@@ -85,7 +85,7 @@ bool Attacking(f32 dt) {
 	}
 
 	if (attack.timer.current < ATTACK_DURATION) {
-		DrawImage(atk_pos_x, atk_pos_y, player.radius / 2.f, player.radius / 2.f, atk_rot, AtkHB);
+		DrawImage(atk_pos_x, atk_pos_y, player.radius * 10.f , player.radius * 10.f, atk_rot-PI/2.f, AtkHB);
 		return true;
 	}
 	return false;

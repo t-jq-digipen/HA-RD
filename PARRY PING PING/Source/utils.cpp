@@ -169,7 +169,7 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 	{
 		// Scale to width and height provided
 		AEMtx33 scale;
-		AEMtx33Scale(&scale, 20*width, 20*height);
+		AEMtx33Scale(&scale, width, height);
 
 		// Translate to position coordinates provided
 		AEMtx33 tran;
@@ -177,7 +177,7 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 
 		// Rotate
 		AEMtx33 rotm;
-		AEMtx33Rot(&rotm, rot-PI/2.f);
+		AEMtx33Rot(&rotm, rot);
 
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &rotm, &scale);
