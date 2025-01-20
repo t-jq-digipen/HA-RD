@@ -97,7 +97,6 @@ f32 dt;
 
 	void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot) 
 	{
-		std::cout << "uvx: " << uv_x << '\n';
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 		// box transform
 		AEMtx33 Transform = { 0 };
