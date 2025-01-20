@@ -13,7 +13,8 @@
 #include "utils.h"
 
 // make player struct
-typedef struct Player {
+typedef struct Player 
+{
 	AEVec2 pos;
 	AEVec2 vel;
 	float speed;
@@ -23,17 +24,19 @@ typedef struct Player {
 	Color color;
 } Player;
 
-typedef struct Attack {
+
+typedef struct Attack 
+{
 	Timer timer;
 	int combo;
 } Attack;
 
-void Movement(f32 dt);
+void Movement();
 
 void Init_Player();
 
-void Update_Player(f32 dt);
+void Update_Player();
 
 void Draw_Player();
 
-bool Attacking(f32 dt);
+bool Attacking();

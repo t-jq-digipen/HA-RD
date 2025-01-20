@@ -13,12 +13,15 @@
 #include <iostream>
 #include <AEEngine.h>
 
+extern f32 dt;
+
 
 // Color
 // -------------------------------------------------
 // 
 // Color struct holding RGBA values of type float
-typedef struct Color {
+typedef struct Color 
+{
 	float R, G, B, A;
 } Color;
 
@@ -30,12 +33,44 @@ Color SetColor(u32 AARRGGBB);
 // -------------------------------------------------
 //
 // Timer struct holding current and end value
-typedef struct Timer {
+typedef struct Timer 
+{
 	float current;
 	float end;
 } Timer;
 
-bool Update_Timer(Timer* timer, float seconds, f32 dt);
+
+bool Update_Timer(Timer* timer, float seconds);
+
+void Loop_Timer(Timer* timer, float seconds);
+
+
+// Spritesheet
+// -------------------------------------------------
+//
+// Anim struct holding stuff
+typedef struct SpriteSheet 
+{
+	AEGfxTexture* texture;
+
+	u32 rows;
+	u32 cols;
+	f32 uv_height;
+	f32 uv_width;
+
+	u32 current_col;
+	u32 current_row;
+
+	AEGfxVertexList* mesh;
+
+	Timer timer;
+	float duration;
+} SpriteSheet;
+
+SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration);
+
+void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot);
+
 
 
 

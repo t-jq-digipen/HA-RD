@@ -21,7 +21,6 @@
 #include "player.h"
 
 
-
 // ---------------------------------------------------------------------------
 // main
 
@@ -62,7 +61,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			InitMesh(20);
 
 		// Player
-		  Init_Player();
+			Init_Player();
 
 		// Dummy enemy
 			AEVec2 dummy_pos = { 0.f, 200.f };
@@ -84,14 +83,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		
 
 		// Delta time!
-		f32 dt = (f32)AEFrameRateControllerGetFrameTime();
+		dt = (f32)AEFrameRateControllerGetFrameTime();
 
 		// Mouse coords!
 		s32 mouseX, mouseY;
 		AEInputGetCursorPosition(&mouseX, &mouseY);
 
 		// Player WASD Movement
-		Update_Player(dt);
+		Update_Player();
 
 		// RENDER
 		// ---------------------------------------------------------------------------
@@ -99,13 +98,17 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AEGfxSetBackgroundColor(0.4f, 0.4f, 0.4f);
 
 		AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+
 		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 		// Dummy
 		DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
 
 		// Player
+
 		Draw_Player();
+
+		
 
 
 
