@@ -95,10 +95,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AEInputGetCursorPosition(&mouseX, &mouseY);
 
 		// Width, height
-		f32 width = AEGfxGetWindowWidth();
-		f32 height = AEGfxGetWindowHeight();
-		// Player WASD Movement
-		Update_Player();
+		s32 width = AEGfxGetWindowWidth();
+		s32 height = AEGfxGetWindowHeight();
 
 		// RENDER
 		// ---------------------------------------------------------------------------
@@ -148,7 +146,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		else if (currentState == GS_LEVEL)
 		{
 			// Player WASD Movement
-			Update_Player(dt);
+			Update_Player();
 
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -156,10 +154,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			// Dummy
 			DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
 
-		// Player
 
-		Draw_Player();
-
+			// Player
+			Draw_Player();
+		}
 		
 
 
