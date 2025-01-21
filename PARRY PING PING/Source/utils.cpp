@@ -135,7 +135,6 @@ f32 dt;
 	// Color values are all 0 to allow adding later in draw functions
 	AEGfxVertexList* UnitSquareMesh(u32 HexCode) 
 	{
-
 		AEGfxMeshStart();
 
 		AEGfxTriAdd(
@@ -156,7 +155,6 @@ f32 dt;
 	// Color values are all 0 to allow adding later in draw functions
 	AEGfxVertexList* UnitCircleMesh(int parts) 
 	{
-
 		AEGfxMeshStart();
 		// make like pizza slice?
 		// desmos goated visualization
@@ -270,7 +268,6 @@ void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color)
 	AEGfxSetTransform(Transform.m);
 	// DRAW :D
 	AEGfxMeshDraw(CircleMesh, AE_GFX_MDM_TRIANGLES);
-
 }
 
 // Draw Image
@@ -298,6 +295,7 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 		AEMtx33Concat(&Transform, &rotm, &scale);
 		AEMtx33Concat(&Transform, &tran, &Transform);
 	}
+
 	AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
 	AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
 	AEGfxSetTransparency(1.0f);

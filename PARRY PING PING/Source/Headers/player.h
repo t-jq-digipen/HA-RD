@@ -11,7 +11,6 @@
 
 #pragma once
 #include "utils.h"
-extern AEGfxTexture* AtkHB;
 
 // make player struct
 typedef struct Player 
@@ -39,5 +38,7 @@ void Init_Player();
 void Update_Player();
 
 void Draw_Player();
+
+void Free_Player();
 
 bool Attacking();

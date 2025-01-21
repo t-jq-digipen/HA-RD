@@ -167,3 +167,10 @@ void Draw_Player()
 	sword.current_row = attack.combo;
 	Draw_SpriteSheet(sword, player.pos.x, player.pos.y, player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
 }
+
+void Free_Player()
+{
+	AEGfxTextureUnload(AtkHB);
+	AEGfxTextureUnload(sword.texture);
+	AEGfxMeshFree(sword.mesh);
+}
