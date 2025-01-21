@@ -129,6 +129,20 @@ f32 dt;
 		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
+	void EnemyAttackPattern(Timer* ParryTimer, int* counter) {
+		if (ParryTimer->current >= 1.f) 
+		{
+			if (*counter == Swinging && ParryTimer->current >= 1.f)
+			{
+				*counter = 0;
+			}
+			else 
+			{
+				++*counter;
+			}
+		}
+	}
+
 // MESHES
 	// UNIT SQUARE
 	// Creates 1x1 square mesh with two triangles

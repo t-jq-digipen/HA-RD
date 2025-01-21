@@ -39,6 +39,18 @@ typedef struct Timer
 	float end;
 } Timer;
 
+//Early Implementation of enemy attacks ignore the ugly ass name
+typedef enum EnemyAttackPatternState
+{
+	Idle,
+	WindUp,
+	Swinging
+
+}EnemyAttackPatternState;
+
+//Dummy attack pattern
+void EnemyAttackPattern(Timer* ParryTimer, int* counter);
+
 
 bool Update_Timer(Timer* timer, float seconds);
 
