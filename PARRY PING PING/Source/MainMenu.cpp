@@ -19,6 +19,11 @@ s32 mouseX, mouseY;
 
 void MainMenu_Load()
 {
+	// Meshes
+	Load_Mesh(20);
+
+	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+
 	std::cout << "Main Menu Loaded\n";
 }
 
@@ -26,10 +31,7 @@ void MainMenu_Initialize()
 {
 	std::cout << "Main Menu Initialized\n";
 
-	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
-	// Meshes
-	InitMesh(20);
 
 	// Colors
 	red = SetColor(0xFFFF6961);
@@ -106,5 +108,6 @@ void MainMenu_Free()
 
 void MainMenu_Unload()
 {
-	FreeMesh();
+	AEGfxDestroyFont(pFont);
+	Unload_Mesh();
 }

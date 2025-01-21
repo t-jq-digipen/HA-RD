@@ -18,6 +18,10 @@ f32 dummy_rad;
 
 void Level1_Load()
 {
+	Load_Player();
+
+	// Meshes
+	Load_Mesh(20);
 	std::cout << "Level 1 Loaded\n";
 }
 
@@ -25,8 +29,6 @@ void Level1_Initialize()
 {
 	std::cout << "Level 1 Initialized\n";
 
-	// Meshes
-	InitMesh(20);
 
 	// Player
 	Init_Player();
@@ -73,7 +75,7 @@ void Level1_Free()
 
 void Level1_Unload()
 {
-
+	Unload_Mesh();
+	Unload_Player();
 	std::cout << "level1_unload";
-	Free_Player();
 }

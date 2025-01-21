@@ -176,7 +176,7 @@ f32 dt;
 	}
 
 	// Initializes unit square and circle mesh, takes in how many parts to create the circle mesh with
-	void InitMesh(int circle_parts) 
+	void Load_Mesh(int circle_parts) 
 	{
 		CircleMesh = UnitCircleMesh(circle_parts);
 		SquareMesh = UnitSquareMesh(0x00000000);
@@ -184,7 +184,7 @@ f32 dt;
 	}
 
 	// Frees unit square and circle meshes
-	void FreeMesh() 
+	void Unload_Mesh() 
 	{
 		AEGfxMeshFree(SquareMesh);
 		AEGfxMeshFree(CircleMesh);

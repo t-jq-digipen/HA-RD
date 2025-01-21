@@ -78,10 +78,10 @@ void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, 
 // -------------------------------------------------
 //
 
+void Load_Mesh(int circle_parts);
 
-void InitMesh(int circle_parts);
+void Unload_Mesh();
 
-void FreeMesh();
 
 // Draws a rectangle
 // param UnitSquareMesh - unit square mesh of 1x1

@@ -33,6 +33,8 @@ typedef struct Attack
 
 void Movement();
 
+void Load_Player();
+
 void Init_Player();
 
 void Update_Player();
@@ -40,5 +42,7 @@ void Update_Player();
 void Draw_Player();
 
 void Free_Player();
+
+void Unload_Player();
 
 bool Attacking();

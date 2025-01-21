@@ -129,6 +129,13 @@ bool Attacking()
 	return false;
 }
 
+void Load_Player()
+{
+	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
+
+	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
+}
+
 void Init_Player() 
 {
 	player.pos = { 0,0 };
@@ -140,14 +147,9 @@ void Init_Player()
 	player.dodgetimer.end = 1.f;
 	player.color = SetColor(0xFF00008B);
 
-	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
-
 	attack.timer.current = 1.f;
 	attack.timer.end = 1.f;
 	attack.combo = 0;
-
-	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
-
 }
 
 void Update_Player() 
@@ -169,6 +171,10 @@ void Draw_Player()
 }
 
 void Free_Player()
+{
+}
+
+void Unload_Player()
 {
 	AEGfxTextureUnload(AtkHB);
 	AEGfxTextureUnload(sword.texture);

@@ -45,7 +45,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
 
 		// Changing the window title
-		AESysSetWindowTitle("UI Port Solo");
+		AESysSetWindowTitle("HA:RD");
 
 		// reset the system modules
 		AESysReset();
@@ -103,6 +103,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gGameRunning = 0;
 	}
 	// free the system
-	AEGfxDestroyFont(pFont);
 	AESysExit();
 }
