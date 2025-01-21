@@ -11,6 +11,7 @@
 
 #pragma once
 #include "utils.h"
+#include "Camera.h"
 
 // make player struct
 typedef struct Player 
@@ -24,6 +25,7 @@ typedef struct Player
 	Color color;
 } Player;
 
+extern Player player;
 
 typedef struct Attack 
 {

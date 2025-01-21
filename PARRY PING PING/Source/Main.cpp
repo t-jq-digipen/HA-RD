@@ -18,6 +18,7 @@
 #include <crtdbg.h> // To check for memory leaks
 #include <AEEngine.h>
 #include "utils.h"
+#include "Input.h"
 #include "player.h"
 #include "GameStateManager.h"
 #include "mobs.h"
@@ -80,6 +81,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			{
 				// Informing the system about the loop's start
 				AESysFrameStart();
+
+				Input_Handle();
 
 				AEGfxSetBackgroundColor(0.4f, 0.4f, 0.4f);
 

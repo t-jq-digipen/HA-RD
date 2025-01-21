@@ -11,7 +11,9 @@
 #pragma once
 
 #include <iostream>
+#include <iomanip>
 #include <AEEngine.h>
+#include "Input.h"
 
 extern f32 dt;
 

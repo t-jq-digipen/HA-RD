@@ -33,6 +33,9 @@ void Level1_Initialize()
 	// Player
 	Init_Player();
 
+	// Camera
+	Init_Camera();
+
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
 	dummy_rad = 50.f;
@@ -52,12 +55,13 @@ void Level1_Update()
 
 	// Player WASD Movement
 	Update_Player();
+	Update_Camera();
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Dummy
-	DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, SetColor(0xFFFF6961));
+	DrawCircle(World_To_Screen_x(dummy_pos.x), World_To_Screen_y(dummy_pos.y), dummy_rad, SetColor(0xFFFF6961));
 
 	// Player
 	Draw_Player();

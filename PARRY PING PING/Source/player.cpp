@@ -108,17 +108,21 @@ bool Attacking()
 
 	// update for player to face mouse
 	{
-		s32 mouse_x, mouse_y;
+		/*s32 mouse_x, mouse_y;
 		AEInputGetCursorPosition(&mouse_x, &mouse_y);
-		f32 x = (f32)mouse_x - atk_pos_x - (AEGfxGetWindowWidth() / 2.f);
-		f32 y = -(f32)mouse_y - atk_pos_y + (AEGfxGetWindowHeight() / 2.f);
+		f32 x = Screen_To_World_x((f32)mouse_x - atk_pos_x - (AEGfxGetWindowWidth() / 2.f));
+		f32 y = Screen_To_World_y(-(f32)mouse_y - atk_pos_y + (AEGfxGetWindowHeight() / 2.f));
+		atk_rot = atan2f(y, x) - PI / 2.f;*/
+
+		f32 x = Screen_To_World_x(Mouse_X)-atk_pos_x;
+		f32 y = Screen_To_World_y(Mouse_Y)-atk_pos_y;
 		atk_rot = atan2f(y, x) - PI / 2.f;
 	}
 
 	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
 	if (attack.timer.current >= ATTACK_START[attack.combo] && attack.timer.current <= ATTACK_END[attack.combo])
 	{
-		DrawImage(atk_pos_x, atk_pos_y, player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
+		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 	}
 
 	// not idling :> not sure if return will be useful
@@ -162,12 +166,13 @@ void Update_Player()
 // Draw Player
 void Draw_Player() 
 {
-	DrawCircle(player.pos.x, player.pos.y, player.radius, player.color);
+	DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
+	//DrawCircle(player.pos.x, player.pos.y, player.radius, player.color);
 
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = attack.combo;
-	Draw_SpriteSheet(sword, player.pos.x, player.pos.y, player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+	Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
 }
 
 void Free_Player()
