@@ -92,6 +92,18 @@ void FreeMesh();
 // param color - color of rectangle
 void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color);
 
+// Draws a text box
+// param UnitSquareMesh - unit square mesh of 1x1
+// param pos_x - x coordinate of center of text box
+// param pos_y - y coordinate of center of text box
+// param width - width of text box
+// param height - height of text box
+// param size - size of font
+// param font - set font type
+// param color - set text color
+// param string - string to print
+void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
+
 // Draws a circle
 // param UnitCircleMesh - unit circle mesh of radius 1
 // param pos_x - x coordinate of center of circle
@@ -134,3 +146,11 @@ void DrawHPBar(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp,
 // param color - color of HP bar
 void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color);
 
+// Checks if an area is clicked
+// param pos_x - x coordinate of center of area
+// param pos_y - y coordinate of center of area
+// param width - width of area
+// param height - height of area
+// param click_x - x coordinate of mouse pointer
+// param click_y - y coordinate of mouse pointer
+int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 click_x, f32 click_y);
