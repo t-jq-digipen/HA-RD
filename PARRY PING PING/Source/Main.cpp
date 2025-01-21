@@ -170,6 +170,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 	// free the system
+	AEGfxTextureUnload(AtkHB);
 	AEGfxDestroyFont(pFont);
 	FreeMesh();
 	AESysExit();

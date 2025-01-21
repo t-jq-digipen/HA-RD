@@ -11,6 +11,7 @@
 
 #pragma once
 #include "utils.h"
+extern AEGfxTexture* AtkHB;
 
 // make player struct
 typedef struct Player 

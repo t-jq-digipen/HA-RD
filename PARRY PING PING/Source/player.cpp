@@ -63,7 +63,7 @@ void Movement() {
 
 // Attack hitbox
 AEGfxTexture* AtkHB;
-const float ATTACK_COOLDOWN = 0.7f;
+const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.5f, 0.7f };
 const float ATTACK_DURATION = 0.3f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.4f, 0.7f };
@@ -95,7 +95,7 @@ bool Attacking()
 
 	// check left click input
 	// check if attack cooldown over + combo not finished
-	if (AEInputCheckTriggered(AEVK_LBUTTON) && (attack.timer.current > ATTACK_COOLDOWN) && (attack.combo < 3)) 
+	if (AEInputCheckTriggered(AEVK_LBUTTON) && (attack.timer.current > ATTACK_COOLDOWN[attack.combo]) && (attack.combo < 3))
 	{
 		attack.timer.current = 0.f;
 		attack.combo++;
