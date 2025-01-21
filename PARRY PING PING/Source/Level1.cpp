@@ -39,7 +39,7 @@ void Level1_Initialize()
 void Level1_Update()
 {
 	// Delta time
-	f32 dt = (f32)AEFrameRateControllerGetFrameTime();
+	dt = (f32)AEFrameRateControllerGetFrameTime();
 
 	// Basic way to trigger exiting the application
 	// when ESCAPE is hit or when the window is closed
@@ -49,7 +49,7 @@ void Level1_Update()
 	}
 
 	// Player WASD Movement
-	Update_Player(dt);
+	Update_Player();
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);

@@ -103,7 +103,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		gGameRunning = 0;
 	}
 	// free the system
-	AEGfxTextureUnload(AtkHB);
 	AEGfxDestroyFont(pFont);
 	FreeMesh();
 	AESysExit();
