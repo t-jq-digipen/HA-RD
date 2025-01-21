@@ -20,6 +20,7 @@
 #include "utils.h"
 #include "player.h"
 #include "GameStateManager.h"
+#include "mobs.h"
 
 
 // ---------------------------------------------------------------------------
@@ -69,7 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Player
 		Init_Player();
 
-		// Dummy enemy
+		// dummy boss
 		AEVec2 dummy_pos = { 0.f, 200.f };
 		f32 dummy_rad = 50.f;
 
@@ -146,12 +147,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		else if (currentState == GS_LEVEL)
 		{
 			// Player WASD Movement
-			Update_Player(dt);
+			Update_Player();
 
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-			// Dummy
+			// Draw dummy
 			DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
 
 			// Player
