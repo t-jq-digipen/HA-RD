@@ -98,7 +98,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Width, height
 		s32 width = AEGfxGetWindowWidth();
 		s32 height = AEGfxGetWindowHeight();
->>>>>>>>> Temporary merge branch 2
 
 		// RENDER
 		// ---------------------------------------------------------------------------
