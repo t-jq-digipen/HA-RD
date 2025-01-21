@@ -1,4 +1,4 @@
-#include "Mobs.h"
+#include "mobs.h"
 
 static void spawn_mobs(mobs_list* list, f32 x, f32 y, f32 size, Color color) {
 	if (list->count < array_count(list->maxmobs)) {

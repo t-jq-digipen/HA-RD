@@ -152,7 +152,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-			// Draw dummy
+			// Draw dummyboss
 			DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
 
 			// Player
