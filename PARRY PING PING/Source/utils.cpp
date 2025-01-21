@@ -201,7 +201,6 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 {
 	// box transform
 	AEMtx33 Transform = { 0 };
-
 	{
 		// Scale to width and height provided
 		AEMtx33 scale;
@@ -221,6 +220,30 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 	// DRAW :D
 	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
 
+}
+
+void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string)
+{
+	// box transform
+	AEMtx33 Transform = { 0 };
+	{
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &tran, &scale);
+	}
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+	// Draw Text
+
+	AEGfxGetPrintSize(font, string, 1.f, &width, &height);
+	AEGfxPrint(font, string, pos_x, pos_y, size, color.R, color.G, color.B, color.A);
 }
 
 // Draw circle
@@ -282,7 +305,6 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 
 	AEGfxTextureSet(image, 0, 0);
 
-
 	AEGfxMeshDraw(ImgBaseMesh, AE_GFX_MDM_TRIANGLES);
 }
 
@@ -339,4 +361,16 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 			DrawRect( (pos_x1 + ((segmentwidth-segmentinterval) / 2.f)) + (i * (segmentwidth+segmentinterval/10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
 		}
 	}
+}
+
+// Checks if an area is clicked
+int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 click_x, f32 click_y)
+{
+	// if mouse pointer is inside the area
+	if (click_x > (pos_x - width / 2) && click_x < (pos_x + width / 2) &&
+		click_y > (pos_y - height / 2) && click_y < (pos_y + height / 2)) 
+	{
+		return 1;
+	}
+	return 0;
 }
