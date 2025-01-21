@@ -104,7 +104,5 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	}
 	// free the system
 	AEGfxDestroyFont(pFont);
-	FreeMesh();
-	Free_Player();
 	AESysExit();
 }

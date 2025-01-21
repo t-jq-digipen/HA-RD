@@ -74,4 +74,6 @@ void Level1_Free()
 void Level1_Unload()
 {
 
+	std::cout << "level1_unload";
+	Free_Player();
 }

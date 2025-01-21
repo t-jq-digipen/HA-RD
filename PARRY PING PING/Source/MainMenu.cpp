@@ -106,5 +106,5 @@ void MainMenu_Free()
 
 void MainMenu_Unload()
 {
-	
+	FreeMesh();
 }
