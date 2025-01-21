@@ -15,11 +15,16 @@
 enum GS_STATES
 {
 	GS_MAIN_MENU = 0,
-	GS_LEVEL,
+	GS_RESTART,
+	GS_LEVEL1,
 	GS_QUIT
 };
 
-extern int currentState;
+typedef void(*FP)(void);
+
+extern int currentState, previousState, nextState;
+
+extern FP fpLoad, fpInitialize, fpUpdate, fpDraw, fpFree, fpUnload;
 
 void GSM_Initialize(int gameState);
 void GSM_Update();
