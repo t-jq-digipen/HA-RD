@@ -160,9 +160,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		}
 		
 
-
-
-
 		// Informing the system about the loop's end
 		AESysFrameEnd();
 
@@ -170,8 +167,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 
 	// free the system
-	AEGfxTextureUnload(AtkHB);
 	AEGfxDestroyFont(pFont);
 	FreeMesh();
+	Free_Player();
 	AESysExit();
 }
