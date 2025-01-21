@@ -55,117 +55,53 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 		// Load the font here 
 		s8 pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
-		
-		// Colors
-		Color red = SetColor(0xFFFF6961);
-		Color green = SetColor(0xFF88B984);
-		Color blue = SetColor(0xFF00008B);
-		Color black = SetColor(0xFF000000);
-		Color white = SetColor(0xFFFFFFFF);
-		Color hover_red = SetColor(0xFFFFA5A1);
-
-		// Meshes
-		InitMesh(20);
-
-		// Player
-		Init_Player();
-
-		// dummy boss
-		AEVec2 dummy_pos = { 0.f, 200.f };
-		f32 dummy_rad = 50.f;
 
 	// Game Loop
 	while (gGameRunning)
 	{
-		// Informing the system about the loop's start
-		AESysFrameStart();
 
-		// Basic way to trigger exiting the application
-		// when ESCAPE is hit or when the window is closed
-		if (AEInputCheckTriggered(AEVK_ESCAPE) || 0 == AESysDoesWindowExist() || currentState == GS_QUIT)
-			gGameRunning = 0;
-
-		// UPDATE
+		// Game State Manager
 		// ---------------------------------------------------------------------------
 
-		// Delta time!
-		dt = (f32)AEFrameRateControllerGetFrameTime();
-
-		// Mouse coords!
-		s32 mouseX, mouseY;
-		AEInputGetCursorPosition(&mouseX, &mouseY);
-
-		// Width, height
-		s32 width = AEGfxGetWindowWidth();
-		s32 height = AEGfxGetWindowHeight();
-
-		// RENDER
-		// ---------------------------------------------------------------------------
-
-		AEGfxSetBackgroundColor(0.4f, 0.4f, 0.4f);
-
-		AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-
-		AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-
-		if (currentState == GS_MAIN_MENU) 
+		while (currentState != GS_QUIT)
 		{
-			DrawTextBox(-0.3f, 0.5f, width, 200.f, 3.f, pFont, red, "HARD");
-			// play button
-			if (IsAreaClicked(width / 2 - 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
+			if (currentState != GS_RESTART)
 			{
-				std::cout << "Click Play\n";
-				DrawRect(-300.f, 0.f, 300.f, 200.f, hover_red);
-				DrawTextBox(-0.5f, 0.f, 300.f, 200.f, 1.f, pFont, white, "PLAY");
-				if (AEInputCheckTriggered(AEVK_LBUTTON))
-				{
-					currentState = GS_LEVEL;
-				}
-			}
-			else 
-			{
-				DrawRect(-300.f, 0.f, 300.f, 200.f, green);
-				DrawTextBox(-0.5f, 0.f, 300.f, 200.f, 1.f, pFont, black, "PLAY");
-			}
-			// exit button
-			if (IsAreaClicked(width / 2 + 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
-			{
-				std::cout << "Click Exit\n";
-				DrawRect(300.f, 0.f, 300.f, 200.f, hover_red);
-				DrawTextBox(0.25f, 0.f, 300.f, 200.f, 1.f, pFont, white, "EXIT");
-				if (AEInputCheckTriggered(AEVK_LBUTTON))
-				{
-					currentState = GS_QUIT;
-				}
+				GSM_Update();
+				fpLoad();
 			}
 			else
 			{
-				DrawRect(300.f, 0.f, 300.f, 200.f, red);
-				DrawTextBox(0.25f, 0.f, 300.f, 200.f, 1.f, pFont, black, "EXIT");
+				nextState = previousState;
+				currentState = previousState;
 			}
+			fpInitialize();
+			while (nextState == currentState)
+			{
+				// Informing the system about the loop's start
+				AESysFrameStart();
+
+				AEGfxSetBackgroundColor(0.4f, 0.4f, 0.4f);
+
+				AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+				AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+				fpUpdate();
+				fpDraw();
+
+				// Informing the system about the loop's end
+				AESysFrameEnd();
+			}
+			fpFree();
+			if (nextState != GS_RESTART)
+			{
+				fpUnload();
+			}
+			previousState = currentState;
+			currentState = nextState;
 		}
-		else if (currentState == GS_LEVEL)
-		{
-			// Player WASD Movement
-			Update_Player();
-
-			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-
-			// Draw dummyboss
-			DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
-
-
-			// Player
-			Draw_Player();
-		}
-
-		// Informing the system about the loop's end
-		AESysFrameEnd();
-
+		gGameRunning = 0;
 	}
-
-
 	// free the system
 	AEGfxTextureUnload(AtkHB);
 	AEGfxDestroyFont(pFont);

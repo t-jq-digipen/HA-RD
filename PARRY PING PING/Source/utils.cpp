@@ -364,7 +364,7 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 }
 
 // Checks if an area is clicked
-int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 click_x, f32 click_y)
+int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y)
 {
 	// if mouse pointer is inside the area
 	if (click_x > (pos_x - width / 2) && click_x < (pos_x + width / 2) &&

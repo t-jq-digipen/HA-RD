@@ -153,4 +153,4 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 // param height - height of area
 // param click_x - x coordinate of mouse pointer
 // param click_y - y coordinate of mouse pointer
-int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 click_x, f32 click_y);
+int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y);
