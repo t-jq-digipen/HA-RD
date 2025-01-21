@@ -20,6 +20,7 @@
 #include "utils.h"
 #include "player.h"
 #include "GameStateManager.h"
+#include "mobs.h"
 
 
 // ---------------------------------------------------------------------------
@@ -69,7 +70,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Player
 		Init_Player();
 
-		// Dummy enemy
+		// dummy boss
 		AEVec2 dummy_pos = { 0.f, 200.f };
 		f32 dummy_rad = 50.f;
 
@@ -97,6 +98,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Width, height
 		s32 width = AEGfxGetWindowWidth();
 		s32 height = AEGfxGetWindowHeight();
+>>>>>>>>> Temporary merge branch 2
 
 		// RENDER
 		// ---------------------------------------------------------------------------
@@ -151,17 +153,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 			AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 			AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-			// Dummy
+			// Draw dummyboss
 			DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, red);
 
 
 			// Player
 			Draw_Player();
 		}
-		
-
-
-
 
 		// Informing the system about the loop's end
 		AESysFrameEnd();
