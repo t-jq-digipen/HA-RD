@@ -109,6 +109,7 @@ f32 dt;
 		// box transform
 		AEMtx33 Transform = { 0 };
 
+
 		{
 			// Scale to width and height provided
 			AEMtx33 scale;

@@ -11,12 +11,24 @@
 //---------------------------------------------------------
 
 #include "player.h"
+#include <vector>
+#include <iostream>
 
 typedef struct Attack
 {
 	Timer timer;
 	int combo;
 } Attack;
+
+typedef struct Projectile {
+	AEVec2 pos;           // Position of the projectile
+	AEVec2 vel;           // Velocity (direction and speed)
+	AEGfxTexture* texture; // Texture for the projectile
+	f32 speed;            // Speed of the projectile
+	f32 angle;
+} Projectile;
+
+std::vector<Projectile> projectiles; // List to hold active projectiles
 
 Player player;
 Attack melee_attack;
@@ -69,6 +81,7 @@ void Movement() {
 }
 
 
+
 // Attack hitbox
 AEGfxTexture* AtkHB;
 const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
@@ -90,6 +103,8 @@ enum ATTACK_PATTERN
 	ATTACK_2,		// ATTACK 2 (left swing)
 	ATTACK_3,		// ATTACK 3 (360)
 };
+
+
 
 // Attack function
 bool Attacking() 
@@ -115,6 +130,48 @@ bool Attacking()
 		//std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
 	}
+
+	if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+			// Calculate direction and angle to the cursor
+			f32 cursor_x = Screen_To_World_x(Mouse_X);
+			f32 cursor_y = Screen_To_World_y(Mouse_Y);
+
+			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
+			AEVec2Normalize(&dir, &dir);
+
+			// Create a single projectile
+			Projectile new_proj;
+			new_proj.pos = player.pos; // Start at player's position
+			new_proj.vel = dir;        // Set direction
+			new_proj.speed = 70.f;    // Speed of the projectile
+			new_proj.texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
+			if (!new_proj.texture) {
+				std::cerr << "Failed to load projectile texture!" << std::endl;
+			}
+			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+
+			// Add the single projectile to the vector
+			projectiles.push_back(new_proj);
+		}
+
+	}
+	
+	for (auto& proj : projectiles) {
+		// Update position
+		AEVec2 scaledVel;
+		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
+		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
+
+		// Draw the projectile
+		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
+			20.f, 20.f, proj.angle, proj.texture);
+	}
+
+
+
+
+
 
 	// update sword swing timer
 	Update_Timer(&sword.timer);
@@ -185,6 +242,18 @@ void Load_Player()
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
 	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
+
+	AEGfxTexture* projectileTexture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
+	if (!projectileTexture) {
+		std::cerr << "Failed to load projectile texture!" << std::endl;
+	}
+
+
+	//if (projectiles.empty()) {
+	//	// Add a projectile to the vector if it's empty
+	//	projectiles.push_back(Projectile());
+	//}
+	//projectiles[0].texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 }
 
 void Init_Player() 
@@ -218,7 +287,17 @@ void Draw_Player()
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
 	Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+	// Draw projectiles
+	for (const auto& proj : projectiles) 
+	{
+		if (proj.texture != nullptr) 
+		{ // Ensure texture is loaded
+			DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, proj.texture); // Adjust size if necessary
+		}
+	}
 }
+
+
 
 void Free_Player()
 {
