@@ -61,19 +61,7 @@ void Level1_Update()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	switch (counter)
-	{
-	case Idle:
-		DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, SetColor(0xFFFF6961));
-		break;
-	case WindUp:
-		DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, SetColor(0xFFFFCF61));
-		break;
-	case Swinging:
-		DrawCircle(dummy_pos.x, dummy_pos.y, dummy_rad, SetColor(0xFFAFFF61));
-		break;
-	}
-	EnemyAttackPattern(&parryTimer, &counter);
+	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad);
 	Loop_Timer(&parryTimer, 1);
 
 

@@ -49,7 +49,7 @@ typedef enum EnemyAttackPatternState
 }EnemyAttackPatternState;
 
 //Dummy attack pattern
-void EnemyAttackPattern(Timer* ParryTimer, int* counter);
+void EnemyAttackPattern(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad);
 
 
 bool Update_Timer(Timer* timer, float seconds);
