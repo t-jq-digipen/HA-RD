@@ -16,6 +16,8 @@
 AEVec2 dummy_pos;
 f32 dummy_rad;
 
+int dummy_check;
+
 void Level1_Load()
 {
 	Load_Player();
@@ -39,6 +41,7 @@ void Level1_Initialize()
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
 	dummy_rad = 25.f;
+	dummy_check = 0;
 }
 
 void Level1_Update()
@@ -55,6 +58,13 @@ void Level1_Update()
 
 	// Player WASD Movement
 	Update_Player();
+	dummy_check = Attacked_Melee(dummy_pos);
+
+
+}
+
+void Level1_Draw()
+{
 	Update_Camera();
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
@@ -65,11 +75,6 @@ void Level1_Update()
 
 	// Player
 	Draw_Player();
-}
-
-void Level1_Draw()
-{
-
 }
 
 void Level1_Free()

@@ -42,3 +42,5 @@ void Free_Player();
 void Unload_Player();
 
 bool Attacking();
+
+int Attacked_Melee(AEVec2 target);
