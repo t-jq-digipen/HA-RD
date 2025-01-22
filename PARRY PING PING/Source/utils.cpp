@@ -36,23 +36,32 @@ f32 dt;
 
 
 
-// TIMER UPDATE
-	bool Update_Timer(Timer* timer, float seconds) 
+// TIMER FUNCTIONS
+	Timer Create_Timer(float duration)
+	{
+		Timer temp;
+		temp.current = 1.f;
+		temp.end = 1.f;
+		temp.duration = duration;
+		return temp;
+	}
+
+	bool Update_Timer(Timer* timer) 
 	{
 		if (timer->current < timer->end) 
 		{
-			timer->current += dt/seconds;
+			timer->current += dt/timer->duration;
 			return true;
 		}
 		return false;
 	}
 
-	void Loop_Timer(Timer* timer, float seconds) 
+	void Loop_Timer(Timer* timer) 
 	{
 		std::cout << "Timer: " << timer->current << '\n';
 		if (timer->current < timer->end) 
 		{
-			timer->current += dt / seconds;
+			timer->current += dt / timer->duration;
 		}
 		else
 		{
@@ -89,8 +98,7 @@ f32 dt;
 
 		temp.mesh = AEGfxMeshEnd();
 
-		temp.timer = { 1.f,1.f };
-		temp.duration = duration;
+		temp.timer = Create_Timer(duration);
 
 		return temp;
 	}

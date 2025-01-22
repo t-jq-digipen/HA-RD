@@ -38,7 +38,7 @@ void Level1_Initialize()
 
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
-	dummy_rad = 50.f;
+	dummy_rad = 25.f;
 }
 
 void Level1_Update()

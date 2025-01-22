@@ -22,7 +22,7 @@ void Update_Camera()
 	cam_shift.y = cam_pos.y - cam_origin.y;
 
 	// Update mouse shift
-	AEVec2Set(&mouse_shift, Mouse_X/2.f, Mouse_Y/2.f);
+	AEVec2Set(&mouse_shift, Mouse_X/2.5f, Mouse_Y/2.5f);
 	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 		
 }

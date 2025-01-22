@@ -27,12 +27,6 @@ typedef struct Player
 
 extern Player player;
 
-typedef struct Attack 
-{
-	Timer timer;
-	int combo;
-} Attack;
-
 void Movement();
 
 void Load_Player();

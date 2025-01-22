@@ -39,12 +39,15 @@ typedef struct Timer
 {
 	float current;
 	float end;
+	float duration;
 } Timer;
 
 
-bool Update_Timer(Timer* timer, float seconds);
+Timer Create_Timer(float duration);
 
-void Loop_Timer(Timer* timer, float seconds);
+bool Update_Timer(Timer* timer);
+
+void Loop_Timer(Timer* timer);
 
 
 // Spritesheet

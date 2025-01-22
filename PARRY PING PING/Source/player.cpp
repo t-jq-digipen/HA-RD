@@ -10,8 +10,14 @@
 
 #include "player.h"
 
+typedef struct Attack
+{
+	Timer timer;
+	int combo;
+} Attack;
+
 Player player;
-Attack attack;
+Attack melee_attack;
 SpriteSheet sword;
 
 // WASD movement
@@ -43,9 +49,9 @@ void Movement() {
 	{
 		player.dodgetimer.current = 0.f;
 	}
-	if (player.dodgetimer.current<player.dodgetimer.end) 
+	if (Update_Timer(&player.dodgetimer))
 	{
-		player.dodgetimer.current += 5.0f*dt;
+		
 		boost = 1.2f*player.speed;
 	}
 	
@@ -64,7 +70,7 @@ void Movement() {
 // Attack hitbox
 AEGfxTexture* AtkHB;
 const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
-const float ATTACK_DURATION = 0.3f;
+const float ATTACK_DURATION = 1.f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.4f, 0.7f };
 
@@ -86,25 +92,25 @@ bool Attacking()
 	atk_pos_y = player.pos.y;
 
 	// if timer is fully done updating and there is combo active
-	if (!Update_Timer(&attack.timer, 1.f) && attack.combo) 
+	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo) 
 	{
 		// reset the combo
-		attack.combo = ATTACK_IDLE;
+		melee_attack.combo = ATTACK_IDLE;
 		std::cout << "combo reset\n";
 	}
 
 	// check left click input
-	// check if attack cooldown over + combo not finished
-	if (AEInputCheckTriggered(AEVK_LBUTTON) && (attack.timer.current > ATTACK_COOLDOWN[attack.combo]) && (attack.combo < 3))
+	// check if melee_attack cooldown over + combo not finished
+	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
 	{
-		attack.timer.current = 0.f;
-		attack.combo++;
-		std::cout << "attack " << attack.combo << '\n';
+		melee_attack.timer.current = 0.f;
+		melee_attack.combo++;
+		std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
 	}
 
 	// update sword swing timer
-	Update_Timer(&sword.timer, 1.0f);
+	Update_Timer(&sword.timer);
 
 	// update for player to face mouse
 	{
@@ -120,13 +126,13 @@ bool Attacking()
 	}
 
 	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
-	if (attack.timer.current >= ATTACK_START[attack.combo] && attack.timer.current <= ATTACK_END[attack.combo])
+	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo])
 	{
 		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 	}
 
 	// not idling :> not sure if return will be useful
-	if (attack.timer.current < ATTACK_DURATION) 
+	if (melee_attack.timer.current < ATTACK_DURATION) 
 	{
 		return true;
 	}
@@ -146,14 +152,12 @@ void Init_Player()
 	player.vel = { 0,0 };
 	player.speed = 500.f;
 	player.hp = 100.f;
-	player.radius = 50.f;
-	player.dodgetimer.current = 1.f;
-	player.dodgetimer.end = 1.f;
+	player.radius = 25.f;
+	player.dodgetimer = Create_Timer(0.2f);
 	player.color = SetColor(0xFF00008B);
 
-	attack.timer.current = 1.f;
-	attack.timer.end = 1.f;
-	attack.combo = 0;
+	melee_attack.timer = Create_Timer(1.f);
+	melee_attack.combo = 0;
 }
 
 void Update_Player() 
@@ -171,7 +175,7 @@ void Draw_Player()
 
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
-	sword.current_row = attack.combo;
+	sword.current_row = melee_attack.combo;
 	Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
 }
 
