@@ -92,6 +92,8 @@ const float ATTACK_END[4] = { 0.f, 0.4f, 0.4f, 0.7f };
 const float ATTACK_ANGLE[2] = { PI/4.f, PI/3.f };
 const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
 
+int counter = 0;
+
 f32 atk_pos_x, atk_pos_y, atk_rot;
 
 bool hitbox_active = false;
@@ -132,7 +134,7 @@ bool Attacking()
 	}
 
 	if (AEInputCheckTriggered(AEVK_RBUTTON)) {
-		if (AEInputCheckTriggered(AEVK_RBUTTON)) {
+		if (counter != 3 && AEInputCheckTriggered(AEVK_RBUTTON)) {
 			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse_X);
 			f32 cursor_y = Screen_To_World_y(Mouse_Y);
@@ -144,7 +146,7 @@ bool Attacking()
 			Projectile new_proj;
 			new_proj.pos = player.pos; // Start at player's position
 			new_proj.vel = dir;        // Set direction
-			new_proj.speed = 70.f;    // Speed of the projectile
+			new_proj.speed = 250.f;    // Speed of the projectile
 			new_proj.texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 			if (!new_proj.texture) {
 				std::cerr << "Failed to load projectile texture!" << std::endl;
@@ -153,6 +155,8 @@ bool Attacking()
 
 			// Add the single projectile to the vector
 			projectiles.push_back(new_proj);
+			counter++;
+
 		}
 
 	}
@@ -162,6 +166,7 @@ bool Attacking()
 		AEVec2 scaledVel;
 		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
 		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
+
 
 		// Draw the projectile
 		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
