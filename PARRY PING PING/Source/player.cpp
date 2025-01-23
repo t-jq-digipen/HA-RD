@@ -392,5 +392,6 @@ void Unload_Player()
 	AEGfxTextureUnload(AtkHB);
 	AEGfxTextureUnload(sword.texture);
 	AEGfxMeshFree(sword.mesh);
+	AEGfxTextureUnload(heavy_atk.texture);
 
 }
