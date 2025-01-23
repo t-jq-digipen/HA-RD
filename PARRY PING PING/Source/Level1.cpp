@@ -16,6 +16,10 @@
 AEVec2 dummy_pos;
 f32 dummy_rad;
 
+Timer parryTimer{0.f, 1.f};
+
+int counter{};
+
 int dummy_check;
 
 void Level1_Load()
@@ -70,8 +74,10 @@ void Level1_Draw()
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-	// Dummy
-	DrawCircle(World_To_Screen_x(dummy_pos.x), World_To_Screen_y(dummy_pos.y), dummy_rad, SetColor(0xFFFF6961));
+	// Parryable dummy!
+	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad);
+	Loop_Timer(&parryTimer, 1);
+
 
 	// Player
 	Draw_Player();
