@@ -51,6 +51,7 @@ f32 dt;
 		if (timer->current < timer->end) 
 		{
 			timer->current += dt/timer->duration;
+
 			return true;
 		}
 		return false;
