@@ -51,6 +51,7 @@ f32 dt;
 		if (timer->current < timer->end) 
 		{
 			timer->current += dt/timer->duration;
+
 			return true;
 		}
 		return false;
@@ -108,6 +109,7 @@ f32 dt;
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 		// box transform
 		AEMtx33 Transform = { 0 };
+
 
 		{
 			// Scale to width and height provided
