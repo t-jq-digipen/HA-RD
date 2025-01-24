@@ -137,34 +137,7 @@ f32 dt;
 		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
-	void EnemyAttackPattern(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad) {
-		if (ParryTimer->current >= 1.f)
-		{
-			if (*counter == Swinging && ParryTimer->current >= 1.f)
-			{
-				*counter = 0;
-			}
-			else
-			{
-				++*counter;
-			}
-		}
 
-		switch (*counter)
-		{
-		case Idle:
-			DrawCircle(EnemyPos.x, EnemyPos.y, HitBoxRad, SetColor(0xFFFF6961));
-			break;
-		case WindUp:
-			DrawCircle(EnemyPos.x, EnemyPos.y, HitBoxRad, SetColor(0xFFFFCF61));
-			break;
-		case Swinging:
-			DrawCircle(EnemyPos.x, EnemyPos.y, HitBoxRad, SetColor(0xFFAFFF61));
-			//can check for parry collision here w square below reee
-			DrawRect(EnemyPos.x, EnemyPos.y - 100, 100, 100, SetColor(0xFFFFCF61));
-			break;
-		}
-	}
 
 // MESHES
 	// UNIT SQUARE

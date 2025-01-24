@@ -10,13 +10,14 @@
 
 #include "utils.h"
 #include "player.h"
+#include "Enemies.h"
 #include "Level1.h"
 #include "GameStateManager.h"
 
 AEVec2 dummy_pos;
 f32 dummy_rad;
 
-Timer parryTimer{0.f, 1.f};
+Timer parryTimer;
 
 int counter{};
 
@@ -41,6 +42,10 @@ void Level1_Initialize()
 
 	// Camera
 	Init_Camera();
+
+	Init_Enemy_Indicator();
+
+	parryTimer = Create_Timer(1.f);
 
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
@@ -76,7 +81,7 @@ void Level1_Draw()
 
 	// Parryable dummy!
 	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad);
-	Loop_Timer(&parryTimer, 1);
+	Loop_Timer(&parryTimer);
 
 
 	// Player
