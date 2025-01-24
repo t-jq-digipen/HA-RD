@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "player.h"
 #include "Level1.h"
+#include "Boss1.h"
 #include "GameStateManager.h"
 
 AEVec2 dummy_pos;
@@ -38,6 +39,9 @@ void Level1_Initialize()
 	// Camera
 	Init_Camera();
 
+	// Boss
+	Init_Boss1();
+
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
 	dummy_rad = 25.f;
@@ -56,10 +60,13 @@ void Level1_Update()
 		nextState = GS_QUIT;
 	}
 
+
+	// Boss behavior
+	Update_Boss1();
+
 	// Player WASD Movement
 	Update_Player();
 	dummy_check = Attacked_Melee(dummy_pos);
-
 
 }
 
@@ -73,8 +80,15 @@ void Level1_Draw()
 	// Dummy
 	DrawCircle(World_To_Screen_x(dummy_pos.x), World_To_Screen_y(dummy_pos.y), dummy_rad, SetColor(0xFFFF6961));
 
+	// Boss
+	Draw_Boss1();
+
 	// Player
 	Draw_Player();
+
+	// Boss HP
+	Draw_Boss1HP();
+
 }
 
 void Level1_Free()
