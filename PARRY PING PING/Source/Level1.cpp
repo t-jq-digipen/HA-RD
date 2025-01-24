@@ -12,6 +12,7 @@
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
+#include "Boss1.h"
 #include "GameStateManager.h"
 
 AEVec2 dummy_pos;
@@ -47,6 +48,9 @@ void Level1_Initialize()
 
 	parryTimer = Create_Timer(1.f);
 
+	// Boss
+	Init_Boss1();
+
 	// Dummy enemy
 	dummy_pos = { 0.f, 200.f };
 	dummy_rad = 25.f;
@@ -65,10 +69,13 @@ void Level1_Update()
 		nextState = GS_QUIT;
 	}
 
+
+	// Boss behavior
+	Update_Boss1();
+
 	// Player WASD Movement
 	Update_Player();
 	dummy_check = Attacked_Melee(dummy_pos);
-
 
 }
 
@@ -84,8 +91,15 @@ void Level1_Draw()
 	Loop_Timer(&parryTimer);
 
 
+	// Boss
+	Draw_Boss1();
+
 	// Player
 	Draw_Player();
+
+	// Boss HP
+	Draw_Boss1HP();
+
 }
 
 void Level1_Free()
