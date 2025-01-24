@@ -20,7 +20,8 @@ typedef struct Attack
 	int combo;
 } Attack;
 
-typedef struct Projectile {
+typedef struct Projectile 
+{
 	AEVec2 pos;           // Position of the projectile
 	AEVec2 vel;           // Velocity (direction and speed)
 	AEGfxTexture* texture; // Texture for the projectile
@@ -29,11 +30,7 @@ typedef struct Projectile {
 	Timer lifetimeTimer;
 	bool isActive;
 	bool isHeavy;
-
 } Projectile;
-
-
-
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
 
@@ -73,7 +70,6 @@ void Movement() {
 	}
 	if (Update_Timer(&player.dodgetimer))
 	{
-
 		boost = 1.2f * player.speed;
 	}
 

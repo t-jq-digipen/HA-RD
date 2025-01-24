@@ -59,7 +59,6 @@ f32 dt;
 
 	void Loop_Timer(Timer* timer) 
 	{
-		std::cout << "Timer: " << timer->current << '\n';
 		if (timer->current < timer->end) 
 		{
 			timer->current += dt / timer->duration;

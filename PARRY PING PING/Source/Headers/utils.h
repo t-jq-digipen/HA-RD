@@ -42,9 +42,6 @@ typedef struct Timer
 	float duration;
 } Timer;
 
-
-
-
 Timer Create_Timer(float duration);
 
 bool Update_Timer(Timer* timer);
