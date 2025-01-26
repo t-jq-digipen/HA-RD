@@ -12,6 +12,7 @@
 #pragma once
 #include "utils.h"
 #include "Camera.h"
+#include "UI.h"
 
 // make player struct
 typedef struct Player 

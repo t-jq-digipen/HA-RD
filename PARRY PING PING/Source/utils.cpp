@@ -327,50 +327,7 @@ bool AreCirclesIntersecting(f32 pos_x1, f32 pos_y1, f32 radius1, f32 pos_x2, f32
 	return AETestCircleToCircle(&crc1, radius1, &crc2, radius2);
 }
 
-// draw full hp bar
-// pos_x1, pos_y1 - position of top left corner
-// pos_x2, pos_y2 - position of bottom right corner
-// hp - current health
-// maxhp - max health
-void DrawHPBar(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color) 
-{
-	// assign total width, height, and width of health bar
-	float width, height, hpwidth;
-	//width and height of total bar
-	width = pos_x2 - pos_x1;
-	height = pos_y2 - pos_y1;
-	//width of current hp
-	hpwidth = width * hp / maxhp;
-	// draw the rectangle
-	DrawRect( pos_x1+(hpwidth/2.f), pos_y1+height/2.f, hpwidth, height, color);
-}
 
-// draw segmented hp bar
-// pos_x1, pos_y1 - position of top left corner
-// pos_x2, pos_y2 - position of bottom right corner
-// hp - current health
-// maxhp - max health
-void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color) 
-{
-	//array of hp in 10% chunks
-	float hpbar[10] = { 0.f, maxhp / 10.f, 2.f * maxhp / 10.f, 3.f * maxhp / 10.f, 4.f * maxhp / 10.f, 5.f * maxhp / 10.f, 6.f * maxhp / 10.f, 7.f * maxhp / 10.f, 8.f * maxhp / 10.f , 9.f * maxhp / 10.f }; //array 10% blocks
-	//size of full bar
-	float width = pos_x2 - pos_x1;
-	float height = pos_y2 - pos_y1;
-	//segment width and interval
-	float segmentwidth = width / 10.f;
-	float segmentinterval = 15.f;
-	//for loop to check hp 10% chunks
-	for (int i = 0; i < 10; ++i) 
-	{
-		if (hp > (hpbar[i]) + maxhp / 20.f) //if hp>10% interval, draw 10% chunk
-		{ 
-			//DrawRect(Mesh, (pos_x1 + (segmentwidth / 2.f)) + (i * (segmentwidth)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
-
-			DrawRect( (pos_x1 + ((segmentwidth-segmentinterval) / 2.f)) + (i * (segmentwidth+segmentinterval/10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
-		}
-	}
-}
 
 // Checks if an area is clicked
 int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y)

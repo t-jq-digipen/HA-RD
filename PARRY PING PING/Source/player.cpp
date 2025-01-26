@@ -334,6 +334,8 @@ void Init_Player()
 	heavy_atk.isActive = true;
 	heavy_atk.isHeavy = true;
 	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
+
+	Init_UI(ammo, 3, player.hp, 100.f);
 }
 
 void Update_Player()
@@ -341,6 +343,8 @@ void Update_Player()
 	Movement();
 	if (Attacking()) {
 	}
+
+	Update_UI(ammo, player.hp);
 }
 
 // Draw Player

@@ -75,6 +75,7 @@ void Level1_Update()
 
 	// Player WASD Movement
 	Update_Player();
+
 	dummy_check = Attacked_Melee(dummy_pos);
 
 }
@@ -99,6 +100,9 @@ void Level1_Draw()
 
 	// Boss HP
 	Draw_Boss1HP();
+
+	// UI
+	Draw_UI();
 
 }
 

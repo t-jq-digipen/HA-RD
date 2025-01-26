@@ -189,7 +189,7 @@ void Draw_Boss1HP()
 	}
 
 	// Draw boss health bar
-	DrawRect(0.f, -400.f, 1200.f, 50.f, boss1.hp_color);
-	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, -400.f, 1200.f, 50.f, hp_damage);
-	DrawRect(800.f, -400.f, 400.f, 50.f, SetColor(0xFF666666));
+	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
+	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, hp_damage);
+	DrawRect(800.f, 400.f, 400.f, 50.f, SetColor(0xFF666666));
 }

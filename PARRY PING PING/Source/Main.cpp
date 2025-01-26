@@ -3,11 +3,7 @@
 // author:	TAN JUN QUAN
 // email:	t.junquan@digipen.edu
 //
-// brief:	UI Port solo project
-//			Damage player in red circle
-//			Heal player in green circle
-//			Render healthbar on top, with segmented bar
-//			underneath it for every 10%
+// brief:	main!
 //
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
