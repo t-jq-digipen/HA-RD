@@ -66,10 +66,6 @@ enum ATTACK_PATTERN
 };
 
 
-Projectile heavy_atk;
-
-int ammo = 3;
-
 bool Attacking_Melee()
 {
 	// if timer is fully done updating and not idling
@@ -84,7 +80,7 @@ bool Attacking_Melee()
 	// check if melee_attack cooldown over + combo not finished
 	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
 	{
-		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse_X) - atk_pos_x, Screen_To_World_y(Mouse_Y) - atk_pos_y);
+		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
 		AEVec2Normalize(&atk_dir, &atk_dir);
 		player.state = MELEE;
 		melee_attack.timer.current = 0.f;
@@ -160,6 +156,15 @@ int Attacked_Melee(AEVec2 target)
 #pragma endregion
 
 
+// RANGED ATTACK
+#pragma region RANGED
+Projectile heavy_atk;
+
+int ammo = 3;
+
+
+#pragma endregion
+
 
 // Attack function
 void Attacking()
@@ -171,8 +176,8 @@ void Attacking()
 
 	// update for player to face mouse
 	{
-		f32 x = Screen_To_World_x(Mouse_X) - atk_pos_x;
-		f32 y = Screen_To_World_y(Mouse_Y) - atk_pos_y;
+		f32 x = Screen_To_World_x(Mouse.x) - atk_pos_x;
+		f32 y = Screen_To_World_y(Mouse.y) - atk_pos_y;
 		atk_rot = atan2f(y, x) - PI / 2.f;
 	}
 
@@ -186,8 +191,8 @@ void Attacking()
 	if (ammo > 0) {
 
 		if (ammo == 3 && AEInputCheckTriggered(AEVK_E)) {
-			f32 cursor_x = Screen_To_World_x(Mouse_X);
-			f32 cursor_y = Screen_To_World_y(Mouse_Y);
+			f32 cursor_x = Screen_To_World_x(Mouse.x);
+			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
 			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
 			AEVec2Normalize(&dir, &dir);
@@ -209,8 +214,8 @@ void Attacking()
 
 		if (ammo != 0 && AEInputCheckTriggered(AEVK_RBUTTON)) {
 			// Calculate direction and angle to the cursor
-			f32 cursor_x = Screen_To_World_x(Mouse_X);
-			f32 cursor_y = Screen_To_World_y(Mouse_Y);
+			f32 cursor_x = Screen_To_World_x(Mouse.x);
+			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
 			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
 			AEVec2Normalize(&dir, &dir);
