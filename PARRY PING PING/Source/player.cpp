@@ -39,54 +39,13 @@ Player player;
 Attack melee_attack;
 SpriteSheet sword;
 
-// WASD movement
-void Movement() {
-	// player movement default 0
-	player.vel = { 0,0 };
-	f32 boost = 0.f;
+// ATTACK LOGIC
+f32 atk_pos_x, atk_pos_y, atk_rot;
+AEVec2 atk_dir;
 
-	// change when key pressed
-
-	if (AEInputCheckCurr(AEVK_W))
-	{
-		player.vel.y += 1.f;
-	}
-	if (AEInputCheckCurr(AEVK_A))
-	{
-		player.vel.x -= 1.f;
-	}
-	if (AEInputCheckCurr(AEVK_S))
-	{
-		player.vel.y -= 1.f;
-	}
-	if (AEInputCheckCurr(AEVK_D))
-	{
-		player.vel.x += 1.f;
-	}
-
-	if (AEInputCheckTriggered(AEVK_SPACE))
-	{
-		player.dodgetimer.current = 0.f;
-	}
-	if (Update_Timer(&player.dodgetimer))
-	{
-		boost = 1.2f * player.speed;
-	}
-
-	if (player.vel.x || player.vel.y)
-	{
-		AEVec2Normalize(&player.vel, &player.vel);
-		AEVec2Scale(&player.vel, &player.vel, (player.speed + boost) * dt);
-	}
-
-	// position update
-	AEVec2Add(&player.pos, &player.vel, &player.pos);
-
-}
-
-
-
-// Attack hitbox
+// MELEE ATTACK
+#pragma region MELEE
+// Melee Attack hitbox and durations in seconds
 AEGfxTexture* AtkHB;
 const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
 const float ATTACK_DURATION = 1.f;
@@ -95,10 +54,6 @@ const float ATTACK_END[4] = { 0.f, 0.4f, 0.4f, 0.7f };
 
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
-
-int ammo = 3;
-
-f32 atk_pos_x, atk_pos_y, atk_rot;
 
 bool hitbox_active = false;
 
@@ -110,15 +65,13 @@ enum ATTACK_PATTERN
 	ATTACK_3,		// ATTACK 3 (360)
 };
 
+
 Projectile heavy_atk;
 
-// Attack function
-bool Attacking()
-{
-	// maybe not needed? placeholder i guess
-	atk_pos_x = player.pos.x;
-	atk_pos_y = player.pos.y;
+int ammo = 3;
 
+bool Attacking_Melee()
+{
 	// if timer is fully done updating and not idling
 	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo)
 	{
@@ -131,15 +84,102 @@ bool Attacking()
 	// check if melee_attack cooldown over + combo not finished
 	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
 	{
+		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse_X) - atk_pos_x, Screen_To_World_y(Mouse_Y) - atk_pos_y);
+		AEVec2Normalize(&atk_dir, &atk_dir);
+		player.state = MELEE;
 		melee_attack.timer.current = 0.f;
 		melee_attack.combo++;
 		//std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
 	}
 
+	// update sword swing timer
+	Update_Timer(&sword.timer);
+
+	hitbox_active = false;
+	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
+	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo])
+	{
+		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
+		hitbox_active = true;
+	}
+	else if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && player.state == MELEE)
+	{
+		player.state = IDLE;
+	}
+	std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n";
+	std::cout << "Playerstate = " << player.state << "\n\n";
+	std::cout << "Atk_Dir x: " << atk_dir.x << " | Atk_Dir y: " << atk_dir.y << "\n\n";
+
+	// not idling :> not sure if return will be useful
+	if (melee_attack.timer.current < ATTACK_DURATION)
+	{
+		return true;
+	}
+	return false;
+
+}
+
+int Attacked_Melee(AEVec2 target)
+{
+	// Check if:
+	// - Hitbox is active
+	// - Player is attacking
+	// - Target is within range of current attack
+	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
+	{
+		switch (melee_attack.combo)
+		{
+		case 1:
+		case 2:
+		{
+			// Check direction for first two swings
+			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+			{
+				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+				return melee_attack.combo;
+			}
+			break;
+		}
+		case 3:
+		{
+			// No need to check direction for third swing as it is 360 circle
+			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+			return melee_attack.combo;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
+	return 0;
+}
+#pragma endregion
+
+
+
+// Attack function
+void Attacking()
+{
+	// maybe not needed? placeholder i guess
+	atk_pos_x = player.pos.x;
+	atk_pos_y = player.pos.y;
+
+
+	// update for player to face mouse
+	{
+		f32 x = Screen_To_World_x(Mouse_X) - atk_pos_x;
+		f32 y = Screen_To_World_y(Mouse_Y) - atk_pos_y;
+		atk_rot = atan2f(y, x) - PI / 2.f;
+	}
+
+	Attacking_Melee();
+
 	if (AEInputCheckTriggered(AEVK_R) && ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
 	{
-
 		ammo += 1;
 	}
 
@@ -212,86 +252,21 @@ bool Attacking()
 	bool lifetimeExpired = Update_Timer(&heavy_atk.lifetimeTimer);
 
 	// Debugging print to see if the timer is updating
-	std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
+	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
 
 	if (!lifetimeExpired) {
-		std::cout << "Projectile lifetime expired, deactivating.\n";
+		//std::cout << "Projectile lifetime expired, deactivating.\n";
 		heavy_atk.isActive = false;  // Mark the projectile as inactive
 	}
 
 	if (!heavy_atk.isActive) {
-		std::cout << "Removing inactive projectile.\n";
+		//std::cout << "Removing inactive projectile.\n";
 		//heavy_atk = projectiles.erase(heavy_atk);  // Remove inactive projectile from the list
 	}
 	
-
-
-
-	// update sword swing timer
-	Update_Timer(&sword.timer);
-
-
-
-	// update for player to face mouse
-	{
-		f32 x = Screen_To_World_x(Mouse_X) - atk_pos_x;
-		f32 y = Screen_To_World_y(Mouse_Y) - atk_pos_y;
-		atk_rot = atan2f(y, x) - PI / 2.f;
-	}
-
-	hitbox_active = false;
-	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
-	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo])
-	{
-		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
-		hitbox_active = true;
-	}
-
-	// not idling :> not sure if return will be useful
-	if (melee_attack.timer.current < ATTACK_DURATION)
-	{
-		return true;
-	}
-	return false;
 }
 
-int Attacked_Melee(AEVec2 target)
-{
-	// Check if:
-	// - Hitbox is active
-	// - Player is attacking
-	// - Target is within range of current attack
-	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
-	{
-		switch (melee_attack.combo)
-		{
-		case 1:
-		case 2:
-		{
-			// Check direction for first two swings
-			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-			{
-				std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-				return melee_attack.combo;
-			}
-			break;
-		}
-		case 3:
-		{
-			// No need to check direction for third swing as it is 360 circle
-			std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-			return melee_attack.combo;
-			break;
-		}
-		default:
-		{
-			break;
-		}
-		}
-	}
-	return 0;
-}
+
 
 void Load_Player()
 {
@@ -322,9 +297,14 @@ void Init_Player()
 	player.radius = 25.f;
 	player.dodgetimer = Create_Timer(0.2f);
 	player.color = SetColor(0xFF00008B);
+	player.state = IDLE;
+	player.direction_v = DOWN;
+	player.direction_h = RIGHT;
 
 	melee_attack.timer = Create_Timer(1.f);
 	melee_attack.combo = 0;
+
+	AEVec2Zero(&atk_dir);
 
 	heavy_atk;
 	heavy_atk.pos = player.pos;
@@ -338,12 +318,89 @@ void Init_Player()
 	Init_UI(ammo, 3, player.hp, 100.f);
 }
 
-void Update_Player()
-{
-	Movement();
-	if (Attacking()) {
+// WASD movement
+void Movement() {
+
+	// player movement default 0
+	player.vel = { 0,0 };
+	f32 boost = 0.f;
+	bool moving = false;
+
+	// change when key pressed
+	if (player.state != MELEE)
+	{
+		if (AEInputCheckCurr(AEVK_W))
+		{
+			moving = true;
+			player.vel.y += 1.f;
+		}
+		if (AEInputCheckCurr(AEVK_A))
+		{
+			moving = true;
+			player.vel.x -= 1.f;
+		}
+		if (AEInputCheckCurr(AEVK_S))
+		{
+			moving = true;
+			player.vel.y -= 1.f;
+		}
+		if (AEInputCheckCurr(AEVK_D))
+		{
+			moving = true;
+			player.vel.x += 1.f;
+		}
+		if (moving)
+		{
+			player.state = MOVING;
+		}
+		else
+		{
+			player.state = IDLE;
+		}
+	}
+	else
+	{
+		float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo]*melee_attack.timer.current;
+
+		std::cout << "atkvelscale " << atk_vel_scale << '\n';
+		AEVec2Scale(&player.vel, &atk_dir, 10.f*atk_vel_scale);
 	}
 
+
+	if (AEInputCheckTriggered(AEVK_SPACE))
+	{
+		player.state = DODGE;
+		player.dodgetimer.current = 0.f;
+	}
+	if (Update_Timer(&player.dodgetimer))
+	{
+		boost = 1.2f * player.speed;
+	}
+
+	if (player.vel.x || player.vel.y)
+	{
+		if (player.state == MOVING)
+		{
+			AEVec2Normalize(&player.vel, &player.vel);
+		}
+		AEVec2Scale(&player.vel, &player.vel, (player.speed + boost) * dt);
+	}
+
+
+	// position update
+	AEVec2Add(&player.pos, &player.vel, &player.pos);
+
+}
+
+void Update_Player()
+{
+	if (player.state != DEAD)
+	{
+		Movement();
+
+		Attacking();
+		
+	}
 	Update_UI(ammo, player.hp);
 }
 
@@ -385,6 +442,7 @@ void Draw_Player()
 
 void Free_Player()
 {
+
 }
 
 void Unload_Player()
