@@ -24,7 +24,7 @@ typedef struct Projectile
 {
 	AEVec2 pos;           // Position of the projectile
 	AEVec2 vel;           // Velocity (direction and speed)
-	AEGfxTexture* texture; // Texture for the projectile
+	//AEGfxTexture* texture; // Texture for the projectile
 	f32 speed;            // Speed of the projectile
 	f32 angle;
 	Timer lifetimeTimer;
@@ -33,7 +33,6 @@ typedef struct Projectile
 } Projectile;
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
-
 
 Player player;
 Attack melee_attack;
@@ -44,9 +43,12 @@ f32 atk_pos_x, atk_pos_y, atk_rot;
 AEVec2 atk_dir;
 
 // MELEE ATTACK
+// =======================================================================
 #pragma region MELEE
 // Melee Attack hitbox and durations in seconds
+
 AEGfxTexture* AtkHB;
+
 const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
 const float ATTACK_DURATION = 1.f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
@@ -154,10 +156,16 @@ int Attacked_Melee(AEVec2 target)
 	return 0;
 }
 #pragma endregion
-
+// =======================================================================
 
 // RANGED ATTACK
+// =======================================================================
 #pragma region RANGED
+
+AEGfxTexture* projectile_texture;
+
+AEGfxTexture* heavy_texture;
+
 Projectile heavy_atk;
 
 int ammo = 3;
@@ -207,13 +215,9 @@ void Attacking_Ranged()
 			new_proj.pos = player.pos; // Start at player's position
 			new_proj.vel = dir;        // Set direction
 			new_proj.speed = 250.f;    // Speed of the projectile
-			new_proj.texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 			new_proj.isActive = true;
 			new_proj.isHeavy = false;
 			new_proj.lifetimeTimer = Create_Timer(10.0f);
-			if (!new_proj.texture) {
-				std::cerr << "Failed to load projectile texture!" << std::endl;
-			}
 			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
 
 			// Add the single projectile to the vector
@@ -232,9 +236,8 @@ void Attacking_Ranged()
 
 		// Draw the projectile
 		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
-			20.f, 20.f, proj.angle, proj.texture);
+			20.f, 20.f, proj.angle, projectile_texture);
 	}
-
 
 	// Update lifetime timer
 	bool lifetimeExpired = Update_Timer(&heavy_atk.lifetimeTimer);
@@ -253,10 +256,9 @@ void Attacking_Ranged()
 		//std::cout << "Removing inactive projectile.\n";
 		//heavy_atk = projectiles.erase(heavy_atk);  // Remove inactive projectile from the list
 	}
-
 }
 #pragma endregion
-
+// =======================================================================
 
 // Attack function
 void Attacking()
@@ -277,6 +279,10 @@ void Attacking()
 	Attacking_Ranged();
 }
 
+
+
+
+
 const float DASH_COOLDOWN = 1.5f;
 const float DASH_DURATION = 0.2f;
 
@@ -289,43 +295,46 @@ void Movement() {
 	bool moving = false;
 
 	// change when key pressed
-	if (player.state != MELEE)
+	if (player.state != HEAVY)
 	{
-		if (AEInputCheckCurr(AEVK_W))
+		if (player.state != MELEE)
 		{
-			moving = true;
-			player.vel.y += 1.f;
-		}
-		if (AEInputCheckCurr(AEVK_A))
-		{
-			moving = true;
-			player.vel.x -= 1.f;
-		}
-		if (AEInputCheckCurr(AEVK_S))
-		{
-			moving = true;
-			player.vel.y -= 1.f;
-		}
-		if (AEInputCheckCurr(AEVK_D))
-		{
-			moving = true;
-			player.vel.x += 1.f;
-		}
-		if (moving)
-		{
-			player.state = MOVING;
+			if (AEInputCheckCurr(AEVK_W))
+			{
+				moving = true;
+				player.vel.y += 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_A))
+			{
+				moving = true;
+				player.vel.x -= 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_S))
+			{
+				moving = true;
+				player.vel.y -= 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_D))
+			{
+				moving = true;
+				player.vel.x += 1.f;
+			}
+			if (moving)
+			{
+				player.state = MOVING;
+			}
+			else
+			{
+				player.state = IDLE;
+			}
 		}
 		else
 		{
-			player.state = IDLE;
-		}
-	}
-	else
-	{
-		float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo]*melee_attack.timer.current;
+			float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo] * melee_attack.timer.current;
 
-		std::cout << "atkvelscale " << atk_vel_scale << '\n';
-		AEVec2Scale(&player.vel, &atk_dir, player.speed*atk_vel_scale*dt);
+			std::cout << "atkvelscale " << atk_vel_scale << '\n';
+			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
+		}
 	}
 
 	if (!Update_Timer(&player.dodgetimer))
@@ -350,10 +359,8 @@ void Movement() {
 		AEVec2Scale(&player.vel, &player.vel, (player.speed + boost) * dt);
 	}
 
-
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
-
 }
 
 
@@ -367,17 +374,15 @@ void Load_Player()
 
 	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
 
-	AEGfxTexture* projectileTexture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
-	if (!projectileTexture) {
+	projectile_texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
+	if (!projectile_texture) {
 		std::cerr << "Failed to load projectile texture!" << std::endl;
 	}
 
-	AEGfxTexture* heavyProjectileTexture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
-	if (!heavyProjectileTexture) {
+	heavy_texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
+	if (!heavy_texture) {
 		std::cerr << "Failed to load projectile texture!" << std::endl;
 	}
-
-	heavy_atk.texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
 }
 
 void Init_Player()
@@ -426,31 +431,29 @@ void Update_Player()
 void Draw_Player()
 {
 	DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
-	//DrawCircle(player.pos.x, player.pos.y, player.radius, player.color);
-
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
 	Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
-	// Draw projectiles
+
 // Draw projectiles
 	for (const auto& proj : projectiles)
 	{
-		if (proj.texture != nullptr)
+		if (projectile_texture != nullptr)
 		{ // Ensure texture is loaded
 			// Use different size depending on whether the projectile is heavy or not
 			if (proj.isHeavy) 
 			{
 				if (heavy_atk.isActive)
 				{
-					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 1000.f, 1000.f, proj.angle, proj.texture); // Heavy projectile
+					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 1000.f, 1000.f, proj.angle, heavy_texture); // Heavy projectile
 				}
 				else {
 					projectiles.pop_back();
 				}
 			}
 			else {
-				DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, proj.texture); // Light projectile
+				DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
 			}
 		}
 	}
@@ -466,5 +469,6 @@ void Unload_Player()
 	AEGfxTextureUnload(AtkHB);
 	AEGfxTextureUnload(sword.texture);
 	AEGfxMeshFree(sword.mesh);
-	AEGfxTextureUnload(heavy_atk.texture);
+	AEGfxTextureUnload(projectile_texture);
+	AEGfxTextureUnload(heavy_texture);
 }
