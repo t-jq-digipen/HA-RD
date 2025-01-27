@@ -100,14 +100,14 @@ void Update_Boss1()
 		AEVec2Normalize(&direction, &direction);
 
 		Boss1_ShootBullet(boss1.pos, direction);
-		std::cout << "Boss has attacked!!!" << '\n';
+		//std::cout << "Boss has attacked!!!" << '\n';
 		boss1.isattacking = 0;
 	}
 
 	// when boss hp is depleted to 0
 	if (boss1.phase == DEFEAT)
 	{
-		std::cout << "Boss is DEAD (rest in pepperonis)" << '\n';
+		//std::cout << "Boss is DEAD (rest in pepperonis)" << '\n';
 	}
 
 	// determine attack speed based on phase

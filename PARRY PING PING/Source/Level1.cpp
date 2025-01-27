@@ -21,6 +21,7 @@ f32 dummy_rad;
 Timer parryTimer;
 
 int counter{};
+f32 StunCounter{ 0.f };
 
 int dummy_check;
 
@@ -88,7 +89,7 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad, player.pos, player.radius);
+	EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
 	Loop_Timer(&parryTimer);
 
 

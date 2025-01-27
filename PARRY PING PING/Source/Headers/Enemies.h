@@ -5,13 +5,14 @@
 //Early Implementation of enemy attacks ignore the ugly ass name
 typedef enum EnemyAttackPatternState
 {
-	Idle,
-	WindUp,
-	Swinging
+	Idle = 0,
+	WindUp = 1,
+	Swinging = 2,
+	Parried = 3
 
 }EnemyAttackPatternState;
 
 //Dummy attack pattern
 
 void Init_Enemy_Indicator();
-void EnemyAttackPattern(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad);
+void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* StunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad);
