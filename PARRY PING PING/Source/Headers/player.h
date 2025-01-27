@@ -23,8 +23,35 @@ typedef struct Player
 	float hp; //health
 	float radius;
 	Timer dodgetimer;
+	int state;
+	int direction_v;
+	int direction_h;
 	Color color;
 } Player;
+
+enum PlayerState 
+{
+	IDLE,
+	MOVING,
+	MELEE,
+	RANGE,
+	HEAVY,
+	DODGE,
+	HIT,
+	DEAD,
+};
+
+enum Direction_v
+{
+	DOWN,
+	UP,
+};
+
+enum Direction_h
+{
+	RIGHT,
+	LEFT,
+};
 
 extern Player player;
 
@@ -42,6 +69,6 @@ void Free_Player();
 
 void Unload_Player();
 
-bool Attacking();
+void Attacking();
 
 int Attacked_Melee(AEVec2 target);
