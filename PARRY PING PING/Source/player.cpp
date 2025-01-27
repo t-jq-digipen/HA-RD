@@ -94,7 +94,7 @@ bool Attacking_Melee()
 
 	hitbox_active = false;
 	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
-	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo])
+	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
 		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
@@ -162,42 +162,25 @@ Projectile heavy_atk;
 
 int ammo = 3;
 
-
-#pragma endregion
-
-
-// Attack function
-void Attacking()
+void Attacking_Ranged()
 {
-	// maybe not needed? placeholder i guess
-	atk_pos_x = player.pos.x;
-	atk_pos_y = player.pos.y;
-
-
-	// update for player to face mouse
-	{
-		f32 x = Screen_To_World_x(Mouse.x) - atk_pos_x;
-		f32 y = Screen_To_World_y(Mouse.y) - atk_pos_y;
-		atk_rot = atan2f(y, x) - PI / 2.f;
-	}
-
-	Attacking_Melee();
-
 	if (AEInputCheckTriggered(AEVK_R) && ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
 	{
 		ammo += 1;
 	}
 
-	if (ammo > 0) {
+	if (ammo > 0) 
+	{
 
-		if (ammo == 3 && AEInputCheckTriggered(AEVK_E)) {
+		if (ammo == 3 && AEInputCheckTriggered(AEVK_E)) 
+		{
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
 			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
 			AEVec2Normalize(&dir, &dir);
 
-			
+
 			heavy_atk.pos = player.pos;
 			heavy_atk.vel = dir;
 			heavy_atk.speed = 0.f; // Adjust speed as needed
@@ -208,11 +191,10 @@ void Attacking()
 
 			projectiles.push_back(heavy_atk);
 			ammo = 0; // Deplete ammo after firing
-
-
 		}
 
-		if (ammo != 0 && AEInputCheckTriggered(AEVK_RBUTTON)) {
+		if (ammo != 0 && AEInputCheckTriggered(AEVK_RBUTTON)) 
+		{
 			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
@@ -241,7 +223,8 @@ void Attacking()
 
 	}
 
-	for (auto& proj : projectiles) {
+	for (auto& proj : projectiles) 
+	{
 		// Update position
 		AEVec2 scaledVel;
 		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
@@ -252,76 +235,50 @@ void Attacking()
 			20.f, 20.f, proj.angle, proj.texture);
 	}
 
-	
+
 	// Update lifetime timer
 	bool lifetimeExpired = Update_Timer(&heavy_atk.lifetimeTimer);
 
 	// Debugging print to see if the timer is updating
 	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
 
-	if (!lifetimeExpired) {
+	if (!lifetimeExpired) 
+	{
 		//std::cout << "Projectile lifetime expired, deactivating.\n";
 		heavy_atk.isActive = false;  // Mark the projectile as inactive
 	}
 
-	if (!heavy_atk.isActive) {
+	if (!heavy_atk.isActive) 
+	{
 		//std::cout << "Removing inactive projectile.\n";
 		//heavy_atk = projectiles.erase(heavy_atk);  // Remove inactive projectile from the list
 	}
-	
+
 }
+#pragma endregion
 
 
-
-void Load_Player()
+// Attack function
+void Attacking()
 {
-	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
+	// maybe not needed? placeholder i guess
+	atk_pos_x = player.pos.x;
+	atk_pos_y = player.pos.y;
 
-	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
-
-	AEGfxTexture* projectileTexture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
-	if (!projectileTexture) {
-		std::cerr << "Failed to load projectile texture!" << std::endl;
+	// update for player to face mouse
+	{
+		f32 x = Screen_To_World_x(Mouse.x) - atk_pos_x;
+		f32 y = Screen_To_World_y(Mouse.y) - atk_pos_y;
+		atk_rot = atan2f(y, x) - PI / 2.f;
 	}
 
-	AEGfxTexture* heavyProjectileTexture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
-	if (!heavyProjectileTexture) {
-		std::cerr << "Failed to load projectile texture!" << std::endl;
-	}
-	
-	heavy_atk.texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
+	Attacking_Melee();
 
+	Attacking_Ranged();
 }
 
-void Init_Player()
-{
-	player.pos = { 0,0 };
-	player.vel = { 0,0 };
-	player.speed = 500.f;
-	player.hp = 100.f;
-	player.radius = 25.f;
-	player.dodgetimer = Create_Timer(0.2f);
-	player.color = SetColor(0xFF00008B);
-	player.state = IDLE;
-	player.direction_v = DOWN;
-	player.direction_h = RIGHT;
-
-	melee_attack.timer = Create_Timer(1.f);
-	melee_attack.combo = 0;
-
-	AEVec2Zero(&atk_dir);
-
-	heavy_atk;
-	heavy_atk.pos = player.pos;
-	heavy_atk.vel = { 0.f, 0.f };
-	heavy_atk.speed = 150.f; // Adjust speed as needed
-	heavy_atk.angle = { 0.f };
-	heavy_atk.isActive = true;
-	heavy_atk.isHeavy = true;
-	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
-
-	Init_UI(ammo, 3, player.hp, 100.f);
-}
+const float DASH_COOLDOWN = 1.5f;
+const float DASH_DURATION = 0.2f;
 
 // WASD movement
 void Movement() {
@@ -368,16 +325,18 @@ void Movement() {
 		float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo]*melee_attack.timer.current;
 
 		std::cout << "atkvelscale " << atk_vel_scale << '\n';
-		AEVec2Scale(&player.vel, &atk_dir, 10.f*atk_vel_scale);
+		AEVec2Scale(&player.vel, &atk_dir, player.speed*atk_vel_scale*dt);
 	}
 
-
-	if (AEInputCheckTriggered(AEVK_SPACE))
+	if (!Update_Timer(&player.dodgetimer))
 	{
-		player.state = DODGE;
-		player.dodgetimer.current = 0.f;
+		if (AEInputCheckTriggered(AEVK_SPACE))
+		{
+			player.state = DODGE;
+			player.dodgetimer.current = 0.f;
+		}
 	}
-	if (Update_Timer(&player.dodgetimer))
+	if (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION)
 	{
 		boost = 1.2f * player.speed;
 	}
@@ -395,6 +354,60 @@ void Movement() {
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
 
+}
+
+
+
+
+
+
+void Load_Player()
+{
+	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
+
+	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
+
+	AEGfxTexture* projectileTexture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
+	if (!projectileTexture) {
+		std::cerr << "Failed to load projectile texture!" << std::endl;
+	}
+
+	AEGfxTexture* heavyProjectileTexture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
+	if (!heavyProjectileTexture) {
+		std::cerr << "Failed to load projectile texture!" << std::endl;
+	}
+
+	heavy_atk.texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
+}
+
+void Init_Player()
+{
+	player.pos = { 0,0 };
+	player.vel = { 0,0 };
+	player.speed = 500.f;
+	player.hp = 100.f;
+	player.radius = 25.f;
+	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
+	player.color = SetColor(0xFF00008B);
+	player.state = IDLE;
+	player.direction_v = DOWN;
+	player.direction_h = RIGHT;
+
+	melee_attack.timer = Create_Timer(1.f);
+	melee_attack.combo = 0;
+
+	AEVec2Zero(&atk_dir);
+
+	heavy_atk;
+	heavy_atk.pos = player.pos;
+	heavy_atk.vel = { 0.f, 0.f };
+	heavy_atk.speed = 150.f; // Adjust speed as needed
+	heavy_atk.angle = { 0.f };
+	heavy_atk.isActive = true;
+	heavy_atk.isHeavy = true;
+	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
+
+	Init_UI(ammo, 3, player.hp, 100.f);
 }
 
 void Update_Player()
@@ -443,8 +456,6 @@ void Draw_Player()
 	}
 }
 
-
-
 void Free_Player()
 {
 
@@ -456,5 +467,4 @@ void Unload_Player()
 	AEGfxTextureUnload(sword.texture);
 	AEGfxMeshFree(sword.mesh);
 	AEGfxTextureUnload(heavy_atk.texture);
-
 }
