@@ -82,7 +82,7 @@ void Update_Boss1()
 	boss1.current_hp -= 6.f * dt;
 	Update_Timer(&boss1.attackInterval);
 
-	std::cout << "Player x: " << player.pos.x << ", y: " << player.pos.y << '\n';
+	//std::cout << "Player x: " << player.pos.x << ", y: " << player.pos.y << '\n';
 
 
 	boss1.attackInterval.current += 1.f * dt;

@@ -52,7 +52,7 @@ void Level1_Initialize()
 	Init_Boss1();
 
 	// Dummy enemy
-	dummy_pos = { 0.f, 200.f };
+	dummy_pos = { 300.f, 200.f };
 	dummy_rad = 25.f;
 	dummy_check = 0;
 }
@@ -88,7 +88,7 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad);
+	EnemyAttackPattern(&parryTimer, &counter, dummy_pos, dummy_rad, player.pos, player.radius);
 	Loop_Timer(&parryTimer);
 
 

@@ -212,15 +212,15 @@ bool Attacking()
 	bool lifetimeExpired = Update_Timer(&heavy_atk.lifetimeTimer);
 
 	// Debugging print to see if the timer is updating
-	std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
+	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
 
 	if (!lifetimeExpired) {
-		std::cout << "Projectile lifetime expired, deactivating.\n";
+		//std::cout << "Projectile lifetime expired, deactivating.\n";
 		heavy_atk.isActive = false;  // Mark the projectile as inactive
 	}
 
 	if (!heavy_atk.isActive) {
-		std::cout << "Removing inactive projectile.\n";
+		//std::cout << "Removing inactive projectile.\n";
 		//heavy_atk = projectiles.erase(heavy_atk);  // Remove inactive projectile from the list
 	}
 	
