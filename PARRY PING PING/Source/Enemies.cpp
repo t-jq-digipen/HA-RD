@@ -4,7 +4,21 @@
 Color idle, windup, swing, parried;
 
 //timer for each state: idle, windup, swing, parry stun duration
-const float PARRY_STUN[4] = { 1.f, 1.f, 0.5f, 3.f };
+const float PARRY_STUN[4] = { 
+	1.f,	//idle
+	1.f,	//wind up for swing
+	0.5f,	//SWING
+	3.f };	//if parried, this the stun duration
+
+const float JQMonke[7] = {
+	1.f,	//idle
+	1.f,	//wind up for smash
+	0.5f,	//SMASH
+	1.f,	//rocket propeler wind up
+	1.f,	//SWEEP
+	1.f,	//recovery before going back to idle
+	3.f		//if parried during sweep
+};
 
 void Init_Enemy_Indicator()
 {
@@ -16,7 +30,6 @@ void Init_Enemy_Indicator()
 
 void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)
 {
-	f32 StunTimer{ 3.f };
 	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };				//to be replaced by proper enemy's attack hitbox!!!!
 	if (*counter == Parried && ParryTimer->current >= 1.f)
 	{
@@ -45,7 +58,8 @@ void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec
 	case WindUp:
 		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, windup);
 		if (ParryTimer->current >= PARRY_STUN[WindUp] - 0.5f) {
-			DrawCircle(World_To_Screen_x(0), World_To_Screen_y(0), HitBoxRad * 2, parried);
+			//temp parry eye spark/ flash effect. Replace with proper sprite later (and add audio!)
+			DrawRect(World_To_Screen_x(EnemyPos.x) - 10.f, World_To_Screen_y(EnemyPos.y), 10.f, 10.f, idle);
 		}
 		break;
 	case Swinging:
@@ -60,6 +74,64 @@ void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec
 	case Parried:
 		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, parried);
 		std::cout << "ahhhhhh cb i kena parried\n";
+		break;
+	}
+}
+
+void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)
+{
+	std::cout << "\n\n\n\n\n JQ COUNTER: " << *counter << "\n\n\n\n\n";
+	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 150.f };				//to be replaced by proper enemy's attack hitbox!!!!
+	if (*counter == JQParried && ParryTimer->current >= 1.f)
+	{
+		++*stunCounter;
+		if (*stunCounter == static_cast<int>(JQMonke[JQParried])) {
+			*counter = 0;
+			*stunCounter = 0;
+		}
+	}
+	else if (*counter == JQRecovery && ParryTimer->current >= JQMonke[*counter])
+	{
+		*counter = 0;
+		ParryTimer->current = 0.f;
+	}
+	else if (ParryTimer->current >= JQMonke[*counter])
+	{
+		++*counter;
+		ParryTimer->current = 0.f;
+	}
+
+	switch (*counter)
+	{
+	case JQIdle:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, idle);
+		break;
+	case JQSmashWindUp:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, windup);
+		break;
+	case JQSmash:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, swing);
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y)-150.f, HitBoxRad*2, parried);
+		if (AETestCircleToCircle(&TempHitbox, HitBoxRad * 2, &PlayerPos, PlayerRad)) {
+			std::cout << "U KENA JQ SMASHED!!!!!\n";
+		}
+		break;
+	case JQSweepWindUp:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, windup);
+		break;
+	case JQSweep:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, swing);
+		DrawRect(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y) - 150.f, 400.f, 150.f, parried);
+		if (AETestCircleToRect(&PlayerPos, PlayerRad, &TempHitbox, 400.f, 150.f)) {
+			std::cout << "U KENA JQ SWEEPED!!!!!\n";
+			*counter = JQParried;
+		}
+		break;
+	case JQRecovery:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, idle);
+		break;
+	case JQParried:
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, parried);
 		break;
 	}
 }

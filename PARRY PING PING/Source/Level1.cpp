@@ -15,11 +15,13 @@
 #include "Boss1.h"
 #include "GameStateManager.h"
 
-AEVec2 dummy_pos;
-f32 dummy_rad;
+AEVec2 dummy_pos, JQMonke_pos;
+f32 dummy_rad, JQMonke_rad;
+int JQCounter{};
 
 Timer parryTimer;
 
+//to be moved into enemy struct btw!
 int counter{};
 f32 StunCounter{ 0.f };
 
@@ -56,6 +58,10 @@ void Level1_Initialize()
 	dummy_pos = { 300.f, 200.f };
 	dummy_rad = 25.f;
 	dummy_check = 0;
+
+	//JQMonke
+	JQMonke_pos = { -300.f, 200.f };
+	JQMonke_rad = 50.f;
 }
 
 void Level1_Update()
@@ -92,6 +98,8 @@ void Level1_Draw()
 	EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
 	Loop_Timer(&parryTimer);
 
+	//JQ Monke
+	JQMonkeAttackDemo(&parryTimer, &JQCounter, &StunCounter, JQMonke_pos, JQMonke_rad, player.pos, player.radius);
 
 	// Boss
 	Draw_Boss1();
