@@ -18,24 +18,23 @@ void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec
 {
 	f32 StunTimer{ 3.f };
 	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };				//to be replaced by proper enemy's attack hitbox!!!!
-	if (ParryTimer->current >= 1.f)
+	if (*counter == Parried && ParryTimer->current >= 1.f)
 	{
-		if (*counter == Parried && ParryTimer->current >= 1.f)
-		{
-			++*stunCounter;
-			if (*stunCounter == StunTimer) {
-				*counter = 0;
-				*stunCounter = 0;
-			}
-		}
-		else if (*counter == Swinging && ParryTimer->current >= 1.f)
-		{
+		++*stunCounter;
+		if (*stunCounter == static_cast<int>(PARRY_STUN[Parried])) {
 			*counter = 0;
+			*stunCounter = 0;
 		}
-		else
-		{
-			++*counter;
-		}
+	}
+	else if (*counter == Swinging && ParryTimer->current >= PARRY_STUN[*counter])
+	{
+		*counter = 0;
+		ParryTimer->current = 0.f;
+	}
+	else if (ParryTimer->current >= PARRY_STUN[*counter])
+	{
+		++*counter;
+		ParryTimer->current = 0.f;
 	}
 
 	switch (*counter)
@@ -45,6 +44,9 @@ void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec
 		break;
 	case WindUp:
 		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, windup);
+		if (ParryTimer->current >= PARRY_STUN[WindUp] - 0.5f) {
+			DrawCircle(World_To_Screen_x(0), World_To_Screen_y(0), HitBoxRad * 2, parried);
+		}
 		break;
 	case Swinging:
 		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, swing);
