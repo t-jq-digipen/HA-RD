@@ -365,7 +365,7 @@ void Movement() {
 }
 
 // BLOCK/PARRY CHECK
-bool parrycheck(Player* player, int* counter)
+bool parrycheck(Player* player, int* counter,Timer*stunnedtimer)
 {
 	switch (*counter)
 	{
@@ -374,6 +374,7 @@ bool parrycheck(Player* player, int* counter)
 		{
 			player->state = PARRY;
 			std::cout << "PARRY PING PING\n" << player->state;
+			stunnedtimer->current = 0.0001f;
 			return PARRY;
 		}
 		break;
@@ -387,7 +388,7 @@ bool parrycheck(Player* player, int* counter)
 		break;
 	}
 }
-void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter)
+void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter,Timer*stunnedtimer)
 {
 	if (blockCDtimer->current != 0.f)
 	{
@@ -397,7 +398,7 @@ void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter)
 	{
 		if (AEInputCheckCurr(AEVK_F))
 		{
-			parrycheck(player, counter);
+			parrycheck(player, counter,stunnedtimer);
 			blockCDtimer->current = 0.001f;
 		}
 	}

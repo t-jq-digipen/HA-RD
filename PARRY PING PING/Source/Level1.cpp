@@ -19,6 +19,7 @@ AEVec2 dummy_pos;
 f32 dummy_rad;
 
 Timer enemyattacktimer;
+Timer stunnedtimer;
 Timer blockCDtimer;
 constexpr float BLOCK_COOLDOWN = 1.0f;
 
@@ -51,6 +52,8 @@ void Level1_Initialize()
 
 	// Enemy Attack Timer
 	enemyattacktimer = Create_Timer(1.f);
+	stunnedtimer = Create_Timer(2.f);
+	stunnedtimer.current = 0;
 
 	// Timer for BLOCK cooldown
 	blockCDtimer = Create_Timer(BLOCK_COOLDOWN);
@@ -85,7 +88,7 @@ void Level1_Update()
 	dummy_check = Attacked_Melee(dummy_pos);
 
 	// Parry Check
-	UpdateBlockParry(&player, &blockCDtimer, &counter);
+	UpdateBlockParry(&player, &blockCDtimer, &counter,&stunnedtimer);
 }
 
 void Level1_Draw()
@@ -96,7 +99,7 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	EnemyAttackPattern(&enemyattacktimer, &counter, dummy_pos, dummy_rad);
+	EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
 	Loop_Timer(&enemyattacktimer);
 
 	// Boss
