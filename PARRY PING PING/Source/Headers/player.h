@@ -39,6 +39,9 @@ enum PlayerState
 	DODGE,
 	HIT,
 	DEAD,
+	BLOCK,
+	PARRY,
+	MISSED
 };
 
 enum Direction_v
@@ -72,3 +75,7 @@ void Unload_Player();
 void Attacking();
 
 int Attacked_Melee(AEVec2 target);
+
+bool parrycheck(Player* player, int* counter);
+
+void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter);
