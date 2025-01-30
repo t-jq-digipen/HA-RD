@@ -9,10 +9,21 @@
 //---------------------------------------------------------
 
 #include "UI.h"
+#include "Boss1.h"
+#include "GameStateManager.h"
+
+int levelState = 0;
+
+s8 UI_font;
+Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red;
+s32 UI_mouseX, UI_mouseY;
 
 float UI_hp, UI_maxhp;
 int UI_ammo, UI_maxammo;
 Color empty, full, health;
+
+Color play_bg, pause_bg, pause_screen;
+Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 void Draw_UI()
 {
@@ -32,6 +43,8 @@ void Draw_UI()
 
 void Update_UI(int ammo, float hp)
 {
+
+	// Update player hp/ammo
 	UI_hp = hp;
 	UI_ammo = ammo;
 }
@@ -39,6 +52,23 @@ void Update_UI(int ammo, float hp)
 // will neaten when more player parameters are finalized
 void Init_UI(int ammo, int maxammo, float hp, float maxhp)
 {
+	// Colors
+	UI_red = SetColor(0xFFFF6961);
+	UI_green = SetColor(0xFF88B984);
+	UI_blue = SetColor(0xFF00008B);
+	UI_black = SetColor(0xFF000000);
+	UI_white = SetColor(0xFFFFFFFF);
+	UI_hover_red = SetColor(0xFFFFA5A1);
+
+	// Font
+	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+
+	// Level state UI
+	play_bg = SetColor(0xFF666666);
+	pause_bg = SetColor(0x4D000000);
+	pause_screen = SetColor(0xFFFFFFFF);
+
+	// Player UI
 	UI_hp = hp;
 	UI_maxhp = maxhp;
 	UI_ammo = ammo;
@@ -46,6 +76,16 @@ void Init_UI(int ammo, int maxammo, float hp, float maxhp)
 	empty = SetColor(0x70B0FFD5);
 	full = SetColor(0xFF24FF8B);
 	health = SetColor(0xFFFF6961);
+
+	// Boss UI
+	boss_hp_green = SetColor(0xFF00FF00);
+	boss_hp_yellow = SetColor(0xFFFFEF00);
+	boss_hp_red = SetColor(0xFFFF0000);
+	boss_hp_damage = SetColor(0xFF800000);
+	boss1.hp_color = boss_hp_green;
+
+	// Starting level state
+	levelState = PLAYING;
 }
 
 // draw full hp bar
@@ -90,5 +130,78 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 
 			DrawRect((pos_x1 + ((segmentwidth - segmentinterval) / 2.f)) + (i * (segmentwidth + segmentinterval / 10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
 		}
+	}
+}
+
+
+void Draw_Boss1HP()
+{
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+	// boss health logic
+	if (boss1.current_hp >= 30.f && boss1.current_hp < 60.f)
+	{
+		boss1.phase = PHASE_2;
+		boss1.hp_color = boss_hp_yellow;
+	}
+	if (boss1.current_hp >= 0.f && boss1.current_hp < 30.f)
+	{
+		boss1.phase = PHASE_3;
+		boss1.hp_color = boss_hp_red;
+	}
+	if (boss1.current_hp <= 0.f)
+	{
+		boss1.phase = DEFEAT;
+		boss1.current_hp = 0.f;
+	}
+
+	// Draw boss health bar
+	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
+	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, boss_hp_damage);
+	DrawRect(800.f, 400.f, 400.f, 50.f, play_bg);
+}
+
+void Draw_PauseMenu() 
+{
+	// Get mouse position coordinates
+	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
+	DrawTextBox(-0.3f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "PAUSED");
+
+	// play button (click to go to Level1 state)
+	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Play\n";
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(-0.5f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_white, "PLAY");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			levelState = PLAYING;
+		}
+	}
+	else
+	{
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
+		DrawTextBox(-0.5f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_black, "PLAY");
+	}
+
+	// exit button (click to go to quit state)
+	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Exit\n";
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(0.25f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			nextState = GS_QUIT;
+		}
+	}
+	else
+	{
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
+		DrawTextBox(0.25f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
 	}
 }

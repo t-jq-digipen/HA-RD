@@ -50,9 +50,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 		// Initialize main menu state
 		GSM_Initialize(GS_MAIN_MENU);
 
-		// Load the font here 
-		s8 pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
-
 	// Game Loop
 	while (gGameRunning)
 	{

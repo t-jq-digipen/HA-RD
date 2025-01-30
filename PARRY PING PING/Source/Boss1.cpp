@@ -14,16 +14,7 @@
 #include <vector>
 
 Boss1 boss1;
-Color hp_red, hp_yellow, hp_green, hp_damage;
 Color proj_color;
-
-enum BOSS_PHASE 
-{
-	PHASE_1,	// shoot once every 4 seconds
-	PHASE_2,	// shoot once every 2 seconds
-	PHASE_3,	// shoot once every 0.5 seconds
-	DEFEAT
-};
 
 typedef struct Boss1_Projectile 
 {
@@ -39,10 +30,6 @@ std::vector<Boss1_Projectile> projs;
 
 void Init_Boss1()
 {
-	hp_green = SetColor(0xFF00FF00);
-	hp_yellow = SetColor(0xFFFFEF00);
-	hp_red = SetColor(0xFFFF0000);
-	hp_damage = SetColor(0xFF800000);
 	proj_color = SetColor(0xFFFF13F0);
 
 	boss1.pos = { 0,450 };
@@ -52,7 +39,6 @@ void Init_Boss1()
 	boss1.isattacking = 0;
 	boss1.attackInterval = Create_Timer(3.f);
 	boss1.color = SetColor(0xFF800080);
-	boss1.hp_color = hp_green;
 	boss1.phase = PHASE_1;
 }
 
@@ -79,7 +65,7 @@ void Update_Boss1()
 	// Delta time
 	dt = (f32)AEFrameRateControllerGetFrameTime();
 
-	boss1.current_hp -= 6.f * dt;
+	boss1.current_hp -= 3.f * dt;
 	Update_Timer(&boss1.attackInterval);
 
 	//std::cout << "Player x: " << player.pos.x << ", y: " << player.pos.y << '\n';
@@ -164,32 +150,4 @@ void Boss1_ShootBullet(const AEVec2& start, const AEVec2& direction)
 	proj.timer = Create_Timer(4.f);
 	AEMtx33Identity(&proj.transform);
 	projs.push_back(proj);
-}
-
-void Draw_Boss1HP()
-{
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-
-	// boss health logic
-	if (boss1.current_hp >= 30.f && boss1.current_hp < 60.f)
-	{
-		boss1.phase = PHASE_2;
-		boss1.hp_color = hp_yellow;
-	}
-	if (boss1.current_hp >= 0.f && boss1.current_hp < 30.f)
-	{
-		boss1.phase = PHASE_3;
-		boss1.hp_color = hp_red;
-	}
-	if (boss1.current_hp <= 0.f)
-	{
-		boss1.phase = DEFEAT;
-		boss1.current_hp = 0.f;
-	}
-
-	// Draw boss health bar
-	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
-	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, hp_damage);
-	DrawRect(800.f, 400.f, 400.f, 50.f, SetColor(0xFF666666));
 }

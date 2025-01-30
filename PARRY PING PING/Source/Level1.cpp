@@ -37,7 +37,6 @@ void Level1_Initialize()
 {
 	std::cout << "Level 1 Initialized\n";
 
-
 	// Player
 	Init_Player();
 
@@ -62,21 +61,26 @@ void Level1_Update()
 	// Delta time
 	dt = (f32)AEFrameRateControllerGetFrameTime();
 
-	// Basic way to trigger exiting the application
-	// when ESCAPE is hit or when the window is closed
-	if (AEInputCheckTriggered(AEVK_ESCAPE))
+	if (levelState == PLAYING)
 	{
-		nextState = GS_QUIT;
+		std::cout << "Playing\n";
+		// Boss behavior
+		Update_Boss1();
+
+		// Player WASD Movement
+		Update_Player();
+
+		dummy_check = Attacked_Melee(dummy_pos);
 	}
 
-
-	// Boss behavior
-	Update_Boss1();
-
-	// Player WASD Movement
-	Update_Player();
-
-	dummy_check = Attacked_Melee(dummy_pos);
+	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
+	{
+		levelState = PAUSED;
+	}
+	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)
+	{
+		levelState = PLAYING;
+	}
 
 }
 
@@ -103,6 +107,11 @@ void Level1_Draw()
 
 	// UI
 	Draw_UI();
+
+	if (levelState == PAUSED)
+	{
+		Draw_PauseMenu();
+	}
 
 }
 
