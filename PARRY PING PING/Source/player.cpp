@@ -177,31 +177,59 @@ void Attacking_Ranged()
 		ammo += 1;
 	}
 
+	static float rightClickTimer = 0.f;
+	const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+
 	if (ammo > 0) 
 	{
 
-		if (ammo == 3 && AEInputCheckTriggered(AEVK_E)) 
+		// Declare a timer to track right-click hold duration
+		static float rightClickTimer = 0.f;
+		const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+
+		// In your update function, handle the right-click hold event
+		if (ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
 		{
-			f32 cursor_x = Screen_To_World_x(Mouse.x);
-			f32 cursor_y = Screen_To_World_y(Mouse.y);
+			// Increase the right-click timer as long as the right button is held
+			rightClickTimer += dt; // g_dt is the delta time (time passed since last frame)
 
-			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
-			AEVec2Normalize(&dir, &dir);
+			if (rightClickTimer >= rightClickHoldDuration)
+			{
+				// If the right mouse button has been held for 1 second, fire the heavy attack
 
+				f32 cursor_x = Screen_To_World_x(Mouse.x);
+				f32 cursor_y = Screen_To_World_y(Mouse.y);
 
-			heavy_atk.pos = player.pos;
-			heavy_atk.vel = dir;
-			heavy_atk.speed = 0.f; // Adjust speed as needed
-			heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
-			heavy_atk.isActive = true;
-			heavy_atk.isHeavy = true;
-			heavy_atk.lifetimeTimer.current = 0.f;
+				AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
+				AEVec2Normalize(&dir, &dir);
 
-			projectiles.push_back(heavy_atk);
-			ammo = 0; // Deplete ammo after firing
+				// Apply an offset to position the projectile slightly ahead of the player
+				AEVec2 offset = { dir.x * 1.5f, dir.y * 1.5f }; // Adjust multiplier as needed to control distance ahead
+
+				// Set heavy attack position to player position + offset
+				heavy_atk.pos = { player.pos.x + offset.x, player.pos.y + offset.y };
+				heavy_atk.vel = dir;
+				heavy_atk.speed = 0.f; // Adjust speed as needed
+				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+				heavy_atk.isActive = true;
+				heavy_atk.isHeavy = true;
+				heavy_atk.lifetimeTimer.current = 0.f;
+
+				projectiles.push_back(heavy_atk);
+				ammo = 0; // Deplete ammo after firing
+
+				// Reset the timer after firing
+				rightClickTimer = 0.f;
+			}
+		}
+		// If right mouse button is released, reset the timer
+		else if (AEInputCheckReleased(AEVK_RBUTTON))
+		{
+			rightClickTimer = 0.f;
 		}
 
-		if (ammo != 0 && AEInputCheckTriggered(AEVK_RBUTTON)) 
+		// Check for light projectiles (no changes to this part)
+		if (ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON))
 		{
 			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
@@ -225,6 +253,7 @@ void Attacking_Ranged()
 			ammo -= 1;
 		}
 
+
 	}
 
 	for (auto& proj : projectiles) 
@@ -235,8 +264,8 @@ void Attacking_Ranged()
 		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
 
 		// Draw the projectile
-		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
-			20.f, 20.f, proj.angle, projectile_texture);
+		//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
+		//	20.f, 20.f, proj.angle, projectile_texture); // Not needed here
 	}
 
 	// Update lifetime timer
