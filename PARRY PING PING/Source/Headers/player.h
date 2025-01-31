@@ -47,6 +47,7 @@ typedef struct Player
 
 	Timer dodgetimer;
 	Timer hittimer;
+	Timer blocktimer;
 
 	PlayerState state;
 

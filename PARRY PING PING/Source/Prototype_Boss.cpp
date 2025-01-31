@@ -132,12 +132,15 @@ const float SWEEP_HEIGHT = 150.f;
 
 f32 x_offset = 0.f;
 
+bool will_hit = true;
+
 void Prototype_Boss_Attack()
 {
 	if (Update_Timer(&proto_monke.attack_timer))
 	{
 		if (proto_monke.attack_timer.current < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
 		{
+			will_hit = true;
 			switch (proto_monke.attack_type)
 			{
 			case MONKE_SMASH:
@@ -166,7 +169,10 @@ void Prototype_Boss_Attack()
 				{
 					std::cout << "bonked\n";
 					// player dmg calc
-					AttackTest(proto_melee[MONKE_SMASH].can_parry, 30.f);
+					if (will_hit)
+					{
+						AttackTest(proto_melee[MONKE_SMASH].can_parry, 30.f);
+					}
 				}
 				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_swing);
 				break;
@@ -175,7 +181,10 @@ void Prototype_Boss_Attack()
 				{
 					std::cout << "slapped\n";
 					// parry checks
-					AttackTest(proto_melee[MONKE_SWEEP].can_parry, 30.f);
+					if (will_hit)
+					{
+						AttackTest(proto_melee[MONKE_SWEEP].can_parry, 30.f);
+					}
 				}
 				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x), World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_swing);
 				break;
@@ -207,6 +216,7 @@ void Prototype_Boss_Attack()
 
 void AttackTest(bool canparry, f32 damage)
 {
+	will_hit = false;
 	switch (player.state)
 	{
 	case PARRY:
@@ -221,10 +231,12 @@ void AttackTest(bool canparry, f32 damage)
 		}
 		else
 		{
-
+			// make enemy attack inactive?
 		}
 		// reload player ammo
 		player.ammo = 3;
+		// reset block cooldown
+		player.blocktimer.current = 1.f;
 		break;
 	case BLOCK:
 		//reduced dmg

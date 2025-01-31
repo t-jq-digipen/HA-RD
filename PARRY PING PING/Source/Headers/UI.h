@@ -15,7 +15,7 @@
 
 void Draw_UI();
 
-void Update_UI(int ammo, float hp);
+void Update_UI(int ammo, float hp, float parry_timer);
 
 // will neaten when more player parameters are finalized
 void Init_UI(int ammo, int maxammo, float hp, float maxhp);

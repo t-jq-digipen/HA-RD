@@ -12,10 +12,16 @@
 
 float UI_hp, UI_maxhp;
 int UI_ammo, UI_maxammo;
-Color empty, full, health;
+float UI_parryCD;
+Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
 void Draw_UI()
 {
+	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
+
+	DrawHPBar(-700.f, -300.f, -500.f, -290.f, UI_parryCD, 1.f, parry);
+
+
 	DrawHPBar(-700.f, -350.f,-300.f,-335.f,UI_hp,UI_maxhp,health);
 
 	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
@@ -24,16 +30,19 @@ void Draw_UI()
 		float posy = -400.f;
 		if (ammo_index < UI_ammo)
 		{
-			DrawRect(posx, posy, 15.f, 50.f, full);
+			DrawRect(posx, posy, 15.f, 50.f, full_ammo);
 		}
-		DrawRect(posx, posy, 25.f, 60.f, empty);
+		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
 	}
+
+
 }
 
-void Update_UI(int ammo, float hp)
+void Update_UI(int ammo, float hp, float parry_timer)
 {
 	UI_hp = hp;
 	UI_ammo = ammo;
+	UI_parryCD = parry_timer;
 }
 
 // will neaten when more player parameters are finalized
@@ -43,9 +52,11 @@ void Init_UI(int ammo, int maxammo, float hp, float maxhp)
 	UI_maxhp = maxhp;
 	UI_ammo = ammo;
 	UI_maxammo = maxammo;
-	empty = SetColor(0x70B0FFD5);
-	full = SetColor(0xFF24FF8B);
+	empty_ammo = SetColor(0x70B0FFD5);
+	full_ammo = SetColor(0xFF24FF8B);
 	health = SetColor(0xFFFF6961);
+	parry_charging = SetColor(0xFF00255F);
+	parry_ready = SetColor(0xFF004EFF);
 }
 
 // draw full hp bar

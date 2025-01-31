@@ -217,7 +217,7 @@ void Attacking_Ranged()
 
 		// Declare a timer to track right-click hold duration
 		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 0.5f; // .5 second hold to trigger heavy attack
+		const float rightClickHoldDuration = 0.2f; // .2 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
 		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
@@ -428,19 +428,17 @@ const float PARRY_DURATION = 0.2f; // PARRY DURATION		0.2s parry
 const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
 const float BLOCK_COOLDOWN = 3.0f; // TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
 
-Timer block_timer;
-
 // BLOCK/PARRY CHECK
 void Parrying()
 {
-	if (Update_Timer(&block_timer) && AEInputCheckCurr(AEVK_E))
+	if (Update_Timer(&player.blocktimer) && AEInputCheckCurr(AEVK_E))
 	{
-		if (block_timer.current < PARRY_DURATION / BLOCK_COOLDOWN)
+		if (player.blocktimer.current < PARRY_DURATION / BLOCK_COOLDOWN)
 		{
 			player.state = PARRY;
 			std::cout << "parrying";
 		}
-		else if (block_timer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
+		else if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
 			player.state = BLOCK;
 		}
@@ -451,20 +449,20 @@ void Parrying()
 	}
 	else if (AEInputCheckReleased(AEVK_E))
 	{
-		if (block_timer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
+		if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
-			block_timer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
+			player.blocktimer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
 			//std::cout << "block cd starts\n";
 		}
 		player.state = IDLE;
 	}
 	else if (AEInputCheckTriggered(AEVK_E))
 	{
-		block_timer.current = 0.f;
+		player.blocktimer.current = 0.f;
 		//std::cout << "block starts\n";
 	}
 	//std::string plystate = (player.state == PARRY) ? "Parry" : player.state == BLOCK ? "Block" : "IDK";
-	//std::cout << "Block timer: " << block_timer.current * block_timer.duration << " seconds\n";
+	//std::cout << "Block timer: " << player.blocktimer.current * player.blocktimer.duration << " seconds\n";
 	//std::cout << "Player State: " << plystate << '\n';
 }
 
@@ -518,7 +516,7 @@ void Init_Player()
 	heavy_atk.isHeavy = true;
 	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
 
-	block_timer = Create_Timer(BLOCK_COOLDOWN);
+	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
 	Init_UI(player.ammo, 3, player.hp, 100.f);
 }
@@ -557,7 +555,7 @@ void Update_Player()
 	{
 		std::cout << "bro is dead\n";
 	}
-	Update_UI(player.ammo, player.hp);
+	Update_UI(player.ammo, player.hp, player.blocktimer.current);
 }
 
 // Draw Player

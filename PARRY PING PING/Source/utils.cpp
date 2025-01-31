@@ -54,6 +54,10 @@ f32 dt;
 
 			return true;
 		}
+		else
+		{
+			timer->current = timer->end;
+		}
 		return false;
 	}
 
