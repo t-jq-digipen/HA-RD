@@ -38,6 +38,7 @@ std::vector<Projectile> projectiles; // List to hold active projectiles
 Player player;
 Attack melee_attack;
 SpriteSheet sword;
+SpriteSheet2 sword_test;
 
 // ATTACK LOGIC
 f32 atk_pos_x, atk_pos_y, atk_rot;
@@ -54,6 +55,7 @@ const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
 const float ATTACK_DURATION = 1.f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
+const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.f };
 
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
@@ -76,7 +78,8 @@ bool Attacking_Melee()
 	{
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
-		//std::cout << "combo reset\n";
+
+		sword_test.current_row = 0;
 	}
 
 	// check left click input
@@ -90,6 +93,36 @@ bool Attacking_Melee()
 		melee_attack.combo++;
 		//std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
+
+		u32 col_start = 0;
+		u32 row_len = 0;
+		f32 duration = ATTACK_TOTAL[melee_attack.combo];
+		switch (melee_attack.combo)
+		{
+		case 0:
+			sword_test.current_row = melee_attack.combo;
+			col_start = 0;
+			row_len = 10;
+			break;
+		case 1:
+			sword_test.current_row = melee_attack.combo;
+			col_start = 0;
+			row_len = 10;
+			break;
+		case 2:
+			sword_test.current_row = melee_attack.combo;
+			col_start = 0;
+			row_len = 10;
+			break;
+		case 3:
+			sword_test.current_row = melee_attack.combo;
+			col_start = 0;
+			row_len = 10;
+			break;
+		default:
+			break;
+		}
+		Set_SpriteSheet(&sword_test, col_start, row_len, duration);
 	}
 
 	// update sword swing timer
@@ -361,7 +394,6 @@ void Movement() {
 		{
 			float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo] * melee_attack.timer.current;
 
-			std::cout << "atkvelscale " << atk_vel_scale << '\n';
 			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
 		}
 	}
@@ -442,6 +474,8 @@ void Load_Player()
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
 	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
+
+	sword_test = Init_SpriteSheet2("Assets/slash.png", 4, 10);
 
 	projectile_texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 	if (!projectile_texture) {
@@ -533,7 +567,10 @@ void Draw_Player()
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
-	Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+	//Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+
+	Draw_SpriteSheet2(&sword_test, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, atk_rot);
+
 
 // Draw projectiles
 	for (const auto& proj : projectiles)
@@ -570,4 +607,5 @@ void Unload_Player()
 	AEGfxMeshFree(sword.mesh);
 	AEGfxTextureUnload(projectile_texture);
 	AEGfxTextureUnload(heavy_texture);
+	AEGfxTextureUnload(sword_test.texture);
 }

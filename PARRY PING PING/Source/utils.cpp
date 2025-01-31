@@ -139,6 +139,96 @@ f32 dt;
 	}
 
 
+	SpriteSheet2 Init_SpriteSheet2(const char* texture_file, u32 total_rows, u32 total_cols)
+	{
+		SpriteSheet2 temp;
+		temp.texture = AEGfxTextureLoad(texture_file);
+		if (!temp.texture)
+		{
+			std::cout << "Could not load " << texture_file << " texture.\n";
+		}
+		temp.total_rows = total_rows;
+		temp.total_cols = total_cols;
+		temp.uv_height = 1.f / total_rows;
+		temp.uv_width = 1.f / total_cols;
+
+		temp.col_start = 0;
+		temp.row_len = total_cols;
+
+		temp.current_col = 0;
+		temp.current_row = 0;
+
+		AEGfxMeshStart();
+
+		AEGfxTriAdd(
+			-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, temp.uv_height, // bottom left
+			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
+			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
+
+		AEGfxTriAdd(
+			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
+			0.5f, 0.5f, 0xFFFFFFFF, temp.uv_width, 0.0f,   // top right
+			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
+
+		temp.mesh = AEGfxMeshEnd();
+
+		temp.timer = Create_Timer(1.f);
+
+		return temp;
+	}
+
+	void Set_SpriteSheet(SpriteSheet2* spritesheet, u32 col_start, u32 row_len, float duration)
+	{
+		spritesheet->col_start = col_start;
+		spritesheet->row_len = row_len;
+
+		spritesheet->current_col = col_start;
+		
+		spritesheet->timer.duration = duration;
+		spritesheet->timer.current = 0.f;
+	}
+
+	void Draw_SpriteSheet2(SpriteSheet2* spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+	{
+		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+		// box transform
+		AEMtx33 Transform = { 0 };
+
+		{
+			// Scale to width and height provided
+			AEMtx33 scale;
+			AEMtx33Scale(&scale, width, height);
+
+			// Translate to position coordinates provided
+			AEMtx33 tran;
+			AEMtx33Trans(&tran, pos_x, pos_y);
+
+			// Rotate
+			AEMtx33 rotm;
+			AEMtx33Rot(&rotm, rot);
+
+			// CONCATENATE
+			AEMtx33Concat(&Transform, &rotm, &scale);
+			AEMtx33Concat(&Transform, &tran, &Transform);
+		}
+		AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
+		AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
+		AEGfxSetTransparency(1.0f);
+		AEGfxSetTransform(Transform.m);
+
+		Loop_Timer(&spritesheet->timer);
+
+		spritesheet->current_col = spritesheet->col_start + static_cast<int>(spritesheet->timer.current * spritesheet->row_len);
+
+		f32 uv_x = spritesheet->current_col * spritesheet->uv_width;
+		f32 uv_y = spritesheet->current_row * spritesheet->uv_height;
+
+		AEGfxTextureSet(spritesheet->texture, uv_x, uv_y);
+
+
+		AEGfxMeshDraw(spritesheet->mesh, AE_GFX_MDM_TRIANGLES);
+	}
+
 
 // MESHES
 	// UNIT SQUARE
