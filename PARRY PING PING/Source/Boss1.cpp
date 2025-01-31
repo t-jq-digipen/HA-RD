@@ -17,6 +17,8 @@ Boss1 boss1;
 Color hp_red, hp_yellow, hp_green, hp_damage;
 Color proj_color;
 
+
+
 enum BOSS_PHASE 
 {
 	PHASE_1,	// shoot once every 4 seconds

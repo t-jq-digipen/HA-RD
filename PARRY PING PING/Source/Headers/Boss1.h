@@ -23,6 +23,7 @@ typedef struct Boss1
 	int phase;
 } Boss1;
 
+
 void Init_Boss1();
 
 void Draw_Boss1();

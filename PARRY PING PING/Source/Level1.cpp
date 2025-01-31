@@ -13,6 +13,7 @@
 #include "Enemies.h"
 #include "Level1.h"
 #include "Boss1.h"
+#include "Prototype_Boss.h"
 #include "GameStateManager.h"
 
 AEVec2 dummy_pos, JQMonke_pos;
@@ -21,8 +22,6 @@ int JQCounter{};
 
 Timer enemyattacktimer;
 Timer stunnedtimer;
-Timer blockCDtimer;
-constexpr float BLOCK_COOLDOWN = 1.0f;
 
 //to be moved into enemy struct btw!
 int counter{};
@@ -57,11 +56,12 @@ void Level1_Initialize()
 	stunnedtimer = Create_Timer(2.f);
 	stunnedtimer.current = 0;
 
-	// Timer for BLOCK cooldown
-	blockCDtimer = Create_Timer(BLOCK_COOLDOWN);
-
 	// Boss
 	Init_Boss1();
+
+	// Proto boss
+	Init_Prototype_Boss();
+	Init_Prototype_Indicator();
 
 	// Dummy enemy
 	dummy_pos = { 300.f, 200.f };
@@ -88,13 +88,14 @@ void Level1_Update()
 	// Boss behavior
 	Update_Boss1();
 
+	// Proto boss
+	Update_Prototype_Boss();
+
 	// Player WASD Movement
 	Update_Player();
 
 	dummy_check = Attacked_Melee(dummy_pos);
 
-	// Parry Check
-	UpdateBlockParry(&player, &blockCDtimer, &counter,&stunnedtimer);
 }
 
 void Level1_Draw()
@@ -105,16 +106,19 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
-	Loop_Timer(&enemyattacktimer);
-	EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
-	Loop_Timer(&parryTimer);
+	//EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
+	//Loop_Timer(&enemyattacktimer);
+	//EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
+	//Loop_Timer(&parryTimer);
 
 	//JQ Monke
-	JQMonkeAttackDemo(&parryTimer, &JQCounter, &StunCounter, JQMonke_pos, JQMonke_rad, player.pos, player.radius);
+	//JQMonkeAttackDemo(&parryTimer, &JQCounter, &StunCounter, JQMonke_pos, JQMonke_rad, player.pos, player.radius);
 
-	// Boss
-	Draw_Boss1();
+	// manfred Boss
+	//Draw_Boss1();
+
+	// Proto boss
+	Draw_Prototype_Boss();
 
 	// Player
 	Draw_Player();

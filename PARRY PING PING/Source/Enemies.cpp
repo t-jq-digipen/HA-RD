@@ -29,7 +29,7 @@ void Init_Enemy_Indicator()
 	parried = SetColor(0xFFFF00FF);
 }
 
-void EnemyAttackPattern(Timer* ParryTimer,Timer* stunnedtimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, Player*player)
+void EnemyAttackPattern(Timer* ParryTimer,Timer* stunnedtimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad)
 {
 	if (stunnedtimer->current==0.f)
 	{
@@ -67,6 +67,9 @@ void EnemyAttackPattern(Timer* ParryTimer,Timer* stunnedtimer, int* counter, AEV
 		/*std::cout << stunnedtimer->current << '\n';*/
 	}
 }
+void Test_Funct(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad )
+{
+	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };
 	switch (*counter)
 	{
 	case Idle:

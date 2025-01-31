@@ -23,11 +23,13 @@ typedef enum JQMonkeAttackPatternState
 	JQSweep = 4,		//SWEEP
 	JQRecovery = 5,		//recovery before going back to idle
 	JQParried = 6		//if parried during sweep
-};
+}JQMonkeAttackPatternState;
+
+
 
 //Dummy attack pattern
 
 void Init_Enemy_Indicator();
-void EnemyAttackPattern(Timer* ParryTimer, Timer* Stunned, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, Player* player);
+//void EnemyAttackPattern(Timer* ParryTimer, Timer* Stunned, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, Player* player);
 
 void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* StunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad);

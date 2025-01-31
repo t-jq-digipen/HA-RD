@@ -14,22 +14,7 @@
 #include "Camera.h"
 #include "UI.h"
 
-// make player struct
-typedef struct Player 
-{
-	AEVec2 pos;
-	AEVec2 vel;
-	float speed;
-	float hp; //health
-	float radius;
-	Timer dodgetimer;
-	int state;
-	int direction_v;
-	int direction_h;
-	Color color;
-} Player;
-
-enum PlayerState 
+typedef enum PlayerState
 {
 	IDLE,
 	MOVING,
@@ -40,9 +25,38 @@ enum PlayerState
 	HIT,
 	DEAD,
 	BLOCK,
+	BLOCKED,
 	PARRY,
+	PARRIED,
 	MISSED
-};
+} PlayerState;
+
+// make player struct
+typedef struct Player 
+{
+	AEVec2 pos;
+
+	AEVec2 vel;
+	float speed;
+
+	float hp; //health
+
+	float radius;
+
+	int ammo;
+
+	Timer dodgetimer;
+	Timer hittimer;
+
+	PlayerState state;
+
+	int direction_v;
+	int direction_h;
+
+	Color color;
+} Player;
+
+
 
 enum Direction_v
 {

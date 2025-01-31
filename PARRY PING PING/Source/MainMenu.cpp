@@ -64,6 +64,7 @@ void MainMenu_Update()
 	// play button (click to go to Level1 state)
 	if (IsAreaClicked(width / 2 - 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
 	{
+		
 		std::cout << "Click Play\n";
 		DrawRect(-300.f, 0.f, 300.f, 200.f, hover_red);
 		DrawTextBox(-0.5f, 0.f, 300.f, 200.f, 1.f, pFont, white, "PLAY");

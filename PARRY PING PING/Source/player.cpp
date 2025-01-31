@@ -53,7 +53,7 @@ AEGfxTexture* AtkHB;
 const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
 const float ATTACK_DURATION = 1.f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
-const float ATTACK_END[4] = { 0.f, 0.4f, 0.4f, 0.7f };
+const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
 
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
@@ -169,27 +169,25 @@ AEGfxTexture* heavy_texture;
 
 Projectile heavy_atk;
 
-int ammo = 3;
+
 
 void Attacking_Ranged()
 {
-	if (AEInputCheckTriggered(AEVK_R) && ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
+	if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
 	{
-		ammo += 1;
+		player.ammo += 1;
 	}
 
-	static float rightClickTimer = 0.f;
-	const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
 
-	if (ammo > 0) 
+	if (player.ammo > 0)
 	{
 
 		// Declare a timer to track right-click hold duration
 		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+		const float rightClickHoldDuration = 0.5f; // .5 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
-		if (ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
+		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
 		{
 			// Increase the right-click timer as long as the right button is held
 			rightClickTimer += dt; // g_dt is the delta time (time passed since last frame)
@@ -217,10 +215,11 @@ void Attacking_Ranged()
 				heavy_atk.lifetimeTimer.current = 0.f;
 
 				projectiles.push_back(heavy_atk);
-				ammo = 0; // Deplete ammo after firing
+				player.ammo = 0; // Deplete ammo after firing
 
 				// Reset the timer after firing
 				rightClickTimer = 0.f;
+
 			}
 		}
 		// If right mouse button is released, reset the timer
@@ -230,7 +229,7 @@ void Attacking_Ranged()
 		}
 
 		// Check for light projectiles (no changes to this part)
-		if (ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON))
+		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON))
 		{
 			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
@@ -251,7 +250,7 @@ void Attacking_Ranged()
 
 			// Add the single projectile to the vector
 			projectiles.push_back(new_proj);
-			ammo -= 1;
+			player.ammo -= 1;
 		}
 
 
@@ -393,45 +392,50 @@ void Movement() {
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
 }
 
+const float PARRY_DURATION = 0.2f; // PARRY DURATION		0.2s parry
+const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
+const float BLOCK_COOLDOWN = 3.0f; // TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
+
+Timer block_timer;
+
 // BLOCK/PARRY CHECK
-bool parrycheck(Player* player, int* counter,Timer*stunnedtimer)
+void Parrying()
 {
-	switch (*counter)
+	if (Update_Timer(&block_timer) && AEInputCheckCurr(AEVK_E))
 	{
-	case Swinging:
-		if (AEInputCheckCurr(AEVK_F))
+		if (block_timer.current < PARRY_DURATION / BLOCK_COOLDOWN)
 		{
-			player->state = PARRY;
-			std::cout << "PARRY PING PING\n" << player->state;
-			stunnedtimer->current = 0.0001f;
-			return PARRY;
+			player.state = PARRY;
+			std::cout << "parrying";
 		}
-		break;
-	default:
-		if (AEInputCheckCurr(AEVK_F))
+		else if (block_timer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
-			player->state = BLOCK;
-			std::cout << "BLOCKED BLOCKED BLOCKED BLOCKED \n" << player->state;
-			return BLOCK;
+			player.state = BLOCK;
 		}
-		break;
+		else
+		{
+			player.state = IDLE;
+		}
 	}
+	else if (AEInputCheckReleased(AEVK_E))
+	{
+		if (block_timer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
+		{
+			block_timer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
+			//std::cout << "block cd starts\n";
+		}
+		player.state = IDLE;
+	}
+	else if (AEInputCheckTriggered(AEVK_E))
+	{
+		block_timer.current = 0.f;
+		//std::cout << "block starts\n";
+	}
+	//std::string plystate = (player.state == PARRY) ? "Parry" : player.state == BLOCK ? "Block" : "IDK";
+	//std::cout << "Block timer: " << block_timer.current * block_timer.duration << " seconds\n";
+	//std::cout << "Player State: " << plystate << '\n';
 }
-void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter,Timer*stunnedtimer)
-{
-	if (blockCDtimer->current != 0.f)
-	{
-		Loop_Timer(blockCDtimer);
-	}
-	if (blockCDtimer->current == 0.f)
-	{
-		if (AEInputCheckCurr(AEVK_F))
-		{
-			parrycheck(player, counter,stunnedtimer);
-			blockCDtimer->current = 0.001f;
-		}
-	}
-}
+
 
 void Load_Player()
 {
@@ -457,6 +461,7 @@ void Init_Player()
 	player.speed = 500.f;
 	player.hp = 100.f;
 	player.radius = 25.f;
+	player.hittimer = Create_Timer(0.5f);
 	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
@@ -468,6 +473,8 @@ void Init_Player()
 
 	AEVec2Zero(&atk_dir);
 
+	player.ammo = 3;
+
 	heavy_atk;
 	heavy_atk.pos = player.pos;
 	heavy_atk.vel = { 0.f, 0.f };
@@ -477,19 +484,46 @@ void Init_Player()
 	heavy_atk.isHeavy = true;
 	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
 
-	Init_UI(ammo, 3, player.hp, 100.f);
+	block_timer = Create_Timer(BLOCK_COOLDOWN);
+
+	Init_UI(player.ammo, 3, player.hp, 100.f);
 }
 
 void Update_Player()
 {
 	if (player.state != DEAD)
 	{
-		Movement();
 
-		Attacking();
+		if (Update_Timer(&player.hittimer))
+		{
+			player.state = HIT;
+		}
+		else
+		{
+			player.state = IDLE;
+
+			Parrying();
+
+			if (player.state != PARRY && player.state != BLOCK)
+			{
+				Movement();
+
+				Attacking();
+			}
+		}
+		player.hp = AEClamp(player.hp, 0.f, 100.f);
+		if (!player.hp)
+		{
+			player.state = DEAD;
+		}
+
 		
 	}
-	Update_UI(ammo, player.hp);
+	else
+	{
+		std::cout << "bro is dead\n";
+	}
+	Update_UI(player.ammo, player.hp);
 }
 
 // Draw Player
