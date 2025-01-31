@@ -1,7 +1,7 @@
 #include "enemies.h"
-#include "utils.h"
+#include "player.h"
 
-Color idle, windup, swing, parried;
+Color idle, windup, swing, stunned, parried;
 
 //timer for each state: idle, windup, swing, parry stun duration
 const float PARRY_STUN[4] = { 
@@ -25,31 +25,48 @@ void Init_Enemy_Indicator()
 	idle = SetColor(0xFFFF6961);
 	windup = SetColor(0xFFFFCF61);
 	swing = SetColor(0xFFAFFF61);
+	stunned = SetColor(0xFF000000);
 	parried = SetColor(0xFFFF00FF);
 }
 
-void EnemyAttackPattern(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)
+void EnemyAttackPattern(Timer* ParryTimer,Timer* stunnedtimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, Player*player)
 {
-	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };				//to be replaced by proper enemy's attack hitbox!!!!
-	if (*counter == Parried && ParryTimer->current >= 1.f)
+	if (stunnedtimer->current==0.f)
 	{
-		++*stunCounter;
-		if (*stunCounter == static_cast<int>(PARRY_STUN[Parried])) {
-			*counter = 0;
-			*stunCounter = 0;
+		if (ParryTimer->current >= 1.f)
+		{
+			if (*counter == Swinging && ParryTimer->current >= 1.f)
+			{
+				*counter = 0;
+			}
+			else
+			{
+				++*counter;
+			}
+		}
+
+		switch (*counter)
+		{
+		case Idle:
+			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, idle);
+			break;
+		case WindUp:
+			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, windup);
+			break;
+		case Swinging:
+			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, swing);
+			//can check for parry collision here w square below reee
+			DrawRect(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y) - 100.f, 100.f, 100.f, windup);
+			break;
 		}
 	}
-	else if (*counter == Swinging && ParryTimer->current >= PARRY_STUN[*counter])
+	else 
 	{
-		*counter = 0;
-		ParryTimer->current = 0.f;
+		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, stunned);
+		Loop_Timer(stunnedtimer);
+		/*std::cout << stunnedtimer->current << '\n';*/
 	}
-	else if (ParryTimer->current >= PARRY_STUN[*counter])
-	{
-		++*counter;
-		ParryTimer->current = 0.f;
-	}
-
+}
 	switch (*counter)
 	{
 	case Idle:

@@ -19,7 +19,10 @@ AEVec2 dummy_pos, JQMonke_pos;
 f32 dummy_rad, JQMonke_rad;
 int JQCounter{};
 
-Timer parryTimer;
+Timer enemyattacktimer;
+Timer stunnedtimer;
+Timer blockCDtimer;
+constexpr float BLOCK_COOLDOWN = 1.0f;
 
 //to be moved into enemy struct btw!
 int counter{};
@@ -49,7 +52,13 @@ void Level1_Initialize()
 
 	Init_Enemy_Indicator();
 
-	parryTimer = Create_Timer(1.f);
+	// Enemy Attack Timer
+	enemyattacktimer = Create_Timer(1.f);
+	stunnedtimer = Create_Timer(2.f);
+	stunnedtimer.current = 0;
+
+	// Timer for BLOCK cooldown
+	blockCDtimer = Create_Timer(BLOCK_COOLDOWN);
 
 	// Boss
 	Init_Boss1();
@@ -76,7 +85,6 @@ void Level1_Update()
 		nextState = GS_QUIT;
 	}
 
-
 	// Boss behavior
 	Update_Boss1();
 
@@ -85,6 +93,8 @@ void Level1_Update()
 
 	dummy_check = Attacked_Melee(dummy_pos);
 
+	// Parry Check
+	UpdateBlockParry(&player, &blockCDtimer, &counter,&stunnedtimer);
 }
 
 void Level1_Draw()
@@ -95,6 +105,8 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
+	EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
+	Loop_Timer(&enemyattacktimer);
 	EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
 	Loop_Timer(&parryTimer);
 

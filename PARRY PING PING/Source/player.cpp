@@ -11,6 +11,7 @@
 //---------------------------------------------------------
 
 #include "player.h"
+#include "Enemies.h"
 #include <vector>
 #include <iostream>
 
@@ -105,9 +106,9 @@ bool Attacking_Melee()
 	{
 		player.state = IDLE;
 	}
-	std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n";
+	/*std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n";
 	std::cout << "Playerstate = " << player.state << "\n\n";
-	std::cout << "Atk_Dir x: " << atk_dir.x << " | Atk_Dir y: " << atk_dir.y << "\n\n";
+	std::cout << "Atk_Dir x: " << atk_dir.x << " | Atk_Dir y: " << atk_dir.y << "\n\n";*/
 
 	// not idling :> not sure if return will be useful
 	if (melee_attack.timer.current < ATTACK_DURATION)
@@ -392,10 +393,45 @@ void Movement() {
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
 }
 
-
-
-
-
+// BLOCK/PARRY CHECK
+bool parrycheck(Player* player, int* counter,Timer*stunnedtimer)
+{
+	switch (*counter)
+	{
+	case Swinging:
+		if (AEInputCheckCurr(AEVK_F))
+		{
+			player->state = PARRY;
+			std::cout << "PARRY PING PING\n" << player->state;
+			stunnedtimer->current = 0.0001f;
+			return PARRY;
+		}
+		break;
+	default:
+		if (AEInputCheckCurr(AEVK_F))
+		{
+			player->state = BLOCK;
+			std::cout << "BLOCKED BLOCKED BLOCKED BLOCKED \n" << player->state;
+			return BLOCK;
+		}
+		break;
+	}
+}
+void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter,Timer*stunnedtimer)
+{
+	if (blockCDtimer->current != 0.f)
+	{
+		Loop_Timer(blockCDtimer);
+	}
+	if (blockCDtimer->current == 0.f)
+	{
+		if (AEInputCheckCurr(AEVK_F))
+		{
+			parrycheck(player, counter,stunnedtimer);
+			blockCDtimer->current = 0.001f;
+		}
+	}
+}
 
 void Load_Player()
 {
