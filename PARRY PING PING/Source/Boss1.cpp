@@ -78,8 +78,6 @@ void Draw_Boss1()
 
 void Update_Boss1()
 {
-	// Delta time
-	dt = (f32)AEFrameRateControllerGetFrameTime();
 
 	boss1.current_hp -= 6.f * dt;
 	Update_Timer(&boss1.attackInterval);

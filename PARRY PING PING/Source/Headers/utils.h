@@ -17,6 +17,7 @@
 
 extern f32 dt;
 
+void Get_DT();
 
 // Color
 // -------------------------------------------------
@@ -41,6 +42,8 @@ typedef struct Timer
 	float end;
 	float duration;
 } Timer;
+
+extern Timer bullet_time;
 
 Timer Create_Timer(float duration);
 
@@ -75,7 +78,7 @@ SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float
 
 void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot);
 
-void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, f32 timer_current, f32 timer_duration);
+void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration);
 
 void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot);
 

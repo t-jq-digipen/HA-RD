@@ -32,6 +32,7 @@ int dummy_check;
 void Level1_Load()
 {
 	Load_Player();
+	Load_Prototype_Boss();
 
 	// Meshes
 	Load_Mesh(20);
@@ -76,7 +77,8 @@ void Level1_Initialize()
 void Level1_Update()
 {
 	// Delta time
-	dt = (f32)AEFrameRateControllerGetFrameTime();
+	//dt = (f32)AEFrameRateControllerGetFrameTime();
+	Get_DT();
 
 	// Basic way to trigger exiting the application
 	// when ESCAPE is hit or when the window is closed

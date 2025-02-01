@@ -39,6 +39,8 @@ typedef struct Player
 	AEVec2 vel;
 	float speed;
 
+	AEVec2 dodge_vel;
+
 	float hp; //health
 
 	float radius;
@@ -50,6 +52,7 @@ typedef struct Player
 	Timer dodgetimer;
 	Timer hittimer;
 	Timer blocktimer;
+	Timer blocked;
 
 	PlayerState state;
 
@@ -60,7 +63,14 @@ typedef struct Player
 	SpriteSheet* spritesheet;
 } Player;
 
-
+// to change
+typedef struct PlayerTimers
+{
+	Timer dodge;
+	Timer hit;
+	Timer blockparry;
+	Timer blocked;
+} PlayerTimers;
 
 enum Direction_v
 {

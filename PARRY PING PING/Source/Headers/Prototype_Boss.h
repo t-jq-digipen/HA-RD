@@ -27,10 +27,13 @@ typedef struct Boss
 	f32 width, height;
 	f32 hp, max_hp;
 	Boss_State state;
+	Boss_Attack_State attackstate;
 
 	Timer idle_timer;
 	Timer attack_timer;
 	Timer stun_timer;
+
+
 
 	int attack_type;
 } Boss;
@@ -38,7 +41,6 @@ typedef struct Boss
 typedef struct Boss_Melee
 {
 	AEVec2 pos;
-	Boss_Attack_State state;
 	Timer timer;
 	f32 attack_windup;
 	f32 attack_active;
@@ -51,7 +53,7 @@ typedef struct Boss_Melee
 
 } Boss_Melee;
 
-
+void Load_Prototype_Boss();
 
 void Init_Prototype_Indicator();
 
@@ -60,6 +62,8 @@ void Init_Prototype_Boss();
 void Update_Prototype_Boss();
 
 void Draw_Prototype_Boss();
+
+void Unload_Prototype_Boss();
 
 
 void Prototype_Boss_Attack();

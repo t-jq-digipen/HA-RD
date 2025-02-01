@@ -5,11 +5,13 @@ Boss proto_monke;
 
 Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried;
 
+SpriteSheet ssproto_monke;
+
 const float PROTO_MONKE_SPAWN_X = 0.f;
 const float PROTO_MONKE_SPAWN_Y = 200.f;
 
-const float PROTO_MONKE_WIDTH = 50.f;
-const float PROTO_MONKE_HEIGHT = 50.f;
+const float PROTO_MONKE_WIDTH = 500.f;
+const float PROTO_MONKE_HEIGHT = 500.f;
 
 const float PROTO_MONKE_MAXHP = 100.f;
 
@@ -24,6 +26,7 @@ const float PROTO_MONKE_STUN[ATTACK_TYPES] = { 0.f, 3.f };			//  0s			 3s
 
 Boss_Melee proto_melee[ATTACK_TYPES];
 
+
 void Init_Prototype_Indicator()
 {
 	proto_idle = SetColor(0xFFFF6961);
@@ -31,6 +34,11 @@ void Init_Prototype_Indicator()
 	proto_swing = SetColor(0xFFAFFF61);
 	proto_stunned = SetColor(0xFF000000);
 	proto_parried = SetColor(0xFFFF00FF);
+}
+
+void Load_Prototype_Boss()
+{
+	ssproto_monke = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png",5,8,1.f);
 }
 
 void Init_Prototype_Boss()
@@ -43,6 +51,7 @@ void Init_Prototype_Boss()
 	proto_monke.hp = proto_monke.max_hp = PROTO_MONKE_MAXHP;
 
 	proto_monke.state = BOSS_IDLE;
+	proto_monke.attackstate = BOSS_ATTACK_WINDUP;
 
 	proto_monke.idle_timer = Create_Timer(2.f);
 	proto_monke.attack_timer = Create_Timer(1.f);
@@ -53,7 +62,6 @@ void Init_Prototype_Boss()
 	for (int i = 0; i < ATTACK_TYPES; i++)
 	{
 		proto_melee[i].pos = { 0.f, 0.f };
-		proto_melee[i].state = BOSS_ATTACK_WINDUP;
 		proto_melee[i].attack_windup = PROTO_MONKE_WINDUP[i];
 		proto_melee[i].attack_active = proto_melee[i].attack_windup + PROTO_MONKE_ATTACK[i];
 		proto_melee[i].attack_recover = proto_melee[i].attack_active + PROTO_MONKE_RECOVER[i];
@@ -101,25 +109,98 @@ void Update_Prototype_Boss()
 		break;
 	}
 
-
+	std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << proto_monke.state << '\n';
 }
 
 void Draw_Prototype_Boss()
 {
-	Color color;
+	Color* color = {};
 	switch (proto_monke.state)
 	{
 	case BOSS_IDLE:
-		color = proto_idle;
+		color = &proto_idle;
 		break;
 	case BOSS_ATTACK:
-		color = proto_swing;
+		color = &proto_swing;
 		break;
 	case BOSS_PARRIED:
-		color = proto_parried;
+		color = &proto_parried;
 		break;
 	}
-	DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, color);
+
+	switch (proto_monke.state)
+	{
+	case BOSS_ATTACK:
+	{
+		u32 row = 0;
+		u32 start_col = 0;
+		u32 end_col = 0;
+		f32 duration = 0.f;
+		switch (proto_monke.attack_type)
+		{
+		case MONKE_SMASH:
+			switch (proto_monke.attackstate)
+			{
+			case BOSS_ATTACK_WINDUP:
+				row = 1;
+				start_col = 0;
+				end_col = 4;
+				duration = proto_melee[proto_monke.attack_type].attack_windup;
+				break;
+			case BOSS_ATTACK_ACTIVE:
+				row = 1;
+				start_col = 4;
+				end_col = 5;
+				duration = proto_melee[proto_monke.attack_type].attack_active;
+				break;
+			case BOSS_ATTACK_RECOVER:
+				row = 1;
+				start_col = 5;
+				end_col = 8;
+				duration = proto_melee[proto_monke.attack_type].attack_recover;
+				break;
+			}
+			break;
+		case MONKE_SWEEP:
+			switch (proto_monke.attackstate)
+			{
+			case BOSS_ATTACK_WINDUP:
+				row = 2;
+				start_col = 0;
+				end_col = 8;
+				duration = proto_melee[proto_monke.attack_type].attack_windup;
+				break;
+			case BOSS_ATTACK_ACTIVE:
+				row = 3;
+				start_col = 0;
+				end_col = 3;
+				duration = proto_melee[proto_monke.attack_type].attack_active;
+				break;
+			case BOSS_ATTACK_RECOVER:
+				row = 3;
+				start_col = 3;
+				end_col = 8;
+				duration = proto_melee[proto_monke.attack_type].attack_recover;
+				break;
+			}
+			break;
+		}
+		Set_SpriteSheet_current(&ssproto_monke, row, start_col, end_col, proto_monke.attack_timer, duration);
+		break;
+	}
+	case BOSS_PARRIED:
+		Loop_Timer(&ssproto_monke.timer);
+		Set_SpriteSheet_current(&ssproto_monke, 4, 0, 8, ssproto_monke.timer, ssproto_monke.timer.duration);
+		break;
+	case BOSS_IDLE:
+	default:
+		Loop_Timer(&ssproto_monke.timer);
+		Set_SpriteSheet_current(&ssproto_monke, 0, 0, 8, ssproto_monke.timer, ssproto_monke.timer.duration);
+		break;
+	}
+
+	//DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, *color);
+	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
 }
 
 
@@ -138,30 +219,35 @@ void Prototype_Boss_Attack()
 {
 	if (Update_Timer(&proto_monke.attack_timer))
 	{
-		if (proto_monke.attack_timer.current < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
+		std::cout << "timer.current : " << proto_monke.attack_timer.current << '\n';
+		std::cout << "attack_type " << proto_monke.attack_type << " | windup = " << proto_melee[proto_monke.attack_type].attack_windup << ", active = " << proto_melee[proto_monke.attack_type].attack_active << ", recover = " << proto_melee[proto_monke.attack_type].attack_recover << '\n';
+		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
 		{
 			will_hit = true;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
 			switch (proto_monke.attack_type)
 			{
 			case MONKE_SMASH:
-				x_offset = (player.pos.x > proto_monke.pos.x) ? 200.f : -200.f;
+				//x_offset = (player.pos.x > proto_monke.pos.x) ? 200.f : -200.f;
+				x_offset = -200.f;
 				proto_melee[MONKE_SMASH].pos = { proto_monke.pos.x + x_offset, proto_monke.pos.y - 150.f };
 				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_windup);
-				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), (proto_monke.attack_timer.current / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
+				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
 				//std::cout << "proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].attack_windup: " << proto_monke.attack_timer.current / proto_melee[proto_monke.attack_type].attack_windup << '\n';
 				break;
 			case MONKE_SWEEP:
 				proto_melee[MONKE_SWEEP].pos = { proto_monke.pos.x, proto_monke.pos.y - 150.f };
 				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x), World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_windup);
-				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x) + ((proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].attack_windup) * SWEEP_WIDTH/2.f - SWEEP_WIDTH/2.f) , World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].attack_windup ) * SWEEP_WIDTH, SWEEP_HEIGHT, proto_swing);
+				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x) + ((proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SWEEP_WIDTH/2.f - SWEEP_WIDTH/2.f) , World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SWEEP_WIDTH, SWEEP_HEIGHT, proto_swing);
 
 				break;
 			default:
 				break;
 			}
 		}
-		else if (proto_monke.attack_timer.current < proto_melee[proto_monke.attack_type].attack_active)	// Attack is active (check collision)
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)	// Attack is active (check collision)
 		{
+			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
 			switch (proto_monke.attack_type)
 			{
 			case MONKE_SMASH:
@@ -174,7 +260,7 @@ void Prototype_Boss_Attack()
 						AttackTest(proto_melee[MONKE_SMASH].can_parry, 30.f);
 					}
 				}
-				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_swing);
+				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_idle);
 				break;
 			case MONKE_SWEEP:
 				if (AETestCircleToRect(&player.pos, player.radius, &proto_melee[MONKE_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
@@ -186,30 +272,33 @@ void Prototype_Boss_Attack()
 						AttackTest(proto_melee[MONKE_SWEEP].can_parry, 30.f);
 					}
 				}
-				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x), World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_swing);
+				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x), World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_idle);
 				break;
 			default:
+				proto_monke.attackstate = BOSS_ATTACK_RECOVER;
 				break;
 			}
 		}
-		else if (proto_monke.attack_timer.current < proto_melee[proto_monke.attack_type].attack_recover)	// Attack is recovering (update anim)
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)	// Attack is recovering (update anim)
 		{
-			// wait
+			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
 		}
 	}
 	else
 	{
-		if (proto_monke.attack_type < ATTACK_TYPES)
+		if (proto_monke.attack_type < ATTACK_TYPES-1)
 		{
 			proto_monke.attack_type++;
-			proto_monke.attack_timer.current = 0.f;
+			proto_melee[proto_monke.attack_type].timer.current = 0.f;
+			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
 		}
 		else
 		{
-			proto_monke.attack_type = 0;
-			proto_monke.attack_timer.current = 0.f;
-			proto_monke.idle_timer.current = 0.f;
+			std::cout << "YES";
 			proto_monke.state = BOSS_IDLE;
+			proto_monke.attack_type = 0;
+			proto_monke.idle_timer.current = 0.f;
 		}
 	}
 }
@@ -227,7 +316,10 @@ void AttackTest(bool canparry, f32 damage)
 			proto_monke.stun_timer.duration = proto_melee[proto_monke.attack_type].stun_duration;
 			proto_monke.state = BOSS_PARRIED;
 			proto_monke.attack_type = 0;
+			bullet_time.current = 0.f;
 			std::cout << "genna parried\n";
+			player.state = PARRIED;
+			player.blocked.current = 0.f;
 		}
 		else
 		{
@@ -240,13 +332,15 @@ void AttackTest(bool canparry, f32 damage)
 		break;
 	case BLOCK:
 		//reduced dmg
-		player.state = HIT;
-		player.hittimer.current = 0.f;
+		player.state = BLOCKED;
+		player.blocked.current = 0.f;
 		player.hp -= 0.5f * damage;
 		break;
+	case PARRIED:
+	case BLOCKED:
 	case HIT:
-		// do nothing lmao loser already got slapped
 	case DODGE:
+		// do nothing, immune
 		break;
 	default:
 		// take dmg

@@ -48,6 +48,7 @@ SpriteSheet sword;
 
 SpriteSheet ssidle_move;
 SpriteSheet ssmelee_atk;
+SpriteSheet sshitdodgeparry;
 
 // ATTACK LOGIC
 f32 atk_pos_x, atk_pos_y, atk_rot;
@@ -324,7 +325,7 @@ void Attacking()
 
 
 const float DASH_COOLDOWN = 1.5f;
-const float DASH_DURATION = 0.2f;
+const float DASH_DURATION = 0.3f;
 
 // WASD movement
 void Movement() {
@@ -370,7 +371,7 @@ void Movement() {
 				player.state = IDLE;
 			}
 		}
-		else
+		else // melee
 		{
 			float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo] * melee_attack.timer.current;
 
@@ -378,26 +379,34 @@ void Movement() {
 		}
 	}
 
-	if (!Update_Timer(&player.dodgetimer))
-	{
-		if (AEInputCheckTriggered(AEVK_SPACE))
-		{
-			player.state = DODGE;
-			player.dodgetimer.current = 0.f;
-		}
-	}
-	if (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION)
-	{
-		boost = 1.2f * player.speed;
-	}
-
+	bool dodging = Update_Timer(&player.dodgetimer);
 	if (player.vel.x || player.vel.y)
 	{
 		if (player.state == MOVING)
 		{
 			AEVec2Normalize(&player.vel, &player.vel);
 		}
-		AEVec2Scale(&player.vel, &player.vel, (player.speed + boost) * dt);
+		AEVec2Scale(&player.vel, &player.vel, player.speed * dt);
+
+		if (!dodging)
+		{
+			if (AEInputCheckTriggered(AEVK_SPACE))
+			{
+				AEVec2Set(&player.dodge_vel, player.vel.x, player.vel.y);
+				AEVec2Normalize(&player.dodge_vel, &player.dodge_vel);
+				player.state = DODGE;
+				player.dodgetimer.current = 0.f;
+			}
+		}
+	}
+
+
+	if (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION)
+	{
+		player.direction_h = (player.dodge_vel.x >= 0.f) ? RIGHT : LEFT;
+		player.state = DODGE;
+		boost = (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION / 2.f) ? 1.5f * player.speed : 0.f;
+		AEVec2Scale(&player.vel, &player.dodge_vel, (player.speed + boost) * dt);
 	}
 
 	// position update
@@ -406,15 +415,24 @@ void Movement() {
 	AEVec2Set(&player.hitbox.min, player.pos.x - PLAYER_HITBOX_WIDTH / 2.f, player.pos.y - PLAYER_HITBOX_HEIGHT / 2.f);
 }
 
-const float PARRY_DURATION = 0.2f; // PARRY DURATION		0.2s parry
+const float PARRY_DURATION = 0.3f; // PARRY DURATION		0.2s parry
 const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
 const float BLOCK_COOLDOWN = 3.0f; // TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
 
 // BLOCK/PARRY CHECK
 void Parrying()
 {
-	if (Update_Timer(&player.blocktimer) && AEInputCheckCurr(AEVK_E))
+	if (Update_Timer(&player.blocktimer) && AEInputCheckCurr(AEVK_E) && player.state != PARRIED)
 	{
+		if (Screen_To_World_x(Mouse.x) > player.pos.x)
+		{
+			player.direction_h = RIGHT;
+		}
+		else
+		{
+			player.direction_h = LEFT;
+		}
+
 		if (player.blocktimer.current < PARRY_DURATION / BLOCK_COOLDOWN)
 		{
 			player.state = PARRY;
@@ -436,7 +454,7 @@ void Parrying()
 			player.blocktimer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
 			//std::cout << "block cd starts\n";
 		}
-		if (player.state == BLOCK || player.state == PARRY)
+		if (player.state == BLOCK || player.state == BLOCKED || player.state == PARRY || player.state == PARRIED)
 		{
 			player.state = IDLE;
 		}
@@ -462,6 +480,8 @@ void Load_Player()
 
 	ssmelee_atk = Init_SpriteSheet("Assets/Player/Melee_Attack.png", 2, 20, ATTACK_DURATION);
 
+	sshitdodgeparry = Init_SpriteSheet("Assets/Player/HitDodgeParry.png", 4, 4, 1.f);
+
 	projectile_texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 	if (!projectile_texture) {
 		std::cerr << "Failed to load projectile texture!" << std::endl;
@@ -476,11 +496,13 @@ void Load_Player()
 
 void Init_Player()
 {
-	player.pos = { 0,0 };
-	player.vel = { 0,0 };
+	player.pos = { 0.f,0.f };
+	player.vel = { 0.f,0.f };
 	player.speed = 500.f;
 	player.hp = 100.f;
 	player.radius = 25.f;
+
+	player.dodge_vel = { 0.f,0.f };
 
 	player.width = PLAYER_WIDTH;
 	player.height = PLAYER_HEIGHT;
@@ -498,6 +520,8 @@ void Init_Player()
 
 	melee_attack.timer = Create_Timer(1.f);
 	melee_attack.combo = 0;
+
+	player.blocked = Create_Timer(0.5f);
 
 	AEVec2Zero(&atk_dir);
 
@@ -526,16 +550,20 @@ void Update_Player()
 		{
 			player.state = HIT;
 		}
+		else if (Update_Timer(&player.blocked))
+		{
+			//?
+		}
 		else
 		{
-			if (player.state == HIT)
+			if (player.state == HIT || player.state == BLOCKED || player.state == PARRIED)
 			{
 				player.state = IDLE;
 			}
 
 			Parrying();
 
-			if (player.state != PARRY && player.state != BLOCK)
+			if (player.state != PARRY && player.state != PARRIED && player.state != BLOCK)
 			{
 				Movement();
 
@@ -567,8 +595,8 @@ void Draw_Player()
 	//Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
 	DrawRect(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.hitbox.max.x - player.hitbox.min.x, player.hitbox.max.y - player.hitbox.min.y, player.color);
 
-	std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n8 - BLOCK\n9 - BLOCKED\n10 - PARRY\n11 - PARRIED\n12 - MISSED";
-	std::cout << "Playerstate = " << player.state << "\n\n";
+	//std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n8 - BLOCK\n9 - BLOCKED\n10 - PARRY\n11 - PARRIED\n12 - MISSED";
+	//std::cout << "Playerstate = " << player.state << "\n\n";
 	switch (player.state)
 	{
 	case MELEE:
@@ -583,13 +611,13 @@ void Draw_Player()
 		switch (melee_attack.combo)
 		{
 		case 1:
-			Set_SpriteSheet_current(&ssmelee_atk, 0, 0, 9, melee_attack.timer.current, ATTACK_END[1]);
+			Set_SpriteSheet_current(&ssmelee_atk, 0, 0, 10, melee_attack.timer, ATTACK_END[1]);
 			break;
 		case 2:
-			Set_SpriteSheet_current(&ssmelee_atk, 0, 10, 19, melee_attack.timer.current, ATTACK_END[2]);
+			Set_SpriteSheet_current(&ssmelee_atk, 0, 10, 20, melee_attack.timer, ATTACK_END[2]);
 			break;
 		case 3:
-			Set_SpriteSheet_current(&ssmelee_atk, 1, 0, 19, melee_attack.timer.current, ATTACK_END[3]);
+			Set_SpriteSheet_current(&ssmelee_atk, 1, 0, 20, melee_attack.timer, ATTACK_END[3]);
 			break;
 		default:
 			break;
@@ -598,13 +626,37 @@ void Draw_Player()
 		break;
 	case MOVING:
 		Loop_Timer(&ssidle_move.timer);
-		Set_SpriteSheet_current(&ssidle_move, 1, 0, 7, ssidle_move.timer.current, ssidle_move.timer.duration);
+		Set_SpriteSheet_current(&ssidle_move, 1, 0, 8, ssidle_move.timer, ssidle_move.timer.duration);
 		player.spritesheet = &ssidle_move;
+		break;
+	case HIT:
+		Set_SpriteSheet_current(&sshitdodgeparry, 0, 0, 4, player.hittimer, player.hittimer.duration);
+		player.spritesheet = &sshitdodgeparry;
+		break;
+	case DODGE:
+		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, DASH_DURATION);
+		player.spritesheet = &sshitdodgeparry;
+		break;
+	case PARRY:
+		Set_SpriteSheet_current(&sshitdodgeparry, 2, 0, 1, player.blocktimer, player.blocktimer.duration);
+		player.spritesheet = &sshitdodgeparry;
+		break;
+	case PARRIED:
+		Set_SpriteSheet_current(&sshitdodgeparry, 2, 1, 4, player.blocked, player.blocked.duration);
+		player.spritesheet = &sshitdodgeparry;
+		break;
+	case BLOCK:
+		Set_SpriteSheet_current(&sshitdodgeparry, 3, 0, 1, player.blocktimer, player.blocktimer.duration);
+		player.spritesheet = &sshitdodgeparry;
+		break;
+	case BLOCKED:
+		Set_SpriteSheet_current(&sshitdodgeparry, 3, 1, 4, player.blocked, player.blocked.duration);
+		player.spritesheet = &sshitdodgeparry;
 		break;
 	case IDLE:
 	default:
 		Loop_Timer(&ssidle_move.timer);
-		Set_SpriteSheet_current(&ssidle_move, 0, 0, 7, ssidle_move.timer.current, ssidle_move.timer.duration);
+		Set_SpriteSheet_current(&ssidle_move, 0, 0, 8, ssidle_move.timer, ssidle_move.timer.duration);
 		player.spritesheet = &ssidle_move;
 		break;
 	}
@@ -659,7 +711,7 @@ void Unload_Player()
 	AEGfxTextureUnload(projectile_texture);
 	AEGfxTextureUnload(heavy_texture);
 
-
+	Unload_SpriteSheet(&sshitdodgeparry);
 	Unload_SpriteSheet(&ssidle_move);
 	Unload_SpriteSheet(&ssmelee_atk);
 	//AEGfxTextureUnload(player.spritesheet->texture);

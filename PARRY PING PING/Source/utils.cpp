@@ -19,7 +19,22 @@ AEGfxVertexList* CircleMesh;
 AEGfxVertexList* SquareMesh;
 AEGfxVertexList* ImgBaseMesh;
 
+// for dt and time slow
 f32 dt;
+const f32 BULLET_TIME = 0.3f;
+Timer bullet_time = { 1.f,1.f,1.f };
+
+void Get_DT()
+{
+	dt = (f32)AEFrameRateControllerGetFrameTime();
+	dt = AEClamp(dt, 0.f, 0.1f);					// prevent weird behaviour from lag spike
+
+	if (Update_Timer(&bullet_time))
+	{
+		dt *= BULLET_TIME;
+	}
+}
+
 #pragma endregion
 
 // COLOR STRUCT
@@ -141,11 +156,20 @@ f32 dt;
 		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
-	void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, f32 timer_current, f32 timer_duration)
+	void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration)
 	{
 		spritesheet->current_row = row;
 		u32 cols = col_end - col_start;
-		spritesheet->current_col = col_start + static_cast<int>(timer_current/timer_duration * cols);
+		u32 col_add = 0;
+		if (draw_duration)
+		{
+			col_add = static_cast<int>(timer.current * timer.duration / draw_duration * cols);
+		}
+		if (col_add >= cols)
+		{
+			col_add = cols-1;
+		}
+		spritesheet->current_col = col_start + col_add;
 	}
 
 	void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
@@ -257,6 +281,7 @@ f32 dt;
 // Draw rectangle
 void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color) 
 {
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// box transform
 	AEMtx33 Transform = { 0 };
 	{
@@ -277,7 +302,6 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 	AEGfxSetTransform(Transform.m);
 	// DRAW :D
 	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
-
 }
 
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string)
