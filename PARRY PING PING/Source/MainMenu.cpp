@@ -31,8 +31,6 @@ void MainMenu_Initialize()
 {
 	std::cout << "Main Menu Initialized\n";
 
-
-
 	// Colors
 	red = SetColor(0xFFFF6961);
 	green = SetColor(0xFF88B984);
