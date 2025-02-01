@@ -6,6 +6,7 @@ typedef enum Boss_State
 	BOSS_IDLE,
 	BOSS_ATTACK,
 	BOSS_PARRIED,
+	BOSS_DEAD,
 } Boss_State;
 
 typedef enum Boss_Attack_State

@@ -1,5 +1,6 @@
 #include "Prototype_Boss.h"
 #include "player.h"
+#include "UI.h"
 
 Boss proto_monke;
 
@@ -78,36 +79,69 @@ void Init_Prototype_Boss()
 			proto_melee[i].can_parry = false;
 		}
 	}
+
+	Init_Boss_UI(proto_monke.hp);
 }
+
+int last_hit = 0;
+int new_hit = 0;
+float damage = 0.f;
 
 void Update_Prototype_Boss()
 {
-	switch (proto_monke.state)
+	if (proto_monke.state != BOSS_DEAD)
 	{
-	case BOSS_IDLE:
-		if (Update_Timer(&proto_monke.idle_timer))
+		switch (proto_monke.state)
 		{
-			// implement walk to above player
-		}
-		else
-		{
-			proto_monke.attack_timer.current = 0.f;
-			proto_monke.state = BOSS_ATTACK;
-		}
-		break;
-	case BOSS_ATTACK:
-		Prototype_Boss_Attack();
-		break;
-	case BOSS_PARRIED:
-		if (!Update_Timer(&proto_monke.stun_timer))
-		{
+		case BOSS_IDLE:
+			if (Update_Timer(&proto_monke.idle_timer))
+			{
+				// implement walk to above player
+			}
+			else
+			{
+				proto_monke.attack_timer.current = 0.f;
+				proto_monke.state = BOSS_ATTACK;
+			}
+			break;
+		case BOSS_ATTACK:
+			Prototype_Boss_Attack();
+			break;
+		case BOSS_PARRIED:
+			if (!Update_Timer(&proto_monke.stun_timer))
+			{
+				proto_monke.state = BOSS_IDLE;
+			}
+			break;
+		default:
 			proto_monke.state = BOSS_IDLE;
+			break;
 		}
-		break;
-	default:
-		proto_monke.state = BOSS_IDLE;
-		break;
+
+		if (!new_hit)
+		{
+			last_hit = 0;
+		}
+
+		if (Attacked_Melee_rect(proto_monke.pos, proto_monke.width, proto_monke.height, &new_hit, &damage))
+		{
+			if (last_hit != new_hit)
+			{
+				proto_monke.hp -= damage;
+				last_hit = new_hit;
+			}
+		}
+
+
+		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
+		if (proto_monke.hp <= 0.f)
+		{
+			proto_monke.state = BOSS_DEAD;
+		}
+
+		Update_Boss_UI(proto_monke.hp);
 	}
+	
 
 	std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << proto_monke.state << '\n';
 }
@@ -201,6 +235,11 @@ void Draw_Prototype_Boss()
 
 	//DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, *color);
 	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
+}
+
+void Unload_Prototype_Boss()
+{
+	Unload_SpriteSheet(&ssproto_monke);
 }
 
 

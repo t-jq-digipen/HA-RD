@@ -70,6 +70,8 @@ const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.f };
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
 
+const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
+
 bool hitbox_active = false;
 
 enum ATTACK_PATTERN
@@ -167,6 +169,52 @@ int Attacked_Melee(AEVec2 target)
 		}
 	}
 	return 0;
+}
+
+bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
+{
+	// Check if:
+	// - Hitbox is active
+	// - Player is attacking
+	// - Target is within range of current attack
+	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
+	{
+		switch (melee_attack.combo)
+		{
+		case 1:
+		case 2:
+		{
+			// Check direction for first two swings
+			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+			{
+				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+				*check_hit = melee_attack.combo;
+				*damage = ATTACK_DAMAGE[melee_attack.combo];
+				return true;
+			}
+			break;
+		}
+		case 3:
+		{
+			// No need to check direction for third swing as it is 360 circle
+			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+			*check_hit = melee_attack.combo;
+			*damage = ATTACK_DAMAGE[melee_attack.combo];
+			return true;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
+	else if (!melee_attack.combo)
+	{
+		*check_hit = 0;
+	}
+	return false;
 }
 #pragma endregion
 // =======================================================================
@@ -538,7 +586,7 @@ void Init_Player()
 
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
-	Init_UI(player.ammo, 3, player.hp, 100.f);
+	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
 }
 
 void Update_Player()
@@ -582,7 +630,7 @@ void Update_Player()
 	{
 		std::cout << "bro is dead\n";
 	}
-	Update_UI(player.ammo, player.hp, player.blocktimer.current);
+	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
 }
 
 // Draw Player

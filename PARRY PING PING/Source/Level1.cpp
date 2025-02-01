@@ -59,6 +59,9 @@ void Level1_Initialize()
 	// Boss
 	Init_Boss1();
 
+	// UI
+	Init_UI();
+
 	// Proto boss
 	Init_Prototype_Boss();
 	Init_Prototype_Indicator();
@@ -130,7 +133,7 @@ void Level1_Draw()
 	Draw_Player();
 
 	// Boss HP
-	Draw_Boss1HP();
+	//Draw_Boss1HP();
 
 	// UI
 	Draw_UI();
@@ -151,5 +154,6 @@ void Level1_Unload()
 {
 	Unload_Mesh();
 	Unload_Player();
+	Unload_Prototype_Boss();
 	std::cout << "level1_unload";
 }

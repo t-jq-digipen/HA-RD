@@ -104,6 +104,4 @@ void Attacking();
 
 int Attacked_Melee(AEVec2 target);
 
-bool parrycheck(Player* player, int* counter, Timer* stunnedtimer);
-
-void UpdateBlockParry(Player* player, Timer* blockCDtimer, int* counter,Timer*stunnedtimer);
+bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage);

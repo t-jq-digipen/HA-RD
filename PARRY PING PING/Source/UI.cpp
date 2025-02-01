@@ -18,48 +18,20 @@ s8 UI_font;
 Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red;
 s32 UI_mouseX, UI_mouseY;
 
-float UI_hp, UI_maxhp;
+float UI_playerhp, UI_playermaxhp;
 int UI_ammo, UI_maxammo;
 float UI_parryCD;
 Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
+float UI_bosshp, UI_bossmaxhp;
+
 Color play_bg, pause_bg, pause_screen;
 Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
-void Draw_UI()
-{
-	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
 
-	DrawHPBar(-700.f, -300.f, -500.f, -290.f, UI_parryCD, 1.f, parry);
-
-
-	DrawHPBar(-700.f, -350.f,-300.f,-335.f,UI_hp,UI_maxhp,health);
-
-	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
-	{
-		float posx = -675.f + ammo_index * 50.f;
-		float posy = -400.f;
-		if (ammo_index < UI_ammo)
-		{
-			DrawRect(posx, posy, 15.f, 50.f, full_ammo);
-		}
-		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
-	}
-
-
-}
-
-void Update_UI(int ammo, float hp, float parry_timer)
-{
-
-	// Update player hp/ammo
-	UI_hp = hp;
-	UI_ammo = ammo;
-	UI_parryCD = parry_timer;
-}
 
 // will neaten when more player parameters are finalized
-void Init_UI(int ammo, int maxammo, float hp, float maxhp)
+void Init_UI()
 {
 	// Colors
 	UI_red = SetColor(0xFFFF6961);
@@ -77,17 +49,6 @@ void Init_UI(int ammo, int maxammo, float hp, float maxhp)
 	pause_bg = SetColor(0x4D000000);
 	pause_screen = SetColor(0xFFFFFFFF);
 
-	// Player UI
-	UI_hp = hp;
-	UI_maxhp = maxhp;
-	UI_ammo = ammo;
-	UI_maxammo = maxammo;
-	empty_ammo = SetColor(0x70B0FFD5);
-	full_ammo = SetColor(0xFF24FF8B);
-	health = SetColor(0xFFFF6961);
-	parry_charging = SetColor(0xFF00255F);
-	parry_ready = SetColor(0xFF004EFF);
-
 	// Boss UI
 	boss_hp_green = SetColor(0xFF00FF00);
 	boss_hp_yellow = SetColor(0xFFFFEF00);
@@ -99,50 +60,81 @@ void Init_UI(int ammo, int maxammo, float hp, float maxhp)
 	levelState = PLAYING;
 }
 
-// draw full hp bar
-// pos_x1, pos_y1 - position of top left corner
-// pos_x2, pos_y2 - position of bottom right corner
-// hp - current health
-// maxhp - max health
-void DrawHPBar(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color)
+void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 {
-	// assign total width, height, and width of health bar
-	float width, height, hpwidth;
-	//width and height of total bar
-	width = pos_x2 - pos_x1;
-	height = pos_y2 - pos_y1;
-	//width of current hp
-	hpwidth = width * hp / maxhp;
-	// draw the rectangle
-	DrawRect(pos_x1 + (hpwidth / 2.f), pos_y1 + height / 2.f, hpwidth, height, color);
+	// Player UI
+	UI_playerhp = hp;
+	UI_playermaxhp = maxhp;
+	UI_ammo = ammo;
+	UI_maxammo = maxammo;
+	empty_ammo = SetColor(0x70B0FFD5);
+	full_ammo = SetColor(0xFF24FF8B);
+	health = SetColor(0xFFFF6961);
+	parry_charging = SetColor(0xFF00255F);
+	parry_ready = SetColor(0xFF004EFF);
 }
 
-// draw segmented hp bar
-// pos_x1, pos_y1 - position of top left corner
-// pos_x2, pos_y2 - position of bottom right corner
-// hp - current health
-// maxhp - max health
-void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color)
+void Update_Player_UI(int ammo, float hp, float parry_timer)
 {
-	//array of hp in 10% chunks
-	float hpbar[10] = { 0.f, maxhp / 10.f, 2.f * maxhp / 10.f, 3.f * maxhp / 10.f, 4.f * maxhp / 10.f, 5.f * maxhp / 10.f, 6.f * maxhp / 10.f, 7.f * maxhp / 10.f, 8.f * maxhp / 10.f , 9.f * maxhp / 10.f }; //array 10% blocks
-	//size of full bar
-	float width = pos_x2 - pos_x1;
-	float height = pos_y2 - pos_y1;
-	//segment width and interval
-	float segmentwidth = width / 10.f;
-	float segmentinterval = 15.f;
-	//for loop to check hp 10% chunks
-	for (int i = 0; i < 10; ++i)
-	{
-		if (hp > (hpbar[i]) + maxhp / 20.f) //if hp>10% interval, draw 10% chunk
-		{
-			//DrawRect(Mesh, (pos_x1 + (segmentwidth / 2.f)) + (i * (segmentwidth)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
+	// Update player hp/ammo
+	UI_playerhp = hp;
+	UI_ammo = ammo;
+	UI_parryCD = parry_timer;
+}
 
-			DrawRect((pos_x1 + ((segmentwidth - segmentinterval) / 2.f)) + (i * (segmentwidth + segmentinterval / 10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
+void Draw_Player_UI()
+{
+	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
+
+	DrawHPBar(-700.f, -300.f, -500.f, -290.f, UI_parryCD, 1.f, parry);
+
+
+	DrawHPBar(-700.f, -350.f, -300.f, -335.f, UI_playerhp, UI_playermaxhp, health);
+
+	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
+	{
+		float posx = -675.f + ammo_index * 50.f;
+		float posy = -400.f;
+		if (ammo_index < UI_ammo)
+		{
+			DrawRect(posx, posy, 15.f, 50.f, full_ammo);
 		}
+		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
 	}
 }
+
+void Init_Boss_UI(float hp)
+{
+	UI_bosshp = UI_bossmaxhp = hp;
+}
+
+void Update_Boss_UI(float hp)
+{
+	UI_bosshp = hp;
+}
+
+void Draw_Boss_HPbar()
+{
+	DrawRect(0.f, 400.f, 1200.f, 50.f, boss_hp_damage);
+	Color hpcolor = boss_hp_green;
+	if (UI_bosshp < 0.6f * UI_bossmaxhp)
+	{
+		hpcolor = boss_hp_yellow;
+	}
+	if (UI_bosshp < 0.3f * UI_bossmaxhp)
+	{
+		hpcolor = boss_hp_red;
+	}
+	DrawHPBar(-600.f, 425.f, 600.f, 375.f, UI_bosshp, UI_bossmaxhp, hpcolor);
+}
+
+void Draw_UI()
+{
+	Draw_Player_UI();
+	Draw_Boss_HPbar();
+}
+
+
 
 
 void Draw_Boss1HP()
@@ -214,5 +206,51 @@ void Draw_PauseMenu()
 	{
 		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
 		DrawTextBox(0.25f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+	}
+}
+
+
+// draw full hp bar
+// pos_x1, pos_y1 - position of top left corner
+// pos_x2, pos_y2 - position of bottom right corner
+// hp - current health
+// maxhp - max health
+void DrawHPBar(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color)
+{
+	// assign total width, height, and width of health bar
+	float width, height, hpwidth;
+	//width and height of total bar
+	width = pos_x2 - pos_x1;
+	height = pos_y2 - pos_y1;
+	//width of current hp
+	hpwidth = width * hp / maxhp;
+	// draw the rectangle
+	DrawRect(pos_x1 + (hpwidth / 2.f), pos_y1 + height / 2.f, hpwidth, height, color);
+}
+
+// draw segmented hp bar
+// pos_x1, pos_y1 - position of top left corner
+// pos_x2, pos_y2 - position of bottom right corner
+// hp - current health
+// maxhp - max health
+void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp, float maxhp, Color color)
+{
+	//array of hp in 10% chunks
+	float hpbar[10] = { 0.f, maxhp / 10.f, 2.f * maxhp / 10.f, 3.f * maxhp / 10.f, 4.f * maxhp / 10.f, 5.f * maxhp / 10.f, 6.f * maxhp / 10.f, 7.f * maxhp / 10.f, 8.f * maxhp / 10.f , 9.f * maxhp / 10.f }; //array 10% blocks
+	//size of full bar
+	float width = pos_x2 - pos_x1;
+	float height = pos_y2 - pos_y1;
+	//segment width and interval
+	float segmentwidth = width / 10.f;
+	float segmentinterval = 15.f;
+	//for loop to check hp 10% chunks
+	for (int i = 0; i < 10; ++i)
+	{
+		if (hp > (hpbar[i]) + maxhp / 20.f) //if hp>10% interval, draw 10% chunk
+		{
+			//DrawRect(Mesh, (pos_x1 + (segmentwidth / 2.f)) + (i * (segmentwidth)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
+
+			DrawRect((pos_x1 + ((segmentwidth - segmentinterval) / 2.f)) + (i * (segmentwidth + segmentinterval / 10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
+		}
 	}
 }
