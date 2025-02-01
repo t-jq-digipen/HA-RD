@@ -67,8 +67,12 @@ const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
 const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.f };
 
+const float ATTACK_COMBO_WINDOW = 0.5f;
+
+Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
+
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
-const float ATTACK_RADIUS[4] = { 250.f,250.f,250.f,250.f };
+const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
 
 const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
 
@@ -86,7 +90,7 @@ enum ATTACK_PATTERN
 bool Attacking_Melee()
 {
 	// if timer is fully done updating and not idling
-	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo)
+	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3)
 	{
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
@@ -115,10 +119,12 @@ bool Attacking_Melee()
 	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
 	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
+		std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
+		DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
 		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
 	}
-	else if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && player.state == MELEE)
+	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
 		player.state = IDLE;
 	}

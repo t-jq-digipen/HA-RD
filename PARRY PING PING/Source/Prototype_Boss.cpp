@@ -151,14 +151,15 @@ void Draw_Prototype_Boss()
 	Color* color = {};
 	switch (proto_monke.state)
 	{
-	case BOSS_IDLE:
-		color = &proto_idle;
-		break;
 	case BOSS_ATTACK:
 		color = &proto_swing;
 		break;
 	case BOSS_PARRIED:
 		color = &proto_parried;
+		break;
+	case BOSS_IDLE:
+	default:
+		color = &proto_idle;
 		break;
 	}
 
@@ -233,7 +234,7 @@ void Draw_Prototype_Boss()
 		break;
 	}
 
-	//DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, *color);
+	DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, SetColor(0x30FFFFFF));
 	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
 }
 
@@ -296,7 +297,7 @@ void Prototype_Boss_Attack()
 					// player dmg calc
 					if (will_hit)
 					{
-						AttackTest(proto_melee[MONKE_SMASH].can_parry, 30.f);
+						Proto_Monke_Attack_Test(proto_melee[MONKE_SMASH].can_parry, 30.f);
 					}
 				}
 				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_idle);
@@ -308,7 +309,7 @@ void Prototype_Boss_Attack()
 					// parry checks
 					if (will_hit)
 					{
-						AttackTest(proto_melee[MONKE_SWEEP].can_parry, 30.f);
+						Proto_Monke_Attack_Test(proto_melee[MONKE_SWEEP].can_parry, 30.f);
 					}
 				}
 				DrawRect(World_To_Screen_x(proto_melee[MONKE_SWEEP].pos.x), World_To_Screen_y(proto_melee[MONKE_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_idle);
@@ -342,7 +343,8 @@ void Prototype_Boss_Attack()
 	}
 }
 
-void AttackTest(bool canparry, f32 damage)
+
+void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
 {
 	will_hit = false;
 	switch (player.state)
@@ -373,7 +375,7 @@ void AttackTest(bool canparry, f32 damage)
 		//reduced dmg
 		player.state = BLOCKED;
 		player.blocked.current = 0.f;
-		player.hp -= 0.5f * damage;
+		player.hp -= 0.5f * boss_damage;
 		break;
 	case PARRIED:
 	case BLOCKED:
@@ -385,7 +387,7 @@ void AttackTest(bool canparry, f32 damage)
 		// take dmg
 		player.state = HIT;
 		player.hittimer.current = 0.f;
-		player.hp -= damage;
+		player.hp -= boss_damage;
 	}
 }
 

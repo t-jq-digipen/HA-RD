@@ -69,4 +69,4 @@ void Unload_Prototype_Boss();
 
 void Prototype_Boss_Attack();
 
-void AttackTest(bool canparry, f32 damage);
+void Proto_Monke_Attack_Test(bool canparry, f32 damage);
