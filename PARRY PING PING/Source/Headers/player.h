@@ -42,6 +42,8 @@ typedef struct Player
 	float hp; //health
 
 	float radius;
+	float width, height;
+	aabb hitbox;
 
 	int ammo;
 
@@ -55,6 +57,7 @@ typedef struct Player
 	int direction_h;
 
 	Color color;
+	SpriteSheet* spritesheet;
 } Player;
 
 

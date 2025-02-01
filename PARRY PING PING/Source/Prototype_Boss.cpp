@@ -148,7 +148,7 @@ void Prototype_Boss_Attack()
 				proto_melee[MONKE_SMASH].pos = { proto_monke.pos.x + x_offset, proto_monke.pos.y - 150.f };
 				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), SMASH_RADIUS, proto_windup);
 				DrawCircle(World_To_Screen_x(proto_melee[MONKE_SMASH].pos.x), World_To_Screen_y(proto_melee[MONKE_SMASH].pos.y), (proto_monke.attack_timer.current / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
-				std::cout << "proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].attack_windup: " << proto_monke.attack_timer.current / proto_melee[proto_monke.attack_type].attack_windup << '\n';
+				//std::cout << "proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].attack_windup: " << proto_monke.attack_timer.current / proto_melee[proto_monke.attack_type].attack_windup << '\n';
 				break;
 			case MONKE_SWEEP:
 				proto_melee[MONKE_SWEEP].pos = { proto_monke.pos.x, proto_monke.pos.y - 150.f };
@@ -167,7 +167,7 @@ void Prototype_Boss_Attack()
 			case MONKE_SMASH:
 				if (AETestCircleToCircle(&proto_melee[MONKE_SMASH].pos, SMASH_RADIUS, &player.pos, player.radius))
 				{
-					std::cout << "bonked\n";
+					//std::cout << "bonked\n";
 					// player dmg calc
 					if (will_hit)
 					{
@@ -179,7 +179,7 @@ void Prototype_Boss_Attack()
 			case MONKE_SWEEP:
 				if (AETestCircleToRect(&player.pos, player.radius, &proto_melee[MONKE_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
 				{
-					std::cout << "slapped\n";
+					//std::cout << "slapped\n";
 					// parry checks
 					if (will_hit)
 					{

@@ -35,10 +35,19 @@ typedef struct Projectile
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
 
+
+const float PLAYER_WIDTH = 250.f;
+const float PLAYER_HEIGHT = 250.f;
+
+const float PLAYER_HITBOX_WIDTH = 80.f;
+const float PLAYER_HITBOX_HEIGHT = 120.f;
+
 Player player;
 Attack melee_attack;
 SpriteSheet sword;
-SpriteSheet2 sword_test;
+
+SpriteSheet ssidle_move;
+SpriteSheet ssmelee_atk;
 
 // ATTACK LOGIC
 f32 atk_pos_x, atk_pos_y, atk_rot;
@@ -79,7 +88,6 @@ bool Attacking_Melee()
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
 
-		sword_test.current_row = 0;
 	}
 
 	// check left click input
@@ -94,35 +102,7 @@ bool Attacking_Melee()
 		//std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
 
-		u32 col_start = 0;
-		u32 row_len = 0;
-		f32 duration = ATTACK_TOTAL[melee_attack.combo];
-		switch (melee_attack.combo)
-		{
-		case 0:
-			sword_test.current_row = melee_attack.combo;
-			col_start = 0;
-			row_len = 10;
-			break;
-		case 1:
-			sword_test.current_row = melee_attack.combo;
-			col_start = 0;
-			row_len = 10;
-			break;
-		case 2:
-			sword_test.current_row = melee_attack.combo;
-			col_start = 0;
-			row_len = 10;
-			break;
-		case 3:
-			sword_test.current_row = melee_attack.combo;
-			col_start = 0;
-			row_len = 10;
-			break;
-		default:
-			break;
-		}
-		Set_SpriteSheet(&sword_test, col_start, row_len, duration);
+		
 	}
 
 	// update sword swing timer
@@ -139,9 +119,7 @@ bool Attacking_Melee()
 	{
 		player.state = IDLE;
 	}
-	/*std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n";
-	std::cout << "Playerstate = " << player.state << "\n\n";
-	std::cout << "Atk_Dir x: " << atk_dir.x << " | Atk_Dir y: " << atk_dir.y << "\n\n";*/
+
 
 	// not idling :> not sure if return will be useful
 	if (melee_attack.timer.current < ATTACK_DURATION)
@@ -370,6 +348,7 @@ void Movement() {
 			{
 				moving = true;
 				player.vel.x -= 1.f;
+				player.direction_h = LEFT;
 			}
 			if (AEInputCheckCurr(AEVK_S))
 			{
@@ -380,6 +359,7 @@ void Movement() {
 			{
 				moving = true;
 				player.vel.x += 1.f;
+				player.direction_h = RIGHT;
 			}
 			if (moving)
 			{
@@ -422,6 +402,8 @@ void Movement() {
 
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
+	AEVec2Set(&player.hitbox.max, player.pos.x + PLAYER_HITBOX_WIDTH / 2.f, player.pos.y + PLAYER_HITBOX_HEIGHT / 2.f);
+	AEVec2Set(&player.hitbox.min, player.pos.x - PLAYER_HITBOX_WIDTH / 2.f, player.pos.y - PLAYER_HITBOX_HEIGHT / 2.f);
 }
 
 const float PARRY_DURATION = 0.2f; // PARRY DURATION		0.2s parry
@@ -454,7 +436,10 @@ void Parrying()
 			player.blocktimer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
 			//std::cout << "block cd starts\n";
 		}
-		player.state = IDLE;
+		if (player.state == BLOCK || player.state == PARRY)
+		{
+			player.state = IDLE;
+		}
 	}
 	else if (AEInputCheckTriggered(AEVK_E))
 	{
@@ -473,7 +458,9 @@ void Load_Player()
 
 	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
 
-	sword_test = Init_SpriteSheet2("Assets/slash.png", 4, 10);
+	ssidle_move = Init_SpriteSheet("Assets/Player/IdleMove.png", 2, 8, 1.f);
+
+	ssmelee_atk = Init_SpriteSheet("Assets/Player/Melee_Attack.png", 2, 20, ATTACK_DURATION);
 
 	projectile_texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
 	if (!projectile_texture) {
@@ -486,6 +473,7 @@ void Load_Player()
 	}
 }
 
+
 void Init_Player()
 {
 	player.pos = { 0,0 };
@@ -493,12 +481,20 @@ void Init_Player()
 	player.speed = 500.f;
 	player.hp = 100.f;
 	player.radius = 25.f;
+
+	player.width = PLAYER_WIDTH;
+	player.height = PLAYER_HEIGHT;
+	player.hitbox.min = { -PLAYER_HITBOX_WIDTH / 2.f, -PLAYER_HITBOX_HEIGHT / 2.f };
+	player.hitbox.max = { PLAYER_HITBOX_WIDTH / 2.f, PLAYER_HITBOX_HEIGHT / 2.f };
+
 	player.hittimer = Create_Timer(0.5f);
 	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
 	player.direction_v = DOWN;
 	player.direction_h = RIGHT;
+
+	player.spritesheet = &ssidle_move;
 
 	melee_attack.timer = Create_Timer(1.f);
 	melee_attack.combo = 0;
@@ -532,7 +528,10 @@ void Update_Player()
 		}
 		else
 		{
-			player.state = IDLE;
+			if (player.state == HIT)
+			{
+				player.state = IDLE;
+			}
 
 			Parrying();
 
@@ -561,13 +560,66 @@ void Update_Player()
 // Draw Player
 void Draw_Player()
 {
-	DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
+	//DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
 	//Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+	DrawRect(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.hitbox.max.x - player.hitbox.min.x, player.hitbox.max.y - player.hitbox.min.y, player.color);
 
-	Draw_SpriteSheet2(&sword_test, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, atk_rot);
+	std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n8 - BLOCK\n9 - BLOCKED\n10 - PARRY\n11 - PARRIED\n12 - MISSED";
+	std::cout << "Playerstate = " << player.state << "\n\n";
+	switch (player.state)
+	{
+	case MELEE:
+		if (Screen_To_World_x(Mouse.x) > player.pos.x)
+		{
+			player.direction_h = RIGHT;
+		}
+		else
+		{
+			player.direction_h = LEFT;
+		}
+		switch (melee_attack.combo)
+		{
+		case 1:
+			Set_SpriteSheet_current(&ssmelee_atk, 0, 0, 9, melee_attack.timer.current, ATTACK_END[1]);
+			break;
+		case 2:
+			Set_SpriteSheet_current(&ssmelee_atk, 0, 10, 19, melee_attack.timer.current, ATTACK_END[2]);
+			break;
+		case 3:
+			Set_SpriteSheet_current(&ssmelee_atk, 1, 0, 19, melee_attack.timer.current, ATTACK_END[3]);
+			break;
+		default:
+			break;
+		}
+		player.spritesheet = &ssmelee_atk;
+		break;
+	case MOVING:
+		Loop_Timer(&ssidle_move.timer);
+		Set_SpriteSheet_current(&ssidle_move, 1, 0, 7, ssidle_move.timer.current, ssidle_move.timer.duration);
+		player.spritesheet = &ssidle_move;
+		break;
+	case IDLE:
+	default:
+		Loop_Timer(&ssidle_move.timer);
+		Set_SpriteSheet_current(&ssidle_move, 0, 0, 7, ssidle_move.timer.current, ssidle_move.timer.duration);
+		player.spritesheet = &ssidle_move;
+		break;
+	}
+
+	switch (player.direction_h)
+	{
+	case LEFT:
+		Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, 0.f);
+		break;
+	case RIGHT:
+		Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), -player.radius * 10.f, player.radius * 10.f, 0.f);
+		break;
+	default:
+		break;
+	}
 
 
 // Draw projectiles
@@ -601,9 +653,14 @@ void Free_Player()
 void Unload_Player()
 {
 	AEGfxTextureUnload(AtkHB);
-	AEGfxTextureUnload(sword.texture);
-	AEGfxMeshFree(sword.mesh);
+
+	Unload_SpriteSheet(&sword);
+
 	AEGfxTextureUnload(projectile_texture);
 	AEGfxTextureUnload(heavy_texture);
-	AEGfxTextureUnload(sword_test.texture);
+
+
+	Unload_SpriteSheet(&ssidle_move);
+	Unload_SpriteSheet(&ssmelee_atk);
+	//AEGfxTextureUnload(player.spritesheet->texture);
 }

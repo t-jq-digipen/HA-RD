@@ -113,7 +113,6 @@ f32 dt;
 		// box transform
 		AEMtx33 Transform = { 0 };
 
-
 		{
 			// Scale to width and height provided
 			AEMtx33 scale;
@@ -142,57 +141,14 @@ f32 dt;
 		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 	}
 
-
-	SpriteSheet2 Init_SpriteSheet2(const char* texture_file, u32 total_rows, u32 total_cols)
+	void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, f32 timer_current, f32 timer_duration)
 	{
-		SpriteSheet2 temp;
-		temp.texture = AEGfxTextureLoad(texture_file);
-		if (!temp.texture)
-		{
-			std::cout << "Could not load " << texture_file << " texture.\n";
-		}
-		temp.total_rows = total_rows;
-		temp.total_cols = total_cols;
-		temp.uv_height = 1.f / total_rows;
-		temp.uv_width = 1.f / total_cols;
-
-		temp.col_start = 0;
-		temp.row_len = total_cols;
-
-		temp.current_col = 0;
-		temp.current_row = 0;
-
-		AEGfxMeshStart();
-
-		AEGfxTriAdd(
-			-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, temp.uv_height, // bottom left
-			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
-			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
-
-		AEGfxTriAdd(
-			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
-			0.5f, 0.5f, 0xFFFFFFFF, temp.uv_width, 0.0f,   // top right
-			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
-
-		temp.mesh = AEGfxMeshEnd();
-
-		temp.timer = Create_Timer(1.f);
-
-		return temp;
+		spritesheet->current_row = row;
+		u32 cols = col_end - col_start;
+		spritesheet->current_col = col_start + static_cast<int>(timer_current/timer_duration * cols);
 	}
 
-	void Set_SpriteSheet(SpriteSheet2* spritesheet, u32 col_start, u32 row_len, float duration)
-	{
-		spritesheet->col_start = col_start;
-		spritesheet->row_len = row_len;
-
-		spritesheet->current_col = col_start;
-		
-		spritesheet->timer.duration = duration;
-		spritesheet->timer.current = 0.f;
-	}
-
-	void Draw_SpriteSheet2(SpriteSheet2* spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+	void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
 	{
 		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 		// box transform
@@ -220,17 +176,16 @@ f32 dt;
 		AEGfxSetTransparency(1.0f);
 		AEGfxSetTransform(Transform.m);
 
-		Loop_Timer(&spritesheet->timer);
-
-		spritesheet->current_col = spritesheet->col_start + static_cast<int>(spritesheet->timer.current * spritesheet->row_len);
-
-		f32 uv_x = spritesheet->current_col * spritesheet->uv_width;
-		f32 uv_y = spritesheet->current_row * spritesheet->uv_height;
-
-		AEGfxTextureSet(spritesheet->texture, uv_x, uv_y);
+		AEGfxTextureSet(spritesheet.texture, spritesheet.uv_width * spritesheet.current_col, spritesheet.uv_height * spritesheet.current_row);
 
 
-		AEGfxMeshDraw(spritesheet->mesh, AE_GFX_MDM_TRIANGLES);
+		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
+	}
+
+	void Unload_SpriteSheet(SpriteSheet* spritesheet)
+	{
+		AEGfxMeshFree(spritesheet->mesh);
+		AEGfxTextureUnload(spritesheet->texture);
 	}
 
 

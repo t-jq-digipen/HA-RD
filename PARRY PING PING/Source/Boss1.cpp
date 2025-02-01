@@ -34,7 +34,7 @@ typedef struct Boss1_Projectile
 	AEMtx33 transform;
 	Timer timer;
 	bool active;
-};
+} Boss1_Projectile;
 
 const float PROJECTILE_SPEED = 500.f;
 std::vector<Boss1_Projectile> projs;

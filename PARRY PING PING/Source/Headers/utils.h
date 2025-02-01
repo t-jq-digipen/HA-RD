@@ -75,35 +75,21 @@ SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float
 
 void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot);
 
-typedef struct SpriteSheet2
+void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, f32 timer_current, f32 timer_duration);
+
+void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot);
+
+void Unload_SpriteSheet(SpriteSheet* spritesheet);
+
+
+// AABB hitbox
+// -------------------------------------------------
+//
+typedef struct aabb
 {
-	AEGfxTexture* texture;
-
-	u32 total_rows;
-	u32 total_cols;
-	f32 uv_height;
-	f32 uv_width;
-
-	u32 col_start;
-	u32 row_len;
-
-	u32 current_col;
-	u32 current_row;
-
-	AEGfxVertexList* mesh;
-
-	Timer timer;
-};
-
-SpriteSheet2 Init_SpriteSheet2(const char* texture_file, u32 total_rows, u32 total_cols);
-
-// Assign which part of the spritesheet to draw over specified duration
-void Set_SpriteSheet(SpriteSheet2* spritesheet, u32 col_start, u32 row_len, float duration);
-
-// Draw spritesheet!
-void Draw_SpriteSheet2(SpriteSheet2* spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot = 0.f);
-
-
+	AEVec2 min;
+	AEVec2 max;
+} aabb;
 
 
 // Mesh
