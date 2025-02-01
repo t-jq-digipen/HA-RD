@@ -76,7 +76,6 @@ void Level1_Initialize()
 void Level1_Update()
 {
 	// Delta time
-	//dt = (f32)AEFrameRateControllerGetFrameTime();
 	Get_DT();
 
 	if (levelState == PLAYING)
