@@ -53,6 +53,9 @@ SpriteSheet sshitdodgeparry;
 f32 atk_pos_x, atk_pos_y, atk_rot;
 AEVec2 atk_dir;
 
+static float rightClickTimer = 0.f;
+const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+
 // MELEE ATTACK
 // =======================================================================
 #pragma region MELEE
@@ -249,7 +252,7 @@ void Attacking_Ranged()
 
 		// Declare a timer to track right-click hold duration
 		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 0.2f; // .2 second hold to trigger heavy attack
+		const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
 		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
@@ -329,8 +332,8 @@ void Attacking_Ranged()
 		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
 
 		// Draw the projectile
-		//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
-		//	20.f, 20.f, proj.angle, projectile_texture); // Not needed here
+		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
+			20.f, 20.f, proj.angle, projectile_texture); // Not needed here
 	}
 
 	// Update lifetime timer
@@ -738,7 +741,18 @@ void Draw_Player()
 			{
 				if (heavy_atk.isActive)
 				{
-					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 1000.f, 1000.f, proj.angle, heavy_texture); // Heavy projectile
+					
+					float offsetDistance = 500.0f;
+					float offsetX = cosf(proj.angle) * offsetDistance;
+					float offsetY = sinf(proj.angle) * offsetDistance;
+
+					// Apply the offset to the projectile's position
+					float screenX = World_To_Screen_x(proj.pos.x + offsetX);
+					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
+
+					// Draw the heavy projectile slightly in front of the player based on angle
+					DrawImage(screenX, screenY, 1000.f, 1000.f, proj.angle, heavy_texture);
+					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 1000.f, 1000.f, proj.angle, heavy_texture); // Heavy projectile
 				}
 				else {
 					projectiles.pop_back();
