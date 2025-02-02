@@ -30,7 +30,6 @@ typedef enum PlayerState
 	BLOCKED,
 	PARRY,
 	PARRIED,
-	MISSED
 } PlayerState;
 
 
@@ -108,6 +107,12 @@ void Unload_Player();
 void Attacking();
 
 int Attacked_Melee(AEVec2 target);
+
+void Parried_Hit();
+
+void Blocked_Hit(f32 damage);
+
+void Eat_Hit(f32 damage);
 
 void Attacking_Ranged();
 

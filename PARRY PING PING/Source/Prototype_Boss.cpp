@@ -21,7 +21,7 @@ const float PROTO_MONKE_HEIGHT = 500.f;
 const float PROTO_MONKE_HITBOX_WIDTH = 400.f;
 const float PROTO_MONKE_HITBOX_HEIGHT = 300.f;
 
-const float PROTO_MONKE_MAXHP = 100.f;
+const float PROTO_MONKE_MAXHP = 200.f;
 
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
@@ -152,7 +152,10 @@ void Update_Prototype_Boss()
 		{
 			if (last_hit != new_hit)
 			{
-				player.ammo++;
+				if (player.ammo < 3)
+				{
+					player.ammo++;
+				}
 				proto_monke.hp -= damage;
 				last_hit = new_hit;
 			}
@@ -188,9 +191,23 @@ void Update_Prototype_Boss()
 					proto_proj.active = false;
 					if (AETestCircleToCircle(&proto_proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius))
 					{
-						player.state = HIT;
-						player.hittimer.current = 0.f;
-						player.hp -= PROTO_PROJECTILE_DAMAGE;
+						switch (player.state)
+						{
+						case PARRY:
+
+							Parried_Hit();
+							break;
+						case BLOCK:
+							Blocked_Hit(PROTO_PROJECTILE_DAMAGE);
+							break;
+						case PARRIED:
+						case BLOCKED:
+						case DODGE:
+						case HIT:
+							break;
+						default:
+							Eat_Hit(PROTO_PROJECTILE_DAMAGE);
+						}
 					}
 				}
 			}
@@ -473,23 +490,14 @@ void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
 			proto_monke.attack_type = 0;
 			bullet_time.current = 0.f;
 			std::cout << "genna parried\n";
-			player.state = PARRIED;
-			player.blocked.current = 0.f;
 		}
 		else
 		{
-			// make enemy attack inactive?
 		}
-		// reload player ammo
-		player.ammo = 3;
-		// reset block cooldown
-		player.blocktimer.current = 1.f;
+		Parried_Hit();
 		break;
 	case BLOCK:
-		//reduced dmg
-		player.state = BLOCKED;
-		player.blocked.current = 0.f;
-		player.hp -= 0.5f * boss_damage;
+		Blocked_Hit(boss_damage);
 		break;
 	case PARRIED:
 	case BLOCKED:
@@ -498,10 +506,7 @@ void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
 		// do nothing, immune
 		break;
 	default:
-		// take dmg
-		player.state = HIT;
-		player.hittimer.current = 0.f;
-		player.hp -= boss_damage;
+		Eat_Hit(boss_damage);
 	}
 }
 

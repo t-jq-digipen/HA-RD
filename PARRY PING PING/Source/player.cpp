@@ -56,7 +56,7 @@ f32 atk_pos_x, atk_pos_y, atk_rot;
 AEVec2 atk_dir;
 
 static float rightClickTimer = 0.f;
-const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
 
 // MELEE ATTACK
 // =======================================================================
@@ -71,7 +71,7 @@ const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
 const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.f };
 
-const float ATTACK_COMBO_WINDOW = 0.5f;
+const float ATTACK_COMBO_WINDOW = 1.f;
 
 Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
 
@@ -94,7 +94,7 @@ enum ATTACK_PATTERN
 bool Attacking_Melee()
 {
 	// if timer is fully done updating and not idling
-	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3)
+	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3 || !Update_Timer(&combo_window))
 	{
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
@@ -113,6 +113,8 @@ bool Attacking_Melee()
 		//std::cout << "melee_attack " << melee_attack.combo << '\n';
 		sword.timer.current = 0.f;
 
+		combo_window.current = 0.f;
+		combo_window.duration = ATTACK_END[melee_attack.combo] + ATTACK_COMBO_WINDOW;
 		
 	}
 
@@ -543,6 +545,35 @@ void Parrying()
 	//std::string plystate = (player.state == PARRY) ? "Parry" : player.state == BLOCK ? "Block" : "IDK";
 	//std::cout << "Block timer: " << player.blocktimer.current * player.blocktimer.duration << " seconds\n";
 	//std::cout << "Player State: " << plystate << '\n';
+}
+
+void Parried_Hit()
+{
+	player.state = PARRIED;
+	player.blocked.current = 0.f;
+
+	// reload player ammo
+	player.ammo = 3;
+
+	// reset block cooldown
+	player.blocktimer.current = 1.f;
+}
+
+const f32 BLOCK_REDUCTION = 0.5f;
+
+void Blocked_Hit(f32 damage)
+{
+	player.state = BLOCKED;
+	player.blocked.current = 0.f;
+	player.hp -= damage * BLOCK_REDUCTION;
+}
+
+void Eat_Hit(f32 damage)
+{
+	// take dmg
+	player.state = HIT;
+	player.hittimer.current = 0.f;
+	player.hp -= damage;
 }
 
 
