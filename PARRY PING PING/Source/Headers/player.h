@@ -13,6 +13,8 @@
 #include "utils.h"
 #include "Camera.h"
 #include "UI.h"
+#include "Prototype_Boss.h"
+
 
 typedef enum PlayerState
 {
@@ -30,6 +32,8 @@ typedef enum PlayerState
 	PARRIED,
 	MISSED
 } PlayerState;
+
+
 
 // make player struct
 typedef struct Player 
@@ -72,6 +76,7 @@ typedef struct PlayerTimers
 	Timer blocked;
 } PlayerTimers;
 
+
 enum Direction_v
 {
 	DOWN,
@@ -103,5 +108,9 @@ void Unload_Player();
 void Attacking();
 
 int Attacked_Melee(AEVec2 target);
+
+void Attacking_Ranged();
+
+bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage); // Now valid!
 
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage);

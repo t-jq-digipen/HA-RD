@@ -30,6 +30,8 @@ typedef struct Projectile
 	Timer lifetimeTimer;
 	bool isActive;
 	bool isHeavy;
+	// Hitbox
+	f32 radius;           // Radius of the circular hitbox
 } Projectile;
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
@@ -236,6 +238,35 @@ AEGfxTexture* projectile_texture;
 AEGfxTexture* heavy_texture;
 
 Projectile heavy_atk;
+Projectile new_proj;
+
+bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
+{
+	bool hit = false; // Track if at least one projectile hits
+
+
+	for (auto& proj : projectiles)
+	{
+		// Update position
+		AEVec2 scaledVel;
+		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
+		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
+
+		if (AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
+		{
+			*damage = 5.f;
+			hit = true;      // Mark as hit
+			proj.isActive = false; // Deactivate projectile after hit
+		}
+
+		if (proj.isHeavy) {
+			*damage = dt * 10.f;
+			hit = true;
+		}
+	}
+
+	return hit; // Only return false if no projectiles hit
+}
 
 
 
@@ -252,13 +283,13 @@ void Attacking_Ranged()
 
 		// Declare a timer to track right-click hold duration
 		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 1.0f; // 1 second hold to trigger heavy attack
+		const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
 		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
 		{
 			// Increase the right-click timer as long as the right button is held
-			rightClickTimer += dt; // g_dt is the delta time (time passed since last frame)
+			rightClickTimer += dt; 
 
 			if (rightClickTimer >= rightClickHoldDuration)
 			{
@@ -307,14 +338,14 @@ void Attacking_Ranged()
 			AEVec2Normalize(&dir, &dir);
 
 			// Create a single projectile
-			Projectile new_proj;
 			new_proj.pos = player.pos; // Start at player's position
 			new_proj.vel = dir;        // Set direction
 			new_proj.speed = 250.f;    // Speed of the projectile
 			new_proj.isActive = true;
 			new_proj.isHeavy = false;
-			new_proj.lifetimeTimer = Create_Timer(10.0f);
+			new_proj.lifetimeTimer.current = 0.f;
 			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+			new_proj.radius = 20.f;
 
 			// Add the single projectile to the vector
 			projectiles.push_back(new_proj);
@@ -324,36 +355,28 @@ void Attacking_Ranged()
 
 	}
 
-	for (auto& proj : projectiles) 
-	{
-		// Update position
-		AEVec2 scaledVel;
-		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
-		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
 
-		// Draw the projectile
-		DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y),
-			20.f, 20.f, proj.angle, projectile_texture); // Not needed here
-	}
 
 	// Update lifetime timer
-	bool lifetimeExpired = Update_Timer(&heavy_atk.lifetimeTimer);
+	bool lifetimeExpiredHeavy = Update_Timer(&heavy_atk.lifetimeTimer);
+	bool lifetimeExpiredLight = Update_Timer(&new_proj.lifetimeTimer);
 
 	// Debugging print to see if the timer is updating
 	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
 
-	if (!lifetimeExpired) 
+	if (!lifetimeExpiredHeavy) 
 	{
 		//std::cout << "Projectile lifetime expired, deactivating.\n";
 		heavy_atk.isActive = false;  // Mark the projectile as inactive
 	}
 
-	if (!heavy_atk.isActive) 
+	if (!lifetimeExpiredLight)
 	{
-		//std::cout << "Removing inactive projectile.\n";
-		//heavy_atk = projectiles.erase(heavy_atk);  // Remove inactive projectile from the list
+		new_proj.isActive = false;
 	}
+
 }
+
 #pragma endregion
 // =======================================================================
 
@@ -372,8 +395,6 @@ void Attacking()
 	}
 
 	Attacking_Melee();
-
-	Attacking_Ranged();
 }
 
 
@@ -591,6 +612,8 @@ void Init_Player()
 	heavy_atk.isHeavy = true;
 	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
 
+	new_proj.lifetimeTimer = Create_Timer(5.0f);
+
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
 	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
@@ -623,6 +646,8 @@ void Update_Player()
 				Movement();
 
 				Attacking();
+
+				Attacking_Ranged();
 			}
 		}
 		player.hp = AEClamp(player.hp, 0.f, 100.f);
@@ -731,9 +756,13 @@ void Draw_Player()
 	}
 
 
-// Draw projectiles
-	for (const auto& proj : projectiles)
+// Draw Heavy projectiles (Without this, the heavy attack will be weird)
+	for (auto& proj : projectiles)
 	{
+		// Update position
+		AEVec2 scaledVel;
+		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
+		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
 		if (projectile_texture != nullptr)
 		{ // Ensure texture is loaded
 			// Use different size depending on whether the projectile is heavy or not
@@ -752,17 +781,71 @@ void Draw_Player()
 
 					// Draw the heavy projectile slightly in front of the player based on angle
 					DrawImage(screenX, screenY, 1000.f, 1000.f, proj.angle, heavy_texture);
-					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 1000.f, 1000.f, proj.angle, heavy_texture); // Heavy projectile
 				}
 				else {
 					projectiles.pop_back();
 				}
 			}
-			else {
-				DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
+			else
+			{
+				if (new_proj.isActive)
+				{
+					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
+				}
+				else {
+					projectiles.pop_back();
+				}
 			}
 		}
 	}
+
+
+	// Draw light projectiles so that it can delete on impact
+	for (auto it = projectiles.begin(); it != projectiles.end(); )
+	{
+		// Skip inactive projectiles
+		if (!it->isActive)
+		{
+			it = projectiles.erase(it); // Erase and move iterator forward
+			continue; // Skip to next iteration
+		}
+
+		// Update position
+		AEVec2 scaledVel;
+		AEVec2Scale(&scaledVel, &it->vel, it->speed * dt);
+		AEVec2Add(&it->pos, &it->pos, &scaledVel);
+
+		if (projectile_texture != nullptr)
+		{ // Ensure texture is loaded
+			if (it->isHeavy)
+			{
+				if (heavy_atk.isActive)
+				{
+					float offsetDistance = 500.0f;
+					float offsetX = cosf(it->angle) * offsetDistance;
+					float offsetY = sinf(it->angle) * offsetDistance;
+
+					// Apply the offset to the projectile's position
+					float screenX = World_To_Screen_x(it->pos.x + offsetX);
+					float screenY = World_To_Screen_y(it->pos.y + offsetY);
+
+					// Draw the heavy projectile slightly in front of the player based on angle
+					DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
+				}
+			}
+			else
+			{
+				DrawImage(World_To_Screen_x(it->pos.x), World_To_Screen_y(it->pos.y), 100.f, 100.f, it->angle, projectile_texture);
+			}
+		}
+
+		++it; // Move iterator forward
+	}
+
+
+
+
+
 }
 
 void Free_Player()

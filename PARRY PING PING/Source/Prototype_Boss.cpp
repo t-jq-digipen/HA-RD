@@ -9,6 +9,9 @@ Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried, proto
 
 SpriteSheet ssproto_monke;
 
+#define MAX_PROJECTILES 3
+#define PROJECTILE_DAMAGE 10
+
 const float PROTO_MONKE_SPAWN_X = 0.f;
 const float PROTO_MONKE_SPAWN_Y = 200.f;
 
@@ -116,7 +119,7 @@ void Update_Prototype_Boss()
 		case BOSS_IDLE:
 			if (Update_Timer(&proto_monke.idle_timer))
 			{
-				// implement walk to above player
+				// Implement walk to above player
 			}
 			else
 			{
@@ -138,11 +141,13 @@ void Update_Prototype_Boss()
 			break;
 		}
 
+		// Reset last hit if no new melee hit detected
 		if (!new_hit)
 		{
 			last_hit = 0;
 		}
 
+		// **Check for melee attack collision**
 		if (Attacked_Melee_rect(proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT, &new_hit, &damage))
 		{
 			if (last_hit != new_hit)
@@ -151,6 +156,13 @@ void Update_Prototype_Boss()
 				proto_monke.hp -= damage;
 				last_hit = new_hit;
 			}
+		}
+
+		// **Check for projectile collisions**
+		if (Attacking_Ranged_Impact(proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT, &damage))
+		{
+			proto_monke.hp -= damage;
+			std::cout << "Boss hit! HP: " << proto_monke.hp << '\n';
 		}
 
 		// Update boss projectiles' behavior
@@ -188,6 +200,8 @@ void Update_Prototype_Boss()
 		proto_projectiles.erase(std::remove_if(proto_projectiles.begin(), proto_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), proto_projectiles.end());
 
 
+
+		// Clamp HP to prevent over-reduction
 		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
 		if (proto_monke.hp > 0.f && proto_monke.hp <= 60.f)
 		{
@@ -218,14 +232,16 @@ void Update_Prototype_Boss()
 			proto_monke.state = BOSS_DEAD;
 		}
 
+		// Update Boss UI
 		Update_Boss_UI(proto_monke.hp);
 	}
 
+	// **Update Boss Hitbox**
 	Update_AABB(&proto_monke.hitbox, proto_monke.pos.x, proto_monke.pos.y, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT);
-	
 
 	std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << proto_monke.state << '\n';
 }
+
 
 void Draw_Prototype_Boss()
 {
