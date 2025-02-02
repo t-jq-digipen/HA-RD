@@ -30,6 +30,8 @@ typedef struct Boss
 	Boss_State state;
 	Boss_Attack_State attackstate;
 
+	aabb hitbox;
+
 	Timer idle_timer;
 	Timer attack_timer;
 	Timer stun_timer;

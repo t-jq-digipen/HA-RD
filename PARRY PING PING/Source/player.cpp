@@ -13,7 +13,6 @@
 #include "player.h"
 #include "Enemies.h"
 #include <vector>
-#include <iostream>
 
 typedef struct Attack
 {
@@ -465,8 +464,7 @@ void Movement() {
 
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
-	AEVec2Set(&player.hitbox.max, player.pos.x + PLAYER_HITBOX_WIDTH / 2.f, player.pos.y + PLAYER_HITBOX_HEIGHT / 2.f);
-	AEVec2Set(&player.hitbox.min, player.pos.x - PLAYER_HITBOX_WIDTH / 2.f, player.pos.y - PLAYER_HITBOX_HEIGHT / 2.f);
+	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
 }
 
 const float PARRY_DURATION = 0.3f; // PARRY DURATION		0.2s parry
@@ -560,8 +558,8 @@ void Init_Player()
 
 	player.width = PLAYER_WIDTH;
 	player.height = PLAYER_HEIGHT;
-	player.hitbox.min = { -PLAYER_HITBOX_WIDTH / 2.f, -PLAYER_HITBOX_HEIGHT / 2.f };
-	player.hitbox.max = { PLAYER_HITBOX_WIDTH / 2.f, PLAYER_HITBOX_HEIGHT / 2.f };
+
+	player.hitbox = Init_AABB(player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
 
 	player.hittimer = Create_Timer(0.5f);
 	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
@@ -647,7 +645,9 @@ void Draw_Player()
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
 	//Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
-	DrawRect(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.hitbox.max.x - player.hitbox.min.x, player.hitbox.max.y - player.hitbox.min.y, player.color);
+	
+	// DRAW HITBOX
+	//DrawRect(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.hitbox.max.x - player.hitbox.min.x, player.hitbox.max.y - player.hitbox.min.y, player.color);
 
 	//std::cout << "States:\n0 - IDLE\n1 - MOVING\n2 - MELEE\n3 - RANGE\n4 - HEAVY\n5 - DODGE\n6 - HIT\n7 - DEAD\n8 - BLOCK\n9 - BLOCKED\n10 - PARRY\n11 - PARRIED\n12 - MISSED";
 	//std::cout << "Playerstate = " << player.state << "\n\n";

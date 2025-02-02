@@ -14,6 +14,9 @@ const float PROTO_MONKE_SPAWN_Y = 200.f;
 const float PROTO_MONKE_WIDTH = 500.f;
 const float PROTO_MONKE_HEIGHT = 500.f;
 
+const float PROTO_MONKE_HITBOX_WIDTH = 400.f;
+const float PROTO_MONKE_HITBOX_HEIGHT = 300.f;
+
 const float PROTO_MONKE_MAXHP = 100.f;
 
 
@@ -48,6 +51,8 @@ void Init_Prototype_Boss()
 
 	proto_monke.width = PROTO_MONKE_WIDTH;
 	proto_monke.height = PROTO_MONKE_HEIGHT;
+
+	proto_monke.hitbox = Init_AABB(proto_monke.pos.x, proto_monke.pos.y, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT);
 
 	proto_monke.hp = proto_monke.max_hp = PROTO_MONKE_MAXHP;
 
@@ -123,10 +128,11 @@ void Update_Prototype_Boss()
 			last_hit = 0;
 		}
 
-		if (Attacked_Melee_rect(proto_monke.pos, proto_monke.width, proto_monke.height, &new_hit, &damage))
+		if (Attacked_Melee_rect(proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT, &new_hit, &damage))
 		{
 			if (last_hit != new_hit)
 			{
+				player.ammo++;
 				proto_monke.hp -= damage;
 				last_hit = new_hit;
 			}
@@ -141,6 +147,8 @@ void Update_Prototype_Boss()
 
 		Update_Boss_UI(proto_monke.hp);
 	}
+
+	Update_AABB(&proto_monke.hitbox, proto_monke.pos.x, proto_monke.pos.y, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT);
 	
 
 	std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << proto_monke.state << '\n';
@@ -234,7 +242,8 @@ void Draw_Prototype_Boss()
 		break;
 	}
 
-	DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, SetColor(0x30FFFFFF));
+	Draw_AABB(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.hitbox, SetColor(0x30FFFFFF));
+	//DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, SetColor(0x30FFFFFF));
 	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
 }
 

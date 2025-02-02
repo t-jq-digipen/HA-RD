@@ -21,7 +21,7 @@ AEGfxVertexList* ImgBaseMesh;
 
 // for dt and time slow
 f32 dt;
-const f32 BULLET_TIME = 0.3f;
+const f32 BULLET_TIME = 0.9f;
 Timer bullet_time = { 1.f,1.f,1.f };
 
 void Get_DT()
@@ -38,179 +38,217 @@ void Get_DT()
 #pragma endregion
 
 // COLOR STRUCT
-	Color SetColor(u32 HexCode) 
-	{
-		Color color;									// temp struct
-		color.A = ((HexCode >> 24) & 0xFF) / 255.0f;	// Alpha
-		color.R = ((HexCode >> 16) & 0xFF) / 255.0f;	// Red
-		color.G = ((HexCode >> 8) & 0xFF) / 255.0f;		// Green
-		color.B = (HexCode & 0xFF) / 255.0f;			// Blue
+#pragma region COLOR
+Color SetColor(u32 HexCode)
+{
+	Color color;									// temp struct
+	color.A = ((HexCode >> 24) & 0xFF) / 255.0f;	// Alpha
+	color.R = ((HexCode >> 16) & 0xFF) / 255.0f;	// Red
+	color.G = ((HexCode >> 8) & 0xFF) / 255.0f;		// Green
+	color.B = (HexCode & 0xFF) / 255.0f;			// Blue
 
-		return color;
-	}
+	return color;
+}
+#pragma endregion
 
 
 
 // TIMER FUNCTIONS
-	Timer Create_Timer(float duration)
+#pragma region TIMER
+Timer Create_Timer(float duration)
+{
+	Timer temp;
+	temp.current = 1.f;
+	temp.end = 1.f;
+	temp.duration = duration;
+	return temp;
+}
+
+bool Update_Timer(Timer* timer)
+{
+	if (timer->current < timer->end)
 	{
-		Timer temp;
-		temp.current = 1.f;
-		temp.end = 1.f;
-		temp.duration = duration;
-		return temp;
-	}
+		timer->current += dt / timer->duration;
 
-	bool Update_Timer(Timer* timer) 
+		return true;
+	}
+	else
 	{
-		if (timer->current < timer->end) 
-		{
-			timer->current += dt/timer->duration;
-
-			return true;
-		}
-		else
-		{
-			timer->current = timer->end;
-		}
-		return false;
+		timer->current = timer->end;
 	}
+	return false;
+}
 
-	void Loop_Timer(Timer* timer) 
+void Loop_Timer(Timer* timer)
+{
+	if (timer->current < timer->end)
 	{
-		if (timer->current < timer->end) 
-		{
-			timer->current += dt / timer->duration;
-		}
-		else
-		{
-			timer->current = 0;
-		}
+		timer->current += dt / timer->duration;
 	}
-
-
-// SPRITESHEET INIT
-	SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration) 
+	else
 	{
-		SpriteSheet temp;
-		temp.texture = AEGfxTextureLoad(texture_file);
-		temp.rows = rows;
-		temp.cols = cols;
-		temp.uv_height = 1.f / rows;
-		temp.uv_width = 1.f / cols;
-		std::cout << temp.uv_height << ' ' << temp.uv_width << '\n';
-
-		temp.current_col = 0;
-		temp.current_row = 0;
-
-		AEGfxMeshStart();
-
-		AEGfxTriAdd(
-			-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, temp.uv_height, // bottom left
-			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
-			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
-
-		AEGfxTriAdd(
-			0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
-			0.5f, 0.5f, 0xFFFFFFFF, temp.uv_width, 0.0f,   // top right
-			-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
-
-		temp.mesh = AEGfxMeshEnd();
-
-		temp.timer = Create_Timer(duration);
-
-		return temp;
+		timer->current = 0;
 	}
+}
+#pragma endregion
 
-	void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot) 
+
+
+// SPRITESHEET FUNCTIONS
+#pragma region SPRITESHEET
+
+SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration)
+{
+	SpriteSheet temp;
+	temp.texture = AEGfxTextureLoad(texture_file);
+	temp.rows = rows;
+	temp.cols = cols;
+	temp.uv_height = 1.f / rows;
+	temp.uv_width = 1.f / cols;
+	std::cout << temp.uv_height << ' ' << temp.uv_width << '\n';
+
+	temp.current_col = 0;
+	temp.current_row = 0;
+
+	AEGfxMeshStart();
+
+	AEGfxTriAdd(
+		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, temp.uv_height, // bottom left
+		0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
+		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
+
+	AEGfxTriAdd(
+		0.5f, -0.5f, 0xFFFFFFFF, temp.uv_width, temp.uv_height, // bottom right 
+		0.5f, 0.5f, 0xFFFFFFFF, temp.uv_width, 0.0f,   // top right
+		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
+
+	temp.mesh = AEGfxMeshEnd();
+
+	temp.timer = Create_Timer(duration);
+
+	return temp;
+}
+
+void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot)
+{
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+	// box transform
+	AEMtx33 Transform = { 0 };
+
 	{
-		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-		// box transform
-		AEMtx33 Transform = { 0 };
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
 
-		{
-			// Scale to width and height provided
-			AEMtx33 scale;
-			AEMtx33Scale(&scale, width, height);
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
 
-			// Translate to position coordinates provided
-			AEMtx33 tran;
-			AEMtx33Trans(&tran, pos_x, pos_y);
+		// Rotate
+		AEMtx33 rotm;
+		AEMtx33Rot(&rotm, rot);
 
-			// Rotate
-			AEMtx33 rotm;
-			AEMtx33Rot(&rotm, rot);
-
-			// CONCATENATE
-			AEMtx33Concat(&Transform, &rotm, &scale);
-			AEMtx33Concat(&Transform, &tran, &Transform);
-		}
-		AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
-		AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
-		AEGfxSetTransparency(1.0f);
-		AEGfxSetTransform(Transform.m);
-
-		AEGfxTextureSet(spritesheet.texture, uv_x, uv_y);
-
-
-		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &rotm, &scale);
+		AEMtx33Concat(&Transform, &tran, &Transform);
 	}
+	AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
+	AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
+	AEGfxSetTransparency(1.0f);
+	AEGfxSetTransform(Transform.m);
 
-	void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration)
+	AEGfxTextureSet(spritesheet.texture, uv_x, uv_y);
+
+
+	AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
+}
+
+void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration)
+{
+	spritesheet->current_row = row;
+	u32 cols = col_end - col_start;
+	u32 col_add = 0;
+	if (draw_duration)
 	{
-		spritesheet->current_row = row;
-		u32 cols = col_end - col_start;
-		u32 col_add = 0;
-		if (draw_duration)
-		{
-			col_add = static_cast<int>(timer.current * timer.duration / draw_duration * cols);
-		}
-		if (col_add >= cols)
-		{
-			col_add = cols-1;
-		}
-		spritesheet->current_col = col_start + col_add;
+		col_add = static_cast<int>(timer.current * timer.duration / draw_duration * cols);
 	}
-
-	void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+	if (col_add >= cols)
 	{
-		AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
-		// box transform
-		AEMtx33 Transform = { 0 };
-
-		{
-			// Scale to width and height provided
-			AEMtx33 scale;
-			AEMtx33Scale(&scale, width, height);
-
-			// Translate to position coordinates provided
-			AEMtx33 tran;
-			AEMtx33Trans(&tran, pos_x, pos_y);
-
-			// Rotate
-			AEMtx33 rotm;
-			AEMtx33Rot(&rotm, rot);
-
-			// CONCATENATE
-			AEMtx33Concat(&Transform, &rotm, &scale);
-			AEMtx33Concat(&Transform, &tran, &Transform);
-		}
-		AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
-		AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
-		AEGfxSetTransparency(1.0f);
-		AEGfxSetTransform(Transform.m);
-
-		AEGfxTextureSet(spritesheet.texture, spritesheet.uv_width * spritesheet.current_col, spritesheet.uv_height * spritesheet.current_row);
-
-
-		AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
+		col_add = cols - 1;
 	}
+	spritesheet->current_col = col_start + col_add;
+}
 
-	void Unload_SpriteSheet(SpriteSheet* spritesheet)
+void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+{
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+	// box transform
+	AEMtx33 Transform = { 0 };
+
 	{
-		AEGfxMeshFree(spritesheet->mesh);
-		AEGfxTextureUnload(spritesheet->texture);
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// Rotate
+		AEMtx33 rotm;
+		AEMtx33Rot(&rotm, rot);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &rotm, &scale);
+		AEMtx33Concat(&Transform, &tran, &Transform);
 	}
+	AEGfxSetColorToMultiply(1.f, 1.f, 1.f, 1.f);
+	AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
+	AEGfxSetTransparency(1.0f);
+	AEGfxSetTransform(Transform.m);
+
+	AEGfxTextureSet(spritesheet.texture, spritesheet.uv_width * spritesheet.current_col, spritesheet.uv_height * spritesheet.current_row);
+
+
+	AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
+}
+
+void Unload_SpriteSheet(SpriteSheet* spritesheet)
+{
+	AEGfxMeshFree(spritesheet->mesh);
+	AEGfxTextureUnload(spritesheet->texture);
+}
+#pragma endregion
+
+
+
+// AABB HITBOX
+#pragma region AABB
+aabb Init_AABB(f32 pos_x, f32 pos_y, f32 width, f32 height)
+{
+	aabb temp;
+	temp.min.x = pos_x - width / 2.f;
+	temp.min.y = pos_y - height / 2.f;
+	temp.max.x = pos_x + width / 2.f;
+	temp.max.y = pos_y + width / 2.f;
+	return temp;
+}
+
+void Update_AABB(aabb* hitbox, f32 pos_x, f32 pos_y, f32 width, f32 height)
+{
+	hitbox->min.x = pos_x - width / 2.f;
+	hitbox->min.y = pos_y - height / 2.f;
+	hitbox->max.x = pos_x + width / 2.f;
+	hitbox->max.y = pos_y + height / 2.f;
+}
+
+void Draw_AABB(f32 pos_x, f32 pos_y, aabb hitbox, Color color)
+{
+	DrawRect(pos_x, pos_y, hitbox.max.x - hitbox.min.x, hitbox.max.y - hitbox.min.y, color);
+}
+
+#pragma endregion
+
 
 
 // MESHES

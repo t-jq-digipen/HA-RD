@@ -94,6 +94,12 @@ typedef struct aabb
 	AEVec2 max;
 } aabb;
 
+aabb Init_AABB(f32 pos_x, f32 pos_y, f32 width, f32 height);
+
+void Update_AABB(aabb* hitbox, f32 pos_x, f32 pos_y, f32 width, f32 height);
+
+void Draw_AABB(f32 pos_x, f32 pos_y, aabb hitbox, Color color);
+
 
 // Mesh
 // -------------------------------------------------
