@@ -1,10 +1,11 @@
 #include "Prototype_Boss.h"
 #include "player.h"
 #include "UI.h"
+#include <vector>
 
 Boss proto_monke;
 
-Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried;
+Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried, proto_projectile_indicator, proto_projectile_color;
 
 SpriteSheet ssproto_monke;
 
@@ -28,7 +29,14 @@ const float PROTO_MONKE_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f };		// +0.4s		+1s
 
 const float PROTO_MONKE_STUN[ATTACK_TYPES] = { 0.f, 3.f };			//  0s			 3s
 
+const float PROTO_PROJECTILE_RADIUS = 30.f;
+const float PROTO_PROJECTILE_DAMAGE = 20.f;
+const float PROTO_PROJECTILE_SPEED = 500.f;
+
 Boss_Melee proto_melee[ATTACK_TYPES];
+
+Boss_Range proto_proj;
+std::vector<Boss_Range> proto_projectiles;
 
 
 void Init_Prototype_Indicator()
@@ -38,6 +46,8 @@ void Init_Prototype_Indicator()
 	proto_swing = SetColor(0xFFAFFF61);
 	proto_stunned = SetColor(0xFF000000);
 	proto_parried = SetColor(0xFFFF00FF);
+	proto_projectile_indicator = SetColor(0xFFFF0000);
+	proto_projectile_color = SetColor(0xFFFF13F0);
 }
 
 void Load_Prototype_Boss()
@@ -64,6 +74,11 @@ void Init_Prototype_Boss()
 	proto_monke.stun_timer = Create_Timer(3.f);
 
 	proto_monke.attack_type = MONKE_SMASH;
+
+	proto_monke.range_warning_timer = Create_Timer(1.f);
+	proto_monke.range_timer = Create_Timer(3.f);
+	proto_monke.isShootingWarningActive = 0;
+	proto_monke.isShooting = 0;
 
 	for (int i = 0; i < ATTACK_TYPES; i++)
 	{
@@ -138,8 +153,66 @@ void Update_Prototype_Boss()
 			}
 		}
 
+		// Update boss projectiles' behavior
+
+		for (auto& proto_proj : proto_projectiles)
+		{
+			if (proto_proj.active)
+			{
+				// Update boss projectiles' movement
+				proto_proj.pos.x += proto_proj.velocity.x * dt;
+				proto_proj.pos.y += proto_proj.velocity.y * dt;
+				proto_proj.timer.current += 1.f * dt;
+
+				// Update boss projectiles' transformation
+				AEMtx33 trans, scale;
+				AEMtx33Trans(&trans, proto_proj.pos.x, proto_proj.pos.y);
+				AEMtx33Scale(&scale, PROTO_PROJECTILE_RADIUS, PROTO_PROJECTILE_RADIUS);
+				AEMtx33Concat(&proto_proj.transform, &trans, &scale);
+
+				// Deactivate projectiles after they hit player or after 4 seconds (aka range)
+				if (AETestCircleToCircle(&proto_proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius) || proto_proj.timer.current >= proto_proj.timer.duration)
+				{
+					proto_proj.active = false;
+					if (AETestCircleToCircle(&proto_proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius))
+					{
+						player.state = HIT;
+						player.hittimer.current = 0.f;
+						player.hp -= PROTO_PROJECTILE_DAMAGE;
+					}
+				}
+			}
+		}
+
+		// Remove inactive boss projectiles
+		proto_projectiles.erase(std::remove_if(proto_projectiles.begin(), proto_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), proto_projectiles.end());
+
 
 		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
+		if (proto_monke.hp > 0.f && proto_monke.hp <= 60.f)
+		{
+			std::cout << proto_monke.range_timer.current << '\n';
+			if (!Update_Timer(&proto_monke.range_timer))
+			{
+				proto_monke.isShooting = 1;
+				proto_monke.range_timer.current = proto_monke.range_warning_timer.current = 0.f;
+				proto_monke.isShootingWarningActive = 1;
+			}
+
+			if (proto_monke.isShooting == 1) 
+			{
+				proto_monke.isShootingWarningActive = 1;
+				std::cout << "Boss is shooting!!!" << '\n';
+				if (!Update_Timer(&proto_monke.range_warning_timer))
+				{
+					proto_monke.isShootingWarningActive = 0;
+					AEVec2 direction = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
+					AEVec2Normalize(&direction, &direction);
+					Proto_Monke_Range_Attack(proto_monke.pos, direction);
+					proto_monke.isShooting = 0;
+				}
+			}
+		}
 		if (proto_monke.hp <= 0.f)
 		{
 			proto_monke.state = BOSS_DEAD;
@@ -240,6 +313,22 @@ void Draw_Prototype_Boss()
 		Loop_Timer(&ssproto_monke.timer);
 		Set_SpriteSheet_current(&ssproto_monke, 0, 0, 8, ssproto_monke.timer, ssproto_monke.timer.duration);
 		break;
+	}
+
+	// Ranged attack warning indicator
+	if (proto_monke.isShootingWarningActive) 
+	{
+		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), PROTO_PROJECTILE_RADIUS, proto_projectile_indicator);
+		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), (proto_monke.range_warning_timer.current / proto_monke.range_warning_timer.duration) * PROTO_PROJECTILE_RADIUS, proto_projectile_color);
+	}
+
+	// Ranged attack projectiles
+	for (const auto& proj : proto_projectiles)
+	{
+		if (proj.active)
+		{
+			DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, proto_projectile_color); // Example projectile size and color
+		}
 	}
 
 	Draw_AABB(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.hitbox, SetColor(0x30FFFFFF));
@@ -398,6 +487,16 @@ void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
 		player.hittimer.current = 0.f;
 		player.hp -= boss_damage;
 	}
+}
+
+void Proto_Monke_Range_Attack(const AEVec2& start, const AEVec2& direction)
+{
+	proto_proj.pos = start;
+	proto_proj.velocity = { direction.x * PROTO_PROJECTILE_SPEED, direction.y * PROTO_PROJECTILE_SPEED };
+	proto_proj.active = true;
+	proto_proj.timer = Create_Timer(4.f);
+	AEMtx33Identity(&proto_proj.transform);
+	proto_projectiles.push_back(proto_proj);
 }
 
 //void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)
