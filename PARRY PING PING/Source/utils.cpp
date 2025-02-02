@@ -21,7 +21,7 @@ AEGfxVertexList* ImgBaseMesh;
 
 // for dt and time slow
 f32 dt;
-const f32 BULLET_TIME = 0.9f;
+const f32 BULLET_TIME = 0.3f;
 Timer bullet_time = { 1.f,1.f,1.f };
 
 void Get_DT()
