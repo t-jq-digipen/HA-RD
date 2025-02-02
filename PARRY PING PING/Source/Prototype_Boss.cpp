@@ -170,26 +170,27 @@ void Update_Prototype_Boss()
 
 		// Update boss projectiles' behavior
 
-		for (auto& proto_proj : proto_projectiles)
+
+		for (auto& proj : proto_projectiles)
 		{
-			if (proto_proj.active)
+			if (proj.active)
 			{
 				// Update boss projectiles' movement
-				proto_proj.pos.x += proto_proj.velocity.x * dt;
-				proto_proj.pos.y += proto_proj.velocity.y * dt;
-				proto_proj.timer.current += 1.f * dt;
+				proj.pos.x += proj.velocity.x * dt;
+				proj.pos.y += proj.velocity.y * dt;
+				proj.timer.current += 1.f * dt;
 
 				// Update boss projectiles' transformation
 				AEMtx33 trans, scale;
-				AEMtx33Trans(&trans, proto_proj.pos.x, proto_proj.pos.y);
+				AEMtx33Trans(&trans, proj.pos.x, proj.pos.y);
 				AEMtx33Scale(&scale, PROTO_PROJECTILE_RADIUS, PROTO_PROJECTILE_RADIUS);
-				AEMtx33Concat(&proto_proj.transform, &trans, &scale);
+				AEMtx33Concat(&proj.transform, &trans, &scale);
 
 				// Deactivate projectiles after they hit player or after 4 seconds (aka range)
-				if (AETestCircleToCircle(&proto_proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius) || proto_proj.timer.current >= proto_proj.timer.duration)
+				if (AETestCircleToCircle(&proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius) || proj.timer.current >= proj.timer.duration)
 				{
-					proto_proj.active = false;
-					if (AETestCircleToCircle(&proto_proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius))
+					proj.active = false;
+					if (AETestCircleToCircle(&proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius))
 					{
 						switch (player.state)
 						{
@@ -220,7 +221,7 @@ void Update_Prototype_Boss()
 
 		// Clamp HP to prevent over-reduction
 		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
-		if (proto_monke.hp > 0.f && proto_monke.hp <= 60.f)
+		if (proto_monke.hp > 0.f && proto_monke.hp <= 0.6 * PROTO_MONKE_MAXHP)
 		{
 			std::cout << proto_monke.range_timer.current << '\n';
 			if (!Update_Timer(&proto_monke.range_timer))
