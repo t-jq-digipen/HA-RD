@@ -221,7 +221,7 @@ void Update_Prototype_Boss()
 
 		// Clamp HP to prevent over-reduction
 		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
-		if (proto_monke.hp > 0.f && proto_monke.hp <= 0.6 * PROTO_MONKE_MAXHP)
+		if (proto_monke.hp > 0.f && proto_monke.hp <= 0.6 * PROTO_MONKE_MAXHP && proto_monke.state != BOSS_PARRIED)
 		{
 			std::cout << proto_monke.range_timer.current << '\n';
 			if (!Update_Timer(&proto_monke.range_timer))
@@ -240,6 +240,7 @@ void Update_Prototype_Boss()
 					proto_monke.isShootingWarningActive = 0;
 					AEVec2 direction = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
 					AEVec2Normalize(&direction, &direction);
+
 					Proto_Monke_Range_Attack(proto_monke.pos, direction);
 					proto_monke.isShooting = 0;
 				}
@@ -365,7 +366,7 @@ void Draw_Prototype_Boss()
 		}
 	}
 
-	Draw_AABB(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.hitbox, SetColor(0x30FFFFFF));
+	//Draw_AABB(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.hitbox, SetColor(0x30FFFFFF));
 	//DrawRect(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, SetColor(0x30FFFFFF));
 	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
 }
