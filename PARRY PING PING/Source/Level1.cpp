@@ -81,6 +81,11 @@ void Level1_Update()
 	// Delta time
 	Get_DT();
 
+	if (AEInputCheckTriggered(AEVK_B))
+	{
+		nextState = GS_RESTART;
+	}
+
 	if (levelState == PLAYING)
 	{
 		std::cout << "Playing\n";
