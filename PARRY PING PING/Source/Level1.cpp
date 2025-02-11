@@ -29,6 +29,9 @@ f32 StunCounter{ 0.f };
 
 int dummy_check;
 
+Timer cleartransitiontimer;
+float levelTimer;
+
 void Level1_Load()
 {
 	Load_Player();
@@ -74,6 +77,13 @@ void Level1_Initialize()
 	//JQMonke
 	JQMonke_pos = { -300.f, 200.f };
 	JQMonke_rad = 50.f;
+
+	// Incrementing Level Timer
+	levelTimer = 0.f;
+
+	// Level Clear Transition Timer
+	cleartransitiontimer = Create_Timer(5.f);
+	cleartransitiontimer.current = 0;
 }
 
 void Level1_Update()
@@ -86,19 +96,25 @@ void Level1_Update()
 		nextState = GS_RESTART;
 	}
 
-	if (levelState == PLAYING)
+	if (levelState != PAUSED && levelState != GAMEOVER)
 	{
 		std::cout << "Playing\n";
 		// Boss behavior
 		Update_Boss1();
 
-	// Proto boss
-	Update_Prototype_Boss();
+		// Proto boss
+		Update_Prototype_Boss();
 
-	// Player WASD Movement
-	Update_Player();
+		// Player WASD Movement
+		Update_Player();
 
 		dummy_check = Attacked_Melee(dummy_pos);
+
+		// Incrementing level timer
+		if (levelState != CLEARED)
+		{
+			Update_LevelTimer(&levelTimer, dt);
+		}
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
@@ -109,7 +125,6 @@ void Level1_Update()
 	{
 		levelState = PLAYING;
 	}
-
 }
 
 void Level1_Draw()
@@ -143,11 +158,24 @@ void Level1_Draw()
 	// UI
 	Draw_UI();
 
+	// Level Timer
+	Draw_LevelTimer(levelTimer);
+
 	if (levelState == PAUSED)
 	{
 		Draw_PauseMenu();
 	}
-
+	else if (levelState == GAMEOVER)
+	{
+		Draw_GameOverMenu();
+	}
+	else if (levelState == CLEARED)
+	{
+		if (!Update_Timer(&cleartransitiontimer))
+		{
+			Draw_ClearMenu();
+		}
+	}
 }
 
 void Level1_Free()

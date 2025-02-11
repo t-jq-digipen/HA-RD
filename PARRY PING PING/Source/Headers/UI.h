@@ -15,9 +15,13 @@ enum LEVEL_STATE
 {
 	PLAYING = 0,
 	PAUSED,
+	GAMEOVER,
+	CLEARED
 };
 
 extern int levelState;
+
+
 
 void Draw_UI();
 
@@ -32,6 +36,14 @@ void Init_Boss_UI(float hp);
 
 void Update_Boss_UI(float hp);
 
-void Draw_Boss1HP();
+void Update_LevelTimer(float *time_elapsed, float dt);
+
+//void Draw_Boss1HP(float time_elapsed);
 
 void Draw_PauseMenu();
+
+void Draw_GameOverMenu();
+
+void Draw_ClearMenu();
+
+void Draw_LevelTimer(float time_elapsed);

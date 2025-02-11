@@ -28,7 +28,7 @@ float UI_bosshp, UI_bossmaxhp;
 Color play_bg, pause_bg, pause_screen;
 Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
-
+char level_timer[16];
 
 // will neaten when more player parameters are finalized
 void Init_UI()
@@ -209,6 +209,109 @@ void Draw_PauseMenu()
 	}
 }
 
+void Draw_ClearMenu()
+{
+	// Get mouse position coordinates
+	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
+	DrawTextBox(-0.5f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "YOU WIN!!!");
+
+	// play button (click to go to Level1 state)
+	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Play\n";
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "REPLAY");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			nextState = GS_RESTART;
+		}
+	}
+	else
+	{
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
+		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "REPLAY");
+	}
+
+	// exit button (click to go to quit state)
+	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Exit\n";
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			nextState = GS_QUIT;
+		}
+	}
+	else
+	{
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
+		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+	}
+}
+
+void Draw_GameOverMenu()
+{
+	// Get mouse position coordinates
+	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
+	DrawTextBox(-0.5f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "GAME OVER");
+
+	// play button (click to go to Level1 state)
+	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Play\n";
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "REPLAY");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			nextState = GS_RESTART;
+		}
+	}
+	else
+	{
+		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
+		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "REPLAY");
+	}
+
+	// exit button (click to go to quit state)
+	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		std::cout << "Click Exit\n";
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
+		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			nextState = GS_QUIT;
+		}
+	}
+	else
+	{
+		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
+		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+	}
+}
+
+void Update_LevelTimer(float *time_elapsed, float dt)
+{
+	*time_elapsed += dt;
+}
+
+void Draw_LevelTimer(float time_elapsed)
+{
+	int minutes = static_cast<int>(time_elapsed) / 60;
+	int seconds = static_cast<int>(time_elapsed) % 60;
+	int milliseconds = static_cast<int>((time_elapsed - static_cast<int>(time_elapsed)) * 100);
+
+	snprintf(level_timer, sizeof(level_timer), "%02d:%02d:%02d", minutes, seconds, milliseconds);
+
+	DrawTextBox(0.5f, -0.9f, 200.f, 100.f, 1.f, UI_font, UI_black, level_timer);
+}
 
 // draw full hp bar
 // pos_x1, pos_y1 - position of top left corner
