@@ -25,6 +25,22 @@ typedef enum JQMonkeAttackPatternState
 	JQParried = 6		//if parried during sweep
 }JQMonkeAttackPatternState;
 
+typedef struct DummyBotMelee
+{
+	AEVec2 pos;
+	f32 rad;
+	f32 hp, max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
+	EnemyAttackPatternState state;
+
+	aabb hitbox;
+
+	Timer idle_timer, windup_timer, attack_timer, stun_timer;
+}DummyBotMelee;
+
+//WIP I GONNA DO THIS TMR!!!!
+void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 hp, f32 max_hp);
+void Active_DummyBotMelee();
+
 
 
 //Dummy attack pattern
