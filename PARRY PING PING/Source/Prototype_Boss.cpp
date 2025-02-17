@@ -23,6 +23,11 @@ const float PROTO_MONKE_HITBOX_HEIGHT = 300.f;
 
 const float PROTO_MONKE_MAXHP = 200.f;
 
+// DASH
+const float PROTO_MONKE_DASH_SPEED = 1000.f;
+const float PROTO_MONKE_DASH_DISTANCE = 300.f;
+const float PROTO_MONKE_DASH_DURATION = 1.f;
+const float PROTO_MONKE_DASH_COOLDOWN = 3.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
 const int ATTACK_TYPES = 2;											//  1			 2
@@ -57,6 +62,8 @@ void Init_Prototype_Indicator()
 	proto_projectile_indicator = SetColor(0xFFFF0000);
 	proto_projectile_color = SetColor(0xFFFF13F0);
 	proto_death_explosion_color = SetColor(0xFFED6240);
+	proto_monke.dash_timer = Create_Timer(PROTO_MONKE_DASH_DURATION);
+	proto_monke.dash_cooldown_timer = Create_Timer(PROTO_MONKE_DASH_COOLDOWN);
 }
 
 void Load_Prototype_Boss()
@@ -125,14 +132,27 @@ void Update_Prototype_Boss()
 		switch (proto_monke.state)
 		{
 		case BOSS_IDLE:
-			if (Update_Timer(&proto_monke.idle_timer))
+			if (!Update_Timer(&proto_monke.idle_timer))
 			{
-				// Implement walk to above player
-			}
-			else
-			{
-				proto_monke.attack_timer.current = 0.f;
-				proto_monke.state = BOSS_ATTACK;
+				if(!Update_Timer(&proto_monke.dash_cooldown_timer))
+				{
+					// Check if player is within dash distance
+					float distance_to_player = AEVec2Distance(&proto_monke.pos, &player.pos);
+					if (distance_to_player > PROTO_MONKE_DASH_DISTANCE)
+					{
+						proto_monke.state = BOSS_DASH;
+						proto_monke.dash_timer.current = 0.f;
+						// Calculate direction to player
+						proto_monke.target_pos = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
+						AEVec2Normalize(&proto_monke.target_pos, &proto_monke.target_pos);
+					}
+					else
+					{
+						proto_monke.attack_timer.current = 0.f;
+						proto_monke.state = BOSS_ATTACK;
+					}
+				}
+				
 			}
 			break;
 		case BOSS_ATTACK:
@@ -142,6 +162,31 @@ void Update_Prototype_Boss()
 			if (!Update_Timer(&proto_monke.stun_timer))
 			{
 				proto_monke.state = BOSS_IDLE;
+			}
+			break;
+		case BOSS_DASH:
+			if (Update_Timer(&proto_monke.dash_timer))
+			{
+				std::cout << proto_monke.dash_timer.current<<'\n';
+				float distance_to_player = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
+				//// Calculate direction to player
+				//proto_monke.target_pos = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
+				//AEVec2Normalize(&proto_monke.target_pos, &proto_monke.target_pos);
+
+				// Move boss towards player
+				proto_monke.pos.x += proto_monke.target_pos.x * PROTO_MONKE_DASH_SPEED * dt;
+				proto_monke.pos.y += proto_monke.target_pos.y * PROTO_MONKE_DASH_SPEED * dt;
+
+				// Check if dash duration is over
+				/*if (proto_monke.pos.x == proto_monke.target_pos.x && proto_monke.pos.y == proto_monke.target_pos.y) 
+				{
+					proto_monke.state = BOSS_IDLE;
+				}*/
+				if (proto_monke.dash_timer.current >= proto_monke.dash_timer.duration || (distance_to_player<50.f))
+				{
+					proto_monke.state = BOSS_ATTACK;
+					proto_monke.dash_cooldown_timer.current = 0.f;
+				}
 			}
 			break;
 		default:
@@ -299,6 +344,9 @@ void Draw_Prototype_Boss()
 	case BOSS_PARRIED:
 		color = &proto_parried;
 		break;
+	case BOSS_DASH:
+		color = &proto_windup; // Use windup color for dash
+		break;
 	case BOSS_IDLE:
 	default:
 		color = &proto_idle;
@@ -421,11 +469,11 @@ void Unload_Prototype_Boss()
 
 
 
-const float SMASH_RADIUS = 80.f;
+const float SMASH_RADIUS = 200.f;
 const float SMASH_DAMAGE = 30.f;
 
-const float SWEEP_WIDTH = 400.f;
-const float SWEEP_HEIGHT = 150.f;
+const float SWEEP_WIDTH = 500.f;
+const float SWEEP_HEIGHT = 500.f;
 
 f32 x_offset = 0.f;
 
@@ -437,7 +485,15 @@ void Prototype_Boss_Attack()
 	{
 		std::cout << "timer.current : " << proto_monke.attack_timer.current << '\n';
 		std::cout << "attack_type " << proto_monke.attack_type << " | windup = " << proto_melee[proto_monke.attack_type].attack_windup << ", active = " << proto_melee[proto_monke.attack_type].attack_active << ", recover = " << proto_melee[proto_monke.attack_type].attack_recover << '\n';
-		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
+		if (proto_monke.state == BOSS_DASH)
+		{
+			if (AETestCircleToCircle(&proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, &player.pos, player.radius))
+			{
+				// Player takes damage if hit by dash
+				Proto_Monke_Attack_Test(false, 30.f); // Assuming dash cannot be parried
+			}
+		}
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
 		{
 			will_hit = true;
 			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
@@ -533,6 +589,7 @@ void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
 			proto_monke.stun_timer.duration = proto_melee[proto_monke.attack_type].stun_duration;
 			proto_monke.state = BOSS_PARRIED;
 			proto_monke.attack_type = 0;
+			proto_monke.dash_cooldown_timer.current = 0.f; // Reset dash cooldown
 			bullet_time.current = 0.f;
 			std::cout << "genna parried\n";
 		}

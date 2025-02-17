@@ -6,6 +6,7 @@ typedef enum Boss_State
 	BOSS_IDLE,
 	BOSS_ATTACK,
 	BOSS_PARRIED,
+	BOSS_DASH,
 	BOSS_DEAD,
 } Boss_State;
 
@@ -25,6 +26,7 @@ typedef enum Boss_AttackType
 typedef struct Boss
 {
 	AEVec2 pos;
+	AEVec2 target_pos;
 	f32 width, height;
 	f32 hp, max_hp;
 	Boss_State state;
@@ -35,6 +37,9 @@ typedef struct Boss
 	Timer idle_timer;
 	Timer attack_timer;
 	Timer stun_timer;
+
+	Timer dash_timer;
+	Timer dash_cooldown_timer;
 
 	Timer range_warning_timer;
 	Timer range_timer;
