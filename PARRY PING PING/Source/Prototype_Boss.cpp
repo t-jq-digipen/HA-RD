@@ -167,21 +167,13 @@ void Update_Prototype_Boss()
 		case BOSS_DASH:
 			if (Update_Timer(&proto_monke.dash_timer))
 			{
-				std::cout << proto_monke.dash_timer.current<<'\n';
 				float distance_to_player = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
-				//// Calculate direction to player
-				//proto_monke.target_pos = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
-				//AEVec2Normalize(&proto_monke.target_pos, &proto_monke.target_pos);
 
 				// Move boss towards player
 				proto_monke.pos.x += proto_monke.target_pos.x * PROTO_MONKE_DASH_SPEED * dt;
 				proto_monke.pos.y += proto_monke.target_pos.y * PROTO_MONKE_DASH_SPEED * dt;
 
 				// Check if dash duration is over
-				/*if (proto_monke.pos.x == proto_monke.target_pos.x && proto_monke.pos.y == proto_monke.target_pos.y) 
-				{
-					proto_monke.state = BOSS_IDLE;
-				}*/
 				if (proto_monke.dash_timer.current >= proto_monke.dash_timer.duration || (distance_to_player<50.f))
 				{
 					proto_monke.state = BOSS_ATTACK;
