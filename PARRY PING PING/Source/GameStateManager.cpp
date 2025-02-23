@@ -12,6 +12,7 @@
 #include "GameStateManager.h"
 #include "MainMenu.h"
 #include "Level1.h"
+#include "HubWorld.h"
 
 int currentState = 0, previousState = 0, nextState = 0;
 
@@ -41,6 +42,14 @@ void GSM_Update()
 		fpDraw = Level1_Draw;
 		fpFree = Level1_Free;
 		fpUnload = Level1_Unload;
+		break;
+	case GS_HUBWORLD:
+		fpLoad = HubWorld_Load;
+		fpInitialize = HubWorld_Initialize;
+		fpUpdate = HubWorld_Update;
+		fpDraw = HubWorld_Draw;
+		fpFree = HubWorld_Free;
+		fpUnload = HubWorld_Unload;
 		break;
 	case GS_RESTART:
 		break;

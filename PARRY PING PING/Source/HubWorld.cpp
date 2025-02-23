@@ -3,21 +3,20 @@
 // author:	ASHFER
 // email:	m.binafzalkhan@digipen.edu
 //
-// brief:	Declaration of Hub World functions
+// brief:	Implementation of Hub World functions
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"
 #include "player.h"
 #include "Enemies.h"
 #include "HubWorld.h"
-#include "Boss1.h"
-#include "Prototype_Boss.h"
 #include "GameStateManager.h"
 
-AEVec2 dummy_pos;
-f32 dummy_rad;
+//removable in future implementations! for parry bot stats
+AEVec2 dummy_pos{};
+f32 dummy_rad{}, CurrHealth{}, MaxHealth{};
 
 Timer enemyattacktimer;
 Timer stunnedtimer;
@@ -53,29 +52,20 @@ void HubWorld_Initialize()
 
 	Init_Enemy_Indicator();
 
+	Init_DummyBotMelee(dummy_pos, dummy_rad, CurrHealth, MaxHealth);
+
 	// Enemy Attack Timer
 	enemyattacktimer = Create_Timer(1.f);
 	stunnedtimer = Create_Timer(2.f);
 	stunnedtimer.current = 0;
 
-	// Boss
-	Init_Boss1();
-
 	// UI
 	Init_UI();
-
-	// Proto boss
-	Init_Prototype_Boss();
-	Init_Prototype_Indicator();
 
 	// Dummy enemy
 	dummy_pos = { 300.f, 200.f };
 	dummy_rad = 25.f;
 	dummy_check = 0;
-
-	//JQMonke
-	JQMonke_pos = { -300.f, 200.f };
-	JQMonke_rad = 50.f;
 
 	// Incrementing Level Timer
 	levelTimer = 0.f;
@@ -98,11 +88,6 @@ void HubWorld_Update()
 	if (levelState != PAUSED && levelState != GAMEOVER)
 	{
 		std::cout << "Playing\n";
-		// Boss behavior
-		Update_Boss1();
-
-		// Proto boss
-		Update_Prototype_Boss();
 
 		// Player WASD Movement
 		Update_Player();
@@ -139,13 +124,14 @@ void HubWorld_Draw()
 	//EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
 	//Loop_Timer(&parryTimer);
 
-	// Proto boss
-	Draw_Prototype_Boss();
-
 	// Player
 	Draw_Player();
 
+	// Boss HP
+	//Draw_Boss1HP();
+
 	// UI
+	//maybe remove? can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool woowooowowowoowowoowooowooooyeaaaaa
 	Draw_UI();
 
 	// Level Timer
@@ -177,6 +163,5 @@ void HubWorld_Unload()
 {
 	Unload_Mesh();
 	Unload_Player();
-	Unload_Prototype_Boss();
 	std::cout << "HubWorld_unload";
 }

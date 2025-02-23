@@ -56,6 +56,11 @@ void MainMenu_Update()
 		nextState = GS_QUIT;
 	}
 
+	//temp testing for hub world
+	if (AEInputCheckTriggered(AEVK_H)) {
+		nextState = GS_HUBWORLD;
+	}
+
 	// game title
 	DrawTextBox(-0.3f, 0.5f, width, 200.f, 3.f, pFont, red, "HARD");
 
