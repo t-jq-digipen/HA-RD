@@ -3,6 +3,8 @@
 
 Color idle, windup, swing, stunned, parried;
 
+DummyBotMelee MParryBot;
+
 //timer for each state: idle, windup, swing, parry stun duration
 const float PARRY_STUN[4] = { 
 	1.f,	//idle
@@ -19,6 +21,38 @@ const float JQMonke[7] = {
 	1.f,	//recovery before going back to idle
 	3.f		//if parried during sweep
 };
+
+void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
+	MParryBot.pos = pos;
+	MParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
+	MParryBot.hp = max_hp;
+	MParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
+	MParryBot.state = Idle;
+
+	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
+
+	MParryBot.idle_timer = Create_Timer(2); 
+	MParryBot.windup_timer = Create_Timer(2);
+	MParryBot.attack_timer = Create_Timer(2);
+	MParryBot.stun_timer = Create_Timer(2);
+}
+
+void Active_DummyBotMelee() {
+	switch (MParryBot.state) 
+	{
+	case Idle:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, idle);
+		break;
+	case WindUp:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, windup);
+		break;
+	case Swinging:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, swing);
+		//can check for parry collision here w square below reee
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y) - 100.f, 100.f, 100.f, windup);
+		break;
+	}
+}
 
 void Init_Enemy_Indicator()
 {

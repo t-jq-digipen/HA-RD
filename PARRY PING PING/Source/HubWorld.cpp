@@ -52,7 +52,7 @@ void HubWorld_Initialize()
 
 	Init_Enemy_Indicator();
 
-	Init_DummyBotMelee(dummy_pos, dummy_rad, CurrHealth, MaxHealth);
+	Init_DummyBotMelee(dummy_pos, dummy_rad, MaxHealth);
 
 	// Enemy Attack Timer
 	enemyattacktimer = Create_Timer(1.f);

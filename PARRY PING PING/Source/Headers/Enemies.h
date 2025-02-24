@@ -38,7 +38,7 @@ typedef struct DummyBotMelee
 }DummyBotMelee;
 
 //WIP I GONNA DO THIS TMR!!!!
-void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 hp, f32 max_hp);
+void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotMelee();
 
 
