@@ -15,20 +15,20 @@
 #include "GameStateManager.h"
 
 //removable in future implementations! for parry bot stats
-AEVec2 dummy_pos{};
-f32 dummy_rad{}, CurrHealth{}, MaxHealth{};
+AEVec2 DummyMelee_pos{};
+f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{};
 
-Timer enemyattacktimer;
-Timer stunnedtimer;
+Timer DummyMelee_AttackTimer;
+Timer DummyMelee_StunTimer;
 
 //to be moved into enemy struct btw!
-int counter{};
-f32 StunCounter{ 0.f };
+int DummyMelee_Counter{};
+f32 StunDummyMelee_Counter{ 0.f };
 
-int dummy_check;
+int DummyMelee_Check;
 
-Timer cleartransitiontimer;
-float levelTimer;
+Timer HubWorld_ClearTransitionTimer;
+float HubWorld_LevelTimer;
 
 void HubWorld_Load()
 {
@@ -44,6 +44,11 @@ void HubWorld_Initialize()
 {
 	std::cout << "Hub World Initialized\n";
 
+	// Dummy enemy
+	DummyMelee_pos = { 300.f, 200.f };
+	DummyMelee_rad = 50.f;
+	DummyMelee_Check = 0;
+
 	// Player
 	Init_Player();
 
@@ -52,27 +57,22 @@ void HubWorld_Initialize()
 
 	Init_Enemy_Indicator();
 
-	Init_DummyBotMelee(dummy_pos, dummy_rad, MaxHealth);
+	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);
 
 	// Enemy Attack Timer
-	enemyattacktimer = Create_Timer(1.f);
-	stunnedtimer = Create_Timer(2.f);
-	stunnedtimer.current = 0;
+	DummyMelee_AttackTimer = Create_Timer(1.f);
+	DummyMelee_StunTimer = Create_Timer(2.f);
+	DummyMelee_StunTimer.current = 0;
 
 	// UI
 	Init_UI();
 
-	// Dummy enemy
-	dummy_pos = { 300.f, 200.f };
-	dummy_rad = 25.f;
-	dummy_check = 0;
-
 	// Incrementing Level Timer
-	levelTimer = 0.f;
+	HubWorld_LevelTimer = 0.f;
 
 	// Level Clear Transition Timer
-	cleartransitiontimer = Create_Timer(5.f);
-	cleartransitiontimer.current = 0;
+	HubWorld_ClearTransitionTimer = Create_Timer(5.f);
+	HubWorld_ClearTransitionTimer.current = 0;
 }
 
 void HubWorld_Update()
@@ -92,12 +92,13 @@ void HubWorld_Update()
 		// Player WASD Movement
 		Update_Player();
 
-		dummy_check = Attacked_Melee(dummy_pos);
+		DummyMelee_Check = Attacked_Melee(DummyMelee_pos);
+		Active_DummyBotMelee();
 
 		// Incrementing level timer
 		if (levelState != CLEARED)
 		{
-			Update_LevelTimer(&levelTimer, dt);
+			Update_LevelTimer(&HubWorld_LevelTimer, dt);
 		}
 	}
 
@@ -119,9 +120,9 @@ void HubWorld_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Parryable dummy!
-	//EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
-	//Loop_Timer(&enemyattacktimer);
-	//EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
+	//EnemyAttackPattern(&DummyMelee_AttackTimer,&DummyMelee_StunTimer, &DummyMelee_Counter, DummyMelee_pos, DummyMelee_rad, &player);
+	//Loop_Timer(&DummyMelee_AttackTimer);
+	//EnemyAttackPattern(&parryTimer, &DummyMelee_Counter, &StunDummyMelee_Counter, DummyMelee_pos, DummyMelee_rad, player.pos, player.radius);
 	//Loop_Timer(&parryTimer);
 
 	// Player
@@ -135,7 +136,7 @@ void HubWorld_Draw()
 	Draw_UI();
 
 	// Level Timer
-	Draw_LevelTimer(levelTimer);
+	Draw_LevelTimer(HubWorld_LevelTimer);
 
 	if (levelState == PAUSED)
 	{
@@ -147,7 +148,7 @@ void HubWorld_Draw()
 	}
 	else if (levelState == CLEARED)
 	{
-		if (!Update_Timer(&cleartransitiontimer))
+		if (!Update_Timer(&HubWorld_ClearTransitionTimer))
 		{
 			Draw_ClearMenu();
 		}
