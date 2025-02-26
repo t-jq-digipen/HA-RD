@@ -32,7 +32,6 @@ typedef struct DummyBotMelee
 	f32 rad;
 	f32 hp, max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
 	EnemyAttackPatternState state;
-	int count;
 
 	aabb hitbox;
 

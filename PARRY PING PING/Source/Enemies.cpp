@@ -28,39 +28,49 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.hp = max_hp;
 	MParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
 	MParryBot.state = Idle;
-	MParryBot.count = 0;
 
 	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
 
-	MParryBot.idle_timer = Create_Timer(2); 
-	MParryBot.windup_timer = Create_Timer(2);
-	MParryBot.attack_timer = Create_Timer(2);
-	MParryBot.stun_timer = Create_Timer(2);
+	MParryBot.idle_timer = Create_Timer(1); 
+	MParryBot.windup_timer = Create_Timer(1);
+	MParryBot.attack_timer = Create_Timer(1);
+	MParryBot.stun_timer = Create_Timer(3);
 	MParryBot.respawn_timer = Create_Timer(3);
 }
 
 void Active_DummyBotMelee() {
 	std::cout << "state " << MParryBot.state << '\n';
-	std::cout << "count " << MParryBot.count << '\n';
 	if (MParryBot.state != Destroyed) {
 		//MParryBot.state = EnemyAttackPatternState(MParryBot.count);
 		switch (MParryBot.state)
 		{
 		case Idle:
 			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, idle);
-			if (!Update_Timer(&MParryBot.idle_timer)) {
+			if (Update_Timer(&MParryBot.idle_timer)) {
+				
+			}
+			else {
+				MParryBot.windup_timer.current = 0.f;
 				MParryBot.state = WindUp;
 			}
 			break;
 		case WindUp:
 			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, windup);
-			if (!Update_Timer(&MParryBot.windup_timer)) {
+			if (Update_Timer(&MParryBot.windup_timer)) {
+				
+			}
+			else {
+				MParryBot.attack_timer.current = 0.f;
 				MParryBot.state = Swinging;
 			}
 			break;
 		case Swinging:
 			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, swing);
-			if (!Update_Timer(&MParryBot.attack_timer)) {
+			if (Update_Timer(&MParryBot.attack_timer)) {
+
+			}
+			else {
+				MParryBot.idle_timer.current = 0.f;
 				MParryBot.state = Idle;
 			}
 			//can check for parry collision here w square below reee
@@ -76,7 +86,7 @@ void Active_DummyBotMelee() {
 	else {
 		//wait for timer to reset, play animation of respawn
 		if (!Update_Timer(&MParryBot.respawn_timer)) {
-			MParryBot.count = 0;
+			//
 		}
 	}
 }
