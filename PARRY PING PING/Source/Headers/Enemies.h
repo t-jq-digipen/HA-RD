@@ -39,6 +39,7 @@ typedef struct DummyBotMelee
 	}FacingDir;
 
 	aabb hitbox;
+	f32 hitboxWidth, hitboxHeight;
 
 	Timer idle_timer, windup_timer, attack_timer, stun_timer, respawn_timer;
 }DummyBotMelee;

@@ -16,7 +16,7 @@
 
 //removable in future implementations! for parry bot stats
 AEVec2 DummyMelee_pos{};
-f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{};
+f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{100.f};
 
 Timer DummyMelee_AttackTimer;
 Timer DummyMelee_StunTimer;

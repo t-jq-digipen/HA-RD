@@ -51,6 +51,8 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.state = Idle;
 
 	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
+	MParryBot.hitboxWidth = MParryBot.hitbox.max.x - MParryBot.hitbox.min.x;
+	MParryBot.hitboxHeight = MParryBot.hitbox.max.y - MParryBot.hitbox.min.y;
 
 	MParryBot.idle_timer = Create_Timer(1); 
 	MParryBot.windup_timer = Create_Timer(1);
@@ -59,10 +61,45 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.respawn_timer = Create_Timer(3);
 }
 
+int MParryBot_last_hit = 0;
+int MParryBot_new_hit = 0;
+
 void Active_DummyBotMelee() {
 	std::cout << "state " << MParryBot.state << '\n';
 	if (MParryBot.state != Destroyed) {
 		//MParryBot.state = EnemyAttackPatternState(MParryBot.count);
+		std::cout << MParryBot.hp << '\n';
+
+		// Reset last hit if no new melee hit detected
+		if (!MParryBot_new_hit)
+		{
+			MParryBot_last_hit = 0;
+		}
+
+		if (Attacked_Melee_rect(MParryBot.pos, MParryBot.hitboxWidth, MParryBot.hitboxHeight, &MParryBot_new_hit, &MParryBot.damage))
+		{
+			if (MParryBot_last_hit != MParryBot_new_hit)
+			{
+				if (player.ammo < 3)
+				{
+					player.ammo++;
+				}
+				MParryBot.hp -= MParryBot.damage;
+				MParryBot_last_hit = MParryBot_new_hit;
+			}
+		}
+
+		if (Attacking_Ranged_Impact(MParryBot.pos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, &MParryBot.damage))
+		{
+			MParryBot.hp -= MParryBot.damage;
+		}
+
+
+		if (MParryBot.hp <= 0) {
+			MParryBot.respawn_timer.current = 0.f;
+			MParryBot.state = Destroyed;
+		}
+
 		switch (MParryBot.state)
 		{
 		case Idle:
@@ -114,7 +151,8 @@ void Active_DummyBotMelee() {
 			//timer has not ended
 		}
 		else {
-			MParryBot.respawn_timer.current = 0.f;
+			MParryBot.idle_timer.current = 0.f;
+			MParryBot.hp = MParryBot.max_hp;
 			MParryBot.state = Idle;
 		}
 	}
@@ -128,7 +166,6 @@ void Attack_DummyBotMelee() {
 			//stun logic
 			MParryBot.stun_timer.current = 0.f;
 			MParryBot.state = Parried;
-			std::cout << "CB FUC UUUU LAAAAAA KENA parried\n";
 			break;
 		case BLOCK:
 			Blocked_Hit(MParryBot.damage);
@@ -154,37 +191,38 @@ void Init_Enemy_Indicator()
 	color_parried = SetColor(0xFFFF00FF);
 }
 
-//outdated code, can probs remove!
-void Test_Funct(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad )
-{
-	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };
-	switch (*counter)
-	{
-	case Idle:
-		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_idle);
-		break;
-	case WindUp:
-		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_windup);
-		if (ParryTimer->current >= PARRY_STUN[WindUp] - 0.5f) {
-			//temp parry eye spark/ flash effect. Replace with proper sprite later (and add audio!)
-			DrawRect(World_To_Screen_x(EnemyPos.x) - 10.f, World_To_Screen_y(EnemyPos.y), 10.f, 10.f, color_idle);
-		}
-		break;
-	case Swinging:
-		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_swing);
-		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y) - 75.f, HitBoxRad*2, color_parried);
-		//To be replaced with player's attack
-		if (AETestCircleToCircle(&TempHitbox, HitBoxRad * 2, &PlayerPos, PlayerRad)) {
-			std::cout << "!!!!!PARRYABLE!!!!!\n";
-			*counter = Parried;
-		}
-		break;
-	case Parried:
-		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_parried);
-		std::cout << "ahhhhhh cb i kena parried\n";
-		break;
-	}
-}
+////outdated code, can probs remove!
+//void Test_Funct(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad )
+//{
+//	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };
+//
+//	switch (*counter)
+//	{
+//	case Idle:
+//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_idle);
+//		break;
+//	case WindUp:
+//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_windup);
+//		if (ParryTimer->current >= PARRY_STUN[WindUp] - 0.5f) {
+//			//temp parry eye spark/ flash effect. Replace with proper sprite later (and add audio!)
+//			DrawRect(World_To_Screen_x(EnemyPos.x) - 10.f, World_To_Screen_y(EnemyPos.y), 10.f, 10.f, color_idle);
+//		}
+//		break;
+//	case Swinging:
+//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_swing);
+//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y) - 75.f, HitBoxRad*2, color_parried);
+//		//To be replaced with player's attack
+//		if (AETestCircleToCircle(&TempHitbox, HitBoxRad * 2, &PlayerPos, PlayerRad)) {
+//			std::cout << "!!!!!PARRYABLE!!!!!\n";
+//			*counter = Parried;
+//		}
+//		break;
+//	case Parried:
+//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_parried);
+//		std::cout << "ahhhhhh cb i kena parried\n";
+//		break;
+//	}
+//}
 
 void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)
 {
