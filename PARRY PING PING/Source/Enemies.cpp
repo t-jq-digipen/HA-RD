@@ -24,9 +24,30 @@ const float JQMonke[7] = {
 
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.pos = pos;
+	MParryBot.FacingDir = MParryBot.FacingDown;								//Init here which dir bot should face!!!
+	switch (MParryBot.FacingDir) {
+		case MParryBot.FacingLeft:
+			MParryBot.attackpos = AEVec2{ pos.x - 100, pos.y };
+			break;
+		case MParryBot.FacingRight:
+			MParryBot.attackpos = AEVec2{ pos.x + 100, pos.y };
+			break;
+		case MParryBot.FacingUp:
+			MParryBot.attackpos = AEVec2{ pos.x + 0, pos.y + 100.f };
+			break;
+		case MParryBot.FacingDown:
+			MParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 100.f };
+			break;
+		default:
+			MParryBot.attackpos = AEVec2{pos.x + 0, pos.y - 100.f};
+			break;
+	}
 	MParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
 	MParryBot.hp = max_hp;
 	MParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
+	MParryBot.damage = 10.f;
+	MParryBot.AttackHitboxWidth = 150.f;
+	MParryBot.AttackHitboxHeight = 75.f;
 	MParryBot.state = Idle;
 
 	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
@@ -66,6 +87,7 @@ void Active_DummyBotMelee() {
 			break;
 		case Swinging:
 			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);
+			Attack_DummyBotMelee();
 			if (Update_Timer(&MParryBot.attack_timer)) {
 				//timer has not ended
 			}
@@ -73,11 +95,14 @@ void Active_DummyBotMelee() {
 				MParryBot.idle_timer.current = 0.f;
 				MParryBot.state = Idle;
 			}
-			//CHECK FOR PARRY HERE!!!
-			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y) - 100.f, 100.f, 100.f, color_windup);
 			break;
 		case Parried:
-			if (!Update_Timer(&MParryBot.stun_timer)) {
+			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
+			if (Update_Timer(&MParryBot.stun_timer)) {
+				//timer has not ended
+			}
+			else {
+				MParryBot.idle_timer.current = 0.f;
 				MParryBot.state = Idle;
 			}
 		}
@@ -95,6 +120,31 @@ void Active_DummyBotMelee() {
 	}
 }
 
+void Attack_DummyBotMelee() {
+	DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
+	if (AETestCircleToRect(&player.pos, player.radius, &MParryBot.attackpos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight)) {
+		switch (player.state) {
+		case PARRY:
+			//stun logic
+			MParryBot.stun_timer.current = 0.f;
+			MParryBot.state = Parried;
+			std::cout << "CB FUC UUUU LAAAAAA KENA parried\n";
+			break;
+		case BLOCK:
+			Blocked_Hit(MParryBot.damage);
+			break;
+		case PARRIED:
+		case BLOCKED:
+		case HIT:
+		case DODGE:
+			// do nothing, immune
+			break;
+		default:
+			Eat_Hit(MParryBot.damage);
+		}
+	}
+}
+
 void Init_Enemy_Indicator()
 {
 	color_idle = SetColor(0xFFFF6961);
@@ -104,47 +154,7 @@ void Init_Enemy_Indicator()
 	color_parried = SetColor(0xFFFF00FF);
 }
 
-//!!!!!
-//OUTDATED CODE! WILL REMOVE ONCE PARRY BOT FINALISED!
-//!!!!!
-//void EnemyAttackPattern(Timer* ParryTimer,Timer* stunnedtimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad)
-//{
-//	if (stunnedtimer->current==0.f)
-//	{
-//		if (ParryTimer->current >= 1.f)
-//		{
-//			if (*counter == Swinging && ParryTimer->current >= 1.f)
-//			{
-//				*counter = 0;
-//			}
-//			else
-//			{
-//				++*counter;
-//			}
-//		}
-//
-//		switch (*counter)
-//		{
-//		case Idle:
-//			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_idle);
-//			break;
-//		case WindUp:
-//			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_windup);
-//			break;
-//		case Swinging:
-//			DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_swing);
-//			//can check for parry collision here w square below reee
-//			DrawRect(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y) - 100.f, 100.f, 100.f, color_windup);
-//			break;
-//		}
-//	}
-//	else 
-//	{
-//		DrawCircle(World_To_Screen_x(EnemyPos.x), World_To_Screen_y(EnemyPos.y), HitBoxRad, color_stunned);
-//		Loop_Timer(stunnedtimer);
-//		/*std::cout << stunnedtimer->current << '\n';*/
-//	}
-//}
+//outdated code, can probs remove!
 void Test_Funct(Timer* ParryTimer, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad )
 {
 	AEVec2 TempHitbox{ EnemyPos.x, EnemyPos.y - 75.f };
