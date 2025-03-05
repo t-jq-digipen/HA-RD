@@ -267,6 +267,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		}
 	}
 
+	// fix projectiles soon
 	return hit; // Only return false if no projectiles hit
 }
 
