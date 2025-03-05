@@ -15,7 +15,7 @@
 #include "GameStateManager.h"
 
 //removable in future implementations! for parry bot stats
-AEVec2 DummyMelee_pos{};
+AEVec2 DummyMelee_pos{}, DummyRange_pos{};
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{100.f};
 
 //Timer DummyMelee_AttackTimer;
@@ -46,6 +46,7 @@ void HubWorld_Initialize()
 
 	// Dummy enemy
 	DummyMelee_pos = { 300.f, 200.f };
+	DummyRange_pos = { 500.f, 200.f };
 	DummyMelee_rad = 50.f;
 	DummyMelee_Check = 0;
 
@@ -58,6 +59,7 @@ void HubWorld_Initialize()
 	Init_Enemy_Indicator();
 
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);
+	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
 
 	// Enemy Attack Timer
 	/*DummyMelee_AttackTimer = Create_Timer(1.f);
@@ -94,6 +96,7 @@ void HubWorld_Update()
 
 		DummyMelee_Check = Attacked_Melee(DummyMelee_pos);
 		Active_DummyBotMelee();
+		Active_DummyBotRange();
 
 		// Incrementing level timer
 		if (levelState != CLEARED)

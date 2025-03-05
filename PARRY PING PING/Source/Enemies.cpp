@@ -67,7 +67,7 @@ int MParryBot_last_hit = 0;
 int MParryBot_new_hit = 0;
 
 void Active_DummyBotMelee() {
-	std::cout << "state " << MParryBot.state << '\n';
+	//std::cout << "state " << MParryBot.state << '\n';
 	if (MParryBot.state != Destroyed) {
 		std::cout << MParryBot.hp << '\n';
 
@@ -185,31 +185,35 @@ void Attack_DummyBotMelee() {
 
 
 //RANGED PARRY BOT  -  Init, Active (Update), Attack
-void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp, f32 firerate) {
+void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 	RParryBot.pos = pos;
 	RParryBot.FacingDir = RParryBot.FacingDown;								//Init here which dir bot should face!!!
 	switch (RParryBot.FacingDir) {
 	case RParryBot.FacingLeft:
-		RParryBot.attackpos = AEVec2{ pos.x - 100, pos.y };
+		RParryBot.attackpos = AEVec2{ pos.x - 50, pos.y };
 		break;
 	case RParryBot.FacingRight:
-		RParryBot.attackpos = AEVec2{ pos.x + 100, pos.y };
+		RParryBot.attackpos = AEVec2{ pos.x + 50, pos.y };
 		break;
 	case RParryBot.FacingUp:
-		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y + 100.f };
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y + 50.f };
 		break;
 	case RParryBot.FacingDown:
-		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 100.f };
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 50.f };
 		break;
 	default:
-		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 100.f };
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 50.f };
 		break;
 	}
+
 	RParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
 	RParryBot.hp = max_hp;
 	RParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
 	RParryBot.damage = 10.f;
-	RParryBot.firerate = firerate;
+	RParryBot.projectile_speed = 350.f;
+	RParryBot.projectile_radius = 20.f;
+	RParryBot.projectile_range = 500.f;
+	RParryBot.projectile_parry = false;
 	RParryBot.AttackHitboxWidth = 150.f;
 	RParryBot.AttackHitboxHeight = 75.f;
 	RParryBot.state = Idle;
@@ -217,13 +221,13 @@ void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp, f32 firerate) {
 	RParryBot.hitbox = Init_AABB(RParryBot.pos.x, RParryBot.pos.y, RParryBot.rad, RParryBot.rad);
 	RParryBot.hitboxWidth = RParryBot.hitbox.max.x - RParryBot.hitbox.min.x;
 	RParryBot.hitboxHeight = RParryBot.hitbox.max.y - RParryBot.hitbox.min.y;
+	RParryBot.projectile_pos = RParryBot.attackpos;
 
 	RParryBot.idle_timer = Create_Timer(1);
 	RParryBot.windup_timer = Create_Timer(1);
-	RParryBot.attack_timer = Create_Timer(1);
+	RParryBot.attack_timer = Create_Timer(3);
 	RParryBot.stun_timer = Create_Timer(3);
 	RParryBot.respawn_timer = Create_Timer(3);
-	RParryBot.projectile_expiry_timer = Create_Timer(5);
 }
 
 
@@ -231,9 +235,10 @@ int RParryBot_last_hit = 0;
 int RParryBot_new_hit = 0;
 
 void Active_DummyBotRange() {
-	std::cout << "state " << RParryBot.state << '\n';
+	std::cout << "range bot state " << RParryBot.state << '\n';
 	if (RParryBot.state != Destroyed) {
 		std::cout << RParryBot.hp << '\n';
+		std::cout << AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) << '\n';
 
 		// Reset last hit if no new melee hit detected
 		if (!RParryBot_new_hit)
@@ -289,12 +294,17 @@ void Active_DummyBotRange() {
 			break;
 		case Swinging:
 			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
-			Attack_DummyBotMelee();
-			if (Update_Timer(&RParryBot.attack_timer)) {
-				//timer has not ended
+			Attack_DummyBotRange();
+			if (Update_Timer(&RParryBot.attack_timer)) {			//idk why when i or this if statement it dont work so pls pardon this ugly ass code
+				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range) {
+					RParryBot.idle_timer.current = 0.f;
+					RParryBot.projectile_pos = RParryBot.attackpos;
+					RParryBot.state = Idle;
+				}
 			}
 			else {
 				RParryBot.idle_timer.current = 0.f;
+				RParryBot.projectile_pos = RParryBot.attackpos;
 				RParryBot.state = Idle;
 			}
 			break;
@@ -324,14 +334,39 @@ void Active_DummyBotRange() {
 }
 
 void Attack_DummyBotRange() {
-	//CHANGE TO HAVE IT SHOOT A PROJECTILE IN A STRAIGHT LINE BASED OF 'FACINGDIR', expires after expiry timer ends
-	DrawRect(World_To_Screen_x(RParryBot.attackpos.x), World_To_Screen_y(RParryBot.attackpos.y), RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
-	if (AETestCircleToRect(&player.pos, player.radius, &RParryBot.attackpos, RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight)) {
+	//TO DO: ON PARRY - DEFLECT PROJECTILE BACK AT ENEMY
+	
+	switch (RParryBot.FacingDir)
+	{
+	case RParryBot.FacingLeft:
+		RParryBot.projectile_pos.x -= RParryBot.projectile_speed * dt;
+		break;
+	case RParryBot.FacingRight:
+		RParryBot.projectile_pos.x += RParryBot.projectile_speed * dt;
+		break;
+	case RParryBot.FacingUp:
+		RParryBot.projectile_pos.y += RParryBot.projectile_speed * dt;
+		break;
+	case RParryBot.FacingDown:
+		RParryBot.projectile_pos.y -= RParryBot.projectile_speed * dt;
+		break;
+	default:
+		RParryBot.projectile_pos.y -= RParryBot.projectile_speed * dt;
+		break;
+	}
+	//std::cout << "x: " << RParryBot.projectile_pos.x << '\n';
+	//std::cout << "y: " << RParryBot.projectile_pos.y << '\n';
+
+	DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, color_idle);
+	DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);
+
+	if (AETestCircleToCircle(&player.pos, player.radius, &RParryBot.projectile_pos, RParryBot.projectile_radius)) {
+		std::cout << "FVSDIKBVBVBVHSVBSDHJKVBSSVB\n\n\n";
 		switch (player.state) {
 		case PARRY:
-			//stun logic
 			RParryBot.stun_timer.current = 0.f;
-			RParryBot.state = Parried;
+			RParryBot.state = Parried;				//change to just deflect proj
+			RParryBot.projectile_parry = true;
 			break;
 		case BLOCK:
 			Blocked_Hit(RParryBot.damage);
