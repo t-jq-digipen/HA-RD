@@ -44,10 +44,33 @@ typedef struct DummyBotMelee
 	Timer idle_timer, windup_timer, attack_timer, stun_timer, respawn_timer;
 }DummyBotMelee;
 
-//WIP I GONNA DO THIS TMR!!!!
+typedef struct DummyBotRange
+{
+	AEVec2 pos, attackpos;
+	f32 rad;
+	f32 hp, max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
+	f32 damage;
+	f32 firerate;
+	f32 AttackHitboxWidth, AttackHitboxHeight;
+	EnemyAttackPatternState state;
+	enum FacingDir {
+		FacingLeft = 0, FacingRight = 1, FacingUp = 2, FacingDown = 3
+	}FacingDir;
+
+	aabb hitbox;
+	f32 hitboxWidth, hitboxHeight;
+
+	Timer idle_timer, windup_timer, attack_timer, stun_timer, respawn_timer, projectile_expiry_timer;
+}DummyBotRange;
+
+
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotMelee();
 void Attack_DummyBotMelee();
+
+void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp, f32 firerate);
+void Active_DummyBotRange();
+void Attack_DummyBotRange();
 
 
 

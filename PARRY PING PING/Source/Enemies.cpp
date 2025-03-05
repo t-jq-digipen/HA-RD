@@ -3,7 +3,8 @@
 
 Color color_idle, color_windup, color_swing, color_stunned, color_parried;
 
-DummyBotMelee MParryBot;
+DummyBotMelee MParryBot;		//Melee Practice Range Parry Bot
+DummyBotRange RParryBot;		//Ranged Attack
 
 //timer for each state: idle, windup, swing, parry stun duration
 const float PARRY_STUN[4] = { 
@@ -22,6 +23,7 @@ const float JQMonke[7] = {
 	3.f		//if parried during sweep
 };
 
+//MELEE PARRY BOT  -  Init, Active (Update), Attack 
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.pos = pos;
 	MParryBot.FacingDir = MParryBot.FacingDown;								//Init here which dir bot should face!!!
@@ -67,7 +69,6 @@ int MParryBot_new_hit = 0;
 void Active_DummyBotMelee() {
 	std::cout << "state " << MParryBot.state << '\n';
 	if (MParryBot.state != Destroyed) {
-		//MParryBot.state = EnemyAttackPatternState(MParryBot.count);
 		std::cout << MParryBot.hp << '\n';
 
 		// Reset last hit if no new melee hit detected
@@ -178,6 +179,171 @@ void Attack_DummyBotMelee() {
 			break;
 		default:
 			Eat_Hit(MParryBot.damage);
+		}
+	}
+}
+
+
+//RANGED PARRY BOT  -  Init, Active (Update), Attack
+void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp, f32 firerate) {
+	RParryBot.pos = pos;
+	RParryBot.FacingDir = RParryBot.FacingDown;								//Init here which dir bot should face!!!
+	switch (RParryBot.FacingDir) {
+	case RParryBot.FacingLeft:
+		RParryBot.attackpos = AEVec2{ pos.x - 100, pos.y };
+		break;
+	case RParryBot.FacingRight:
+		RParryBot.attackpos = AEVec2{ pos.x + 100, pos.y };
+		break;
+	case RParryBot.FacingUp:
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y + 100.f };
+		break;
+	case RParryBot.FacingDown:
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 100.f };
+		break;
+	default:
+		RParryBot.attackpos = AEVec2{ pos.x + 0, pos.y - 100.f };
+		break;
+	}
+	RParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
+	RParryBot.hp = max_hp;
+	RParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
+	RParryBot.damage = 10.f;
+	RParryBot.firerate = firerate;
+	RParryBot.AttackHitboxWidth = 150.f;
+	RParryBot.AttackHitboxHeight = 75.f;
+	RParryBot.state = Idle;
+
+	RParryBot.hitbox = Init_AABB(RParryBot.pos.x, RParryBot.pos.y, RParryBot.rad, RParryBot.rad);
+	RParryBot.hitboxWidth = RParryBot.hitbox.max.x - RParryBot.hitbox.min.x;
+	RParryBot.hitboxHeight = RParryBot.hitbox.max.y - RParryBot.hitbox.min.y;
+
+	RParryBot.idle_timer = Create_Timer(1);
+	RParryBot.windup_timer = Create_Timer(1);
+	RParryBot.attack_timer = Create_Timer(1);
+	RParryBot.stun_timer = Create_Timer(3);
+	RParryBot.respawn_timer = Create_Timer(3);
+	RParryBot.projectile_expiry_timer = Create_Timer(5);
+}
+
+
+int RParryBot_last_hit = 0;
+int RParryBot_new_hit = 0;
+
+void Active_DummyBotRange() {
+	std::cout << "state " << RParryBot.state << '\n';
+	if (RParryBot.state != Destroyed) {
+		std::cout << RParryBot.hp << '\n';
+
+		// Reset last hit if no new melee hit detected
+		if (!RParryBot_new_hit)
+		{
+			RParryBot_last_hit = 0;
+		}
+
+		if (Attacked_Melee_rect(RParryBot.pos, RParryBot.hitboxWidth, RParryBot.hitboxHeight, &RParryBot_new_hit, &RParryBot.damage))
+		{
+			if (RParryBot_last_hit != RParryBot_new_hit)
+			{
+				if (player.ammo < 3)
+				{
+					player.ammo++;
+				}
+				RParryBot.hp -= RParryBot.damage;
+				RParryBot_last_hit = RParryBot_new_hit;
+			}
+		}
+
+		if (Attacking_Ranged_Impact(RParryBot.pos, RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight, &RParryBot.damage))
+		{
+			RParryBot.hp -= RParryBot.damage;
+		}
+
+
+		if (RParryBot.hp <= 0) {
+			RParryBot.respawn_timer.current = 0.f;
+			RParryBot.state = Destroyed;
+		}
+
+		switch (RParryBot.state)
+		{
+		case Idle:
+			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
+			if (Update_Timer(&RParryBot.idle_timer)) {
+				//timer has not ended
+			}
+			else {
+				RParryBot.windup_timer.current = 0.f;
+				RParryBot.state = WindUp;
+			}
+			break;
+		case WindUp:
+			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_windup);
+			if (Update_Timer(&RParryBot.windup_timer)) {
+				//timer has not ended
+			}
+			else {
+				RParryBot.attack_timer.current = 0.f;
+				RParryBot.state = Swinging;
+			}
+			break;
+		case Swinging:
+			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
+			Attack_DummyBotMelee();
+			if (Update_Timer(&RParryBot.attack_timer)) {
+				//timer has not ended
+			}
+			else {
+				RParryBot.idle_timer.current = 0.f;
+				RParryBot.state = Idle;
+			}
+			break;
+		case Parried:
+			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
+			if (Update_Timer(&RParryBot.stun_timer)) {
+				//timer has not ended
+			}
+			else {
+				RParryBot.idle_timer.current = 0.f;
+				RParryBot.state = Idle;
+			}
+		}
+
+	}
+	else {
+		//wait for timer to reset, play animation of respawn
+		if (Update_Timer(&RParryBot.respawn_timer)) {
+			//timer has not ended
+		}
+		else {
+			RParryBot.idle_timer.current = 0.f;
+			RParryBot.hp = RParryBot.max_hp;
+			RParryBot.state = Idle;
+		}
+	}
+}
+
+void Attack_DummyBotRange() {
+	//CHANGE TO HAVE IT SHOOT A PROJECTILE IN A STRAIGHT LINE BASED OF 'FACINGDIR', expires after expiry timer ends
+	DrawRect(World_To_Screen_x(RParryBot.attackpos.x), World_To_Screen_y(RParryBot.attackpos.y), RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
+	if (AETestCircleToRect(&player.pos, player.radius, &RParryBot.attackpos, RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight)) {
+		switch (player.state) {
+		case PARRY:
+			//stun logic
+			RParryBot.stun_timer.current = 0.f;
+			RParryBot.state = Parried;
+			break;
+		case BLOCK:
+			Blocked_Hit(RParryBot.damage);
+			break;
+		case PARRIED:
+		case BLOCKED:
+		case HIT:
+		case DODGE:
+			// do nothing, immune
+			break;
+		default:
+			Eat_Hit(RParryBot.damage);
 		}
 	}
 }

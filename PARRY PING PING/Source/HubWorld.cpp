@@ -18,12 +18,12 @@
 AEVec2 DummyMelee_pos{};
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{100.f};
 
-Timer DummyMelee_AttackTimer;
-Timer DummyMelee_StunTimer;
+//Timer DummyMelee_AttackTimer;
+//Timer DummyMelee_StunTimer;
 
 //to be moved into enemy struct btw!
-int DummyMelee_Counter{};
-f32 StunDummyMelee_Counter{ 0.f };
+//int DummyMelee_Counter{};
+//f32 StunDummyMelee_Counter{ 0.f };
 
 int DummyMelee_Check;
 
@@ -60,9 +60,9 @@ void HubWorld_Initialize()
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);
 
 	// Enemy Attack Timer
-	DummyMelee_AttackTimer = Create_Timer(1.f);
+	/*DummyMelee_AttackTimer = Create_Timer(1.f);
 	DummyMelee_StunTimer = Create_Timer(2.f);
-	DummyMelee_StunTimer.current = 0;
+	DummyMelee_StunTimer.current = 0;*/
 
 	// UI
 	Init_UI();
