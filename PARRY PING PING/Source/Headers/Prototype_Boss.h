@@ -3,30 +3,47 @@
 
 typedef enum Boss_State
 {
+
 	BOSS_IDLE,
-	BOSS_ATTACK,
+	BOSS_SMASH_SWEEP,
+	BOSS_THREE_HIT,
+	BOSS_RANGED_CHARGE,
+	BOSS_RANGED_ROCKETFIST,
 	BOSS_PARRIED,
-	BOSS_DASH,
 	BOSS_DEAD,
+
 } Boss_State;
 
 typedef enum Boss_Attack_State
 {
+
 	BOSS_ATTACK_WINDUP,
 	BOSS_ATTACK_ACTIVE,
 	BOSS_ATTACK_RECOVER,
+
 } Boss_Attack_State;
 
 typedef enum Boss_AttackType
 {
-	MONKE_SMASH,
-	MONKE_SWEEP,
+
+	BOSS_SMASH,
+	BOSS_SWEEP,
+
+	BOSS_LEFT_HIT,
+	BOSS_RIGHT_HIT,
+	BOSS_CIRCLE_HIT,
+
+	BOSS_CHARGE,
+	BOSS_ROCKETFIST,
+
 } Boss_AttackType;
 
 typedef struct Boss
 {
+
 	AEVec2 pos;
 	AEVec2 target_pos;
+	AEVec2 target_dir;
 	f32 width, height;
 	f32 hp, max_hp;
 	Boss_State state;
@@ -37,9 +54,7 @@ typedef struct Boss
 	Timer idle_timer;
 	Timer attack_timer;
 	Timer stun_timer;
-
 	Timer dash_timer;
-	Timer dash_cooldown_timer;
 
 	Timer range_warning_timer;
 	Timer range_timer;
@@ -55,6 +70,7 @@ typedef struct Boss
 
 typedef struct Boss_Melee
 {
+
 	AEVec2 pos;
 	Timer timer;
 	f32 attack_windup;
@@ -64,25 +80,27 @@ typedef struct Boss_Melee
 	bool hitbox_active;
 	f32 stun_duration;
 
-	//f32 damage;
-
 } Boss_Melee;
 
 typedef struct Boss_Range
 {
+
 	AEVec2 pos;
 	AEVec2 velocity;
 	AEMtx33 transform;
 	Timer timer;
 	bool active;
+
 } Boss_Range;
 
 typedef struct Boss_Explosion
 {
+
 	AEVec2 pos;
 	AEMtx33 transform;
 	Timer timer;
 	bool active;
+
 } Boss_Explosion;
 
 void Load_Prototype_Boss();
@@ -97,8 +115,13 @@ void Draw_Prototype_Boss();
 
 void Unload_Prototype_Boss();
 
+void Smash_Sweep_Logic();
 
-void Prototype_Boss_Attack();
+void Three_Hit_Logic();
+
+void Boss_Dash_Logic();
+
+void Boss_Rocket_Logic();
 
 void Proto_Monke_Attack_Test(bool canparry, f32 damage);
 
