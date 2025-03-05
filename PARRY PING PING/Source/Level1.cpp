@@ -96,7 +96,7 @@ void Level1_Update()
 		nextState = GS_RESTART;
 	}
 
-	if (levelState != PAUSED && levelState != GAMEOVER)
+	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
 	{
 		std::cout << "Playing\n";
 		// Boss behavior
@@ -169,6 +169,10 @@ void Level1_Draw()
 	{
 		Draw_GameOverMenu();
 	}
+	else if (levelState == OPTIONS)
+	{
+		Draw_OptionsMenu();
+	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&cleartransitiontimer))
@@ -185,6 +189,7 @@ void Level1_Free()
 
 void Level1_Unload()
 {
+	Unload_UI();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_Prototype_Boss();

@@ -16,11 +16,30 @@ enum LEVEL_STATE
 	PLAYING = 0,
 	PAUSED,
 	GAMEOVER,
+	OPTIONS,
 	CLEARED
 };
 
 extern int levelState;
 
+typedef struct UIScreen 
+{
+	SpriteSheet* spritesheet_screen;
+	SpriteSheet* spritesheet_playbutton;
+	SpriteSheet* spritesheet_optionsbutton;
+	SpriteSheet* spritesheet_exitbutton;
+
+	SpriteSheet* spritesheet_button1;
+	SpriteSheet* spritesheet_button2;
+	SpriteSheet* spritesheet_button3;
+	SpriteSheet* spritesheet_button4;
+
+	Timer animationtimer;
+	int isPlayClicked;
+	int isOptionsClicked;
+	int isExitClicked;
+	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;
+} UIScreen;
 
 
 void Draw_UI();
@@ -28,6 +47,7 @@ void Draw_UI();
 void Update_Player_UI(int ammo, float hp, float parry_timer);
 
 // will neaten when more player parameters are finalized
+
 void Init_UI();
 
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp);
@@ -38,11 +58,15 @@ void Update_Boss_UI(float hp);
 
 void Update_LevelTimer(float *time_elapsed, float dt);
 
+void Unload_UI();
+
 //void Draw_Boss1HP(float time_elapsed);
 
 void Draw_PauseMenu();
 
 void Draw_GameOverMenu();
+
+void Draw_OptionsMenu();
 
 void Draw_ClearMenu();
 
