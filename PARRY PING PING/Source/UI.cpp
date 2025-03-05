@@ -30,7 +30,7 @@ Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 char level_timer[16];
 
-SpriteSheet ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen;
+SpriteSheet ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
@@ -75,6 +75,8 @@ void Init_UI()
 	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
 	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
 	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
+	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
+	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 
 	uiscreen.spritesheet_playbutton = &ssmenu_play;
 	uiscreen.spritesheet_optionsbutton = &ssmenu_options;
@@ -84,6 +86,8 @@ void Init_UI()
 	uiscreen.spritesheet_button3 = &ssmenu_3;
 	uiscreen.spritesheet_button4 = &ssmenu_4;
 	uiscreen.spritesheet_screen = &ssmenu_screen;
+	uiscreen.spritesheet_bar1 = &ssmenu_bar1;
+	uiscreen.spritesheet_bar2 = &ssmenu_bar2;
 	uiscreen.animationtimer = Create_Timer(0.5f);
 
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
@@ -370,7 +374,9 @@ void Draw_OptionsMenu()
 	
 	DrawTextBox(-0.5f, 0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "BGM");
 
-	DrawHPBar(-50.f, 75.f, 350.f, 125.f, current_bgm_vol, max_bgm_vol, UI_hover_red);
+	DrawHPBar(-50.f, 75.f, 350.f, 125.f, AEClamp(current_bgm_vol, 0.f, max_bgm_vol), max_bgm_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, 150.f, 100.f, 425.f, 50.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_bar1, 1, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (current_bgm_vol > max_bgm_vol)
 	{
@@ -431,7 +437,9 @@ void Draw_OptionsMenu()
 
 	DrawTextBox(-0.5f, -0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "SFX");
 
-	DrawHPBar(-50.f, -75.f, 350.f, -25.f, current_sfx_vol, max_sfx_vol, UI_hover_red);
+	DrawHPBar(-50.f, -75.f, 350.f, -25.f, AEClamp(current_sfx_vol, 0.f, max_sfx_vol), max_sfx_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar2, 150.f, -50.f, 425.f, 50.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_bar2, 1, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (current_sfx_vol > max_sfx_vol)
 	{
@@ -665,4 +673,6 @@ void Unload_UI()
 	Unload_SpriteSheet(&ssmenu_3);
 	Unload_SpriteSheet(&ssmenu_4);
 	Unload_SpriteSheet(&ssmenu_screen);
+	Unload_SpriteSheet(&ssmenu_bar1);
+	Unload_SpriteSheet(&ssmenu_bar2);
 }

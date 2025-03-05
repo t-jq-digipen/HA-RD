@@ -34,6 +34,9 @@ typedef struct UIScreen
 	SpriteSheet* spritesheet_button3;
 	SpriteSheet* spritesheet_button4;
 
+	SpriteSheet* spritesheet_bar1;
+	SpriteSheet* spritesheet_bar2;
+
 	Timer animationtimer;
 	int isPlayClicked;
 	int isOptionsClicked;
