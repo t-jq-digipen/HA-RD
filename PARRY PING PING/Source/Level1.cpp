@@ -16,11 +16,8 @@
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
 
-// Define map boundary limits
-const float MAP_LEFT = -500.f;
-const float MAP_RIGHT = 500.f;
-const float MAP_TOP = 300.f;
-const float MAP_BOTTOM = -300.f;
+
+AEGfxTexture* mapTexture = nullptr;
 
 
 AEVec2 dummy_pos, JQMonke_pos;
@@ -44,8 +41,15 @@ void Level1_Load()
 	Load_Player();
 	Load_Prototype_Boss();
 
+
 	// Meshes
 	Load_Mesh(20);
+
+	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary2.jpg");
+	if (!mapTexture)
+	{
+		printf("Failed to load map texture!\n");
+	}
 	std::cout << "Level 1 Loaded\n";
 }
 
@@ -65,6 +69,8 @@ void Level1_Initialize()
 	enemyattacktimer = Create_Timer(1.f);
 	stunnedtimer = Create_Timer(2.f);
 	stunnedtimer.current = 0;
+
+
 
 	// Boss
 	Init_Boss1();
@@ -136,14 +142,13 @@ void Level1_Update()
 
 void Level1_Draw()
 {
-	Update_Camera();
-
+	AEGfxSetBackgroundColor(0, 0, 0);
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 800.0f, map_height = 600.0f;
-	Color borderColor = { 0.0f, 0.0f, 1.0f, 1.0f }; // Blue
+	f32 map_width = 3000.0f, map_height = 4000.0f;
+	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
 
 	// Offset map drawing so (0,0) is centered in the camera view
 	f32 map_x = -map_width / 2;
@@ -158,6 +163,15 @@ void Level1_Draw()
 	DrawRect(screen_x + map_width / 2, screen_y + map_height, map_width, 10, borderColor); // Top
 	DrawRect(screen_x, screen_y + map_height / 2, 10, map_height, borderColor); // Left
 	DrawRect(screen_x + map_width, screen_y + map_height / 2, 10, map_height, borderColor); // Right
+
+
+	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
+	DrawImageAttachedToRect(screen_x, screen_y, map_width, map_height, mapTexture);
+
+
+
+	Update_Camera();
+
 
 	// Parryable dummy!
 	//EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
@@ -182,6 +196,8 @@ void Level1_Draw()
 
 	// UI
 	Draw_UI();
+
+
 
 	// Level Timer
 	Draw_LevelTimer(levelTimer);

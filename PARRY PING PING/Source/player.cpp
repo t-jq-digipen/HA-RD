@@ -695,7 +695,9 @@ void Update_Player()
 			player.state = DEAD;
 		}
 
-		f32 map_width = 800.0f, map_height = 600.0f;
+
+
+		f32 map_width = 3000.0f, map_height = 4000.0f;
 		f32 left_bound = -map_width / 2;
 		f32 right_bound = map_width / 2;
 		f32 top_bound = -map_height / 2;
