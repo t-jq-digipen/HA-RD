@@ -16,6 +16,13 @@
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
 
+// Define map boundary limits
+const float MAP_LEFT = -500.f;
+const float MAP_RIGHT = 500.f;
+const float MAP_TOP = 300.f;
+const float MAP_BOTTOM = -300.f;
+
+
 AEVec2 dummy_pos, JQMonke_pos;
 f32 dummy_rad, JQMonke_rad;
 int JQCounter{};
@@ -133,6 +140,24 @@ void Level1_Draw()
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+	// Define map size
+	f32 map_width = 800.0f, map_height = 600.0f;
+	Color borderColor = { 0.0f, 0.0f, 1.0f, 1.0f }; // Blue
+
+	// Offset map drawing so (0,0) is centered in the camera view
+	f32 map_x = -map_width / 2;
+	f32 map_y = -map_height / 2;
+
+	// Convert world positions to screen positions
+	f32 screen_x = World_To_Screen_x(map_x);
+	f32 screen_y = World_To_Screen_y(map_y);
+
+	// Draw map borders
+	DrawRect(screen_x + map_width / 2, screen_y, map_width, 10, borderColor); // Bottom
+	DrawRect(screen_x + map_width / 2, screen_y + map_height, map_width, 10, borderColor); // Top
+	DrawRect(screen_x, screen_y + map_height / 2, 10, map_height, borderColor); // Left
+	DrawRect(screen_x + map_width, screen_y + map_height / 2, 10, map_height, borderColor); // Right
 
 	// Parryable dummy!
 	//EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
