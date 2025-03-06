@@ -33,6 +33,8 @@ typedef struct DummyBotMelee
 	f32 rad;
 	f32 hp, max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
 	f32 damage;
+	f32 spark_buffer;				//time before attack starts (indicates to player a parryable attack is coming)
+	bool spark_draw;
 	f32 AttackHitboxWidth, AttackHitboxHeight;
 	EnemyAttackPatternState state;
 	enum FacingDir {
@@ -52,7 +54,7 @@ typedef struct DummyBotRange
 	f32 hp, max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
 	f32 damage;
 	f32 projectile_speed, projectile_radius, projectile_range;
-	bool projectile_parry;
+	bool projectile_parry, projectile_draw;
 	AEMtx33 projectile_transform;
 	f32 AttackHitboxWidth, AttackHitboxHeight;
 	EnemyAttackPatternState state;
@@ -70,9 +72,11 @@ typedef struct DummyBotRange
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotMelee();
 void Attack_DummyBotMelee();
+void Draw_DummyBotMelee();
 
 void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotRange();
 void Attack_DummyBotRange();
+void Draw_DummyBotRange();
 
 void Init_Enemy_Indicator();

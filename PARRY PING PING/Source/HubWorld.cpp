@@ -16,7 +16,7 @@
 
 //removable in future implementations! for parry bot stats
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
-f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{100.f};
+f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{50.f};
 
 //Timer DummyMelee_AttackTimer;
 //Timer DummyMelee_StunTimer;
@@ -122,17 +122,12 @@ void HubWorld_Draw()
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
-	// Parryable dummy!
-	//EnemyAttackPattern(&DummyMelee_AttackTimer,&DummyMelee_StunTimer, &DummyMelee_Counter, DummyMelee_pos, DummyMelee_rad, &player);
-	//Loop_Timer(&DummyMelee_AttackTimer);
-	//EnemyAttackPattern(&parryTimer, &DummyMelee_Counter, &StunDummyMelee_Counter, DummyMelee_pos, DummyMelee_rad, player.pos, player.radius);
-	//Loop_Timer(&parryTimer);
+	//Draw Parry Bots
+	Draw_DummyBotMelee();
+	Draw_DummyBotRange();
 
 	// Player
 	Draw_Player();
-
-	// Boss HP
-	//Draw_Boss1HP();
 
 	// UI
 	//maybe remove? can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool woowooowowowoowowoowooowooooyeaaaaa

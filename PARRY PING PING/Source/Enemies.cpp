@@ -10,6 +10,7 @@ DummyBotRange RParryBot;		//Ranged Attack
 // Init            - Inits values such as timers etc
 // Active (Update) - Call in Update(), handles checking of states
 // Attack          - Call in Attacking state, handles logic for parrying, damage detection etc
+//Draw             - Render sprites
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.pos = pos;
 	MParryBot.FacingDir = MParryBot.FacingDown;								//Init here which dir bot should face!!!
@@ -38,6 +39,9 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	MParryBot.AttackHitboxWidth = 150.f;
 	MParryBot.AttackHitboxHeight = 75.f;
 	MParryBot.state = Idle;
+
+	MParryBot.spark_buffer = 0.5;
+	MParryBot.spark_draw = false;
 
 	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
 	MParryBot.hitboxWidth = MParryBot.hitbox.max.x - MParryBot.hitbox.min.x;
@@ -90,7 +94,6 @@ void Active_DummyBotMelee() {
 		switch (MParryBot.state)
 		{
 		case Idle:
-			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_idle);
 			if (Update_Timer(&MParryBot.idle_timer)) {
 				//timer has not ended
 			}
@@ -101,18 +104,20 @@ void Active_DummyBotMelee() {
 			}
 			break;
 		case WindUp:
-			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_windup);
 			if (Update_Timer(&MParryBot.windup_timer)) {
 				//timer has not ended
+				if (MParryBot.windup_timer.current >= MParryBot.windup_timer.end - MParryBot.spark_buffer) {
+					MParryBot.spark_draw = true;
+				}
 			}
 			else 
 			{
+				MParryBot.spark_draw = false;
 				MParryBot.attack_timer.current = 0.f;
 				MParryBot.state = Swinging;
 			}
 			break;
 		case Swinging:
-			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);
 			Attack_DummyBotMelee();
 			if (Update_Timer(&MParryBot.attack_timer)) {
 				//timer has not ended
@@ -124,7 +129,6 @@ void Active_DummyBotMelee() {
 			}
 			break;
 		case Parried:
-			DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
 			if (Update_Timer(&MParryBot.stun_timer)) {
 				//timer has not ended
 			}
@@ -138,6 +142,7 @@ void Active_DummyBotMelee() {
 	}
 	else {
 		//wait for timer to reset, play animation of respawn
+		MParryBot.spark_draw = false;
 		if (Update_Timer(&MParryBot.respawn_timer)) {
 			//timer has not ended
 		}
@@ -150,7 +155,6 @@ void Active_DummyBotMelee() {
 }
 
 void Attack_DummyBotMelee() {
-	DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
 	if (AETestCircleToRect(&player.pos, player.radius, &MParryBot.attackpos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight)) 
 	{
 		switch (player.state) {
@@ -174,11 +178,37 @@ void Attack_DummyBotMelee() {
 	}
 }
 
+void Draw_DummyBotMelee() {
+	//jq the almighty animation lord please do ur magic these drawrects look ASS
+	switch (MParryBot.state)
+	{
+	case Idle:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_idle);
+		break;
+	case WindUp:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_windup);
+		break;
+	case Swinging:
+		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);
+		break;
+	case Parried:
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
+		break;
+	}
+	if (MParryBot.spark_draw) {
+		std::cout << "draw cool spark like shiiiing sheeeeoonng not the supermarket but like the sound ykwim shiiiing and also play the sound like the one i just made shiiiing ok ty\n";
+		//DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad * 10, MParryBot.rad, color_parried);
+		//add spark anim here :), its pos is alr synced with enem anim so just need to draw here :)
+	}
+}
+
 
 //RANGED PARRY BOT FUNCTIONS:
 // Init            - Inits values such as timers etc
 // Active (Update) - Call in Update(), handles checking of states
 // Attack          - Call in Attacking state, handles logic for parrying, damage detection etc, i know the attack state is 'swinging' but yeah
+//Draw             - Render sprites
 void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 	RParryBot.pos = pos;
 	RParryBot.FacingDir = RParryBot.FacingDown;								//Init here which dir bot should face!!!
@@ -208,6 +238,7 @@ void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 	RParryBot.projectile_radius = 20.f;
 	RParryBot.projectile_range = 500.f;
 	RParryBot.projectile_parry = false;
+	RParryBot.projectile_draw = false;
 	RParryBot.AttackHitboxWidth = 150.f;
 	RParryBot.AttackHitboxHeight = 75.f;
 	RParryBot.state = Idle;
@@ -265,7 +296,6 @@ void Active_DummyBotRange() {
 		switch (RParryBot.state)
 		{
 		case Idle:
-			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
 			if (Update_Timer(&RParryBot.idle_timer)) {
 				//timer has not ended
 			}
@@ -276,7 +306,6 @@ void Active_DummyBotRange() {
 			}
 			break;
 		case WindUp:
-			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_windup);
 			if (Update_Timer(&RParryBot.windup_timer)) {
 				//timer has not ended
 			}
@@ -287,11 +316,12 @@ void Active_DummyBotRange() {
 			}
 			break;
 		case Swinging:
-			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
+			RParryBot.projectile_draw = true;
 			Attack_DummyBotRange();
 			if (Update_Timer(&RParryBot.attack_timer)) {			//idk why when i or this if statement it dont work so pls pardon this ugly ass code
 				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range) 
 				{
+					RParryBot.projectile_draw = false;
 					RParryBot.idle_timer.current = 0.f;
 					RParryBot.projectile_pos = RParryBot.attackpos;
 					RParryBot.state = Idle;
@@ -299,13 +329,14 @@ void Active_DummyBotRange() {
 			}
 			else 
 			{
+				RParryBot.projectile_draw = false;
 				RParryBot.idle_timer.current = 0.f;
 				RParryBot.projectile_pos = RParryBot.attackpos;
 				RParryBot.state = Idle;
 			}
 			break;
 		case Parried:
-			DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
+			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
 			if (Update_Timer(&RParryBot.stun_timer)) {
 				//timer has not ended
 			}
@@ -352,9 +383,6 @@ void Attack_DummyBotRange() {
 		break;
 	}
 
-	//Temp Projectile Drawing
-	DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);
-
 	if (AETestCircleToCircle(&player.pos, player.radius, &RParryBot.projectile_pos, RParryBot.projectile_radius)) 
 	{
 		switch (player.state) {
@@ -365,16 +393,42 @@ void Attack_DummyBotRange() {
 			break;
 		case BLOCK:
 			Blocked_Hit(RParryBot.damage);
+			RParryBot.projectile_draw = false;
 			break;
 		case PARRIED:
 		case BLOCKED:
 		case HIT:
 		case DODGE:
 			// do nothing, immune
+			RParryBot.projectile_draw = false;
 			break;
 		default:
 			Eat_Hit(RParryBot.damage);
+			RParryBot.projectile_draw = false;
 		}
+	}
+}
+
+void Draw_DummyBotRange() {
+	//jq the almighty animation lord please do ur magic these drawrects look ASS
+	switch (RParryBot.state)
+	{
+	case Idle:
+		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
+		break;
+	case WindUp:
+		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_windup);
+		break;
+	case Swinging:
+		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
+		break;
+	case Parried:
+		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
+	}
+	if (RParryBot.projectile_draw)
+	{
+		//Temp Projectile Drawing
+		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);
 	}
 }
 
