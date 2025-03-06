@@ -15,6 +15,7 @@ typedef enum EnemyAttackPatternState
 }EnemyAttackPatternState;
 
 //JQ Monke Attack Pattern
+//Can probably remove this??
 typedef enum JQMonkeAttackPatternState
 {
 	JQIdle = 0,			//idle
@@ -65,7 +66,7 @@ typedef struct DummyBotRange
 	Timer idle_timer, windup_timer, attack_timer, stun_timer, respawn_timer;
 }DummyBotRange;
 
-
+//Dummy attack pattern
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotMelee();
 void Attack_DummyBotMelee();
@@ -74,11 +75,4 @@ void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotRange();
 void Attack_DummyBotRange();
 
-
-
-//Dummy attack pattern
-
 void Init_Enemy_Indicator();
-//void EnemyAttackPattern(Timer* ParryTimer, Timer* Stunned, int* counter, AEVec2 EnemyPos, f32 HitBoxRad, Player* player);
-
-void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* StunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad);
