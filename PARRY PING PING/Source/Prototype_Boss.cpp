@@ -5,7 +5,7 @@
 
 Boss proto_monke;
 
-Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried, proto_projectile_indicator, proto_projectile_color;
+Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried, proto_projectile_indicator, proto_projectile_color, proto_death_explosion_color;
 
 SpriteSheet ssproto_monke;
 
@@ -41,6 +41,11 @@ Boss_Melee proto_melee[ATTACK_TYPES];
 Boss_Range proto_proj;
 std::vector<Boss_Range> proto_projectiles;
 
+// Boss Explosion Effects and Particles
+const float PROTO_MONKE_DEATH_EXPLOSION_RADIUS = 50.f;
+Boss_Explosion explosion_particle;
+std::vector<Boss_Explosion> proto_death_explosion;
+
 
 void Init_Prototype_Indicator()
 {
@@ -51,6 +56,7 @@ void Init_Prototype_Indicator()
 	proto_parried = SetColor(0xFFFF00FF);
 	proto_projectile_indicator = SetColor(0xFFFF0000);
 	proto_projectile_color = SetColor(0xFFFF13F0);
+	proto_death_explosion_color = SetColor(0xFFED6240);
 }
 
 void Load_Prototype_Boss()
@@ -82,6 +88,8 @@ void Init_Prototype_Boss()
 	proto_monke.range_timer = Create_Timer(3.f);
 	proto_monke.isShootingWarningActive = 0;
 	proto_monke.isShooting = 0;
+
+	proto_monke.death_explosion_duration = Create_Timer(4.f);
 
 	for (int i = 0; i < ATTACK_TYPES; i++)
 	{
@@ -249,10 +257,28 @@ void Update_Prototype_Boss()
 		if (proto_monke.hp <= 0.f)
 		{
 			proto_monke.state = BOSS_DEAD;
+			proto_monke.death_explosion_duration.current = proto_monke.explosion_timer.current = 0.f;
 		}
 
 		// Update Boss UI
 		Update_Boss_UI(proto_monke.hp);
+	}
+
+	else if (proto_monke.state == BOSS_DEAD)
+	{
+		levelState = CLEARED;
+		for (auto& proj : proto_projectiles)
+		{
+			proj.active = false;
+		}
+		if (Update_Timer(&proto_monke.death_explosion_duration))
+		{
+			std::cout << proto_monke.death_explosion_duration.current << '\n';
+			if (!Update_Timer(&proto_monke.explosion_timer))
+			{
+				Draw_Proto_Monke_Death_Explosion(proto_monke.pos);
+			}
+		}
 	}
 
 	// **Update Boss Hitbox**
@@ -351,7 +377,7 @@ void Draw_Prototype_Boss()
 	}
 
 	// Ranged attack warning indicator
-	if (proto_monke.isShootingWarningActive) 
+	if (proto_monke.isShootingWarningActive && proto_monke.state != BOSS_DEAD) 
 	{
 		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), PROTO_PROJECTILE_RADIUS, proto_projectile_indicator);
 		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), (proto_monke.range_warning_timer.current / proto_monke.range_warning_timer.duration) * PROTO_PROJECTILE_RADIUS, proto_projectile_color);
@@ -364,6 +390,23 @@ void Draw_Prototype_Boss()
 		{
 			DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, proto_projectile_color); // Example projectile size and color
 		}
+	}
+
+	// Death explosion
+	for (auto& exp : proto_death_explosion)
+	{
+		if (exp.active)
+		{
+			f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * PROTO_MONKE_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * PROTO_MONKE_HITBOX_WIDTH * 0.8f));
+			f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * PROTO_MONKE_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * PROTO_MONKE_HITBOX_HEIGHT * 0.8f));
+			DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * PROTO_MONKE_DEATH_EXPLOSION_RADIUS, proto_death_explosion_color);
+			if (exp.timer.current >= exp.timer.duration)
+			{
+				exp.active = false;
+			}
+		}
+		// Remove inactive explosion particles
+		proto_death_explosion.erase(std::remove_if(proto_death_explosion.begin(), proto_death_explosion.end(), [](const Boss_Explosion& p) { return !p.active; }), proto_death_explosion.end());
 	}
 
 	//Draw_AABB(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.hitbox, SetColor(0x30FFFFFF));
@@ -520,6 +563,15 @@ void Proto_Monke_Range_Attack(const AEVec2& start, const AEVec2& direction)
 	proto_proj.timer = Create_Timer(4.f);
 	AEMtx33Identity(&proto_proj.transform);
 	proto_projectiles.push_back(proto_proj);
+}
+
+void Draw_Proto_Monke_Death_Explosion(AEVec2& start)
+{
+	explosion_particle.pos = start;
+	explosion_particle.active = true;
+	explosion_particle.timer = Create_Timer(0.5f);
+	AEMtx33Identity(&explosion_particle.transform);
+	proto_death_explosion.push_back(explosion_particle);
 }
 
 //void JQMonkeAttackDemo(Timer* ParryTimer, int* counter, f32* stunCounter, AEVec2 EnemyPos, f32 HitBoxRad, AEVec2 PlayerPos, f32 PlayerRad)

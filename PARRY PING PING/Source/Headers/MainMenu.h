@@ -10,6 +10,16 @@
 
 #pragma once
 
+typedef struct MainMenu
+{
+	SpriteSheet* spritesheet_button1;
+	SpriteSheet* spritesheet_button2;
+
+	Timer animationtimer;
+	int isPlayClicked;
+	int isExitClicked;
+} MainMenu;
+
 void MainMenu_Load();
 
 void MainMenu_Initialize();

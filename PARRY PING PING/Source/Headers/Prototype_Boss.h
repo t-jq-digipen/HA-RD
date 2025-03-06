@@ -42,6 +42,10 @@ typedef struct Boss
 	bool isShooting;
 
 	int attack_type;
+
+	Timer explosion_timer;
+	Timer death_explosion_duration;
+
 } Boss;
 
 typedef struct Boss_Melee
@@ -68,6 +72,14 @@ typedef struct Boss_Range
 	bool active;
 } Boss_Range;
 
+typedef struct Boss_Explosion
+{
+	AEVec2 pos;
+	AEMtx33 transform;
+	Timer timer;
+	bool active;
+} Boss_Explosion;
+
 void Load_Prototype_Boss();
 
 void Init_Prototype_Indicator();
@@ -86,3 +98,5 @@ void Prototype_Boss_Attack();
 void Proto_Monke_Attack_Test(bool canparry, f32 damage);
 
 void Proto_Monke_Range_Attack(const AEVec2& start, const AEVec2& direction);
+
+void Draw_Proto_Monke_Death_Explosion(AEVec2& start);

@@ -692,6 +692,7 @@ void Update_Player()
 	}
 	else
 	{
+		levelState = GAMEOVER;
 		std::cout << "bro is dead\n";
 	}
 	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
