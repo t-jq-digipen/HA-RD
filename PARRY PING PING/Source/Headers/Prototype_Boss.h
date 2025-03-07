@@ -1,5 +1,6 @@
 #pragma once
 #include "Enemies.h"
+#include <vector>
 
 typedef enum Boss_State
 {
@@ -9,6 +10,7 @@ typedef enum Boss_State
 	BOSS_THREE_HIT,
 	BOSS_RANGED_CHARGE,
 	BOSS_RANGED_ROCKETFIST,
+	BOSS_ROCKET_FIST_ACTIVE,
 	BOSS_PARRIED,
 	BOSS_DEAD,
 
@@ -103,6 +105,15 @@ typedef struct Boss_Explosion
 	bool active;
 
 } Boss_Explosion;
+
+typedef struct RocketFist {
+	AEVec2 pos;
+	AEVec2 velocity;
+	f32 radius;
+	bool active;
+	Timer timer;
+	AEMtx33 transform;
+}RocketFist;
 
 void Load_Prototype_Boss();
 

@@ -48,6 +48,8 @@ const f32 PROTO_MONKE_DEATH_EXPLOSION_RADIUS = 50.f;
 Boss_Explosion explosion_particle;
 std::vector<Boss_Explosion> proto_death_explosion;
 
+std::vector<RocketFist> rocket_fists;
+
 void Load_Prototype_Boss()
 {
 	ssproto_monke = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png",5,8,1.f);
@@ -149,8 +151,8 @@ void Update_Prototype_Boss()
 					{
 						// Do a charge
 						proto_monke.attack_timer.current = 0.f;
-						proto_monke.attack_type = BOSS_CHARGE;
-						proto_monke.state = BOSS_RANGED_CHARGE;
+						proto_monke.attack_type = BOSS_ROCKETFIST;
+						proto_monke.state = BOSS_RANGED_ROCKETFIST;
 					}
 
 				}
@@ -189,6 +191,15 @@ void Update_Prototype_Boss()
 	
 		case BOSS_RANGED_ROCKETFIST:
 			Boss_Rocket_Logic();
+			break;
+
+		case BOSS_ROCKET_FIST_ACTIVE:
+			// Boss is inactive while rocket fists are active
+			if (rocket_fists.empty())
+			{
+				// No more active rocket fists, return to idle
+				proto_monke.state = BOSS_IDLE;
+			}
 			break;
 
 		case BOSS_PARRIED:
@@ -231,8 +242,6 @@ void Update_Prototype_Boss()
 		}
 
 		// Update boss projectiles' behavior
-
-
 		for (auto& proj : proto_projectiles)
 		{
 			if (proj.active)
@@ -275,6 +284,51 @@ void Update_Prototype_Boss()
 				}
 			}
 		}
+
+		for (auto& fist : rocket_fists)
+		{
+			if (fist.active)
+			{
+				// Update rocket fist's movement
+				fist.pos.x += fist.velocity.x * dt;
+				fist.pos.y += fist.velocity.y * dt;
+				fist.timer.current += 1.f * dt;
+
+				// Update rocket fist's transformation
+				AEMtx33 trans, scale;
+				AEMtx33Trans(&trans, fist.pos.x, fist.pos.y);
+				AEMtx33Scale(&scale, fist.radius, fist.radius);
+				AEMtx33Concat(&fist.transform, &trans, &scale);
+
+				// Deactivate rocket fist after it hits player or after 4 seconds (aka range)
+				if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius) || fist.timer.current >= fist.timer.duration)
+				{
+					fist.active = false;
+					if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius))
+					{
+						switch (player.state)
+						{
+						case PARRY:
+							Parried_Hit();
+							break;
+						case BLOCK:
+							Blocked_Hit(PROTO_PROJECTILE_DAMAGE);
+							break;
+						case PARRIED:
+						case BLOCKED:
+						case DODGE:
+						case HIT:
+							break;
+						default:
+							Eat_Hit(PROTO_PROJECTILE_DAMAGE);
+						}
+					}
+				}
+			}
+		}
+
+		// Remove inactive rocket fists
+		rocket_fists.erase(std::remove_if(rocket_fists.begin(), rocket_fists.end(), [](const RocketFist& f) { return !f.active; }), rocket_fists.end());
 
 		// Remove inactive boss projectiles
 		proto_projectiles.erase(std::remove_if(proto_projectiles.begin(), proto_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), proto_projectiles.end());
@@ -460,6 +514,14 @@ void Draw_Prototype_Boss()
 		if (proj.active)
 		{
 			DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, proto_projectile_color); // Example projectile size and color
+		}
+	}
+
+	for (const auto& fist : rocket_fists)
+	{
+		if (fist.active)
+		{
+			DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, proto_projectile_color);
 		}
 	}
 
@@ -811,7 +873,95 @@ void Boss_Dash_Logic()
 
 void Boss_Rocket_Logic()
 {
-	
+	if (Update_Timer(&proto_monke.attack_timer))
+	{
+		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)
+		{
+			// Attack is winding up (to update anim)
+			will_hit = true;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+
+			// Set the target position to the player's current position
+			proto_monke.target_pos = player.pos;
+
+			// Calculate the direction vector
+			proto_monke.target_dir = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
+			AEVec2Normalize(&proto_monke.target_dir, &proto_monke.target_dir);
+
+			// Calculate the rotation angle
+			proto_monke.target_rot = atan2(proto_monke.target_dir.y, proto_monke.target_dir.x);
+
+			// Calculate the distance
+			proto_monke.target_dist = AEVec2Distance(&player.pos, &proto_monke.pos);
+
+			// Calculate the progress of the windup (0 to 1)
+			f32 windup_progress = proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup;
+
+			// Draw the base rectangle (full area of the attack)
+			DrawRotatedRect(
+				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist / 2.f)),  // Center X (offset by half the distance)
+				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist / 2.f)),  // Center Y (offset by half the distance)
+				proto_monke.target_dist,  // Length of the rectangle (full distance to target)
+				PROTO_MONKE_HEIGHT,       // Height of the rectangle
+				proto_windup,             // Color for the base rectangle
+				proto_monke.target_rot    // Rotation angle
+			);
+
+			// Draw the growing rectangle (progress of the windup)
+			DrawRotatedRect(
+				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
+				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
+				proto_monke.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
+				PROTO_MONKE_HEIGHT,                        // Height of the rectangle
+				proto_swing,                               // Color for the growing rectangle
+				proto_monke.target_rot                     // Rotation angle
+			);
+		}
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)
+		{
+			// Attack is active (check collision)
+			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
+
+			// Spawn a rocket fist
+			RocketFist fist;
+			fist.pos = proto_monke.pos;
+			fist.velocity = { proto_monke.target_dir.x * PROTO_PROJECTILE_SPEED, proto_monke.target_dir.y * PROTO_PROJECTILE_SPEED };
+			fist.radius = PROTO_PROJECTILE_RADIUS;
+			fist.active = true;
+			fist.timer = Create_Timer(4.f);
+			AEMtx33Identity(&fist.transform);
+			rocket_fists.push_back(fist);
+
+			// Set the boss state to inactive while the rocket fist is active
+			proto_monke.state = BOSS_ROCKET_FIST_ACTIVE;
+
+			// Transition to the next state (e.g., BOSS_SMASH_SWEEP)
+			proto_monke.attack_timer.current = 0.f;
+			proto_monke.attack_type = BOSS_SMASH;
+		}
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)
+		{
+			// Attack is recovering (update anim)
+			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
+		}
+	}
+	else
+	{
+		if (proto_monke.attack_type == BOSS_SMASH)
+		{
+			proto_monke.attack_type++;
+			proto_melee[proto_monke.attack_type].timer.current = 0.f;
+			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+		}
+		else
+		{
+			std::cout << "YES";
+			proto_monke.state = BOSS_IDLE;
+			proto_monke.attack_type = 0;
+			proto_monke.idle_timer.current = 0.f;
+		}
+	}
 }
 
 
