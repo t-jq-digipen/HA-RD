@@ -3,554 +3,537 @@
 #include "UI.h"
 #include <vector>
 
-Boss proto_monke;
+Boss boss_1;
 
-Color proto_idle, proto_windup, proto_swing, proto_stunned, proto_parried, proto_projectile_indicator, proto_projectile_color, proto_death_explosion_color;
+Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
 
-SpriteSheet ssproto_monke;
+SpriteSheet boss_sprite_sheet;
 
 #define MAX_PROJECTILES 3
 #define PROJECTILE_DAMAGE 10
 
-const f32 PROTO_MONKE_SPAWN_X = 0.f;
-const f32 PROTO_MONKE_SPAWN_Y = 200.f;
+const f32 BOSS_SPAWN_X = 0.f;
+const f32 BOSS_SPAWN_Y = 200.f;
 
-const f32 PROTO_MONKE_WIDTH = 500.f;
-const f32 PROTO_MONKE_HEIGHT = 500.f;
+const f32 BOSS_WIDTH = 500.f;
+const f32 BOSS_HEIGHT = 500.f;
 
-const f32 PROTO_MONKE_HITBOX_WIDTH = 400.f;
-const f32 PROTO_MONKE_HITBOX_HEIGHT = 300.f;
+const f32 BOSS_HITBOX_WIDTH = 400.f;
+const f32 BOSS_HITBOX_HEIGHT = 300.f;
 
-const f32 PROTO_MONKE_MAXHP = 200.f;
+const f32 BOSS_MAXHP = 200.f;
 
 // DASH
-const f32 PROTO_MONKE_DASH_DISTANCE = 300.f;
+const f32 BOSS_DASH_DISTANCE = 300.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
-const s32 ATTACK_TYPES = 7;											//  1			 2
-const f32 PROTO_MONKE_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 1.f/*idfk*/};		//  0.8s		 1s
-const f32 PROTO_MONKE_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f , 1.5f/*idfk*/ };		// +0.2s		+0.2s
-const f32 PROTO_MONKE_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f/*(i dont fking know how long bruv)*/, 1.f/*this too bruv*/ };		// +0.4s		+1s
+const s32 ATTACK_TYPES = 7;
+const f32 BOSS_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 1.f };
+const f32 BOSS_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
+const f32 BOSS_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 1.f };
 
-const f32 PROTO_MONKE_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 0.f ,0.f,0.f};			//  0s			 3s
+const f32 BOSS_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f };
 
-const f32 PROTO_PROJECTILE_RADIUS = 30.f;
-const f32 PROTO_PROJECTILE_DAMAGE = 20.f;
-const f32 PROTO_PROJECTILE_SPEED = 500.f;
+const f32 BOSS_PROJECTILE_RADIUS = 30.f;
+const f32 BOSS_PROJECTILE_DAMAGE = 20.f;
+const f32 BOSS_PROJECTILE_SPEED = 500.f;
 
-Boss_Melee proto_melee[ATTACK_TYPES];
- 
-Boss_Range proto_proj;
-std::vector<Boss_Range> proto_projectiles;
+Boss_Melee boss_melee[ATTACK_TYPES];
+Boss_Range boss_projectile;
+std::vector<Boss_Range> boss_projectiles;
 
 // Boss Explosion Effects and Particles
-const f32 PROTO_MONKE_DEATH_EXPLOSION_RADIUS = 50.f;
+const f32 BOSS_DEATH_EXPLOSION_RADIUS = 50.f;
 Boss_Explosion explosion_particle;
-std::vector<Boss_Explosion> proto_death_explosion;
+std::vector<Boss_Explosion> boss_death_explosion;
 
 std::vector<RocketFist> rocket_fists;
 
-void Load_Prototype_Boss()
+void Load_Boss()
 {
-	ssproto_monke = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png",5,8,1.f);
+    boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
 }
 
-void Init_Prototype_Indicator()
+void Init_Boss_Indicator()
 {
-	proto_idle = SetColor(0xFFFF6961);
-	proto_windup = SetColor(0xFFFFCF61);
-	proto_swing = SetColor(0xFFAFFF61);
-	proto_stunned = SetColor(0xFF000000);
-	proto_parried = SetColor(0xFFFF00FF);
-	proto_projectile_indicator = SetColor(0xFFFF0000);
-	proto_projectile_color = SetColor(0xFFFF13F0);
-	proto_death_explosion_color = SetColor(0xFFED6240);
+    boss_idle = SetColor(0xFFFF6961);
+    boss_windup = SetColor(0xFFFFCF61);
+    boss_swing = SetColor(0xFFAFFF61);
+    boss_stunned = SetColor(0xFF000000);
+    boss_parried = SetColor(0xFFFF00FF);
+    boss_projectile_indicator = SetColor(0xFFFF0000);
+    boss_projectile_color = SetColor(0xFFFF13F0);
+    boss_death_explosion_color = SetColor(0xFFED6240);
 }
 
-
-void Init_Prototype_Boss()
+void Init_Boss()
 {
-	proto_monke.pos = { PROTO_MONKE_SPAWN_X, PROTO_MONKE_SPAWN_Y };
+    boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
 
-	proto_monke.width = PROTO_MONKE_WIDTH;
-	proto_monke.height = PROTO_MONKE_HEIGHT;
+    boss_1.width = BOSS_WIDTH;
+    boss_1.height = BOSS_HEIGHT;
 
-	proto_monke.hitbox = Init_AABB(proto_monke.pos.x, proto_monke.pos.y, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT);
+    boss_1.hitbox = Init_AABB(boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
 
-	proto_monke.hp = proto_monke.max_hp = PROTO_MONKE_MAXHP;
+    boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
 
-	proto_monke.state = BOSS_IDLE;
-	proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+    boss_1.state = BOSS_IDLE;
+    boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-	proto_monke.idle_timer = Create_Timer(1.f);
-	proto_monke.attack_timer = Create_Timer(1.f);
-	proto_monke.stun_timer = Create_Timer(3.f);
+    boss_1.idle_timer = Create_Timer(1.f);
+    boss_1.attack_timer = Create_Timer(1.f);
+    boss_1.stun_timer = Create_Timer(3.f);
 
-	proto_monke.attack_type = BOSS_SMASH;
+    boss_1.attack_type = BOSS_SMASH;
 
-	proto_monke.range_warning_timer = Create_Timer(1.f);
-	proto_monke.range_timer = Create_Timer(3.f);
-	proto_monke.isShootingWarningActive = 0;
-	proto_monke.isShooting = 0;
+    boss_1.range_warning_timer = Create_Timer(1.f);
+    boss_1.range_timer = Create_Timer(3.f);
+    boss_1.isShootingWarningActive = 0;
+    boss_1.isShooting = 0;
 
-	proto_monke.death_explosion_duration = Create_Timer(4.f);
+    boss_1.death_explosion_duration = Create_Timer(4.f);
 
-	for (s32 i = 0; i < ATTACK_TYPES; i++)
-	{
-		proto_melee[i].pos = { 0.f, 0.f };
-		proto_melee[i].attack_windup = PROTO_MONKE_WINDUP[i];
-		proto_melee[i].attack_active = proto_melee[i].attack_windup + PROTO_MONKE_ATTACK[i];
-		proto_melee[i].attack_recover = proto_melee[i].attack_active + PROTO_MONKE_RECOVER[i];
+    for (s32 i = 0; i < ATTACK_TYPES; i++)
+    {
+        boss_melee[i].pos = { 0.f, 0.f };
+        boss_melee[i].attack_windup = BOSS_WINDUP[i];
+        boss_melee[i].attack_active = boss_melee[i].attack_windup + BOSS_ATTACK[i];
+        boss_melee[i].attack_recover = boss_melee[i].attack_active + BOSS_RECOVER[i];
 
-		proto_melee[i].timer = Create_Timer(proto_melee[i].attack_recover);
+        boss_melee[i].timer = Create_Timer(boss_melee[i].attack_recover);
 
-		proto_melee[i].stun_duration = PROTO_MONKE_STUN[i];
-		if (proto_melee[i].stun_duration)
-		{
-			proto_melee[i].can_parry = true;
-		}
-		else
-		{
-			proto_melee[i].can_parry = false;
-		}
-	}
+        boss_melee[i].stun_duration = BOSS_STUN[i];
+        if (boss_melee[i].stun_duration)
+        {
+            boss_melee[i].can_parry = true;
+        }
+        else
+        {
+            boss_melee[i].can_parry = false;
+        }
+    }
 
-	Init_Boss_UI(proto_monke.hp);
+    Init_Boss_UI(boss_1.hp);
 }
 
 s32 last_hit = 0;
 s32 new_hit = 0;
 f32 damage = 0.f;
- 
-void Update_Prototype_Boss()
+
+void Update_Boss()
 {
-	if (proto_monke.state != BOSS_DEAD)
-	{
-		switch (proto_monke.state)
-		{
+    if (boss_1.state != BOSS_DEAD)
+    {
+        switch (boss_1.state)
+        {
+        case BOSS_IDLE:
+            if (!Update_Timer(&boss_1.idle_timer))
+            {
+                // Calculate distance between player to check if you wanna do ranged attack
+                boss_1.target_dist = AEVec2Distance(&boss_1.pos, &player.pos);
 
-		case BOSS_IDLE:
-			if (!Update_Timer(&proto_monke.idle_timer))
-			{
-				// Calculate distance between player to check if you wanna do ranged attack
-				proto_monke.target_dist = AEVec2Distance(&proto_monke.pos, &player.pos);
+                if (boss_1.target_dist > BOSS_DASH_DISTANCE) // Player is out of melee range
+                {
+                    f32 randomizer_ranged = AERandFloat();
+                    if (randomizer_ranged > 0.5f)
+                    {
+                        // Do a charge
+                        boss_1.attack_timer.current = 0.f;
+                        boss_1.attack_type = BOSS_CHARGE;
+                        boss_1.state = BOSS_RANGED_CHARGE;
+                    }
+                    else
+                    {
+                        // Do a charge
+                        boss_1.attack_timer.current = 0.f;
+                        boss_1.attack_type = BOSS_ROCKETFIST;
+                        boss_1.state = BOSS_RANGED_ROCKETFIST;
+                    }
+                }
+                else // Player is in melee range
+                {
+                    f32 randomizer_melee = AERandFloat();
+                    if (randomizer_melee > 0.5f)
+                    {
+                        // Do smash sweep combo
+                        boss_1.attack_timer.current = 0.f;
+                        boss_1.attack_type = BOSS_SMASH;
+                        boss_1.state = BOSS_SMASH_SWEEP;
+                    }
+                    else
+                    {
+                        // Do three hit combo
+                        boss_1.attack_timer.current = 0.f;
+                        boss_1.attack_type = BOSS_LEFT_HIT;
+                        boss_1.state = BOSS_THREE_HIT;
+                    }
+                }
+            }
+            break;
+        case BOSS_SMASH_SWEEP:
+            Smash_Sweep_Logic();
+            break;
 
+        case BOSS_THREE_HIT:
+            Three_Hit_Logic();
+            break;
 
-				if (proto_monke.target_dist > PROTO_MONKE_DASH_DISTANCE) // Player is out of melee range
-				{
+        case BOSS_RANGED_CHARGE:
+            Boss_Dash_Logic();
+            break;
 
-					f32 randomizer_ranged = AERandFloat();
-					if (randomizer_ranged > 0.5f)
-					{
-						// Do a charge
-						proto_monke.attack_timer.current = 0.f;
-						proto_monke.attack_type = BOSS_CHARGE;
-						proto_monke.state = BOSS_RANGED_CHARGE;
-					}
-					else
-					{
-						// Do a charge
-						proto_monke.attack_timer.current = 0.f;
-						proto_monke.attack_type = BOSS_ROCKETFIST;
-						proto_monke.state = BOSS_RANGED_ROCKETFIST;
-					}
+        case BOSS_RANGED_ROCKETFIST:
+            Boss_Rocket_Logic();
+            break;
 
-				}
-				else // Player is in melee range
-				{
-					f32 randomizer_melee = AERandFloat();
-					if (randomizer_melee > 0.5f)
-					{
-						// Do smash sweep combo
-						proto_monke.attack_timer.current = 0.f;
-						proto_monke.attack_type = BOSS_SMASH;
-						proto_monke.state = BOSS_SMASH_SWEEP;
-					}
-					else
-					{
-						// Do three hit combo
-						proto_monke.attack_timer.current = 0.f;
-						proto_monke.attack_type = BOSS_LEFT_HIT;
-						proto_monke.state = BOSS_THREE_HIT;
-					}
-				}
+        case BOSS_ROCKET_FIST_ACTIVE:
+            // Boss is inactive while rocket fists are active
+            if (rocket_fists.empty())
+            {
+                // No more active rocket fists, return to idle
+                boss_1.state = BOSS_IDLE;
+            }
+            break;
 
-			}
-			break;
-		case BOSS_SMASH_SWEEP:
-			Smash_Sweep_Logic();
-			break;
+        case BOSS_PARRIED:
+            if (!Update_Timer(&boss_1.stun_timer))
+            {
+                boss_1.state = BOSS_IDLE;
+            }
+            break;
 
-		case BOSS_THREE_HIT:
-			Three_Hit_Logic();
-			break;
+        default:
+            boss_1.state = BOSS_IDLE;
+            break;
+        }
 
-		case BOSS_RANGED_CHARGE:
-			Boss_Dash_Logic();
-			break;
-	
-		case BOSS_RANGED_ROCKETFIST:
-			Boss_Rocket_Logic();
-			break;
+        // Reset last hit if no new melee hit detected
+        if (!new_hit)
+        {
+            last_hit = 0;
+        }
 
-		case BOSS_ROCKET_FIST_ACTIVE:
-			// Boss is inactive while rocket fists are active
-			if (rocket_fists.empty())
-			{
-				// No more active rocket fists, return to idle
-				proto_monke.state = BOSS_IDLE;
-			}
-			break;
+        // Check for player melee attack collision
+        if (Attacked_Melee_rect(boss_1.pos, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT, &new_hit, &damage))
+        {
+            if (last_hit != new_hit)
+            {
+                if (player.ammo < 3)
+                {
+                    player.ammo++;
+                }
+                boss_1.hp -= damage;
+                last_hit = new_hit;
+            }
+        }
 
-		case BOSS_PARRIED:
-			if (!Update_Timer(&proto_monke.stun_timer))
-			{
-				proto_monke.state = BOSS_IDLE;
-			}
-			break;
+        // Check for player projectile collisions
+        if (Attacking_Ranged_Impact(boss_1.pos, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT, &damage))
+        {
+            boss_1.hp -= damage;
+            std::cout << "Boss hit! HP: " << boss_1.hp << '\n';
+        }
 
-		default:
-			proto_monke.state = BOSS_IDLE;
-			break;
-		}
+        // Update boss projectiles' behavior
+        for (auto& proj : boss_projectiles)
+        {
+            if (proj.active)
+            {
+                // Update boss projectiles' movement
+                proj.pos.x += proj.velocity.x * dt;
+                proj.pos.y += proj.velocity.y * dt;
+                proj.timer.current += 1.f * dt;
 
-		// Reset last hit if no new melee hit detected
-		if (!new_hit)
-		{
-			last_hit = 0;
-		}
+                // Update boss projectiles' transformation
+                AEMtx33 trans, scale;
+                AEMtx33Trans(&trans, proj.pos.x, proj.pos.y);
+                AEMtx33Scale(&scale, BOSS_PROJECTILE_RADIUS, BOSS_PROJECTILE_RADIUS);
+                AEMtx33Concat(&proj.transform, &trans, &scale);
 
-		// Check for player melee attack collision**
-		if (Attacked_Melee_rect(proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT, &new_hit, &damage))
-		{
-			if (last_hit != new_hit)
-			{
-				if (player.ammo < 3)
-				{
-					player.ammo++;
-				}
-				proto_monke.hp -= damage;
-				last_hit = new_hit;
-			}
-		}
+                // Deactivate projectiles after they hit player or after 4 seconds (aka range)
+                if (AETestCircleToCircle(&proj.pos, BOSS_PROJECTILE_RADIUS, &player.pos, player.radius) || proj.timer.current >= proj.timer.duration)
+                {
+                    proj.active = false;
+                    if (AETestCircleToCircle(&proj.pos, BOSS_PROJECTILE_RADIUS, &player.pos, player.radius))
+                    {
+                        switch (player.state)
+                        {
+                        case PARRY:
+                            Parried_Hit();
+                            break;
+                        case BLOCK:
+                            Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
+                            break;
+                        case PARRIED:
+                        case BLOCKED:
+                        case DODGE:
+                        case HIT:
+                            break;
+                        default:
+                            Eat_Hit(BOSS_PROJECTILE_DAMAGE);
+                        }
+                    }
+                }
+            }
+        }
 
-		// Check for player projectile collisions**
-		if (Attacking_Ranged_Impact(proto_monke.pos, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT, &damage))
-		{
-			proto_monke.hp -= damage;
-			std::cout << "Boss hit! HP: " << proto_monke.hp << '\n';
-		}
+        for (auto& fist : rocket_fists)
+        {
+            if (fist.active)
+            {
+                // Update rocket fist's movement
+                fist.pos.x += fist.velocity.x * dt;
+                fist.pos.y += fist.velocity.y * dt;
+                fist.timer.current += 1.f * dt;
 
-		// Update boss projectiles' behavior
-		for (auto& proj : proto_projectiles)
-		{
-			if (proj.active)
-			{
-				// Update boss projectiles' movement
-				proj.pos.x += proj.velocity.x * dt;
-				proj.pos.y += proj.velocity.y * dt;
-				proj.timer.current += 1.f * dt;
+                // Update rocket fist's transformation
+                AEMtx33 trans, scale;
+                AEMtx33Trans(&trans, fist.pos.x, fist.pos.y);
+                AEMtx33Scale(&scale, fist.radius, fist.radius);
+                AEMtx33Concat(&fist.transform, &trans, &scale);
 
-				// Update boss projectiles' transformation
-				AEMtx33 trans, scale;
-				AEMtx33Trans(&trans, proj.pos.x, proj.pos.y);
-				AEMtx33Scale(&scale, PROTO_PROJECTILE_RADIUS, PROTO_PROJECTILE_RADIUS);
-				AEMtx33Concat(&proj.transform, &trans, &scale);
+                // Deactivate rocket fist after it hits player or after 4 seconds (aka range)
+                if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius) || fist.timer.current >= fist.timer.duration)
+                {
+                    fist.active = false;
+                    if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius))
+                    {
+                        switch (player.state)
+                        {
+                        case PARRY:
+                            Parried_Hit();
+                            break;
+                        case BLOCK:
+                            Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
+                            break;
+                        case PARRIED:
+                        case BLOCKED:
+                        case DODGE:
+                        case HIT:
+                            break;
+                        default:
+                            Eat_Hit(BOSS_PROJECTILE_DAMAGE);
+                        }
+                    }
+                }
+            }
+        }
 
-				// Deactivate projectiles after they hit player or after 4 seconds (aka range)
-				if (AETestCircleToCircle(&proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius) || proj.timer.current >= proj.timer.duration)
-				{
-					proj.active = false;
-					if (AETestCircleToCircle(&proj.pos, PROTO_PROJECTILE_RADIUS, &player.pos, player.radius))
-					{
-						switch (player.state)
-						{
-						case PARRY:
+        // Remove inactive rocket fists
+        rocket_fists.erase(std::remove_if(rocket_fists.begin(), rocket_fists.end(), [](const RocketFist& f) { return !f.active; }), rocket_fists.end());
 
-							Parried_Hit();
-							break;
-						case BLOCK:
-							Blocked_Hit(PROTO_PROJECTILE_DAMAGE);
-							break;
-						case PARRIED:
-						case BLOCKED:
-						case DODGE:
-						case HIT:
-							break;
-						default:
-							Eat_Hit(PROTO_PROJECTILE_DAMAGE);
-						}
-					}
-				}
-			}
-		}
+        // Remove inactive boss projectiles
+        boss_projectiles.erase(std::remove_if(boss_projectiles.begin(), boss_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), boss_projectiles.end());
 
-		for (auto& fist : rocket_fists)
-		{
-			if (fist.active)
-			{
-				// Update rocket fist's movement
-				fist.pos.x += fist.velocity.x * dt;
-				fist.pos.y += fist.velocity.y * dt;
-				fist.timer.current += 1.f * dt;
+        // Clamp HP to prevent over-reduction
+        boss_1.hp = AEClamp(boss_1.hp, 0.f, BOSS_MAXHP);
+        if (boss_1.hp > 0.f && boss_1.hp <= 0.6 * BOSS_MAXHP && boss_1.state != BOSS_PARRIED)
+        {
+            std::cout << boss_1.range_timer.current << '\n';
+            if (!Update_Timer(&boss_1.range_timer))
+            {
+                boss_1.isShooting = 1;
+                boss_1.range_timer.current = boss_1.range_warning_timer.current = 0.f;
+                boss_1.isShootingWarningActive = 1;
+            }
 
-				// Update rocket fist's transformation
-				AEMtx33 trans, scale;
-				AEMtx33Trans(&trans, fist.pos.x, fist.pos.y);
-				AEMtx33Scale(&scale, fist.radius, fist.radius);
-				AEMtx33Concat(&fist.transform, &trans, &scale);
+            if (boss_1.isShooting == 1)
+            {
+                boss_1.isShootingWarningActive = 1;
+                std::cout << "Boss is shooting!!!" << '\n';
+                if (!Update_Timer(&boss_1.range_warning_timer))
+                {
+                    boss_1.isShootingWarningActive = 0;
+                    AEVec2 direction = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+                    AEVec2Normalize(&direction, &direction);
 
-				// Deactivate rocket fist after it hits player or after 4 seconds (aka range)
-				if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius) || fist.timer.current >= fist.timer.duration)
-				{
-					fist.active = false;
-					if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius))
-					{
-						switch (player.state)
-						{
-						case PARRY:
-							Parried_Hit();
-							break;
-						case BLOCK:
-							Blocked_Hit(PROTO_PROJECTILE_DAMAGE);
-							break;
-						case PARRIED:
-						case BLOCKED:
-						case DODGE:
-						case HIT:
-							break;
-						default:
-							Eat_Hit(PROTO_PROJECTILE_DAMAGE);
-						}
-					}
-				}
-			}
-		}
+                    Boss_Range_Attack(boss_1.pos, direction);
+                    boss_1.isShooting = 0;
+                }
+            }
+        }
+        if (boss_1.hp <= 0.f)
+        {
+            boss_1.state = BOSS_DEAD;
+            boss_1.death_explosion_duration.current = boss_1.explosion_timer.current = 0.f;
+        }
 
-		// Remove inactive rocket fists
-		rocket_fists.erase(std::remove_if(rocket_fists.begin(), rocket_fists.end(), [](const RocketFist& f) { return !f.active; }), rocket_fists.end());
+        // Update Boss UI
+        Update_Boss_UI(boss_1.hp);
+    }
+    else if (boss_1.state == BOSS_DEAD)
+    {
+        levelState = CLEARED;
+        for (auto& proj : boss_projectiles)
+        {
+            proj.active = false;
+        }
+        if (Update_Timer(&boss_1.death_explosion_duration))
+        {
+            std::cout << boss_1.death_explosion_duration.current << '\n';
+            if (!Update_Timer(&boss_1.explosion_timer))
+            {
+                Draw_Boss_Death_Explosion(boss_1.pos);
+            }
+        }
+    }
 
-		// Remove inactive boss projectiles
-		proto_projectiles.erase(std::remove_if(proto_projectiles.begin(), proto_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), proto_projectiles.end());
+    // Update Boss Hitbox
+    Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
 
-
-
-		// Clamp HP to prevent over-reduction
-		proto_monke.hp = AEClamp(proto_monke.hp, 0.f, PROTO_MONKE_MAXHP);
-		if (proto_monke.hp > 0.f && proto_monke.hp <= 0.6 * PROTO_MONKE_MAXHP && proto_monke.state != BOSS_PARRIED)
-		{
-			std::cout << proto_monke.range_timer.current << '\n';
-			if (!Update_Timer(&proto_monke.range_timer))
-			{
-				proto_monke.isShooting = 1;
-				proto_monke.range_timer.current = proto_monke.range_warning_timer.current = 0.f;
-				proto_monke.isShootingWarningActive = 1;
-			}
-
-			if (proto_monke.isShooting == 1) 
-			{
-				proto_monke.isShootingWarningActive = 1;
-				std::cout << "Boss is shooting!!!" << '\n';
-				if (!Update_Timer(&proto_monke.range_warning_timer))
-				{
-					proto_monke.isShootingWarningActive = 0;
-					AEVec2 direction = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
-					AEVec2Normalize(&direction, &direction);
-
-					Proto_Monke_Range_Attack(proto_monke.pos, direction);
-					proto_monke.isShooting = 0;
-				}
-			}
-		}
-		if (proto_monke.hp <= 0.f)
-		{
-			proto_monke.state = BOSS_DEAD;
-			proto_monke.death_explosion_duration.current = proto_monke.explosion_timer.current = 0.f;
-		}
-
-		// Update Boss UI
-		Update_Boss_UI(proto_monke.hp);
-	}
-
-	else if (proto_monke.state == BOSS_DEAD)
-	{
-		levelState = CLEARED;
-		for (auto& proj : proto_projectiles)
-		{
-			proj.active = false;
-		}
-		if (Update_Timer(&proto_monke.death_explosion_duration))
-		{
-			std::cout << proto_monke.death_explosion_duration.current << '\n';
-			if (!Update_Timer(&proto_monke.explosion_timer))
-			{
-				Draw_Proto_Monke_Death_Explosion(proto_monke.pos);
-			}
-		}
-	}
-
-	// **Update Boss Hitbox**
-	Update_AABB(&proto_monke.hitbox, proto_monke.pos.x, proto_monke.pos.y, PROTO_MONKE_HITBOX_WIDTH, PROTO_MONKE_HITBOX_HEIGHT);
-
-	std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << proto_monke.state << '\n';
+    std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
 }
 
-
-void Draw_Prototype_Boss()
+void Draw_Boss()
 {
-	Color* color = {};
-	switch (proto_monke.state)
-	{
-	case BOSS_SMASH_SWEEP:
-		color = &proto_swing;
-		break;
-	case BOSS_THREE_HIT:
-		//TBC
-		break;
-	case BOSS_PARRIED:
-		color = &proto_parried;
-		break;
-	case BOSS_RANGED_CHARGE:
-		//TBC
-		break;
+    Color* color = {};
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+        color = &boss_swing;
+        break;
+    case BOSS_THREE_HIT:
+        // TBC
+        break;
+    case BOSS_PARRIED:
+        color = &boss_parried;
+        break;
+    case BOSS_RANGED_CHARGE:
+        // TBC
+        break;
+    case BOSS_RANGED_ROCKETFIST:
+        // TBC
+        break;
+    case BOSS_IDLE:
+    default:
+        color = &boss_idle;
+        break;
+    }
 
-	case BOSS_RANGED_ROCKETFIST:
-		//TBC
-		break;
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+    {
+        u32 row = 0;
+        u32 start_col = 0;
+        u32 end_col = 0;
+        f32 duration = 0.f;
+        switch (boss_1.attack_type)
+        {
+        case BOSS_SMASH:
+            switch (boss_1.attackstate)
+            {
+            case BOSS_ATTACK_WINDUP:
+                row = 1;
+                start_col = 0;
+                end_col = 4;
+                duration = boss_melee[boss_1.attack_type].attack_windup;
+                break;
+            case BOSS_ATTACK_ACTIVE:
+                row = 1;
+                start_col = 4;
+                end_col = 5;
+                duration = boss_melee[boss_1.attack_type].attack_active;
+                break;
+            case BOSS_ATTACK_RECOVER:
+                row = 1;
+                start_col = 5;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_recover;
+                break;
+            }
+            break;
+        case BOSS_SWEEP:
+            switch (boss_1.attackstate)
+            {
+            case BOSS_ATTACK_WINDUP:
+                row = 2;
+                start_col = 0;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_windup;
+                break;
+            case BOSS_ATTACK_ACTIVE:
+                row = 3;
+                start_col = 0;
+                end_col = 3;
+                duration = boss_melee[boss_1.attack_type].attack_active;
+                break;
+            case BOSS_ATTACK_RECOVER:
+                row = 3;
+                start_col = 3;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_recover;
+                break;
+            }
+            break;
+        }
+        Set_SpriteSheet_current(&boss_sprite_sheet, row, start_col, end_col, boss_1.attack_timer, duration);
+        break;
+    }
+    case BOSS_THREE_HIT:
+    {
+        // Up to you my brother JQ
+        break;
+    }
+    case BOSS_PARRIED:
+        Loop_Timer(&boss_sprite_sheet.timer);
+        Set_SpriteSheet_current(&boss_sprite_sheet, 4, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
+        break;
+    case BOSS_IDLE:
+    default:
+        Loop_Timer(&boss_sprite_sheet.timer);
+        Set_SpriteSheet_current(&boss_sprite_sheet, 0, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
+        break;
+    }
 
-	case BOSS_IDLE:
-	default:
-		color = &proto_idle;
-		break;
-	}
+    // Ranged attack warning indicator
+    if (boss_1.isShootingWarningActive && boss_1.state != BOSS_DEAD)
+    {
+        DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_PROJECTILE_RADIUS, boss_projectile_indicator);
+        DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), (boss_1.range_warning_timer.current / boss_1.range_warning_timer.duration) * BOSS_PROJECTILE_RADIUS, boss_projectile_color);
+    }
 
-	switch (proto_monke.state)
-	{
-	case BOSS_SMASH_SWEEP:
-	{
-		u32 row = 0;
-		u32 start_col = 0;
-		u32 end_col = 0;
-		f32 duration = 0.f;
-		switch (proto_monke.attack_type)
-		{
-		case BOSS_SMASH:
-			switch (proto_monke.attackstate)
-			{
-			case BOSS_ATTACK_WINDUP:
-				row = 1;
-				start_col = 0;
-				end_col = 4;
-				duration = proto_melee[proto_monke.attack_type].attack_windup;
-				break;
-			case BOSS_ATTACK_ACTIVE:
-				row = 1;
-				start_col = 4;
-				end_col = 5;
-				duration = proto_melee[proto_monke.attack_type].attack_active;
-				break;
-			case BOSS_ATTACK_RECOVER:
-				row = 1;
-				start_col = 5;
-				end_col = 8;
-				duration = proto_melee[proto_monke.attack_type].attack_recover;
-				break;
-			}
-			break;
-		case BOSS_SWEEP:
-			switch (proto_monke.attackstate)
-			{
-			case BOSS_ATTACK_WINDUP:
-				row = 2;
-				start_col = 0;
-				end_col = 8;
-				duration = proto_melee[proto_monke.attack_type].attack_windup;
-				break;
-			case BOSS_ATTACK_ACTIVE:
-				row = 3;
-				start_col = 0;
-				end_col = 3;
-				duration = proto_melee[proto_monke.attack_type].attack_active;
-				break;
-			case BOSS_ATTACK_RECOVER:
-				row = 3;
-				start_col = 3;
-				end_col = 8;
-				duration = proto_melee[proto_monke.attack_type].attack_recover;
-				break;
-			}
-			break;
-		}
-		Set_SpriteSheet_current(&ssproto_monke, row, start_col, end_col, proto_monke.attack_timer, duration);
-		break;
-	}
-	case BOSS_THREE_HIT:
-	{
-		//Up to you my brother JQ
-		break;
-	}
-	
-	case BOSS_PARRIED:
-		Loop_Timer(&ssproto_monke.timer);
-		Set_SpriteSheet_current(&ssproto_monke, 4, 0, 8, ssproto_monke.timer, ssproto_monke.timer.duration);
-		break;
-	case BOSS_IDLE:
-	default:
-		Loop_Timer(&ssproto_monke.timer);
-		Set_SpriteSheet_current(&ssproto_monke, 0, 0, 8, ssproto_monke.timer, ssproto_monke.timer.duration);
-		break;
-	}
+    // Ranged attack projectiles
+    for (const auto& proj : boss_projectiles)
+    {
+        if (proj.active)
+        {
+            DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, boss_projectile_color); // Example projectile size and color
+        }
+    }
 
-	// Ranged attack warning indicator
-	if (proto_monke.isShootingWarningActive && proto_monke.state != BOSS_DEAD) 
-	{
-		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), PROTO_PROJECTILE_RADIUS, proto_projectile_indicator);
-		DrawCircle(World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), (proto_monke.range_warning_timer.current / proto_monke.range_warning_timer.duration) * PROTO_PROJECTILE_RADIUS, proto_projectile_color);
-	}
+    for (const auto& fist : rocket_fists)
+    {
+        if (fist.active)
+        {
+            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
+        }
+    }
 
-	// Ranged attack projectiles
-	for (const auto& proj : proto_projectiles)
-	{
-		if (proj.active)
-		{
-			DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, proto_projectile_color); // Example projectile size and color
-		}
-	}
+    // Death explosion
+    for (auto& exp : boss_death_explosion)
+    {
+        if (exp.active)
+        {
+            f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f));
+            f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f));
+            DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * BOSS_DEATH_EXPLOSION_RADIUS, boss_death_explosion_color);
+            if (exp.timer.current >= exp.timer.duration)
+            {
+                exp.active = false;
+            }
+        }
+        // Remove inactive explosion particles
+        boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& p) { return !p.active; }), boss_death_explosion.end());
+    }
 
-	for (const auto& fist : rocket_fists)
-	{
-		if (fist.active)
-		{
-			DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, proto_projectile_color);
-		}
-	}
-
-	// Death explosion
-	for (auto& exp : proto_death_explosion)
-	{
-		if (exp.active)
-		{
-			f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * PROTO_MONKE_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * PROTO_MONKE_HITBOX_WIDTH * 0.8f));
-			f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * PROTO_MONKE_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * PROTO_MONKE_HITBOX_HEIGHT * 0.8f));
-			DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * PROTO_MONKE_DEATH_EXPLOSION_RADIUS, proto_death_explosion_color);
-			if (exp.timer.current >= exp.timer.duration)
-			{
-				exp.active = false;
-			}
-		}
-		// Remove inactive explosion particles
-		proto_death_explosion.erase(std::remove_if(proto_death_explosion.begin(), proto_death_explosion.end(), [](const Boss_Explosion& p) { return !p.active; }), proto_death_explosion.end());
-	}
-
-	Draw_SpriteSheet_test(ssproto_monke, World_To_Screen_x(proto_monke.pos.x), World_To_Screen_y(proto_monke.pos.y), proto_monke.width, proto_monke.height, 0.f);
+    Draw_SpriteSheet_test(boss_sprite_sheet, World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, 0.f);
 }
 
-void Unload_Prototype_Boss()
+void Unload_Boss()
 {
-	Unload_SpriteSheet(&ssproto_monke);
+    Unload_SpriteSheet(&boss_sprite_sheet);
 }
-
-
 
 const f32 SMASH_RADIUS = 200.f;
 const f32 SMASH_DAMAGE = 30.f;
@@ -565,456 +548,456 @@ bool will_hit = true;
 
 void Smash_Sweep_Logic()
 {
-	if (Update_Timer(&proto_monke.attack_timer))
-	{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up (to update anim)
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_SMASH:
+                x_offset = -200.f;
+                boss_melee[BOSS_SMASH].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+                break;
 
-		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
-		{
-			will_hit = true;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-			switch (proto_monke.attack_type)
-			{
-			case BOSS_SMASH:
-				x_offset = -200.f;
-				proto_melee[BOSS_SMASH].pos = { proto_monke.pos.x + x_offset, proto_monke.pos.y - 150.f };
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_SMASH].pos.x), World_To_Screen_y(proto_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, proto_windup);
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_SMASH].pos.x), World_To_Screen_y(proto_melee[BOSS_SMASH].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
-				break;
+            case BOSS_SWEEP:
+                boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_windup);
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x) + ((boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH / 2.f - SWEEP_WIDTH / 2.f), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH, SWEEP_HEIGHT, boss_swing);
+                break;
 
-			case BOSS_SWEEP:
-				proto_melee[BOSS_SWEEP].pos = { proto_monke.pos.x, proto_monke.pos.y - 150.f };
-				DrawRect(World_To_Screen_x(proto_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(proto_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_windup);
-				DrawRect(World_To_Screen_x(proto_melee[BOSS_SWEEP].pos.x) + ((proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SWEEP_WIDTH/2.f - SWEEP_WIDTH/2.f) , World_To_Screen_y(proto_melee[BOSS_SWEEP].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SWEEP_WIDTH, SWEEP_HEIGHT, proto_swing);
-
-				break;
-
-			default:
-				break;
-			}
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)	// Attack is active (check collision)
-		{
-			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
-			switch (proto_monke.attack_type)
-			{
-			case BOSS_SMASH:
-				if (AETestCircleToCircle(&proto_melee[BOSS_SMASH].pos, SMASH_RADIUS, &player.pos, player.radius))
-				{
-					// player dmg calc
-					if (will_hit)
-					{
-						Proto_Monke_Attack_Test(proto_melee[BOSS_SMASH].can_parry, 30.f);
-					}
-				}
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_SMASH].pos.x), World_To_Screen_y(proto_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, proto_idle);
-				break;
-			case BOSS_SWEEP:
-				if (AETestCircleToRect(&player.pos, player.radius, &proto_melee[BOSS_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
-				{
-					// parry checks
-					if (will_hit)
-					{
-						Proto_Monke_Attack_Test(proto_melee[BOSS_SWEEP].can_parry, 30.f);
-					}
-				}
-				DrawRect(World_To_Screen_x(proto_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(proto_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, proto_idle);
-				break;
-			default:
-				proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-				break;
-			}
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)	// Attack is recovering (update anim)
-		{
-			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-		}
-	}
-	else
-	{
-		if (proto_monke.attack_type == BOSS_SMASH)
-		{
-			proto_monke.attack_type++;
-			proto_melee[proto_monke.attack_type].timer.current = 0.f;
-			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-		}
-		else
-		{
-			std::cout << "YES";
-			proto_monke.state = BOSS_IDLE;
-			proto_monke.attack_type = 0;
-			proto_monke.idle_timer.current = 0.f;
-		}
-	}
+            default:
+                break;
+            }
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_SMASH:
+                if (AETestCircleToCircle(&boss_melee[BOSS_SMASH].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_SMASH].can_parry, 30.f);
+                    }
+                }
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_idle);
+                break;
+            case BOSS_SWEEP:
+                if (AETestCircleToRect(&player.pos, player.radius, &boss_melee[BOSS_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
+                {
+                    // Parry checks
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_SWEEP].can_parry, 30.f);
+                    }
+                }
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_idle);
+                break;
+            default:
+                boss_1.attackstate = BOSS_ATTACK_RECOVER;
+                break;
+            }
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering (update anim)
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+        }
+    }
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
+            boss_1.attack_type++;
+            boss_melee[boss_1.attack_type].timer.current = 0.f;
+            boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+        }
+        else
+        {
+            std::cout << "YES";
+            boss_1.state = BOSS_IDLE;
+            boss_1.attack_type = 0;
+            boss_1.idle_timer.current = 0.f;
+        }
+    }
 }
 
 void Three_Hit_Logic()
 {
-	if (Update_Timer(&proto_monke.attack_timer))
-	{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up (to update anim)
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_LEFT_HIT:
+                x_offset = -200.f;
+                boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+                break;
 
-		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)			// Attack is winding up (to update anim)
-		{
-			will_hit = true;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-			switch (proto_monke.attack_type)
-			{
-			case BOSS_LEFT_HIT:
-				x_offset = -200.f;
-				proto_melee[BOSS_LEFT_HIT].pos = { proto_monke.pos.x + x_offset, proto_monke.pos.y - 150.f };
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, proto_windup);
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_LEFT_HIT].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
-				break;
+            case BOSS_RIGHT_HIT:
+                x_offset = 200.f;
+                boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+                break;
 
-			case BOSS_RIGHT_HIT:
-				x_offset = 200.f;
-				proto_melee[BOSS_RIGHT_HIT].pos = { proto_monke.pos.x + x_offset, proto_monke.pos.y - 150.f };
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, proto_windup);
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_RIGHT_HIT].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * SMASH_RADIUS, proto_swing);
-				break;
+            case BOSS_CIRCLE_HIT:
+                boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * BIG_SMASH_RADIUS, boss_swing);
+                break;
 
-			case BOSS_CIRCLE_HIT:
-				proto_melee[BOSS_CIRCLE_HIT].pos = { proto_monke.pos.x, proto_monke.pos.y - 150.f };
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, proto_windup);
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_CIRCLE_HIT].pos.y), (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup) * BIG_SMASH_RADIUS, proto_swing);
-				break;
-
-			default:
-				break;
-			}
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)	// Attack is active (check collision)
-		{
-			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
-			switch (proto_monke.attack_type)
-			{
-			case BOSS_LEFT_HIT:
-				if (AETestCircleToCircle(&proto_melee[BOSS_LEFT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
-				{
-					// player dmg calc
-					if (will_hit)
-					{
-						Proto_Monke_Attack_Test(proto_melee[BOSS_LEFT_HIT].can_parry, 30.f);
-					}
-				}
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, proto_idle);
-				break;
-			case BOSS_RIGHT_HIT:
-				if (AETestCircleToCircle(&proto_melee[BOSS_RIGHT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
-				{
-					// player dmg calc
-					if (will_hit)
-					{
-						Proto_Monke_Attack_Test(proto_melee[BOSS_RIGHT_HIT].can_parry, 30.f);
-					}
-				}
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, proto_idle);
-				break;
-
-			case BOSS_CIRCLE_HIT:
-				if (AETestCircleToCircle(&proto_melee[BOSS_CIRCLE_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
-				{
-					// player dmg calc
-					if (will_hit)
-					{
-						Proto_Monke_Attack_Test(proto_melee[BOSS_CIRCLE_HIT].can_parry, 30.f);
-					}
-				}
-				DrawCircle(World_To_Screen_x(proto_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(proto_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, proto_idle);
-				break;
-
-			default:
-				proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-				break;
-			}
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)	// Attack is recovering (update anim)
-		{
-			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-		}
-	}
-	else
-	{
-		if (proto_monke.attack_type == BOSS_LEFT_HIT || proto_monke.attack_type == BOSS_RIGHT_HIT)
-		{
-			proto_monke.attack_type++;
-			proto_melee[proto_monke.attack_type].timer.current = 0.f;
-			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-		}
-		else
-		{
-			std::cout << "YES";
-			proto_monke.state = BOSS_IDLE;
-			proto_monke.attack_type = 0;
-			proto_monke.idle_timer.current = 0.f;
-		}
-	}
+            default:
+                break;
+            }
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_LEFT_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_LEFT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_LEFT_HIT].can_parry, 30.f);
+                    }
+                }
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_idle);
+                break;
+            case BOSS_RIGHT_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_RIGHT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_RIGHT_HIT].can_parry, 30.f);
+                    }
+                }
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_idle);
+                break;
+            case BOSS_CIRCLE_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_CIRCLE_HIT].pos, BIG_SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_CIRCLE_HIT].can_parry, 30.f);
+                    }
+                }
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_idle);
+                break;
+            default:
+                boss_1.attackstate = BOSS_ATTACK_RECOVER;
+                break;
+            }
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering (update anim)
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+        }
+    }
+    else
+    {
+        if (boss_1.attack_type == BOSS_LEFT_HIT || boss_1.attack_type == BOSS_RIGHT_HIT)
+        {
+            boss_1.attack_type++;
+            boss_melee[boss_1.attack_type].timer.current = 0.f;
+            boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+        }
+        else
+        {
+            std::cout << "YES";
+            boss_1.state = BOSS_IDLE;
+            boss_1.attack_type = 0;
+            boss_1.idle_timer.current = 0.f;
+        }
+    }
 }
 
 void Boss_Dash_Logic()
 {
-	if (Update_Timer(&proto_monke.attack_timer))
-	{
-		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)
-		{
-			// Attack is winding up (to update anim)
-			will_hit = true;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up (to update anim)
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-			// Set the target position to the player's current position
-			proto_monke.target_pos = player.pos;
+            // Set the target position to the player's current position
+            boss_1.target_pos = player.pos;
 
-			// Calculate the direction vector
-			proto_monke.target_dir = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
-			AEVec2Normalize(&proto_monke.target_dir, &proto_monke.target_dir);
+            // Calculate the direction vector
+            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
 
-			// Calculate the rotation angle
-			proto_monke.target_rot = atan2(proto_monke.target_dir.y, proto_monke.target_dir.x);
+            // Calculate the rotation angle
+            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
 
-			// Calculate the distance
-			proto_monke.target_dist = AEVec2Distance(&player.pos, &proto_monke.pos);
+            // Calculate the distance
+            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
 
-			// Calculate the progress of the windup (0 to 1)
-			f32 windup_progress = proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup;
+            // Calculate the progress of the windup (0 to 1)
+            f32 windup_progress = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
 
-			// Draw the base rectangle (full area of the attack)
-			DrawRotatedRect(
-				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist / 2.f)),  // Center X (offset by half the distance)
-				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist / 2.f)),  // Center Y (offset by half the distance)
-				proto_monke.target_dist,  // Length of the rectangle (full distance to target)
-				PROTO_MONKE_HEIGHT,       // Height of the rectangle
-				proto_windup,             // Color for the base rectangle
-				proto_monke.target_rot    // Rotation angle
-			);
+            // Draw the base rectangle (full area of the attack)
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),  // Center X (offset by half the distance)
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist / 2.f)),  // Center Y (offset by half the distance)
+                boss_1.target_dist,  // Length of the rectangle (full distance to target)
+                BOSS_HEIGHT,         // Height of the rectangle
+                boss_windup,         // Color for the base rectangle
+                boss_1.target_rot    // Rotation angle
+            );
 
-			// Draw the growing rectangle (progress of the windup)
-			DrawRotatedRect(
-				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
-				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
-				proto_monke.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
-				PROTO_MONKE_HEIGHT,                        // Height of the rectangle
-				proto_swing,                               // Color for the growing rectangle
-				proto_monke.target_rot                     // Rotation angle
-			);
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)
-		{
-			// Attack is active (check collision)
-			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
+            // Draw the growing rectangle (progress of the windup)
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
+                boss_1.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
+                BOSS_HEIGHT,                          // Height of the rectangle
+                boss_swing,                          // Color for the growing rectangle
+                boss_1.target_rot                     // Rotation angle
+            );
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
-			// Calculate the remaining time for the charge attack
-			f32 remaining_time = proto_melee[proto_monke.attack_type].timer.duration - proto_monke.attack_timer.current;
+            // Calculate the remaining time for the charge attack
+            f32 remaining_time = boss_melee[boss_1.attack_type].timer.duration - boss_1.attack_timer.current;
 
-			// Calculate the required speed to reach the target in the remaining time
-			f32 required_speed = proto_monke.target_dist*5.f / remaining_time;
+            // Calculate the required speed to reach the target in the remaining time
+            f32 required_speed = boss_1.target_dist * 5.f / remaining_time;
 
-			// Move boss towards the target position using the required speed
-			proto_monke.pos.x += proto_monke.target_dir.x * required_speed * dt;
-			proto_monke.pos.y += proto_monke.target_dir.y * required_speed * dt;
+            // Move boss towards the target position using the required speed
+            boss_1.pos.x += boss_1.target_dir.x * required_speed * dt;
+            boss_1.pos.y += boss_1.target_dir.y * required_speed * dt;
 
-			// Check for collision with the player
-			if (AETestCircleToRect(&player.pos, player.radius, &proto_monke.pos, PROTO_MONKE_WIDTH, PROTO_MONKE_HEIGHT))
-			{
-				// Parry checks
-				if (will_hit)
-				{
-					Proto_Monke_Attack_Test(proto_melee[BOSS_CHARGE].can_parry, 30.f);
-				}
-			}
+            // Check for collision with the player
+            if (AETestCircleToRect(&player.pos, player.radius, &boss_1.pos, BOSS_WIDTH, BOSS_HEIGHT))
+            {
+                // Parry checks
+                if (will_hit)
+                {
+                    Boss_Attack_Test(boss_melee[BOSS_CHARGE].can_parry, 30.f);
+                }
+            }
 
-			// Check if boss has reached the target position with a slight buffer
-			f32 distance_to_target = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
-			if (distance_to_target <= 10.f)  // Adjust this threshold if needed
-			{
-				// Snap the boss to the target position to ensure it stops exactly
-				proto_monke.pos = proto_monke.target_pos;
+            // Check if boss has reached the target position with a slight buffer
+            f32 distance_to_target = AEVec2Distance(&boss_1.pos, &boss_1.target_pos);
+            if (distance_to_target <= 10.f)  // Adjust this threshold if needed
+            {
+                // Snap the boss to the target position to ensure it stops exactly
+                boss_1.pos = boss_1.target_pos;
 
-				// Transition to the next state (e.g., BOSS_SMASH_SWEEP)
-				proto_monke.attack_timer.current = 0.f;
-				proto_monke.attack_type = BOSS_SMASH;
-				proto_monke.state = BOSS_SMASH_SWEEP;
-			}
+                // Transition to the next state (e.g., BOSS_SMASH_SWEEP)
+                boss_1.attack_timer.current = 0.f;
+                boss_1.attack_type = BOSS_SMASH;
+                boss_1.state = BOSS_SMASH_SWEEP;
+            }
 
-			// Draw the attack hitbox
-			DrawRotatedRect(
-				World_To_Screen_x(proto_monke.pos.x),
-				World_To_Screen_y(proto_monke.pos.y),
-				PROTO_MONKE_WIDTH,
-				PROTO_MONKE_HEIGHT,
-				proto_idle,
-				proto_monke.target_rot
-			);
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)
-		{
-			// Attack is recovering (update anim)
-			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-		}
-	}
-	else
-	{
-		if (proto_monke.attack_type == BOSS_SMASH)
-		{
-			proto_monke.attack_type++;
-			proto_melee[proto_monke.attack_type].timer.current = 0.f;
-			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-		}
-		else
-		{
-			std::cout << "YES";
-			proto_monke.state = BOSS_IDLE;
-			proto_monke.attack_type = 0;
-			proto_monke.idle_timer.current = 0.f;
-		}
-	}
+            // Draw the attack hitbox
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x),
+                World_To_Screen_y(boss_1.pos.y),
+                BOSS_WIDTH,
+                BOSS_HEIGHT,
+                boss_idle,
+                boss_1.target_rot
+            );
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering (update anim)
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+        }
+    }
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
+            boss_1.attack_type++;
+            boss_melee[boss_1.attack_type].timer.current = 0.f;
+            boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+        }
+        else
+        {
+            std::cout << "YES";
+            boss_1.state = BOSS_IDLE;
+            boss_1.attack_type = 0;
+            boss_1.idle_timer.current = 0.f;
+        }
+    }
 }
 
 void Boss_Rocket_Logic()
 {
-	if (Update_Timer(&proto_monke.attack_timer))
-	{
-		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)
-		{
-			// Attack is winding up (to update anim)
-			will_hit = true;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up (to update anim)
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-			// Set the target position to the player's current position
-			proto_monke.target_pos = player.pos;
+            // Set the target position to the player's current position
+            boss_1.target_pos = player.pos;
 
-			// Calculate the direction vector
-			proto_monke.target_dir = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
-			AEVec2Normalize(&proto_monke.target_dir, &proto_monke.target_dir);
+            // Calculate the direction vector
+            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
 
-			// Calculate the rotation angle
-			proto_monke.target_rot = atan2(proto_monke.target_dir.y, proto_monke.target_dir.x);
+            // Calculate the rotation angle
+            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
 
-			// Calculate the distance
-			proto_monke.target_dist = AEVec2Distance(&player.pos, &proto_monke.pos);
+            // Calculate the distance
+            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
 
-			// Calculate the progress of the windup (0 to 1)
-			f32 windup_progress = proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup;
+            // Calculate the progress of the windup (0 to 1)
+            f32 windup_progress = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
 
-			// Draw the base rectangle (full area of the attack)
-			DrawRotatedRect(
-				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist / 2.f)),  // Center X (offset by half the distance)
-				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist / 2.f)),  // Center Y (offset by half the distance)
-				proto_monke.target_dist,  // Length of the rectangle (full distance to target)
-				PROTO_MONKE_HEIGHT,       // Height of the rectangle
-				proto_windup,             // Color for the base rectangle
-				proto_monke.target_rot    // Rotation angle
-			);
+            // Draw the base rectangle (full area of the attack)
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),  // Center X (offset by half the distance)
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist / 2.f)),  // Center Y (offset by half the distance)
+                boss_1.target_dist,  // Length of the rectangle (full distance to target)
+                BOSS_HEIGHT,         // Height of the rectangle
+                boss_windup,         // Color for the base rectangle
+                boss_1.target_rot    // Rotation angle
+            );
 
-			// Draw the growing rectangle (progress of the windup)
-			DrawRotatedRect(
-				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
-				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
-				proto_monke.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
-				PROTO_MONKE_HEIGHT,                        // Height of the rectangle
-				proto_swing,                               // Color for the growing rectangle
-				proto_monke.target_rot                     // Rotation angle
-			);
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)
-		{
-			// Attack is active (check collision)
-			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
+            // Draw the growing rectangle (progress of the windup)
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
+                boss_1.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
+                BOSS_HEIGHT,                          // Height of the rectangle
+                boss_swing,                           // Color for the growing rectangle
+                boss_1.target_rot                     // Rotation angle
+            );
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
-			// Spawn a rocket fist
-			RocketFist fist;
-			fist.pos = proto_monke.pos;
-			fist.velocity = { proto_monke.target_dir.x * PROTO_PROJECTILE_SPEED, proto_monke.target_dir.y * PROTO_PROJECTILE_SPEED };
-			fist.radius = PROTO_PROJECTILE_RADIUS;
-			fist.active = true;
-			fist.timer = Create_Timer(4.f);
-			AEMtx33Identity(&fist.transform);
-			rocket_fists.push_back(fist);
+            // Spawn a rocket fist
+            RocketFist fist;
+            fist.pos = boss_1.pos;
+            fist.velocity = { boss_1.target_dir.x * BOSS_PROJECTILE_SPEED, boss_1.target_dir.y * BOSS_PROJECTILE_SPEED };
+            fist.radius = BOSS_PROJECTILE_RADIUS;
+            fist.active = true;
+            fist.timer = Create_Timer(4.f);
+            AEMtx33Identity(&fist.transform);
+            rocket_fists.push_back(fist);
 
-			// Set the boss state to inactive while the rocket fist is active
-			proto_monke.state = BOSS_ROCKET_FIST_ACTIVE;
+            // Set the boss state to inactive while the rocket fist is active
+            boss_1.state = BOSS_ROCKET_FIST_ACTIVE;
 
-			// Transition to the next state (e.g., BOSS_SMASH_SWEEP)
-			proto_monke.attack_timer.current = 0.f;
-			proto_monke.attack_type = BOSS_SMASH;
-		}
-		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)
-		{
-			// Attack is recovering (update anim)
-			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
-		}
-	}
-	else
-	{
-		if (proto_monke.attack_type == BOSS_SMASH)
-		{
-			proto_monke.attack_type++;
-			proto_melee[proto_monke.attack_type].timer.current = 0.f;
-			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
-			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
-		}
-		else
-		{
-			std::cout << "YES";
-			proto_monke.state = BOSS_IDLE;
-			proto_monke.attack_type = 0;
-			proto_monke.idle_timer.current = 0.f;
-		}
-	}
+            // Transition to the next state (e.g., BOSS_SMASH_SWEEP)
+            boss_1.attack_timer.current = 0.f;
+            boss_1.attack_type = BOSS_SMASH;
+        }
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering (update anim)
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+        }
+    }
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
+            boss_1.attack_type++;
+            boss_melee[boss_1.attack_type].timer.current = 0.f;
+            boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+        }
+        else
+        {
+            std::cout << "YES";
+            boss_1.state = BOSS_IDLE;
+            boss_1.attack_type = 0;
+            boss_1.idle_timer.current = 0.f;
+        }
+    }
 }
 
-
-void Proto_Monke_Attack_Test(bool canparry, f32 boss_damage)
+void Boss_Attack_Test(bool canparry, f32 boss_damage)
 {
-	will_hit = false;
-	switch (player.state)
-	{
-	case PARRY:
-		//stun logic
-		if (canparry)
-		{
-			proto_monke.stun_timer.current = 0.f;
-			proto_monke.stun_timer.duration = proto_melee[proto_monke.attack_type].stun_duration;
-			proto_monke.state = BOSS_PARRIED;
-			proto_monke.attack_type = 0;
-			bullet_time.current = 0.f;
-			std::cout << "genna parried\n";
-		}
-		else
-		{
-		}
-		Parried_Hit();
-		break;
-	case BLOCK:
-		Blocked_Hit(boss_damage);
-		break;
-	case PARRIED:
-	case BLOCKED:
-	case HIT:
-	case DODGE:
-		// do nothing, immune
-		break;
-	default:
-		Eat_Hit(boss_damage);
-	}
+    will_hit = false;
+    switch (player.state)
+    {
+    case PARRY:
+        // Stun logic
+        if (canparry)
+        {
+            boss_1.stun_timer.current = 0.f;
+            boss_1.stun_timer.duration = boss_melee[boss_1.attack_type].stun_duration;
+            boss_1.state = BOSS_PARRIED;
+            boss_1.attack_type = 0;
+            bullet_time.current = 0.f;
+            std::cout << "Boss parried\n";
+        }
+        else
+        {
+        }
+        Parried_Hit();
+        break;
+    case BLOCK:
+        Blocked_Hit(boss_damage);
+        break;
+    case PARRIED:
+    case BLOCKED:
+    case HIT:
+    case DODGE:
+        // Do nothing, immune
+        break;
+    default:
+        Eat_Hit(boss_damage);
+    }
 }
 
-void Proto_Monke_Range_Attack(const AEVec2& start, const AEVec2& direction)
+void Boss_Range_Attack(const AEVec2& start, const AEVec2& direction)
 {
-	proto_proj.pos = start;
-	proto_proj.velocity = { direction.x * PROTO_PROJECTILE_SPEED, direction.y * PROTO_PROJECTILE_SPEED };
-	proto_proj.active = true;
-	proto_proj.timer = Create_Timer(4.f);
-	AEMtx33Identity(&proto_proj.transform);
-	proto_projectiles.push_back(proto_proj);
+    boss_projectile.pos = start;
+    boss_projectile.velocity = { direction.x * BOSS_PROJECTILE_SPEED, direction.y * BOSS_PROJECTILE_SPEED };
+    boss_projectile.active = true;
+    boss_projectile.timer = Create_Timer(4.f);
+    AEMtx33Identity(&boss_projectile.transform);
+    boss_projectiles.push_back(boss_projectile);
 }
 
-void Draw_Proto_Monke_Death_Explosion(AEVec2& start)
+void Draw_Boss_Death_Explosion(AEVec2& start)
 {
-	explosion_particle.pos = start;
-	explosion_particle.active = true;
-	explosion_particle.timer = Create_Timer(0.5f);
-	AEMtx33Identity(&explosion_particle.transform);
-	proto_death_explosion.push_back(explosion_particle);
+    explosion_particle.pos = start;
+    explosion_particle.active = true;
+    explosion_particle.timer = Create_Timer(0.5f);
+    AEMtx33Identity(&explosion_particle.transform);
+    boss_death_explosion.push_back(explosion_particle);
 }

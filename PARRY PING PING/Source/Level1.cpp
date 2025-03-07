@@ -35,7 +35,7 @@ float levelTimer;
 void Level1_Load()
 {
 	Load_Player();
-	Load_Prototype_Boss();
+	Load_Boss();
 
 	// Meshes
 	Load_Mesh(20);
@@ -66,8 +66,8 @@ void Level1_Initialize()
 	Init_UI();
 
 	// Proto boss
-	Init_Prototype_Boss();
-	Init_Prototype_Indicator();
+	Init_Boss();
+	Init_Boss_Indicator();
 
 	// Dummy enemy
 	dummy_pos = { 300.f, 200.f };
@@ -103,7 +103,7 @@ void Level1_Update()
 		Update_Boss1();
 
 		// Proto boss
-		Update_Prototype_Boss();
+		Update_Boss();
 
 		// Player WASD Movement
 		Update_Player();
@@ -147,7 +147,7 @@ void Level1_Draw()
 	//Draw_Boss1();
 
 	// Proto boss
-	Draw_Prototype_Boss();
+	Draw_Boss();
 
 	// Player
 	Draw_Player();
@@ -187,6 +187,6 @@ void Level1_Unload()
 {
 	Unload_Mesh();
 	Unload_Player();
-	Unload_Prototype_Boss();
+	Unload_Boss();
 	std::cout << "level1_unload";
 }
