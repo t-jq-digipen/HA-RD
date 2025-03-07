@@ -342,6 +342,35 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
 }
 
+void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f32 angle)
+{
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	// box transform
+	AEMtx33 Transform = { 0 };
+	{
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		AEMtx33 rot;
+		AEMtx33Rot(&rot, angle);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &rot, &scale);
+		AEMtx33Concat(&Transform, &tran, &Transform);
+	}
+	// Add color onto blank mesh
+	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+	// DRAW :D
+	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
+}
+
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string)
 {
 	// box transform

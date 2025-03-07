@@ -119,6 +119,16 @@ void Unload_Mesh();
 // param color - color of rectangle
 void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color);
 
+// Draws a rotated rectangle
+// param UnitSquareMesh - unit square mesh of 1x1
+// param pos_x - x coordinate of center of rectangle
+// param pos_y - y coordinate of center of rectangle
+// param width - width of rectangle
+// param height - height of rectangle
+// param color - color of rectangle
+// param angle - angle of rotation
+void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f32 angle);
+
 // Draws a text box
 // param UnitSquareMesh - unit square mesh of 1x1
 // param pos_x - x coordinate of center of text box

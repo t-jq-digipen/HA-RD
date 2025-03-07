@@ -43,6 +43,8 @@ typedef struct Boss
 
 	AEVec2 pos;
 	AEVec2 target_pos;
+	f32 target_dist;
+	f32 target_rot;
 	AEVec2 target_dir;
 	f32 width, height;
 	f32 hp, max_hp;
@@ -54,7 +56,6 @@ typedef struct Boss
 	Timer idle_timer;
 	Timer attack_timer;
 	Timer stun_timer;
-	Timer dash_timer;
 
 	Timer range_warning_timer;
 	Timer range_timer;

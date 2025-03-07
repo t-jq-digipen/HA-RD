@@ -24,25 +24,22 @@ const f32 PROTO_MONKE_HITBOX_HEIGHT = 300.f;
 const f32 PROTO_MONKE_MAXHP = 200.f;
 
 // DASH
-const f32 PROTO_MONKE_DASH_SPEED = 1000.f;
 const f32 PROTO_MONKE_DASH_DISTANCE = 300.f;
-const f32 DASH_WIDTH = 500.f;
-const f32 DASH_HEIGHT = 500.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
-const s32 ATTACK_TYPES = 5;											//  1			 2
-const f32 PROTO_MONKE_WINDUP[ATTACK_TYPES] = { 0.8f, 1.f, 0.8f, 0.8f, 1.f};		//  0.8s		 1s
-const f32 PROTO_MONKE_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };		// +0.2s		+0.2s
-const f32 PROTO_MONKE_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f };		// +0.4s		+1s
+const s32 ATTACK_TYPES = 7;											//  1			 2
+const f32 PROTO_MONKE_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 1.f/*idfk*/};		//  0.8s		 1s
+const f32 PROTO_MONKE_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f , 1.5f/*idfk*/ };		// +0.2s		+0.2s
+const f32 PROTO_MONKE_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f/*(i dont fking know how long bruv)*/, 1.f/*this too bruv*/ };		// +0.4s		+1s
 
-const f32 PROTO_MONKE_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 0.f };			//  0s			 3s
+const f32 PROTO_MONKE_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 0.f ,0.f,0.f};			//  0s			 3s
 
 const f32 PROTO_PROJECTILE_RADIUS = 30.f;
 const f32 PROTO_PROJECTILE_DAMAGE = 20.f;
 const f32 PROTO_PROJECTILE_SPEED = 500.f;
 
 Boss_Melee proto_melee[ATTACK_TYPES];
-
+ 
 Boss_Range proto_proj;
 std::vector<Boss_Range> proto_projectiles;
 
@@ -86,7 +83,6 @@ void Init_Prototype_Boss()
 	proto_monke.idle_timer = Create_Timer(1.f);
 	proto_monke.attack_timer = Create_Timer(1.f);
 	proto_monke.stun_timer = Create_Timer(3.f);
-	proto_monke.dash_timer = Create_Timer(2.f);
 
 	proto_monke.attack_type = BOSS_SMASH;
 
@@ -135,27 +131,26 @@ void Update_Prototype_Boss()
 			if (!Update_Timer(&proto_monke.idle_timer))
 			{
 				// Calculate distance between player to check if you wanna do ranged attack
-				f32 distance_to_player = AEVec2Distance(&proto_monke.pos, &player.pos);
+				proto_monke.target_dist = AEVec2Distance(&proto_monke.pos, &player.pos);
 
-				if (distance_to_player > PROTO_MONKE_DASH_DISTANCE) // Player is out of melee range
+
+				if (proto_monke.target_dist > PROTO_MONKE_DASH_DISTANCE) // Player is out of melee range
 				{
-
-					// Calculate direction to player and normalize it
-					proto_monke.target_dir = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
-					AEVec2Normalize(&proto_monke.target_dir, &proto_monke.target_dir);
-
-					// Set target position for the ranged attack to end at
-					proto_monke.target_pos = { player.pos.x , player.pos.y };
 
 					f32 randomizer_ranged = AERandFloat();
 					if (randomizer_ranged > 0.5f)
 					{
-						// Switch to ranged attack state
+						// Do a charge
+						proto_monke.attack_timer.current = 0.f;
+						proto_monke.attack_type = BOSS_CHARGE;
 						proto_monke.state = BOSS_RANGED_CHARGE;
 					}
 					else
 					{
-						proto_monke.state = BOSS_RANGED_ROCKETFIST;
+						// Do a charge
+						proto_monke.attack_timer.current = 0.f;
+						proto_monke.attack_type = BOSS_CHARGE;
+						proto_monke.state = BOSS_RANGED_CHARGE;
 					}
 
 				}
@@ -697,39 +692,126 @@ void Three_Hit_Logic()
 
 void Boss_Dash_Logic()
 {
-	// Move boss towards the target position
-	proto_monke.pos.x += proto_monke.target_dir.x * PROTO_MONKE_DASH_SPEED * dt;
-	proto_monke.pos.y += proto_monke.target_dir.y * PROTO_MONKE_DASH_SPEED * dt;
-
-	// Calculate distance between boss and target position
-	f32 distance_to_target = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
-
-	// Check if boss has reached with a slight buffer
-	if (distance_to_target <= 10.f)
+	if (Update_Timer(&proto_monke.attack_timer))
 	{
-		proto_monke.pos = proto_monke.target_pos;  // Ensure the boss stops exactly at the target position
-		//proto_monke.state = BOSS_IDLE; // Switch to attack state after reaching the target
-		proto_monke.attack_timer.current = 0.f;
-		proto_monke.attack_type = BOSS_SMASH;
-		proto_monke.state = BOSS_SMASH_SWEEP;
+		if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_windup)
+		{
+			// Attack is winding up (to update anim)
+			will_hit = true;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+
+			// Set the target position to the player's current position
+			proto_monke.target_pos = player.pos;
+
+			// Calculate the direction vector
+			proto_monke.target_dir = { player.pos.x - proto_monke.pos.x, player.pos.y - proto_monke.pos.y };
+			AEVec2Normalize(&proto_monke.target_dir, &proto_monke.target_dir);
+
+			// Calculate the rotation angle
+			proto_monke.target_rot = atan2(proto_monke.target_dir.y, proto_monke.target_dir.x);
+
+			// Calculate the distance
+			proto_monke.target_dist = AEVec2Distance(&player.pos, &proto_monke.pos);
+
+			// Calculate the progress of the windup (0 to 1)
+			f32 windup_progress = proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration / proto_melee[proto_monke.attack_type].attack_windup;
+
+			// Draw the base rectangle (full area of the attack)
+			DrawRotatedRect(
+				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist / 2.f)),  // Center X (offset by half the distance)
+				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist / 2.f)),  // Center Y (offset by half the distance)
+				proto_monke.target_dist,  // Length of the rectangle (full distance to target)
+				PROTO_MONKE_HEIGHT,       // Height of the rectangle
+				proto_windup,             // Color for the base rectangle
+				proto_monke.target_rot    // Rotation angle
+			);
+
+			// Draw the growing rectangle (progress of the windup)
+			DrawRotatedRect(
+				World_To_Screen_x(proto_monke.pos.x + proto_monke.target_dir.x * (proto_monke.target_dist * windup_progress / 2.f)),  // Center X (offset by half the progress)
+				World_To_Screen_y(proto_monke.pos.y + proto_monke.target_dir.y * (proto_monke.target_dist * windup_progress / 2.f)),  // Center Y (offset by half the progress)
+				proto_monke.target_dist * windup_progress,  // Length of the rectangle (scaled by progress)
+				PROTO_MONKE_HEIGHT,                        // Height of the rectangle
+				proto_swing,                               // Color for the growing rectangle
+				proto_monke.target_rot                     // Rotation angle
+			);
+		}
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_active)
+		{
+			// Attack is active (check collision)
+			proto_monke.attackstate = BOSS_ATTACK_ACTIVE;
+
+			// Calculate the remaining time for the charge attack
+			f32 remaining_time = proto_melee[proto_monke.attack_type].timer.duration - proto_monke.attack_timer.current;
+
+			// Calculate the required speed to reach the target in the remaining time
+			f32 required_speed = proto_monke.target_dist*5.f / remaining_time;
+
+			// Move boss towards the target position using the required speed
+			proto_monke.pos.x += proto_monke.target_dir.x * required_speed * dt;
+			proto_monke.pos.y += proto_monke.target_dir.y * required_speed * dt;
+
+			// Check for collision with the player
+			if (AETestCircleToRect(&player.pos, player.radius, &proto_monke.pos, PROTO_MONKE_WIDTH, PROTO_MONKE_HEIGHT))
+			{
+				// Parry checks
+				if (will_hit)
+				{
+					Proto_Monke_Attack_Test(proto_melee[BOSS_CHARGE].can_parry, 30.f);
+				}
+			}
+
+			// Check if boss has reached the target position with a slight buffer
+			f32 distance_to_target = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
+			if (distance_to_target <= 10.f)  // Adjust this threshold if needed
+			{
+				// Snap the boss to the target position to ensure it stops exactly
+				proto_monke.pos = proto_monke.target_pos;
+
+				// Transition to the next state (e.g., BOSS_SMASH_SWEEP)
+				proto_monke.attack_timer.current = 0.f;
+				proto_monke.attack_type = BOSS_SMASH;
+				proto_monke.state = BOSS_SMASH_SWEEP;
+			}
+
+			// Draw the attack hitbox
+			DrawRotatedRect(
+				World_To_Screen_x(proto_monke.pos.x),
+				World_To_Screen_y(proto_monke.pos.y),
+				PROTO_MONKE_WIDTH,
+				PROTO_MONKE_HEIGHT,
+				proto_idle,
+				proto_monke.target_rot
+			);
+		}
+		else if (proto_monke.attack_timer.current * proto_melee[proto_monke.attack_type].timer.duration < proto_melee[proto_monke.attack_type].attack_recover)
+		{
+			// Attack is recovering (update anim)
+			proto_monke.attackstate = BOSS_ATTACK_RECOVER;
+		}
+	}
+	else
+	{
+		if (proto_monke.attack_type == BOSS_SMASH)
+		{
+			proto_monke.attack_type++;
+			proto_melee[proto_monke.attack_type].timer.current = 0.f;
+			proto_monke.attack_timer = proto_melee[proto_monke.attack_type].timer;
+			proto_monke.attackstate = BOSS_ATTACK_WINDUP;
+		}
+		else
+		{
+			std::cout << "YES";
+			proto_monke.state = BOSS_IDLE;
+			proto_monke.attack_type = 0;
+			proto_monke.idle_timer.current = 0.f;
+		}
 	}
 }
 
 void Boss_Rocket_Logic()
 {
-	// Move boss towards the target position
-	proto_monke.pos.x += proto_monke.target_dir.x * PROTO_MONKE_DASH_SPEED * dt;
-	proto_monke.pos.y += proto_monke.target_dir.y * PROTO_MONKE_DASH_SPEED * dt;
-
-	// Calculate distance between boss and target position
-	f32 distance_to_target = AEVec2Distance(&proto_monke.pos, &proto_monke.target_pos);
-
-	// Check if boss has reached with a slight buffer
-	if (distance_to_target <= 10.f)
-	{
-		proto_monke.pos = proto_monke.target_pos;  // Ensure the boss stops exactly at the target position
-		proto_monke.state = BOSS_IDLE; // Switch to attack state after reaching the target
-	}
+	
 }
 
 
