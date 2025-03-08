@@ -457,6 +457,49 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 	AEGfxMeshDraw(ImgBaseMesh, AE_GFX_MDM_TRIANGLES);
 }
 
+void DrawImageAttachedToRect(f32 rectPosX, f32 rectPosY, f32 rectWidth, f32 rectHeight, AEGfxTexture* image)
+{
+	// Calculate the center of the rectangle (use the rectangle's center as the image's position)
+	f32 image_pos_x = rectPosX + rectWidth / 2.0f;
+	f32 image_pos_y = rectPosY + rectHeight / 2.0f;
+
+	// Draw the image at the center of the rectangle
+	DrawImage(image_pos_x, image_pos_y, rectWidth, rectHeight, 0.0f, image); // Assuming no rotation
+}
+
+// Function to draw a boundary box (hitbox) around an object
+void DrawBoundary(f32 pos_x, f32 pos_y, f32 width, f32 height)
+{
+	Color boundaryColor = { 1.0f, 0.0f, 0.0f, 1.0f }; // Red color for the boundary
+
+	// Draw the boundary as a rectangle
+	DrawRect(pos_x, pos_y, width, height, boundaryColor);
+}
+
+void DrawObjectWithBoundary(f32 pos_x, f32 pos_y, f32 width, f32 height, AEGfxTexture* image)
+{
+	// Draw the image first
+	DrawImage(pos_x, pos_y, width, height, 0.0f, image);
+
+	// Draw the boundary around the image
+	DrawBoundary(pos_x, pos_y, width, height);
+}
+
+// Draw boundary considering the object’s center
+void DrawObjectWithBoundaryCentered(f32 pos_x, f32 pos_y, f32 width, f32 height, AEGfxTexture* image)
+{
+	// Draw the image
+	DrawImage(pos_x, pos_y, width, height, 0.0f, image);
+
+	// Adjust the boundary to account for the center origin
+	f32 boundary_x = pos_x - (width / 2);
+	f32 boundary_y = pos_y - (height / 2);
+
+	// Draw the boundary
+	DrawBoundary(boundary_x, boundary_y, width, height);
+}
+
+
 // Check if two circles are intersecting
 bool AreCirclesIntersecting(f32 pos_x1, f32 pos_y1, f32 radius1, f32 pos_x2, f32 pos_y2, f32 radius2) 
 {
