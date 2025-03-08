@@ -139,6 +139,8 @@ void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font,
 // param color - color of circle
 void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color);
 
+void DrawImageAttachedToRect(f32 rectPosX, f32 rectPosY, f32 rectWidth, f32 rectHeight, AEGfxTexture* image);
+
 void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image);
 
 // Checks if two circles are intersecting

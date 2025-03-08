@@ -30,7 +30,14 @@ Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 char level_timer[16];
 
+SpriteSheet ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
+UIScreen uiscreen;
+
+float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
+float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
+
 // will neaten when more player parameters are finalized
+
 void Init_UI()
 {
 	// Colors
@@ -39,7 +46,7 @@ void Init_UI()
 	UI_blue = SetColor(0xFF00008B);
 	UI_black = SetColor(0xFF000000);
 	UI_white = SetColor(0xFFFFFFFF);
-	UI_hover_red = SetColor(0xFFFFA5A1);
+	UI_hover_red = SetColor(0xFFFF6961);
 
 	// Font
 	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
@@ -58,6 +65,37 @@ void Init_UI()
 
 	// Starting level state
 	levelState = PLAYING;
+
+	// Menu Buttons
+	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
+	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
+	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
+	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
+
+	uiscreen.spritesheet_playbutton = &ssmenu_play;
+	uiscreen.spritesheet_optionsbutton = &ssmenu_options;
+	uiscreen.spritesheet_exitbutton = &ssmenu_exit;
+	uiscreen.spritesheet_button1 = &ssmenu_1;
+	uiscreen.spritesheet_button2 = &ssmenu_2;
+	uiscreen.spritesheet_button3 = &ssmenu_3;
+	uiscreen.spritesheet_button4 = &ssmenu_4;
+	uiscreen.spritesheet_screen = &ssmenu_screen;
+	uiscreen.spritesheet_bar1 = &ssmenu_bar1;
+	uiscreen.spritesheet_bar2 = &ssmenu_bar2;
+	uiscreen.animationtimer = Create_Timer(0.5f);
+
+	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
+	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
+
+	// Volume Settings
+	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 50.f;
+	max_bgm_vol = max_sfx_vol = 100.f;
 }
 
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
@@ -171,15 +209,28 @@ void Draw_PauseMenu()
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
-	DrawTextBox(-0.3f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "PAUSED");
+
+	// Pause menu screen
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_screen, 0, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isOptionsClicked == 0 && uiscreen.isExitClicked == 0)
+	{
+		uiscreen.animationtimer.current = 0.f;
+	}
 
 	// play button (click to go to Level1 state)
-	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -50.f, 300.f, 200.f, 0.f);
+
+	if (IsAreaClicked(450.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Play\n";
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(-0.5f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_white, "PLAY");
+		uiscreen.isPlayClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_play, 0, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+		
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			levelState = PLAYING;
@@ -187,16 +238,49 @@ void Draw_PauseMenu()
 	}
 	else
 	{
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
-		DrawTextBox(-0.5f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_black, "PLAY");
+		uiscreen.isPlayClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_play, 0, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// options button (click to go to options)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_optionsbutton, 0.f, -50.f, 300.f, 200.f, 0.f);
+
+	if (IsAreaClicked(800.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isOptionsClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_options, 3, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			// Initialize volumes
+			current_bgm_vol = prev_bgm_vol;
+			current_sfx_vol = prev_sfx_vol;
+
+			levelState = OPTIONS;
+		}
+	}
+	else
+	{
+		uiscreen.isOptionsClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_options, 3, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 	// exit button (click to go to quit state)
-	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -50.f, 300.f, 200.f, 0.f);
+
+	if (IsAreaClicked(1150.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Exit\n";
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(0.25f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		uiscreen.isExitClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			nextState = GS_QUIT;
@@ -204,8 +288,8 @@ void Draw_PauseMenu()
 	}
 	else
 	{
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
-		DrawTextBox(0.25f, -0.1f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+		uiscreen.isExitClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 }
 
@@ -215,15 +299,27 @@ void Draw_ClearMenu()
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
-	DrawTextBox(-0.5f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "YOU WIN!!!");
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
+	{
+		uiscreen.animationtimer.current = 0.f;
+	}
 
 	// play button (click to go to Level1 state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -50.f, 300.f, 200.f, 0.f);
+
 	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Play\n";
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "REPLAY");
+		uiscreen.isPlayClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_play, 1, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			nextState = GS_RESTART;
@@ -231,16 +327,21 @@ void Draw_ClearMenu()
 	}
 	else
 	{
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
-		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "REPLAY");
+		uiscreen.isPlayClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 	// exit button (click to go to quit state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
+
 	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Exit\n";
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		uiscreen.isExitClicked = 1;
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			nextState = GS_QUIT;
@@ -248,8 +349,198 @@ void Draw_ClearMenu()
 	}
 	else
 	{
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
-		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+		uiscreen.isExitClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+}
+
+void Draw_OptionsMenu()
+{
+	// Get mouse position coordinates
+	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_screen, 3, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (uiscreen.isButton1Clicked == 0 && uiscreen.isButton2Clicked == 0 && uiscreen.isButton3Clicked == 0 &&
+		uiscreen.isButton4Clicked == 0 && uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
+	{
+		uiscreen.animationtimer.current = 0.f;
+	}
+
+	// BGM bar and buttons
+	
+	DrawTextBox(-0.5f, 0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "BGM");
+
+	DrawHPBar(-50.f, 75.f, 350.f, 125.f, AEClamp(current_bgm_vol, 0.f, max_bgm_vol), max_bgm_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, 150.f, 100.f, 425.f, 50.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_bar1, 1, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (current_bgm_vol > max_bgm_vol)
+	{
+		current_bgm_vol = max_bgm_vol;
+	}
+	else if (current_bgm_vol < 0.f)
+	{
+		current_bgm_vol = 0.f;
+	}
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, -150.f, 100.f, 70.f, 70.f, 0.f);
+
+	if (IsAreaClicked(650.f, 350.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isButton1Clicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_1, 6, 5, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckCurr(AEVK_LBUTTON))
+		{
+			// lower bgm
+			current_bgm_vol -= 1.f;
+		}
+	}
+	else
+	{
+		uiscreen.isButton1Clicked = 0;
+		Set_SpriteSheet_current(&ssmenu_1, 6, 5, 5, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button2, 450.f, 100.f, 70.f, 70.f, 0.f);
+
+	if (IsAreaClicked(1250.f, 350.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isButton2Clicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_2, 6, 1, 4, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckCurr(AEVK_LBUTTON))
+		{
+			// raise bgm
+			current_bgm_vol += 1.f;
+		}
+	}
+	else
+	{
+		uiscreen.isButton2Clicked = 0;
+		Set_SpriteSheet_current(&ssmenu_2, 6, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// SFX bar and buttons
+
+	DrawTextBox(-0.5f, -0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "SFX");
+
+	DrawHPBar(-50.f, -75.f, 350.f, -25.f, AEClamp(current_sfx_vol, 0.f, max_sfx_vol), max_sfx_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar2, 150.f, -50.f, 425.f, 50.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_bar2, 1, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (current_sfx_vol > max_sfx_vol)
+	{
+		current_sfx_vol = max_sfx_vol;
+	}
+	else if (current_sfx_vol < 0.f)
+	{
+		current_sfx_vol = 0.f;
+	}
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button3, -150.f, -50.f, 70.f, 70.f, 0.f);
+
+	if (IsAreaClicked(650.f, 500.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isButton3Clicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_3, 6, 5, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckCurr(AEVK_LBUTTON))
+		{
+			// lower sfx
+			current_sfx_vol -= 1.f;
+		}
+	}
+	else
+	{
+		uiscreen.isButton3Clicked = 0;
+		Set_SpriteSheet_current(&ssmenu_3, 6, 5, 5, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button4, 450.f, -50.f, 70.f, 70.f, 0.f);
+
+	if (IsAreaClicked(1250.f, 500.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isButton4Clicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_4, 6, 1, 4, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckCurr(AEVK_LBUTTON))
+		{
+			// raise sfx
+			current_sfx_vol += 1.f;
+		}
+	}
+	else
+	{
+		uiscreen.isButton4Clicked = 0;
+		Set_SpriteSheet_current(&ssmenu_4, 6, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// save button (click to save changes)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -200.f, 200.f, 100.f, 0.f);
+
+	if (IsAreaClicked(450.f, 650.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isPlayClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_play, 4, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			prev_bgm_vol = current_bgm_vol;
+			prev_sfx_vol = current_sfx_vol;
+		}
+	}
+	else
+	{
+		uiscreen.isPlayClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_play, 4, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// exit button (click to return to pause menu)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -200.f, 200.f, 100.f, 0.f);
+
+	if (IsAreaClicked(1150.f, 650.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isExitClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_exit, 5, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			levelState = PAUSED;
+		}
+	}
+	else
+	{
+		uiscreen.isExitClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_exit, 5, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 }
 
@@ -259,15 +550,25 @@ void Draw_GameOverMenu()
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-	DrawRect(0.f, 0.f, 1200.f, 600.f, pause_screen);
-	DrawTextBox(-0.5f, 0.25f, 800.f, 200.f, 2.f, UI_font, UI_black, "GAME OVER");
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_screen, 1, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
+	{
+		uiscreen.animationtimer.current = 0.f;
+	}
 
 	// play button (click to go to Level1 state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -50.f, 300.f, 200.f, 0.f);
+
 	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Play\n";
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "REPLAY");
+		uiscreen.isPlayClicked = 1;
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_play, 1, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			nextState = GS_RESTART;
@@ -275,16 +576,20 @@ void Draw_GameOverMenu()
 	}
 	else
 	{
-		DrawRect(-300.f, -50.f, 300.f, 200.f, UI_green);
-		DrawTextBox(-0.55f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "REPLAY");
+		uiscreen.isPlayClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 	// exit button (click to go to quit state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
+
 	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
-		std::cout << "Click Exit\n";
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_hover_red);
-		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_white, "QUIT");
+		uiscreen.isExitClicked = 1;
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			nextState = GS_QUIT;
@@ -292,8 +597,8 @@ void Draw_GameOverMenu()
 	}
 	else
 	{
-		DrawRect(300.f, -50.f, 300.f, 200.f, UI_red);
-		DrawTextBox(0.25f, -0.15f, 300.f, 200.f, 1.f, UI_font, UI_black, "QUIT");
+		uiscreen.isExitClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 }
 
@@ -356,4 +661,18 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 			DrawRect((pos_x1 + ((segmentwidth - segmentinterval) / 2.f)) + (i * (segmentwidth + segmentinterval / 10.f)), pos_y1 + height / 2.f, segmentwidth - segmentinterval, height, color);
 		}
 	}
+}
+
+void Unload_UI()
+{
+	Unload_SpriteSheet(&ssmenu_play);
+	Unload_SpriteSheet(&ssmenu_options);
+	Unload_SpriteSheet(&ssmenu_exit);
+	Unload_SpriteSheet(&ssmenu_1);
+	Unload_SpriteSheet(&ssmenu_2);
+	Unload_SpriteSheet(&ssmenu_3);
+	Unload_SpriteSheet(&ssmenu_4);
+	Unload_SpriteSheet(&ssmenu_screen);
+	Unload_SpriteSheet(&ssmenu_bar1);
+	Unload_SpriteSheet(&ssmenu_bar2);
 }
