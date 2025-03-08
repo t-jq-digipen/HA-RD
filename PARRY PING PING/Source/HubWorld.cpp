@@ -14,16 +14,18 @@
 #include "HubWorld.h"
 #include "GameStateManager.h"
 
-//removable in future implementations! for parry bot stats
+//Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
+EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 50.f, 50.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{-600.f, 300.f, 100.f, 200.f};
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{50.f};
 
-//Timer DummyMelee_AttackTimer;
-//Timer DummyMelee_StunTimer;
+//TEMPORARY
+Color tempUI_white;
+s8  tempUI_font;
 
-//to be moved into enemy struct btw!
-//int DummyMelee_Counter{};
-//f32 StunDummyMelee_Counter{ 0.f };
+//Fade from black transition 
+Color FadeIn;
+f32 FadeInSpeed;
 
 int DummyMelee_Check;
 
@@ -45,10 +47,16 @@ void HubWorld_Initialize()
 	std::cout << "Hub World Initialized\n";
 
 	// Dummy enemy
-	DummyMelee_pos = { 300.f, 200.f };
-	DummyRange_pos = { 500.f, 200.f };
+	DummyMelee_pos = { 600.f, 200.f };
+	DummyRange_pos = { 800.f, 200.f };
 	DummyMelee_rad = 50.f;
 	DummyMelee_Check = 0;
+
+	tempUI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	tempUI_white = SetColor(0xFFFFFFFF);
+
+	FadeIn = SetColor(0xFF000000);
+	FadeInSpeed = 0.01f;
 
 	// Player
 	Init_Player();
@@ -61,10 +69,6 @@ void HubWorld_Initialize()
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);
 	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
 
-	// Enemy Attack Timer
-	/*DummyMelee_AttackTimer = Create_Timer(1.f);
-	DummyMelee_StunTimer = Create_Timer(2.f);
-	DummyMelee_StunTimer.current = 0;*/
 
 	// UI
 	Init_UI();
@@ -103,6 +107,11 @@ void HubWorld_Update()
 		{
 			Update_LevelTimer(&HubWorld_LevelTimer, dt);
 		}
+
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
+			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
+			nextState = GS_LEVEL1;
+		}
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
@@ -113,6 +122,15 @@ void HubWorld_Update()
 	{
 		levelState = PLAYING;
 	}
+	if (AEInputCheckTriggered(AEVK_0))
+	{
+		FadeIn.A = 0;
+	}
+	if (AEInputCheckTriggered(AEVK_9))
+	{
+		FadeIn.A = 1;
+	}
+	std::cout << '\n' << FadeIn.A << '\n';
 }
 
 void HubWorld_Draw()
@@ -126,12 +144,26 @@ void HubWorld_Draw()
 	Draw_DummyBotMelee();
 	Draw_DummyBotRange();
 
+	//Draw Environment
+	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));
+	//DrawTextBox(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width * 2, Env_Gate.Height * 2, 10.f, tempUI_font, tempUI_white, "GATE");
+
+	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));
+	//DrawTextBox(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, 1.f, tempUI_font, tempUI_white, "CAMPFIRE");
+
+	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));
+	//DrawTextBox(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, 1.f, tempUI_font, tempUI_white, "SHRINE");
+
+	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));
+	//DrawTextBox(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, 1.f, tempUI_font, tempUI_white, "MODIFIERS");
+	
+
 	// Player
 	Draw_Player();
 
 	// UI
 	//maybe remove? can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool woowooowowowoowowoowooowooooyeaaaaa
-	Draw_UI();
+	Draw_UI(0);
 
 	// Level Timer
 	Draw_LevelTimer(HubWorld_LevelTimer);
@@ -151,6 +183,13 @@ void HubWorld_Draw()
 			Draw_ClearMenu();
 		}
 	}
+
+	//cool little fade in effect
+	if (FadeIn.A > 0) {
+		DrawRect(0.f, 0.f, AEGfxGetWindowWidth(), AEGfxGetWindowHeight(), FadeIn);
+		FadeIn.A -= FadeInSpeed;
+	}
+	else FadeIn.A = 0.f;
 }
 
 void HubWorld_Free()

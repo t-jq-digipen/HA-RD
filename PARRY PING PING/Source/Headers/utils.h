@@ -181,3 +181,13 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 // param click_x - x coordinate of mouse pointer
 // param click_y - y coordinate of mouse pointer
 int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y);
+
+// Struct to store coords and dimensions of props to place down in environments
+// Pos - x & y coordinates
+// Width & Height - dimensions (can just use width in place of circle rad)
+typedef struct EnvStruct {
+	AEVec2 Pos;
+	f32 Width;
+	f32 Height;
+	//aabb Hitbox;		//for future implementation if want to add coll/ destructable objects etc
+}EnvStruct;

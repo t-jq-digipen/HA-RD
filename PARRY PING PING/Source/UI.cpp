@@ -128,10 +128,10 @@ void Draw_Boss_HPbar()
 	DrawHPBar(-600.f, 425.f, 600.f, 375.f, UI_bosshp, UI_bossmaxhp, hpcolor);
 }
 
-void Draw_UI()
+void Draw_UI(int DrawBossHP )
 {
 	Draw_Player_UI();
-	Draw_Boss_HPbar();
+	if (DrawBossHP) { Draw_Boss_HPbar(); }
 }
 
 

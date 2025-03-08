@@ -22,8 +22,8 @@ enum LEVEL_STATE
 extern int levelState;
 
 
-
-void Draw_UI();
+//1 - draw boss hp bar, 0 - dont draw
+void Draw_UI(int DrawBossHP = 1);
 
 void Update_Player_UI(int ammo, float hp, float parry_timer);
 

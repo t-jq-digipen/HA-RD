@@ -390,6 +390,7 @@ void Attack_DummyBotRange() {
 			RParryBot.stun_timer.current = 0.f;
 			RParryBot.state = Parried;				//change to just deflect proj
 			RParryBot.projectile_parry = true;
+			RParryBot.projectile_draw = false;		//set to true once deflect logic implemented
 			break;
 		case BLOCK:
 			Blocked_Hit(RParryBot.damage);
