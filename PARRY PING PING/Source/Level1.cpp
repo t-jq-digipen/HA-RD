@@ -36,6 +36,7 @@ int dummy_check;
 Timer cleartransitiontimer;
 float levelTimer;
 
+
 void Level1_Load()
 {
 	Load_Player();
@@ -45,7 +46,7 @@ void Level1_Load()
 	// Meshes
 	Load_Mesh(20);
 
-	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary2.jpg");
+	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary3.png");
 	if (!mapTexture)
 	{
 		printf("Failed to load map texture!\n");
