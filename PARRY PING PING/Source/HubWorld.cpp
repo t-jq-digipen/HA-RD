@@ -35,7 +35,7 @@ float HubWorld_LevelTimer;
 void HubWorld_Load()
 {
 	Load_Player();
-	Load_Prototype_Boss();
+	Load_Boss();
 
 	// Meshes
 	Load_Mesh(20);
