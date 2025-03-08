@@ -697,11 +697,11 @@ void Update_Player()
 
 
 
-		f32 map_width = 2900.0f, map_height = 3800.0f;
+		f32 map_width = 2900.0f, map_height = 2300.0f;
 		f32 left_bound = -map_width / 2;
 		f32 right_bound = map_width / 2;
 		f32 top_bound = -map_height / 2;
-		f32 bottom_bound = 1750.0f;
+		f32 bottom_bound = 1100.0f;
 
 		// Restrict movement within the map boundaries
 		if (player.pos.x < left_bound) player.pos.x = left_bound;
