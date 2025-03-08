@@ -44,7 +44,6 @@ typedef struct UIScreen
 	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;
 } UIScreen;
 
-
 void Draw_UI();
 
 void Update_Player_UI(int ammo, float hp, float parry_timer);
@@ -60,6 +59,8 @@ void Init_Boss_UI(float hp);
 void Update_Boss_UI(float hp);
 
 void Update_LevelTimer(float *time_elapsed, float dt);
+
+void Free_UI();
 
 void Unload_UI();
 

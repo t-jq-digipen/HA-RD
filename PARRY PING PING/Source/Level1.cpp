@@ -9,6 +9,7 @@
 //---------------------------------------------------------
 
 #include "utils.h"
+#include "UI.h"
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
@@ -52,11 +53,16 @@ void Level1_Load()
 		printf("Failed to load map texture!\n");
 	}
 	std::cout << "Level 1 Loaded\n";
+
+
 }
 
 void Level1_Initialize()
 {
 	std::cout << "Level 1 Initialized\n";
+
+	// Music
+	AEAudioInit();
 
 	// Player
 	Init_Player();
@@ -104,6 +110,9 @@ void Level1_Update()
 {
 	// Delta time
 	Get_DT();
+
+	// Music
+	AEAudioUpdate();
 
 	if (AEInputCheckTriggered(AEVK_B))
 	{
@@ -226,7 +235,7 @@ void Level1_Draw()
 
 void Level1_Free()
 {
-
+	Free_UI();
 }
 
 void Level1_Unload()
