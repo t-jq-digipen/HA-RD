@@ -1,5 +1,5 @@
 //---------------------------------------------------------
-// file:	camera.h
+// file:	Camera.h
 // author:	AVID PARRY ENJOYERS
 // email:	-
 //

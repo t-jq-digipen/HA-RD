@@ -1,5 +1,6 @@
 #pragma once
 #include "utils.h"
+#include "Camera.h"
 
 
 #define array_count(x) sizeof(x)/sizeof(*x)
