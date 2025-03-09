@@ -51,11 +51,6 @@ typedef struct Boss
     Timer stun_timer;
     Timer recovery_timer;
 
-    Timer range_warning_timer;
-    Timer range_timer;
-    bool isShootingWarningActive;
-    bool isShooting;
-
     int attack_type;
 
     Timer explosion_timer;
@@ -74,23 +69,6 @@ typedef struct Boss_Melee
     f32 stun_duration;
 } Boss_Melee;
 
-typedef struct Boss_Range
-{
-    AEVec2 pos;
-    AEVec2 velocity;
-    AEMtx33 transform;
-    Timer timer;
-    bool active;
-} Boss_Range;
-
-typedef struct Boss_Explosion
-{
-    AEVec2 pos;
-    AEMtx33 transform;
-    Timer timer;
-    bool active;
-} Boss_Explosion;
-
 typedef struct RocketFist
 {
     AEVec2 pos;
@@ -100,6 +78,14 @@ typedef struct RocketFist
     Timer timer;
     AEMtx33 transform;
 } RocketFist;
+
+typedef struct Boss_Explosion
+{
+    AEVec2 pos;
+    AEMtx33 transform;
+    Timer timer;
+    bool active;
+} Boss_Explosion;
 
 void Load_Boss();
 void Init_Boss_Indicator();
@@ -113,5 +99,4 @@ void Three_Hit_Logic();
 void Boss_Dash_Logic();
 void Boss_Rocket_Logic();
 void Boss_Attack_Test(bool canparry, f32 damage);
-void Boss_Range_Attack(const AEVec2& start, const AEVec2& direction);
 void Draw_Boss_Death_Explosion(AEVec2& start);

@@ -27,7 +27,7 @@ const f32 BOSS_HITBOX_HEIGHT = 300.f;
 const f32 BOSS_MAXHP = 200.f;
 
 // DASH
-const f32 BOSS_DASH_DISTANCE = 300.f;
+const f32 BOSS_DASH_DISTANCE = 250.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
 const s32 ATTACK_TYPES = 7;
@@ -42,11 +42,9 @@ const f32 BOSS_PROJECTILE_DAMAGE = 20.f;
 const f32 BOSS_PROJECTILE_SPEED = 500.f;
 
 Boss_Melee boss_melee[ATTACK_TYPES];
-Boss_Range boss_projectile;
-std::vector<Boss_Range> boss_projectiles;
 
 // Boss Explosion Effects and Particles
-const f32 BOSS_DEATH_EXPLOSION_RADIUS = 50.f;
+const f32 BOSS_DEATH_EXPLOSION_RADIUS = 25.f;
 Boss_Explosion explosion_particle;
 std::vector<Boss_Explosion> boss_death_explosion;
 
@@ -55,10 +53,10 @@ std::vector<RocketFist> rocket_fists;
 // For attack logics
 const f32 SMASH_RADIUS = 200.f;
 const f32 SMASH_DAMAGE = 30.f;
-const f32 BIG_SMASH_RADIUS = 500.f;
+const f32 BIG_SMASH_RADIUS = 350.f;
 
-const f32 SWEEP_WIDTH = 500.f;
-const f32 SWEEP_HEIGHT = 500.f;
+const f32 SWEEP_WIDTH = 600.f;
+const f32 SWEEP_HEIGHT = 600.f;
 
 f32 x_offset = 0.f;
 
@@ -84,6 +82,10 @@ void Init_Boss_Indicator()
 
 void Init_Boss()
 {
+
+    // Clear any existing death explosions
+    boss_death_explosion.clear();
+
     boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
 
     boss_1.width = BOSS_WIDTH;
@@ -102,11 +104,6 @@ void Init_Boss()
     boss_1.recovery_timer = Create_Timer(2.f);
 
     boss_1.attack_type = BOSS_SMASH;
-
-    boss_1.range_warning_timer = Create_Timer(1.f);
-    boss_1.range_timer = Create_Timer(3.f);
-    boss_1.isShootingWarningActive = 0;
-    boss_1.isShooting = 0;
 
     boss_1.death_explosion_duration = Create_Timer(4.f);
 
@@ -249,48 +246,6 @@ void Update_Boss()
             std::cout << "Boss hit! HP: " << boss_1.hp << '\n';
         }
 
-        // Update boss projectiles' behavior
-        for (auto& proj : boss_projectiles)
-        {
-            if (proj.active)
-            {
-                // Update boss projectiles' movement
-                proj.pos.x += proj.velocity.x * dt;
-                proj.pos.y += proj.velocity.y * dt;
-                proj.timer.current += 1.f * dt;
-
-                // Update boss projectiles' transformation
-                AEMtx33 trans, scale;
-                AEMtx33Trans(&trans, proj.pos.x, proj.pos.y);
-                AEMtx33Scale(&scale, BOSS_PROJECTILE_RADIUS, BOSS_PROJECTILE_RADIUS);
-                AEMtx33Concat(&proj.transform, &trans, &scale);
-
-                // Deactivate projectiles after they hit player or after 4 seconds (aka range)
-                if (AETestCircleToCircle(&proj.pos, BOSS_PROJECTILE_RADIUS, &player.pos, player.radius) || proj.timer.current >= proj.timer.duration)
-                {
-                    proj.active = false;
-                    if (AETestCircleToCircle(&proj.pos, BOSS_PROJECTILE_RADIUS, &player.pos, player.radius))
-                    {
-                        switch (player.state)
-                        {
-                        case PARRY:
-                            Parried_Hit();
-                            break;
-                        case BLOCK:
-                            Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
-                            break;
-                        case PARRIED:
-                        case BLOCKED:
-                        case DODGE:
-                        case HIT:
-                            break;
-                        default:
-                            Eat_Hit(BOSS_PROJECTILE_DAMAGE);
-                        }
-                    }
-                }
-            }
-        }
 
         for (auto& fist : rocket_fists) {
             if (fist.active) {
@@ -332,36 +287,9 @@ void Update_Boss()
         // Remove inactive rocket fists
         rocket_fists.erase(std::remove_if(rocket_fists.begin(), rocket_fists.end(), [](const RocketFist& f) { return !f.active; }), rocket_fists.end());
 
-        // Remove inactive boss projectiles
-        boss_projectiles.erase(std::remove_if(boss_projectiles.begin(), boss_projectiles.end(), [](const Boss_Range& p) { return !p.active; }), boss_projectiles.end());
-
         // Clamp HP to prevent over-reduction
         boss_1.hp = AEClamp(boss_1.hp, 0.f, BOSS_MAXHP);
-        if (boss_1.hp > 0.f && boss_1.hp <= 0.6 * BOSS_MAXHP && boss_1.state != BOSS_PARRIED)
-        {
-            std::cout << boss_1.range_timer.current << '\n';
-            if (!Update_Timer(&boss_1.range_timer))
-            {
-                boss_1.isShooting = 1;
-                boss_1.range_timer.current = boss_1.range_warning_timer.current = 0.f;
-                boss_1.isShootingWarningActive = 1;
-            }
 
-            if (boss_1.isShooting == 1)
-            {
-                boss_1.isShootingWarningActive = 1;
-                std::cout << "Boss is shooting!!!" << '\n';
-                if (!Update_Timer(&boss_1.range_warning_timer))
-                {
-                    boss_1.isShootingWarningActive = 0;
-                    AEVec2 direction = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
-                    AEVec2Normalize(&direction, &direction);
-
-                    Boss_Range_Attack(boss_1.pos, direction);
-                    boss_1.isShooting = 0;
-                }
-            }
-        }
         if (boss_1.hp <= 0.f)
         {
             boss_1.state = BOSS_DEAD;
@@ -374,10 +302,6 @@ void Update_Boss()
     else if (boss_1.state == BOSS_DEAD)
     {
         levelState = CLEARED;
-        for (auto& proj : boss_projectiles)
-        {
-            proj.active = false;
-        }
         if (Update_Timer(&boss_1.death_explosion_duration))
         {
             std::cout << boss_1.death_explosion_duration.current << '\n';
@@ -719,22 +643,6 @@ void Draw_Boss()
     }
 
 
-    // Ranged attack warning indicator
-    if (boss_1.isShootingWarningActive && boss_1.state != BOSS_DEAD)
-    {
-        DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_PROJECTILE_RADIUS, boss_projectile_indicator);
-        DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), (boss_1.range_warning_timer.current / boss_1.range_warning_timer.duration) * BOSS_PROJECTILE_RADIUS, boss_projectile_color);
-    }
-
-    // Ranged attack projectiles
-    for (const auto& proj : boss_projectiles)
-    {
-        if (proj.active)
-        {
-            DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, boss_projectile_color);
-        }
-    }
-
     // Rocket fists
     for (const auto& fist : rocket_fists)
     {
@@ -749,8 +657,8 @@ void Draw_Boss()
     {
         if (exp.active)
         {
-            f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f));
-            f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f));
+            f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.5f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.5f));
+            f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.5f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.5f));
             DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * BOSS_DEATH_EXPLOSION_RADIUS, boss_death_explosion_color);
         }
     }
@@ -767,13 +675,11 @@ void Unload_Boss()
     boss_1_sprite.Unload();
 }
 
-
-
 void Smash_Sweep_Logic()
 {
     // Update hitbox positions at the start of the logic
     boss_melee[BOSS_SMASH].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f }; // Smash position
-    boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };        // Sweep position
+    boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y};        // Sweep position
 
     if (Update_Timer(&boss_1.attack_timer))
     {
@@ -845,7 +751,7 @@ void Three_Hit_Logic()
     // Update hitbox positions at the start of the logic
     boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f };  // Left hit position
     boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + 200.f, boss_1.pos.y - 150.f }; // Right hit position
-    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };        // Circle hit position
+    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y };        // Circle hit position
 
     if (Update_Timer(&boss_1.attack_timer))
     {
@@ -1008,124 +914,6 @@ void Boss_Dash_Logic()
     }
 }
 
-//void Boss_Rocket_Logic() {
-//    if (Update_Timer(&boss_1.attack_timer)) {
-//        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-//            // Attack is winding up
-//            will_hit = true;
-//            boss_1.attackstate = BOSS_ATTACK_WINDUP;
-//
-//            // Set the target position to the player's current position
-//            boss_1.target_pos = player.pos;
-//
-//            // Calculate the direction vector
-//            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
-//            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
-//
-//            // Calculate the rotation angle
-//            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
-//
-//            // Calculate the distance
-//            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
-//        }
-//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-//            // Attack is active (spawn rocket fist)
-//            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
-//
-//            // Spawn a rocket fist
-//            RocketFist fist;
-//            fist.pos = boss_1.pos;
-//            fist.velocity = { boss_1.target_dir.x * BOSS_PROJECTILE_SPEED, boss_1.target_dir.y * BOSS_PROJECTILE_SPEED };
-//            fist.radius = BOSS_PROJECTILE_RADIUS;
-//            fist.active = true;
-//            fist.timer = Create_Timer(4.f);
-//            AEMtx33Identity(&fist.transform);
-//            rocket_fists.push_back(fist);
-//
-//            // Set the boss state to inactive while the rocket fist is active
-//            boss_1.state = BOSS_ROCKET_FIST_ACTIVE;
-//
-//            // Start the recovery timer
-//            boss_1.recovery_timer.current = 0.f;
-//        }
-//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-//            // Attack is recovering
-//            boss_1.attackstate = BOSS_ATTACK_RECOVER;
-//        }
-//    }
-//    else {
-//        // If the attack timer is done, but the recovery timer is still running, do nothing
-//        if (Update_Timer(&boss_1.recovery_timer)) {
-//            // Recovery time is over, transition to the next state
-//            if (boss_1.attack_type == BOSS_SMASH) {
-//                boss_1.attack_type++;
-//                boss_melee[boss_1.attack_type].timer.current = 0.f;
-//                boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
-//                boss_1.attackstate = BOSS_ATTACK_WINDUP;
-//            }
-//            else {
-//                boss_1.state = BOSS_IDLE;
-//                boss_1.attack_type = 0;
-//                boss_1.idle_timer.current = 0.f;
-//            }
-//        }
-//    }
-//}
-
-//void Boss_Rocket_Logic() {
-//    if (Update_Timer(&boss_1.attack_timer)) {
-//        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-//            std::cout << boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration << " < " << boss_melee[boss_1.attack_type].attack_windup << '\n';
-//            // Attack is winding up
-//            will_hit = true;
-//            boss_1.attackstate = BOSS_ATTACK_WINDUP;
-//
-//            // Set the target position to the player's current position
-//            boss_1.target_pos = player.pos;
-//
-//            // Calculate the direction vector
-//            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
-//            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
-//
-//            // Calculate the rotation angle
-//            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
-//
-//            // Calculate the distance
-//            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
-//        }
-//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-//            // Attack is active (spawn rocket fist)
-//            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
-//
-//
-//            // Spawn a rocket fist
-//            RocketFist fist;
-//            fist.pos = boss_1.pos;
-//            fist.velocity = { boss_1.target_dir.x * BOSS_PROJECTILE_SPEED, boss_1.target_dir.y * BOSS_PROJECTILE_SPEED };
-//            fist.radius = BOSS_PROJECTILE_RADIUS;
-//            fist.active = true;
-//            fist.timer = Create_Timer(4.f);
-//            AEMtx33Identity(&fist.transform);
-//            rocket_fists.push_back(fist);
-//
-//            // Immediately transition to the recovery phase
-//            boss_1.attackstate = BOSS_ATTACK_RECOVER;
-//            boss_1.attack_timer.current = boss_melee[boss_1.attack_type].attack_active; // Skip to recovery phase
-//        }
-//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-//            // Attack is recovering
-//            boss_1.attackstate = BOSS_ATTACK_RECOVER;
-//
-//        }
-//    }
-//    else {
-//        // If the attack timer is done, transition back to idle
-//        boss_1.state = BOSS_IDLE;
-//        boss_1.attack_type = 0;
-//        boss_1.idle_timer.current = 0.f;
-//    }
-//}
-
 void Boss_Rocket_Logic() {
     if (Update_Timer(&boss_melee[boss_1.attack_type].timer)) {
         if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
@@ -1214,16 +1002,6 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
     default:
         Eat_Hit(boss_damage);
     }
-}
-
-void Boss_Range_Attack(const AEVec2& start, const AEVec2& direction)
-{
-    boss_projectile.pos = start;
-    boss_projectile.velocity = { direction.x * BOSS_PROJECTILE_SPEED, direction.y * BOSS_PROJECTILE_SPEED };
-    boss_projectile.active = true;
-    boss_projectile.timer = Create_Timer(4.f);
-    AEMtx33Identity(&boss_projectile.transform);
-    boss_projectiles.push_back(boss_projectile);
 }
 
 void Draw_Boss_Death_Explosion(AEVec2& start)
