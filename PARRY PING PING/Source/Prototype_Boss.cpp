@@ -148,7 +148,7 @@ void Update_Boss()
                     }
                     else
                     {
-                        // Do a charge
+                        // Do a rocketpunch
                         boss_1.attack_timer.current = 0.f;
                         boss_1.attack_type = BOSS_ROCKETFIST;
                         boss_1.state = BOSS_RANGED_ROCKETFIST;
@@ -515,6 +515,8 @@ void Draw_Boss() {
 
     // Draw the boss sprite
     Draw_SpriteSheet_test(boss_sprite_sheet, World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, 0.f);
+
+    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height);
 }
 
 void Unload_Boss()
@@ -685,6 +687,11 @@ void Boss_Rocket_Logic() {
             boss_1.is_rocket_windup_active = true; // Activate the rocket windup
             boss_1.rocket_start_pos = boss_1.pos; // Store the starting position
             boss_1.rocket_target_pos = player.pos; // Store the target position
+            
+            // Set sprite info
+            boss_1_sprite.Set_Row(9);
+            boss_1_sprite.Set_Col(0, 11, boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
+            std::cout << "AIMING";
 
             // Calculate the direction and distance of the rocket attack
             boss_1.rocket_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
@@ -711,6 +718,10 @@ void Boss_Rocket_Logic() {
             AEMtx33Identity(&fist.transform);
             rocket_fists.push_back(fist);
 
+            // Set sprite info
+            boss_1_sprite.Set_Row(10);
+            boss_1_sprite.Set_Col(0);
+
             // Set the boss state to inactive while the rocket fist is active
             boss_1.state = BOSS_ROCKET_FIST_ACTIVE;
 
@@ -721,6 +732,15 @@ void Boss_Rocket_Logic() {
         else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
             // Attack is recovering (update anim)
             boss_1.is_rocket_windup_active = false; // Stop drawing the windup
+
+            std::cout << "RELOADING!!!";
+            // Set sprite info
+            boss_1_sprite.Set_Row(11);
+            boss_1_sprite.Set_Col(0, 18, (boss_1.attack_timer.current - boss_melee[boss_1.attack_type].attack_recover) * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_recover);
+        }
+        else
+        {
+            std::cout << "RELOADING!!!!";
         }
     }
     else {
