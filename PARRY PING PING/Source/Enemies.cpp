@@ -1,3 +1,13 @@
+//---------------------------------------------------------
+// file:	Enemies.cpp
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Declaration of General Enemy related functions
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
+
 #include "enemies.h"
 #include "player.h"
 
@@ -17,7 +27,7 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 	switch (MParryBot.FacingDir) 
 	{
 		case MParryBot.FacingLeft:
-			MParryBot.attackpos = AEVec2{ pos.x - 100, pos.y };
+			MParryBot.attackpos = AEVec2{ pos.x - 100, pos.y };				// Assigns attack pos based off direction its facing
 			break;
 		case MParryBot.FacingRight:
 			MParryBot.attackpos = AEVec2{ pos.x + 100, pos.y };
@@ -32,33 +42,34 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp) {
 			MParryBot.attackpos = AEVec2{pos.x + 0, pos.y - 100.f};
 			break;
 	}
-	MParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
-	MParryBot.hp = max_hp;
+	MParryBot.rad = rad;						// I know it says rad but hitbox will be a square so we just leave it as it is
+	MParryBot.hp = max_hp;						// Dummy starts with max health
 	MParryBot.max_hp = max_hp;
-	MParryBot.damage = 10.f;
-	MParryBot.AttackHitboxWidth = 150.f;
+	MParryBot.damage = 10.f;					// Adjust damage here!
+	MParryBot.AttackHitboxWidth = 150.f;		// Adjust Hitbox width and height here!
 	MParryBot.AttackHitboxHeight = 75.f;
-	MParryBot.state = Idle;
+	MParryBot.state = Idle;						// Starting state = idle
 
-	MParryBot.spark_buffer = 0.5;
+	MParryBot.spark_buffer = 0.5;				// Timing for when spark is drawn on player before attack starts (in seconds)
 	MParryBot.spark_draw = false;
 
-	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);
+	MParryBot.hitbox = Init_AABB(MParryBot.pos.x, MParryBot.pos.y, MParryBot.rad, MParryBot.rad);		// Init hitbox
 	MParryBot.hitboxWidth = MParryBot.hitbox.max.x - MParryBot.hitbox.min.x;
 	MParryBot.hitboxHeight = MParryBot.hitbox.max.y - MParryBot.hitbox.min.y;
 
-	MParryBot.idle_timer = Create_Timer(1); 
+	MParryBot.idle_timer = Create_Timer(1);			// Adjust timer lengths (in seconds) here! More details found in Enemies.h
 	MParryBot.windup_timer = Create_Timer(1);
 	MParryBot.attack_timer = Create_Timer(1);
 	MParryBot.stun_timer = Create_Timer(3);
 	MParryBot.respawn_timer = Create_Timer(3);
 }
 
-int MParryBot_last_hit = 0;
+int MParryBot_last_hit = 0;							// Checks for single hit detections
 int MParryBot_new_hit = 0;
 
+// Runs each frame - for dummy logic
 void Active_DummyBotMelee() {
-	if (MParryBot.state != Destroyed) {
+	if (MParryBot.state != Destroyed) {				// If dummy is still alive
 
 		// Reset last hit if no new melee hit detected
 		if (!MParryBot_new_hit)
@@ -66,32 +77,32 @@ void Active_DummyBotMelee() {
 			MParryBot_last_hit = 0;
 		}
 
-		if (Attacked_Melee_rect(MParryBot.pos, MParryBot.hitboxWidth, MParryBot.hitboxHeight, &MParryBot_new_hit, &MParryBot.damage))
+		if (Attacked_Melee_rect(MParryBot.pos, MParryBot.hitboxWidth, MParryBot.hitboxHeight, &MParryBot_new_hit, &MParryBot.damage))		// If dummy was hit
 		{
-			if (MParryBot_last_hit != MParryBot_new_hit)
+			if (MParryBot_last_hit != MParryBot_new_hit)			// Single hit detection
 			{
-				if (player.ammo < 3)
+				if (player.ammo < 3)								// Give player a ranged projectile on hit (capped at 3)
 				{
 					player.ammo++;
 				}
-				MParryBot.hp -= MParryBot.damage;
-				MParryBot_last_hit = MParryBot_new_hit;
+				MParryBot.hp -= MParryBot.damage;					// Bot takes damage
+				MParryBot_last_hit = MParryBot_new_hit;				// So bot only gets hit once
 			}
 		}
 
-		if (Attacking_Ranged_Impact(MParryBot.pos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, &MParryBot.damage))
+		if (Attacking_Ranged_Impact(MParryBot.pos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, &MParryBot.damage))			// Same as above but for ranged attack
 		{
 			MParryBot.hp -= MParryBot.damage;
 		}
 
 
-		if (MParryBot.hp <= 0) 
+		if (MParryBot.hp <= 0)										// If dummy is dead :(
 		{
-			MParryBot.respawn_timer.current = 0.f;
-			MParryBot.state = Destroyed;
+			MParryBot.respawn_timer.current = 0.f;					// Start respawn timer AND BRING HIM BACK TO LIFE
+			MParryBot.state = Destroyed;							// Set state to destroyed - doesnt repeat its usual cycle
 		}
 
-		switch (MParryBot.state)
+		switch (MParryBot.state)									// Depending on current state
 		{
 		case Idle:
 			if (Update_Timer(&MParryBot.idle_timer)) {
@@ -99,21 +110,21 @@ void Active_DummyBotMelee() {
 			}
 			else 
 			{
-				MParryBot.windup_timer.current = 0.f;
+				MParryBot.windup_timer.current = 0.f;				// Idle timer has ended, change states and start timer for next state
 				MParryBot.state = WindUp;
 			}
 			break;
 		case WindUp:
 			if (Update_Timer(&MParryBot.windup_timer)) {
 				//timer has not ended
-				if (MParryBot.windup_timer.current >= MParryBot.windup_timer.end - MParryBot.spark_buffer) {
+				if (MParryBot.windup_timer.current >= MParryBot.windup_timer.end - MParryBot.spark_buffer) {		// Depending on buffer length, set flag to draw spark
 					MParryBot.spark_draw = true;
 				}
 			}
 			else 
 			{
-				MParryBot.spark_draw = false;
-				MParryBot.attack_timer.current = 0.f;
+				MParryBot.spark_draw = false;						// Clear flag
+				MParryBot.attack_timer.current = 0.f;				// Windup timer has ended, change states and start timer for next state
 				MParryBot.state = Swinging;
 			}
 			break;
@@ -124,7 +135,7 @@ void Active_DummyBotMelee() {
 			}
 			else 
 			{
-				MParryBot.idle_timer.current = 0.f;
+				MParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
 				MParryBot.state = Idle;
 			}
 			break;
@@ -134,7 +145,7 @@ void Active_DummyBotMelee() {
 			}
 			else 
 			{
-				MParryBot.idle_timer.current = 0.f;
+				MParryBot.idle_timer.current = 0.f;					// Parried timer has ended, change states and start timer for next state
 				MParryBot.state = Idle;
 			}
 		}
@@ -147,7 +158,7 @@ void Active_DummyBotMelee() {
 			//timer has not ended
 		}
 		else {
-			MParryBot.idle_timer.current = 0.f;
+			MParryBot.idle_timer.current = 0.f;						// Respawn timer has ended, change states and start timer for next state
 			MParryBot.hp = MParryBot.max_hp;
 			MParryBot.state = Idle;
 		}
@@ -155,16 +166,16 @@ void Active_DummyBotMelee() {
 }
 
 void Attack_DummyBotMelee() {
-	if (AETestCircleToRect(&player.pos, player.radius, &MParryBot.attackpos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight)) 
+	if (AETestCircleToRect(&player.pos, player.radius, &MParryBot.attackpos, MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight))		// If dummy attacks player
 	{
-		switch (player.state) {
+		switch (player.state) {										// Depending on player state, there are different outcomes
 		case PARRY:
-			//stun logic
+			// Player parried the bot - Swap states to parried
 			MParryBot.stun_timer.current = 0.f;
 			MParryBot.state = Parried;
 			break;
 		case BLOCK:
-			Blocked_Hit(MParryBot.damage);
+			Blocked_Hit(MParryBot.damage);							// Player blocks damage - takes reduced damage
 			break;
 		case PARRIED:
 		case BLOCKED:
@@ -173,14 +184,14 @@ void Attack_DummyBotMelee() {
 			// do nothing, immune
 			break;
 		default:
-			Eat_Hit(MParryBot.damage);
+			Eat_Hit(MParryBot.damage);								// Player takes full damage
 		}
 	}
 }
 
 void Draw_DummyBotMelee() {
-	//jq the almighty animation lord please do ur magic these drawrects look ASS
-	switch (MParryBot.state)
+	//jq the almighty animation lord please do ur magic these drawrects look UNPLEASANT
+	switch (MParryBot.state)										// Placeholder sprites - Draws circles of different colours depending on state its in
 	{
 	case Idle:
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_idle);
@@ -189,8 +200,8 @@ void Draw_DummyBotMelee() {
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_windup);
 		break;
 	case Swinging:
-		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			//draw 'hitbox'
-		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);
+		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			// Draw 'hitbox'
+		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);													// Draw attack range
 		break;
 	case Parried:
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
@@ -211,8 +222,8 @@ void Draw_DummyBotMelee() {
 //Draw             - Render sprites
 void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 	RParryBot.pos = pos;
-	RParryBot.FacingDir = RParryBot.FacingDown;								//Init here which dir bot should face!!!
-	switch (RParryBot.FacingDir) {
+	RParryBot.FacingDir = RParryBot.FacingDown;								// Init here which dir bot should face!!!
+	switch (RParryBot.FacingDir) {											// Depending on direction its facing, attack position will be adjusted!
 	case RParryBot.FacingLeft:
 		RParryBot.attackpos = AEVec2{ pos.x - 50, pos.y };
 		break;
@@ -232,23 +243,23 @@ void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 
 	RParryBot.rad = rad;						//ik it says rad but hitbox will be a square so we just leave it as it is
 	RParryBot.hp = max_hp;
-	RParryBot.max_hp = max_hp;					//not sure if we want a destructable bot that will rebuild so im leaving this here
-	RParryBot.damage = 10.f;
-	RParryBot.projectile_speed = 350.f;
-	RParryBot.projectile_radius = 20.f;
-	RParryBot.projectile_range = 500.f;
-	RParryBot.projectile_parry = false;
+	RParryBot.max_hp = max_hp;					// Dummy starts with max health
+	RParryBot.damage = 10.f;					// Adjust damage here!
+	RParryBot.projectile_speed = 350.f;			// Adjust projectile speed here! 
+	RParryBot.projectile_radius = 20.f;			// Adjust projectile radius here!
+	RParryBot.projectile_range = 500.f;			// Adjust distance projectile travels before being destroyed here!
+	RParryBot.projectile_parry = false;			// Flags for when projectile is parried and to draw projectile
 	RParryBot.projectile_draw = false;
-	RParryBot.AttackHitboxWidth = 150.f;
+	RParryBot.AttackHitboxWidth = 150.f;		// Adjust Hitbox width and height here!
 	RParryBot.AttackHitboxHeight = 75.f;
-	RParryBot.state = Idle;
+	RParryBot.state = Idle;						// Starting state = idle
 
-	RParryBot.hitbox = Init_AABB(RParryBot.pos.x, RParryBot.pos.y, RParryBot.rad, RParryBot.rad);
+	RParryBot.hitbox = Init_AABB(RParryBot.pos.x, RParryBot.pos.y, RParryBot.rad, RParryBot.rad);		// Init hitbox
 	RParryBot.hitboxWidth = RParryBot.hitbox.max.x - RParryBot.hitbox.min.x;
 	RParryBot.hitboxHeight = RParryBot.hitbox.max.y - RParryBot.hitbox.min.y;
 	RParryBot.projectile_pos = RParryBot.attackpos;
 
-	RParryBot.idle_timer = Create_Timer(1);
+	RParryBot.idle_timer = Create_Timer(1);		// Adjust timer lengths (in seconds) here! More details found in Enemies.h
 	RParryBot.windup_timer = Create_Timer(1);
 	RParryBot.attack_timer = Create_Timer(3);
 	RParryBot.stun_timer = Create_Timer(3);
@@ -260,7 +271,7 @@ int RParryBot_last_hit = 0;
 int RParryBot_new_hit = 0;
 
 void Active_DummyBotRange() {
-	if (RParryBot.state != Destroyed) {
+	if (RParryBot.state != Destroyed) {			// If dummy is still alive
 
 		// Reset last hit if no new melee hit detected
 		if (!RParryBot_new_hit)
@@ -268,32 +279,32 @@ void Active_DummyBotRange() {
 			RParryBot_last_hit = 0;
 		}
 
-		if (Attacked_Melee_rect(RParryBot.pos, RParryBot.hitboxWidth, RParryBot.hitboxHeight, &RParryBot_new_hit, &RParryBot.damage))
+		if (Attacked_Melee_rect(RParryBot.pos, RParryBot.hitboxWidth, RParryBot.hitboxHeight, &RParryBot_new_hit, &RParryBot.damage))		// If dummy was hit
 		{
-			if (RParryBot_last_hit != RParryBot_new_hit)
+			if (RParryBot_last_hit != RParryBot_new_hit)			// Single hit detection
 			{
-				if (player.ammo < 3)
+				if (player.ammo < 3)								// Give player a ranged projectile on hit (capped at 3)
 				{
 					player.ammo++;
 				}
-				RParryBot.hp -= RParryBot.damage;
-				RParryBot_last_hit = RParryBot_new_hit;
+				RParryBot.hp -= RParryBot.damage;					// Bot takes damage
+				RParryBot_last_hit = RParryBot_new_hit;				// So bot only gets hit once
 			}
 		}
 
-		if (Attacking_Ranged_Impact(RParryBot.pos, RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight, &RParryBot.damage))
+		if (Attacking_Ranged_Impact(RParryBot.pos, RParryBot.AttackHitboxWidth, RParryBot.AttackHitboxHeight, &RParryBot.damage))			// Same as above but for ranged attack
 		{
 			RParryBot.hp -= RParryBot.damage;
 		}
 
 
-		if (RParryBot.hp <= 0) 
+		if (RParryBot.hp <= 0)										// If dummy is dead :(
 		{
-			RParryBot.respawn_timer.current = 0.f;
+			RParryBot.respawn_timer.current = 0.f;					// Start respawn timer AND BRING HIM BACK TO LIFE
 			RParryBot.state = Destroyed;
 		}
 
-		switch (RParryBot.state)
+		switch (RParryBot.state)									// Depending on current state
 		{
 		case Idle:
 			if (Update_Timer(&RParryBot.idle_timer)) {
@@ -301,7 +312,7 @@ void Active_DummyBotRange() {
 			}
 			else 
 			{
-				RParryBot.windup_timer.current = 0.f;
+				RParryBot.windup_timer.current = 0.f;				// Idle timer has ended, change states and start timer for next state
 				RParryBot.state = WindUp;
 			}
 			break;
@@ -311,26 +322,26 @@ void Active_DummyBotRange() {
 			}
 			else 
 			{
-				RParryBot.attack_timer.current = 0.f;
+				RParryBot.attack_timer.current = 0.f;				// Windup timer has ended, change states and start timer for next state
 				RParryBot.state = Swinging;
 			}
 			break;
 		case Swinging:
 			RParryBot.projectile_draw = true;
 			Attack_DummyBotRange();
-			if (Update_Timer(&RParryBot.attack_timer)) {			//idk why when i or this if statement it dont work so pls pardon this ugly ass code
-				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range) 
+			if (Update_Timer(&RParryBot.attack_timer)) {			// idk why when i or this if statement it dont work so pls pardon this UNPLEASANT code
+				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range)		// If projectile travels too far, 
 				{
 					RParryBot.projectile_draw = false;
 					RParryBot.idle_timer.current = 0.f;
-					RParryBot.projectile_pos = RParryBot.attackpos;
+					RParryBot.projectile_pos = RParryBot.attackpos;			// Projectile spawns from attack pos
 					RParryBot.state = Idle;
 				}
 			}
 			else 
 			{
 				RParryBot.projectile_draw = false;
-				RParryBot.idle_timer.current = 0.f;
+				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
 				RParryBot.projectile_pos = RParryBot.attackpos;
 				RParryBot.state = Idle;
 			}
@@ -342,7 +353,7 @@ void Active_DummyBotRange() {
 			}
 			else 
 			{
-				RParryBot.idle_timer.current = 0.f;
+				RParryBot.idle_timer.current = 0.f;					// Parried timer has ended, change states and start timer for next state
 				RParryBot.state = Idle;
 			}
 		}
@@ -355,7 +366,7 @@ void Active_DummyBotRange() {
 		}
 		else 
 		{
-			RParryBot.idle_timer.current = 0.f;
+			RParryBot.idle_timer.current = 0.f;						// Respawn timer has ended, change states and start timer for next state
 			RParryBot.hp = RParryBot.max_hp;
 			RParryBot.state = Idle;
 		}
@@ -364,7 +375,7 @@ void Active_DummyBotRange() {
 
 void Attack_DummyBotRange() {
 	//TO DO: ON PARRY - DEFLECT PROJECTILE BACK AT ENEMY
-	switch (RParryBot.FacingDir)
+	switch (RParryBot.FacingDir)									// Depending on direction dummy is facing, adjust projectile direction and speed
 	{
 	case RParryBot.FacingLeft:
 		RParryBot.projectile_pos.x -= RParryBot.projectile_speed * dt;
@@ -383,16 +394,16 @@ void Attack_DummyBotRange() {
 		break;
 	}
 
-	if (AETestCircleToCircle(&player.pos, player.radius, &RParryBot.projectile_pos, RParryBot.projectile_radius)) 
+	if (AETestCircleToCircle(&player.pos, player.radius, &RParryBot.projectile_pos, RParryBot.projectile_radius))			// If projectile hits player
 	{
-		switch (player.state) {
+		switch (player.state) {						// Depending on player state, there are different outcomes
 		case PARRY:
 			RParryBot.stun_timer.current = 0.f;
-			RParryBot.state = Parried;				//change to just deflect proj
+			RParryBot.state = Parried;				// change to just deflect proj, currently bot will get parried upon projectile parry
 			RParryBot.projectile_parry = true;
-			RParryBot.projectile_draw = false;		//set to true once deflect logic implemented
+			RParryBot.projectile_draw = false;		// set to true once deflect logic implemented
 			break;
-		case BLOCK:
+		case BLOCK:									// Player blocks damage - takes reduced damage
 			Blocked_Hit(RParryBot.damage);
 			RParryBot.projectile_draw = false;
 			break;
@@ -401,18 +412,18 @@ void Attack_DummyBotRange() {
 		case HIT:
 		case DODGE:
 			// do nothing, immune
-			RParryBot.projectile_draw = false;
+			RParryBot.projectile_draw = false;		// Stop drawing
 			break;
 		default:
-			Eat_Hit(RParryBot.damage);
-			RParryBot.projectile_draw = false;
+			Eat_Hit(RParryBot.damage);				// Player takes full damage
+			RParryBot.projectile_draw = false;		// Stop drawing
 		}
 	}
 }
 
 void Draw_DummyBotRange() {
 	//jq the almighty animation lord please do ur magic these drawrects look ASS
-	switch (RParryBot.state)
+	switch (RParryBot.state)						// Placeholder sprites - Draws circles of different colours depending on state its in
 	{
 	case Idle:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
@@ -426,14 +437,14 @@ void Draw_DummyBotRange() {
 	case Parried:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
 	}
-	if (RParryBot.projectile_draw)
+	if (RParryBot.projectile_draw)		// If projectile needs to be drawn
 	{
 		//Temp Projectile Drawing
-		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);
+		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);		// Draw circle at projectile's position
 	}
 }
 
-void Init_Enemy_Indicator()
+void Init_Enemy_Indicator()								// For colours!!!!
 {
 	color_idle = SetColor(0xFFFF6961);
 	color_windup = SetColor(0xFFFFCF61);
