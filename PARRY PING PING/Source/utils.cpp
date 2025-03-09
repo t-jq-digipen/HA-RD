@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	utils.cpp
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
+// email:	t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
 //
 // brief:	Collection of utility functions
 //
