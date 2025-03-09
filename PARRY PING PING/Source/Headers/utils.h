@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	utils.h
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
+// email:	t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
 //
 // brief:	Declaration of utility structs and functions
 //
@@ -247,12 +247,56 @@ typedef struct EnvStruct {
 	//aabb Hitbox;		//for future implementation if want to add coll/ destructable objects etc
 }EnvStruct;
 
+/*!
+ * \brief Calculates the distance between two points (x1, y1) and (x2, y2).
+ *
+ * \param x1 The x-coordinate of the first point.
+ * \param y1 The y-coordinate of the first point.
+ * \param x2 The x-coordinate of the second point.
+ * \param y2 The y-coordinate of the second point.
+ * \return The distance between the two points.
+ */
 float CalculateDistance(float x1, float y1, float x2, float y2);
 
+/*!
+ * \brief Checks for a collision using the Separating Axis Theorem (SAT) for two convex polygons.
+ *
+ * \param corners1 Array of corners (vertices) of the first polygon.
+ * \param corners2 Array of corners (vertices) of the second polygon.
+ * \return True if a collision is detected, false otherwise.
+ */
 bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
 
+/*!
+ * \brief Rotates a point around a given center by a specified angle.
+ *
+ * \param point The point to be rotated.
+ * \param center The center around which the point will be rotated.
+ * \param angle The angle in radians by which to rotate the point.
+ * \return The rotated point.
+ */
 AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
 
+/*!
+ * \brief Projects a point onto a specified axis.
+ *
+ * \param point The point to project.
+ * \param axis The axis onto which the point will be projected.
+ * \return The projection of the point onto the axis.
+ */
 float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis);
 
+/*!
+ * \brief Checks if two rectangles are intersecting.
+ *
+ * \param rect1_x The x-coordinate of the first rectangle's top-left corner.
+ * \param rect1_y The y-coordinate of the first rectangle's top-left corner.
+ * \param rect1_width The width of the first rectangle.
+ * \param rect1_height The height of the first rectangle.
+ * \param rect2_x The x-coordinate of the second rectangle's top-left corner.
+ * \param rect2_y The y-coordinate of the second rectangle's top-left corner.
+ * \param rect2_width The width of the second rectangle.
+ * \param rect2_height The height of the second rectangle.
+ * \return True if the rectangles are intersecting, false otherwise.
+ */
 bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height, f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height);

@@ -1,12 +1,13 @@
 //---------------------------------------------------------
 // file:	player.cpp
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
+// email:	t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
 //
 // brief:	Player functions  |	Line number
 //			- Movement			24
 //			- Atack				72
-//
+//			- Attacking_Ranged
+//			- Attacking_Ranged_Impact
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
@@ -255,52 +256,6 @@ Projectile new_proj;
 // AABB hitbox for the heavy attack (laser)
 aabb heavyAtkHitbox;
 
-//bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
-//{
-//	bool hit = false;
-//
-//	for (auto& proj : projectiles)
-//	{
-//		// Check for heavy (laser) projectile
-//		if (proj.isHeavy)
-//		{
-//			// Laser collision using AETestRectToRect (treating the laser as a thin rectangle)
-//			if (AETestRectToRect(&proj.pos, proj.width, proj.height, &target, width, height))
-//			{
-//				*damage = 10.f; // Laser deals more damage
-//				hit = true;
-//			}
-//
-//			// Update laser position (it keeps moving in the given direction)
-//			AEVec2 scaledVel;
-//			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt); // Scale the velocity by the time delta
-//			AEVec2Add(&proj.pos, &proj.pos, &scaledVel); // Move the laser
-//
-//			// If the laser exceeds its range, deactivate it
-//			if (CalculateDistance(proj.pos.x, proj.pos.y, player.pos.x, player.pos.y) > proj.range)
-//			{
-//				proj.isActive = false;
-//			}
-//		}
-//		else
-//		{
-//			// Light projectile collision using AETestCircleToRect
-//			if (AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
-//			{
-//				*damage = 5.f;  // Light projectile deals less damage
-//				hit = true;
-//				proj.isActive = false;  // Deactivate light projectile after collision
-//			}
-//
-//			// Update light projectile position
-//			AEVec2 scaledVel;
-//			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt); // Scale the velocity by the time delta
-//			AEVec2Add(&proj.pos, &proj.pos, &scaledVel); // Move the projectile
-//		}
-//	}
-//
-//	return hit; // Return true if any projectile hit
-//}
 
 
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
@@ -384,9 +339,6 @@ void Attacking_Ranged()
 	if (player.ammo > 0)
 	{
 
-		// Declare a timer to track right-click hold duration
-		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
 		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held

@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	Level1.cpp
-// author:	MANFRED SIM
-// email:	manfred.sim@digipen.edu
+// author:	MANFRED SIM, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
+// email:	manfred.sim@digipen.edu, muhammadfauzan.b@digipen.edu
 //
 // brief:	Implementation of Level 1 functions
 //
