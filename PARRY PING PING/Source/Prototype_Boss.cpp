@@ -2,12 +2,15 @@
 #include "player.h"
 #include "UI.h"
 #include <vector>
+#include "SpriteSheet.h"
 
 Boss boss_1;
 
 Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
 
-SpriteSheet boss_sprite_sheet;
+SpriteSheet_Old boss_sprite_sheet;
+
+SpriteSheet boss_1_sprite;
 
 #define MAX_PROJECTILES 3
 #define PROJECTILE_DAMAGE 10
@@ -52,6 +55,7 @@ std::vector<RocketFist> rocket_fists;
 void Load_Boss()
 {
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
+    boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
 }
 
 void Init_Boss_Indicator()
@@ -516,6 +520,7 @@ void Draw_Boss() {
 void Unload_Boss()
 {
     Unload_SpriteSheet(&boss_sprite_sheet);
+    boss_1_sprite.Unload();
 }
 
 const f32 SMASH_RADIUS = 200.f;

@@ -63,7 +63,7 @@ typedef struct Player
 	int direction_h;
 
 	Color color;
-	SpriteSheet* spritesheet;
+	SpriteSheet_Old* spritesheet;
 } Player;
 
 // to change

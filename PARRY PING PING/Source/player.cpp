@@ -52,11 +52,11 @@ const float PLAYER_HITBOX_HEIGHT = 120.f;
 
 Player player;
 Attack melee_attack;
-SpriteSheet sword;
+SpriteSheet_Old sword;
 
-SpriteSheet ssidle_move;
-SpriteSheet ssmelee_atk;
-SpriteSheet sshitdodgeparry;
+SpriteSheet_Old ssidle_move;
+SpriteSheet_Old ssmelee_atk;
+SpriteSheet_Old sshitdodgeparry;
 
 // ATTACK LOGIC
 f32 atk_pos_x, atk_pos_y, atk_rot;

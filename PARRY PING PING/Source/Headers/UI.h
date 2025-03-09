@@ -24,18 +24,18 @@ extern int levelState;
 
 typedef struct UIScreen 
 {
-	SpriteSheet* spritesheet_screen;
-	SpriteSheet* spritesheet_playbutton;
-	SpriteSheet* spritesheet_optionsbutton;
-	SpriteSheet* spritesheet_exitbutton;
+	SpriteSheet_Old* spritesheet_screen;
+	SpriteSheet_Old* spritesheet_playbutton;
+	SpriteSheet_Old* spritesheet_optionsbutton;
+	SpriteSheet_Old* spritesheet_exitbutton;
 
-	SpriteSheet* spritesheet_button1;
-	SpriteSheet* spritesheet_button2;
-	SpriteSheet* spritesheet_button3;
-	SpriteSheet* spritesheet_button4;
+	SpriteSheet_Old* spritesheet_button1;
+	SpriteSheet_Old* spritesheet_button2;
+	SpriteSheet_Old* spritesheet_button3;
+	SpriteSheet_Old* spritesheet_button4;
 
-	SpriteSheet* spritesheet_bar1;
-	SpriteSheet* spritesheet_bar2;
+	SpriteSheet_Old* spritesheet_bar1;
+	SpriteSheet_Old* spritesheet_bar2;
 
 	Timer animationtimer;
 	int isPlayClicked;

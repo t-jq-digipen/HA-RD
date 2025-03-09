@@ -56,7 +56,7 @@ void Loop_Timer(Timer* timer);
 // -------------------------------------------------
 //
 // Anim struct holding stuff
-typedef struct SpriteSheet 
+typedef struct SpriteSheet_Old 
 {
 	AEGfxTexture* texture;
 
@@ -72,17 +72,17 @@ typedef struct SpriteSheet
 
 	Timer timer;
 	float duration;
-} SpriteSheet;
+} SpriteSheet_Old;
 
-SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration);
+SpriteSheet_Old Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration);
 
-void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot);
+void Draw_SpriteSheet(SpriteSheet_Old spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot);
 
-void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration);
+void Set_SpriteSheet_current(SpriteSheet_Old* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration);
 
-void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot);
+void Draw_SpriteSheet_test(SpriteSheet_Old spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot);
 
-void Unload_SpriteSheet(SpriteSheet* spritesheet);
+void Unload_SpriteSheet(SpriteSheet_Old* spritesheet);
 
 
 // AABB hitbox

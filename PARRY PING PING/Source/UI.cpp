@@ -30,7 +30,7 @@ Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 char level_timer[16];
 
-SpriteSheet ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
+SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;

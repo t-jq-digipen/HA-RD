@@ -112,6 +112,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="..\Source\MainMenu.cpp" />
     <ClCompile Include="..\Source\player.cpp" />
     <ClCompile Include="..\Source\Prototype_Boss.cpp" />
+    <ClCompile Include="..\Source\SpriteSheet.cpp" />
     <ClCompile Include="..\Source\UI.cpp" />
     <ClCompile Include="..\Source\utils.cpp" />
   </ItemGroup>
@@ -126,6 +127,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\MainMenu.h" />
     <ClInclude Include="..\Source\Headers\player.h" />
     <ClInclude Include="..\Source\Headers\Prototype_Boss.h" />
+    <ClInclude Include="..\Source\Headers\SpriteSheet.h" />
     <ClInclude Include="..\Source\Headers\UI.h" />
     <ClInclude Include="..\Source\Headers\utils.h" />
     <ClInclude Include="mobs.h" />

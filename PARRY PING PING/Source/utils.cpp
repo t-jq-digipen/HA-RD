@@ -64,12 +64,39 @@ Timer Create_Timer(float duration)
 	return temp;
 }
 
+//bool Update_Timer(Timer* timer)
+//{
+//	if (timer->current < timer->end)
+//	{
+//		timer->current += dt / timer->duration;
+//
+//		return true;
+//	}
+//	else
+//	{
+//		timer->current = timer->end;
+//	}
+//	return false;
+//}
+
+//void Loop_Timer(Timer* timer)
+//{
+//	if (timer->current < timer->end)
+//	{
+//		timer->current += dt / timer->duration;
+//	}
+//	else
+//	{
+//		timer->current = 0;
+//	}
+//}
+
 bool Update_Timer(Timer* timer)
 {
+	timer->current += dt / timer->duration;
+
 	if (timer->current < timer->end)
 	{
-		timer->current += dt / timer->duration;
-
 		return true;
 	}
 	else
@@ -81,15 +108,13 @@ bool Update_Timer(Timer* timer)
 
 void Loop_Timer(Timer* timer)
 {
-	if (timer->current < timer->end)
-	{
-		timer->current += dt / timer->duration;
-	}
-	else
+	timer->current += dt / timer->duration;
+	if (timer->current > timer->end)
 	{
 		timer->current = 0;
 	}
 }
+
 #pragma endregion
 
 
@@ -97,9 +122,9 @@ void Loop_Timer(Timer* timer)
 // SPRITESHEET FUNCTIONS
 #pragma region SPRITESHEET
 
-SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration)
+SpriteSheet_Old Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float duration)
 {
-	SpriteSheet temp;
+	SpriteSheet_Old temp;
 	temp.texture = AEGfxTextureLoad(texture_file);
 	temp.rows = rows;
 	temp.cols = cols;
@@ -129,7 +154,7 @@ SpriteSheet Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, float
 	return temp;
 }
 
-void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot)
+void Draw_SpriteSheet(SpriteSheet_Old spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 uv_x, f32 uv_y, f32 rot)
 {
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	// box transform
@@ -163,7 +188,7 @@ void Draw_SpriteSheet(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, 
 	AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 }
 
-void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration)
+void Set_SpriteSheet_current(SpriteSheet_Old* spritesheet, u32 row, u32 col_start, u32 col_end, Timer timer, f32 draw_duration)
 {
 	spritesheet->current_row = row;
 	u32 cols = col_end - col_start;
@@ -179,7 +204,7 @@ void Set_SpriteSheet_current(SpriteSheet* spritesheet, u32 row, u32 col_start, u
 	spritesheet->current_col = col_start + col_add;
 }
 
-void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+void Draw_SpriteSheet_test(SpriteSheet_Old spritesheet, f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
 {
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	// box transform
@@ -213,7 +238,7 @@ void Draw_SpriteSheet_test(SpriteSheet spritesheet, f32 pos_x, f32 pos_y, f32 wi
 	AEGfxMeshDraw(spritesheet.mesh, AE_GFX_MDM_TRIANGLES);
 }
 
-void Unload_SpriteSheet(SpriteSheet* spritesheet)
+void Unload_SpriteSheet(SpriteSheet_Old* spritesheet)
 {
 	AEGfxMeshFree(spritesheet->mesh);
 	AEGfxTextureUnload(spritesheet->texture);

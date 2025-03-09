@@ -17,7 +17,7 @@ Color red, green, blue, black, white, hover_red;
 f32 width, height;
 s32 mouseX, mouseY;
 
-SpriteSheet playbutton, exitbutton;
+SpriteSheet_Old playbutton, exitbutton;
 MainMenu mainmenu;
 
 void MainMenu_Load()

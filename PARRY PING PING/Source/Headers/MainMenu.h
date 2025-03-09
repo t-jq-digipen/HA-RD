@@ -12,8 +12,8 @@
 
 typedef struct MainMenu
 {
-	SpriteSheet* spritesheet_button1;
-	SpriteSheet* spritesheet_button2;
+	SpriteSheet_Old* spritesheet_button1;
+	SpriteSheet_Old* spritesheet_button2;
 
 	Timer animationtimer;
 	int isPlayClicked;
