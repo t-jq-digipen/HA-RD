@@ -116,7 +116,11 @@ void Init_Boss()
     boss_1.idle_timer = Create_Timer(1.f);
     boss_1.attack_timer = Create_Timer(1.f);
     boss_1.stun_timer = Create_Timer(3.f);
+    boss_1.explosion_timer = Create_Timer(0.5f);
     boss_1.death_explosion_duration = Create_Timer(4.f);
+
+    // Explosion effect check
+    boss_1.explosion_triggered = 0;
  
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -302,14 +306,31 @@ void Update_Boss()
     else if (boss_1.state == BOSS_DEAD)
     {
         levelState = CLEARED;
+        for (auto& fist : rocket_fists)
+        {
+            fist.active = false;
+        }
+
         if (Update_Timer(&boss_1.death_explosion_duration))
         {
-            std::cout << boss_1.death_explosion_duration.current << '\n';
-            if (!Update_Timer(&boss_1.explosion_timer))
+            Loop_Timer(&boss_1.explosion_timer);
+            if (boss_1.explosion_timer.current == 0.f)
+            {
+                boss_1.explosion_triggered = 1;
+            }
+            if (boss_1.explosion_triggered == 1)
             {
                 Draw_Boss_Death_Explosion(boss_1.pos);
+                boss_1.explosion_triggered = 0;
             }
         }
+        else
+        {
+            boss_death_explosion.clear();
+        }
+
+        // Remove inactive explosion effects
+        boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& e) { return !e.active; }), boss_death_explosion.end());
     }
 
     // Update Boss Hitbox

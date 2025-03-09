@@ -14,15 +14,19 @@
 #include "Level1.h"
 #include "HubWorld.h"
 
+// Game states
 int currentState = 0, previousState = 0, nextState = 0;
 
+// Function pointers
 FP fpLoad = nullptr, fpInitialize = nullptr, fpUpdate = nullptr, fpDraw = nullptr, fpFree = nullptr, fpUnload = nullptr;
 
+// Initialize the game state manager
 void GSM_Initialize(int gameState)
 {
 	currentState = gameState;
 }
 
+// Update the game state manager
 void GSM_Update()
 {
 	switch (currentState)

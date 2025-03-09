@@ -70,6 +70,7 @@ typedef struct Boss
 
     int attack_type;            // Current attack type
 
+    bool explosion_triggered;    // Whether an explosion effect is active  
     Timer explosion_timer;      // Timer for explosion effects
     Timer death_explosion_duration; // Timer for death explosion duration
 } Boss;

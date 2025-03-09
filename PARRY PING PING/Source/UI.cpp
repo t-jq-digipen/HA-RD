@@ -13,37 +13,46 @@
 #include "GameStateManager.h"
 #include "SpriteSheet.h"
 
+// Level number
 int levelState = 0;
 
+// Font, colors, mouse coordinates
 s8 UI_font;
 Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red;
 s32 UI_mouseX, UI_mouseY;
 
+// Player UI
 float UI_playerhp, UI_playermaxhp;
 int UI_ammo, UI_maxammo;
 float UI_parryCD;
 Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
+// Boss UI
 float UI_bosshp, UI_bossmaxhp;
 
+// UI Colors
 Color play_bg, pause_bg, pause_screen;
+
+// Boss HP Colors
 Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
+// Level Timer
 char level_timer[16];
 
+// Crosshair
 SpriteSheet crosshair;
 
+// UI Menus
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 
+// BGM and SFX
 AEAudio levelBGM, levelSFX;
 AEAudioGroup gameBGM, gameSFX;
-
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
-// will neaten when more player parameters are finalized
-
+// Initialize the various screen UI elements
 void Init_UI()
 {
 	// Colors
@@ -84,6 +93,7 @@ void Init_UI()
 	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 
+	// UI Screen Spritesheets
 	uiscreen.spritesheet_playbutton = &ssmenu_play;
 	uiscreen.spritesheet_optionsbutton = &ssmenu_options;
 	uiscreen.spritesheet_exitbutton = &ssmenu_exit;
@@ -96,6 +106,7 @@ void Init_UI()
 	uiscreen.spritesheet_bar2 = &ssmenu_bar2;
 	uiscreen.animationtimer = Create_Timer(0.5f);
 
+	// Checks for button clicks in UI screens
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
@@ -103,17 +114,21 @@ void Init_UI()
 	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
 	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
 
+	// BGM and SFX (Audio Groups)
 	gameBGM = AEAudioCreateGroup();
 	gameSFX = AEAudioCreateGroup();
 
+	// BGM and SFX (Settings)
 	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 50.f;
 	max_bgm_vol = max_sfx_vol = 100.f;
 
+	// Initialize volume settings when entering level
 	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
 	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
 }
 
+// Initialize the player UI elements
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 {
 	// Player UI
@@ -132,6 +147,7 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	crosshair.Set_Row(0);
 }
 
+// Update the values for player UI
 void Update_Player_UI(int ammo, float hp, float parry_timer)
 {
 	// Update player hp/ammo
@@ -140,6 +156,7 @@ void Update_Player_UI(int ammo, float hp, float parry_timer)
 	UI_parryCD = parry_timer;
 }
 
+// Draws the player UI elements
 void Draw_Player_UI()
 {
 	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
@@ -165,16 +182,19 @@ void Draw_Player_UI()
 
 }
 
+// Initialize the boss UI elements
 void Init_Boss_UI(float hp)
 {
 	UI_bosshp = UI_bossmaxhp = hp;
 }
 
+// Update the boss UI elements
 void Update_Boss_UI(float hp)
 {
 	UI_bosshp = hp;
 }
 
+// Draw Boss HP bar
 void Draw_Boss_HPbar()
 {
 	DrawRect(0.f, 400.f, 1200.f, 50.f, boss_hp_damage);
@@ -190,43 +210,42 @@ void Draw_Boss_HPbar()
 	DrawHPBar(-600.f, 425.f, 600.f, 375.f, UI_bosshp, UI_bossmaxhp, hpcolor);
 }
 
+// Draw the various UI elements
 void Draw_UI(int DrawBossHP )
 {
 	Draw_Player_UI();
 	if (DrawBossHP) { Draw_Boss_HPbar(); }
 }
 
+//void Draw_Boss1HP()
+//{
+//	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+//	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+//
+//	// boss health logic
+//	if (boss1.current_hp >= 30.f && boss1.current_hp < 60.f)
+//	{
+//		boss1.phase = PHASE_2;
+//		boss1.hp_color = boss_hp_yellow;
+//	}
+//	if (boss1.current_hp >= 0.f && boss1.current_hp < 30.f)
+//	{
+//		boss1.phase = PHASE_3;
+//		boss1.hp_color = boss_hp_red;
+//	}
+//	if (boss1.current_hp <= 0.f)
+//	{
+//		boss1.phase = DEFEAT;
+//		boss1.current_hp = 0.f;
+//	}
+//
+//	// Draw boss health bar
+//	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
+//	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, boss_hp_damage);
+//	DrawRect(800.f, 400.f, 400.f, 50.f, play_bg);
+//}
 
-
-
-void Draw_Boss1HP()
-{
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-
-	// boss health logic
-	if (boss1.current_hp >= 30.f && boss1.current_hp < 60.f)
-	{
-		boss1.phase = PHASE_2;
-		boss1.hp_color = boss_hp_yellow;
-	}
-	if (boss1.current_hp >= 0.f && boss1.current_hp < 30.f)
-	{
-		boss1.phase = PHASE_3;
-		boss1.hp_color = boss_hp_red;
-	}
-	if (boss1.current_hp <= 0.f)
-	{
-		boss1.phase = DEFEAT;
-		boss1.current_hp = 0.f;
-	}
-
-	// Draw boss health bar
-	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
-	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, boss_hp_damage);
-	DrawRect(800.f, 400.f, 400.f, 50.f, play_bg);
-}
-
+// Open the pause menu when player pauses the game
 void Draw_PauseMenu() 
 {
 	// Get mouse position coordinates
@@ -319,6 +338,7 @@ void Draw_PauseMenu()
 	}
 }
 
+// Open the level complete screen when player beats the boss
 void Draw_ClearMenu()
 {
 	// Get mouse position coordinates
@@ -382,6 +402,7 @@ void Draw_ClearMenu()
 	}
 }
 
+// Open the options menu when player accesses options from the pause menu
 void Draw_OptionsMenu()
 {
 	// Get mouse position coordinates
@@ -580,6 +601,7 @@ void Draw_OptionsMenu()
 	}
 }
 
+// Open the game over screen when player dies
 void Draw_GameOverMenu()
 {
 	// Get mouse position coordinates
@@ -640,11 +662,13 @@ void Draw_GameOverMenu()
 	}
 }
 
+// Update the level timer
 void Update_LevelTimer(float *time_elapsed)
 {
 	*time_elapsed += dt;
 }
 
+// Draw the level timer
 void Draw_LevelTimer(float time_elapsed)
 {
 	int minutes = static_cast<int>(time_elapsed) / 60;
@@ -656,7 +680,7 @@ void Draw_LevelTimer(float time_elapsed)
 	DrawTextBox(0.5f, -0.9f, 200.f, 100.f, 1.f, UI_font, UI_black, level_timer);
 }
 
-// draw full hp bar
+// Draw full hp bar
 // pos_x1, pos_y1 - position of top left corner
 // pos_x2, pos_y2 - position of bottom right corner
 // hp - current health
@@ -674,7 +698,7 @@ void DrawHPBar(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp,
 	DrawRect(pos_x1 + (hpwidth / 2.f), pos_y1 + height / 2.f, hpwidth, height, color);
 }
 
-// draw segmented hp bar
+// Draw segmented hp bar
 // pos_x1, pos_y1 - position of top left corner
 // pos_x2, pos_y2 - position of bottom right corner
 // hp - current health
@@ -701,14 +725,17 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 	}
 }
 
+// Free the UI elements
 void Free_UI()
 {
 	AEAudioStopGroup(gameBGM);
 	AEAudioStopGroup(gameSFX);
 }
 
+// Unload the UI elements
 void Unload_UI()
 {
+	// Spritesheets
 	Unload_SpriteSheet(&ssmenu_play);
 	Unload_SpriteSheet(&ssmenu_options);
 	Unload_SpriteSheet(&ssmenu_exit);
@@ -719,8 +746,11 @@ void Unload_UI()
 	Unload_SpriteSheet(&ssmenu_screen);
 	Unload_SpriteSheet(&ssmenu_bar1);
 	Unload_SpriteSheet(&ssmenu_bar2);
+
+	// Crosshair
 	crosshair.Unload();
 
+	// Game audio
 	AEAudioUnloadAudio(levelBGM);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
