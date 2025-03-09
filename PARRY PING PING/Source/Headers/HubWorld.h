@@ -1,23 +1,21 @@
 //---------------------------------------------------------
 // file:	HubWorld.h
-// author:	ASHFER
-// email:	m.binafzalkhan@digipen.edu
+// author:	AVID PARRY ENJOYERS
+// email:	-
 //
 // brief:	Declaration of Hub World functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once
-
-void HubWorld_Load();
-
-void HubWorld_Initialize();
-
-void HubWorld_Update();
-
-void HubWorld_Draw();
-
-void HubWorld_Free();
-
-void HubWorld_Unload(); 
+// ----------------------------------------------------------------------------
+// Function prototypes
+// ----------------------------------------------------------------------------
+void HubWorld_Load();			// Load Hub World resources
+void HubWorld_Initialize();		// Initialize Hub World elements, such as practice range dummy, assets, UI etc.
+void HubWorld_Update();			// Handles logic on per frame basis, mainly used to update logic for practice range dummies and logic for interactables
+void HubWorld_Draw();			// Draws assets for props, player, UI etc.
+void HubWorld_Free();			// Free memory allocated for Hub World elements
+void HubWorld_Unload();			// Unload Hub World resources
+		
