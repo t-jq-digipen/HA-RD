@@ -51,22 +51,22 @@ void Draw_Mobs()
 {
     AEGfxSetRenderMode(AE_GFX_RM_COLOR);
     AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-    for (int i = 0; i < mobs_list.count; ++i) 
+    for (u32 i = 0; i < mobs_list.count; ++i) 
     {
         mobs_type* mob = &mobs_list.mobs[i];
         DrawCircle(World_To_Screen_x(mob->x), World_To_Screen_y(mob->y), mob->size, mob->color);
     }
 }
 
-void spawn_mob(f32 x, f32 y, f32 size, Color color) 
+void spawn_mob(f32 x, f32 y, f32 sizey, Color colory) 
 {
     if (mobs_list.count < array_count(mobs_list.mobs)) 
     {
         mobs_type* mob = &mobs_list.mobs[mobs_list.count++];
         mob->x = x;
         mob->y = y;
-        mob->size = size;
-        mob->color = color;
+        mob->size = sizey;
+        mob->color = colory;
         mob->isattacking = false;
         mob->attackrange = 0.0f; // Initialize attack range if needed
     }
