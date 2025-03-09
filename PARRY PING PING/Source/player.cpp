@@ -341,9 +341,6 @@ void Attacking_Ranged()
 	if (player.ammo > 0)
 	{
 
-		// Declare a timer to track right-click hold duration
-		static float rightClickTimer = 0.f;
-		const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
 
 		// In your update function, handle the right-click hold event
 		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
