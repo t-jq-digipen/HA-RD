@@ -373,8 +373,6 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 
 
 
-
-
 void Attacking_Ranged()
 {
 	if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
