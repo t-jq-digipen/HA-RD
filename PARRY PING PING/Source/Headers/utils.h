@@ -129,6 +129,11 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color);
 // param angle - angle of rotation
 void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f32 angle);
 
+// Determines if playeris to the left or right of the boss (1 if left, 0 if right)
+// param boss - position of boss
+// param player - position of player
+int BossPlayerDirection(AEVec2 boss, AEVec2 player);
+
 // Draws a text box
 // param UnitSquareMesh - unit square mesh of 1x1
 // param pos_x - x coordinate of center of text box

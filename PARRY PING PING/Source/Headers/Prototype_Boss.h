@@ -49,6 +49,7 @@ typedef struct Boss
     Timer idle_timer;
     Timer attack_timer;
     Timer stun_timer;
+    Timer recovery_timer;
 
     Timer range_warning_timer;
     Timer range_timer;
