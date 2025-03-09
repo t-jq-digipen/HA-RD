@@ -27,7 +27,7 @@ const f32 BOSS_HITBOX_HEIGHT = 300.f;
 const f32 BOSS_MAXHP = 200.f;
 
 // DASH
-const f32 BOSS_DASH_DISTANCE = 300.f;
+const f32 BOSS_DASH_DISTANCE = 250.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
 const s32 ATTACK_TYPES = 7;
@@ -53,10 +53,10 @@ std::vector<RocketFist> rocket_fists;
 // For attack logics
 const f32 SMASH_RADIUS = 200.f;
 const f32 SMASH_DAMAGE = 30.f;
-const f32 BIG_SMASH_RADIUS = 500.f;
+const f32 BIG_SMASH_RADIUS = 350.f;
 
-const f32 SWEEP_WIDTH = 500.f;
-const f32 SWEEP_HEIGHT = 500.f;
+const f32 SWEEP_WIDTH = 600.f;
+const f32 SWEEP_HEIGHT = 600.f;
 
 f32 x_offset = 0.f;
 
@@ -746,7 +746,7 @@ void Smash_Sweep_Logic()
 {
     // Update hitbox positions at the start of the logic
     boss_melee[BOSS_SMASH].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f }; // Smash position
-    boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };        // Sweep position
+    boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y};        // Sweep position
 
     if (Update_Timer(&boss_1.attack_timer))
     {
@@ -818,7 +818,7 @@ void Three_Hit_Logic()
     // Update hitbox positions at the start of the logic
     boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f };  // Left hit position
     boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + 200.f, boss_1.pos.y - 150.f }; // Right hit position
-    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };        // Circle hit position
+    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y };        // Circle hit position
 
     if (Update_Timer(&boss_1.attack_timer))
     {
