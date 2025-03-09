@@ -95,6 +95,7 @@ void Init_Boss()
     boss_1.idle_timer = Create_Timer(1.f);
     boss_1.attack_timer = Create_Timer(1.f);
     boss_1.stun_timer = Create_Timer(3.f);
+    boss_1.recovery_timer = Create_Timer(2.f);
 
     boss_1.attack_type = BOSS_SMASH;
 
@@ -199,10 +200,7 @@ void Update_Boss()
             break;
 
         case BOSS_ROCKET_FIST_ACTIVE:
-            // Boss is inactive while rocket fists are active
-            if (rocket_fists.empty())
-            {
-                // No more active rocket fists, return to idle
+            if (rocket_fists.empty() && !Update_Timer(&boss_1.recovery_timer)) {
                 boss_1.state = BOSS_IDLE;
             }
             break;
@@ -289,10 +287,8 @@ void Update_Boss()
             }
         }
 
-        for (auto& fist : rocket_fists)
-        {
-            if (fist.active)
-            {
+        for (auto& fist : rocket_fists) {
+            if (fist.active) {
                 // Update rocket fist's movement
                 fist.pos.x += fist.velocity.x * dt;
                 fist.pos.y += fist.velocity.y * dt;
@@ -305,13 +301,10 @@ void Update_Boss()
                 AEMtx33Concat(&fist.transform, &trans, &scale);
 
                 // Deactivate rocket fist after it hits player or after 4 seconds (aka range)
-                if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius) || fist.timer.current >= fist.timer.duration)
-                {
+                if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius) || fist.timer.current >= fist.timer.duration) {
                     fist.active = false;
-                    if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius))
-                    {
-                        switch (player.state)
-                        {
+                    if (AETestCircleToCircle(&fist.pos, fist.radius, &player.pos, player.radius)) {
+                        switch (player.state) {
                         case PARRY:
                             Parried_Hit();
                             break;
@@ -896,7 +889,7 @@ void Boss_Dash_Logic()
                 // Snap the boss to the target position to ensure it stops exactly
                 boss_1.pos = boss_1.target_pos;
 
-                // Transition to the next state (e.g., BOSS_SMASH_SWEEP)
+                // Transition to the next state 
                 boss_1.attack_timer.current = 0.f;
                 boss_1.attack_type = BOSS_SMASH;
                 boss_1.state = BOSS_SMASH_SWEEP;
@@ -926,12 +919,9 @@ void Boss_Dash_Logic()
     }
 }
 
-void Boss_Rocket_Logic()
-{
-    if (Update_Timer(&boss_1.attack_timer))
-    {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
-        {
+void Boss_Rocket_Logic() {
+    if (Update_Timer(&boss_1.attack_timer)) {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
             // Attack is winding up
             will_hit = true;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
@@ -949,8 +939,7 @@ void Boss_Rocket_Logic()
             // Calculate the distance
             boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
-        {
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
             // Attack is active (spawn rocket fist)
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
@@ -967,30 +956,29 @@ void Boss_Rocket_Logic()
             // Set the boss state to inactive while the rocket fist is active
             boss_1.state = BOSS_ROCKET_FIST_ACTIVE;
 
-            // Transition to the next state (e.g., BOSS_SMASH_SWEEP)
-            boss_1.attack_timer.current = 0.f;
-            boss_1.attack_type = BOSS_SMASH;
+            // Start the recovery timer
+            boss_1.recovery_timer.current = 0.f;
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
-        {
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
             // Attack is recovering
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
-    else
-    {
-        if (boss_1.attack_type == BOSS_SMASH)
-        {
-            boss_1.attack_type++;
-            boss_melee[boss_1.attack_type].timer.current = 0.f;
-            boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
-            boss_1.attackstate = BOSS_ATTACK_WINDUP;
-        }
-        else
-        {
-            boss_1.state = BOSS_IDLE;
-            boss_1.attack_type = 0;
-            boss_1.idle_timer.current = 0.f;
+    else {
+        // If the attack timer is done, but the recovery timer is still running, do nothing
+        if (Update_Timer(&boss_1.recovery_timer)) {
+            // Recovery time is over, transition to the next state
+            if (boss_1.attack_type == BOSS_SMASH) {
+                boss_1.attack_type++;
+                boss_melee[boss_1.attack_type].timer.current = 0.f;
+                boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
+                boss_1.attackstate = BOSS_ATTACK_WINDUP;
+            }
+            else {
+                boss_1.state = BOSS_IDLE;
+                boss_1.attack_type = 0;
+                boss_1.idle_timer.current = 0.f;
+            }
         }
     }
 }
