@@ -52,6 +52,8 @@ typedef struct Player
 
 	int ammo;
 
+	float knockbackTimer; // Timer for knockback effect
+
 	Timer dodgetimer;
 	Timer hittimer;
 	Timer blocktimer;

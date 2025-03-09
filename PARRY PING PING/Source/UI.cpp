@@ -97,7 +97,7 @@ void Init_UI()
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
 	// BGM and SFX
-	levelBGM = AEAudioLoadMusic("Assets/bouken.mp3");
+	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
 	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
 
 	gameBGM = AEAudioCreateGroup();

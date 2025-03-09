@@ -326,6 +326,14 @@ void Attacking_Ranged()
 				projectiles.push_back(heavy_atk);
 				player.ammo = 0; // Deplete ammo after firing
 
+				// Apply knockback to player (move in opposite direction of attack)
+				float knockbackStrength = 200.f; // Adjust for stronger/weaker knockback
+				AEVec2 knockbackDirection = { -dir.x, -dir.y }; // Inverse of attack direction
+				AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength); // Apply knockback velocity
+
+				player.knockbackTimer = 0.3f; // Knockback lasts for 0.3 seconds
+
+
 				// Reset the timer after firing
 				rightClickTimer = 0.f;
 
@@ -373,6 +381,7 @@ void Attacking_Ranged()
 
 	// Debugging print to see if the timer is updating
 	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
+
 
 	if (!lifetimeExpiredHeavy) 
 	{
@@ -662,6 +671,39 @@ void Update_Player()
 {
 	if (player.state != DEAD)
 	{
+		if (player.knockbackTimer > 0.0f)
+		{
+			// Calculate the knockback direction based on the direction of the attack
+			f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+			f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+
+			AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+			AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+
+			// Apply knockback in the opposite direction of the attack
+			AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+
+			// Apply knockback boost if necessary
+			float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
+
+			// Apply knockback velocity (scaled by the speed and knockback boost)
+			AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+
+			// Move the player using the knockback velocity
+			AEVec2Add(&player.pos, &player.vel, &player.pos);
+
+			// Apply friction to gradually slow down the knockback
+			float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+			player.vel.x *= knockbackFriction;
+			player.vel.y *= knockbackFriction;
+
+			// Decrease knockback timer
+			player.knockbackTimer -= dt;
+
+			// Stop movement when the knockback velocity is very small
+			if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+			if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+		}
 
 		if (Update_Timer(&player.hittimer))
 		{
@@ -702,6 +744,8 @@ void Update_Player()
 		f32 right_bound = map_width / 2;
 		f32 top_bound = -map_height / 2;
 		f32 bottom_bound = 1100.0f;
+
+
 
 		// Restrict movement within the map boundaries
 		if (player.pos.x < left_bound) player.pos.x = left_bound;

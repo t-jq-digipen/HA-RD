@@ -244,5 +244,10 @@ void Level1_Unload()
 	Unload_Mesh();
 	Unload_Player();
 	Unload_Prototype_Boss();
+	if (mapTexture)
+	{
+		AEGfxTextureUnload(mapTexture);
+		mapTexture = nullptr;
+	}
 	std::cout << "level1_unload";
 }
