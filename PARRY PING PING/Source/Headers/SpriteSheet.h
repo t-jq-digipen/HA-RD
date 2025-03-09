@@ -22,6 +22,10 @@ public:
 
 	void Loop(u32 left, u32 right, f32 duration);
 
+	u32 Get_Row();
+
+	u32 Get_Col();
+
 	void Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot = 0.f);
 
 private:

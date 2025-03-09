@@ -93,7 +93,7 @@ void HubWorld_Update()
 
 	if (levelState != PAUSED && levelState != GAMEOVER)
 	{
-		std::cout << "Playing\n";
+		//std::cout << "Playing\n";
 
 		// Player WASD Movement
 		Update_Player();

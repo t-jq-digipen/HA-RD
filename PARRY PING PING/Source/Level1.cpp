@@ -111,7 +111,7 @@ void Level1_Update()
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
 	{
-		std::cout << "Playing\n";
+		//std::cout << "Playing\n";
 		// Boss behavior
 		Update_Boss1();
 

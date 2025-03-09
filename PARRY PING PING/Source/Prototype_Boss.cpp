@@ -31,7 +31,7 @@ const f32 BOSS_DASH_DISTANCE = 300.f;
 
 // Performs an overhead smash, followed by a wide sweep that can be parried
 const s32 ATTACK_TYPES = 7;
-const f32 BOSS_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 1.f };
+const f32 BOSS_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
 const f32 BOSS_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
 const f32 BOSS_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
 
@@ -128,6 +128,7 @@ void Init_Boss()
         {
             boss_melee[i].can_parry = false;
         }
+        std::cout << "ATTACK TYPE " << i << ": \nWindup: " << boss_melee[i].attack_windup << "\nActive: " << boss_melee[i].attack_active << "\nRecover: " << boss_melee[i].attack_recover << "\n----\n";
     }
 
     Init_Boss_UI(boss_1.hp);
@@ -156,6 +157,7 @@ void Update_Boss()
                     {
                         // Do a charge
                         boss_1.attack_timer.current = 0.f;
+                        boss_melee[BOSS_CHARGE].timer.current = 0.f;
                         boss_1.attack_type = BOSS_CHARGE;
                         boss_1.state = BOSS_RANGED_CHARGE;
                     }
@@ -163,7 +165,9 @@ void Update_Boss()
                     {
                         // Do a rocketpunch
                         boss_1.attack_timer.current = 0.f;
+                        boss_melee[BOSS_ROCKETFIST].timer.current = 0.f;
                         boss_1.attack_type = BOSS_ROCKETFIST;
+                        boss_1.attackstate = BOSS_ATTACK_WINDUP;
                         boss_1.state = BOSS_RANGED_ROCKETFIST;
                     }
                 }
@@ -204,9 +208,6 @@ void Update_Boss()
             break;
 
         case BOSS_ROCKET_FIST_ACTIVE:
-            if (!Update_Timer(&boss_1.recovery_timer)) {
-                boss_1.state = BOSS_IDLE;
-            }
             break;
 
         case BOSS_PARRIED:
@@ -390,7 +391,7 @@ void Update_Boss()
     // Update Boss Hitbox
     Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
 
-    std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
+    //std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
 }
 
 void Draw_Boss()
@@ -635,26 +636,31 @@ void Draw_Boss()
             DrawRotatedRect(
                 World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),
                 World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist / 2.f)),
-                boss_1.target_dist, BOSS_HEIGHT, boss_windup, boss_1.target_rot
+                boss_1.target_dist, 10.f, boss_windup, boss_1.target_rot
             );
             DrawRotatedRect(
-                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
-                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
-                boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), BOSS_HEIGHT, boss_swing, boss_1.target_rot
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                boss_1.target_dist * (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), 10.f, boss_swing, boss_1.target_rot
             );
 
             // Set sprite info
             boss_1_sprite.Set_Row(9);
-            boss_1_sprite.Set_Col(0, 11, boss_1.attack_timer.current* boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
+            boss_1_sprite.Set_Col(0, 11, boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
         }
-
+        else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+        {
+            // Set sprite info
+            //boss_1_sprite.Set_Row(10);
+            //boss_1_sprite.Set_Col(0);
+        }
         else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
         {
             // Set sprite info
             boss_1_sprite.Set_Row(11);
-            f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+            f32 active_curr = (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
             f32 anim_time = active_curr / recover_time;
-            boss_1_sprite.Set_Col(0, 18, boss_1.recovery_timer.current);
+            boss_1_sprite.Set_Col(0, 18, anim_time);
         }
 
         break;
@@ -678,6 +684,8 @@ void Draw_Boss()
     default:
         break;
     }
+
+
     // Existing animation and sprite sheet drawing logic (unchanged)
     Color* color = {};
     switch (boss_1.state)
@@ -765,7 +773,7 @@ void Draw_Boss()
     }
     case BOSS_THREE_HIT:
     {
-        // Up to you my brother JQ
+        
         break;
     }
     case BOSS_PARRIED:
@@ -1132,9 +1140,64 @@ void Boss_Dash_Logic()
 //    }
 //}
 
+//void Boss_Rocket_Logic() {
+//    if (Update_Timer(&boss_1.attack_timer)) {
+//        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
+//            std::cout << boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration << " < " << boss_melee[boss_1.attack_type].attack_windup << '\n';
+//            // Attack is winding up
+//            will_hit = true;
+//            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+//
+//            // Set the target position to the player's current position
+//            boss_1.target_pos = player.pos;
+//
+//            // Calculate the direction vector
+//            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+//            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
+//
+//            // Calculate the rotation angle
+//            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
+//
+//            // Calculate the distance
+//            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
+//        }
+//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
+//            // Attack is active (spawn rocket fist)
+//            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+//
+//
+//            // Spawn a rocket fist
+//            RocketFist fist;
+//            fist.pos = boss_1.pos;
+//            fist.velocity = { boss_1.target_dir.x * BOSS_PROJECTILE_SPEED, boss_1.target_dir.y * BOSS_PROJECTILE_SPEED };
+//            fist.radius = BOSS_PROJECTILE_RADIUS;
+//            fist.active = true;
+//            fist.timer = Create_Timer(4.f);
+//            AEMtx33Identity(&fist.transform);
+//            rocket_fists.push_back(fist);
+//
+//            // Immediately transition to the recovery phase
+//            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+//            boss_1.attack_timer.current = boss_melee[boss_1.attack_type].attack_active; // Skip to recovery phase
+//        }
+//        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
+//            // Attack is recovering
+//            boss_1.attackstate = BOSS_ATTACK_RECOVER;
+//
+//        }
+//    }
+//    else {
+//        // If the attack timer is done, transition back to idle
+//        boss_1.state = BOSS_IDLE;
+//        boss_1.attack_type = 0;
+//        boss_1.idle_timer.current = 0.f;
+//    }
+//}
+
 void Boss_Rocket_Logic() {
-    if (Update_Timer(&boss_1.attack_timer)) {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
+    if (Update_Timer(&boss_melee[boss_1.attack_type].timer)) {
+        if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
+            std::cout << boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration << " < " << boss_melee[boss_1.attack_type].attack_windup << '\n';
             // Attack is winding up
             will_hit = true;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
@@ -1152,7 +1215,7 @@ void Boss_Rocket_Logic() {
             // Calculate the distance
             boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
+        else if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
             // Attack is active (spawn rocket fist)
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
@@ -1169,9 +1232,9 @@ void Boss_Rocket_Logic() {
 
             // Immediately transition to the recovery phase
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
-            boss_1.attack_timer.current = boss_melee[boss_1.attack_type].attack_active; // Skip to recovery phase
+            boss_melee[boss_1.attack_type].timer.current = boss_melee[boss_1.attack_type].attack_active / boss_melee[boss_1.attack_type].timer.duration; // Skip to recovery phase
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
+        else if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
             // Attack is recovering
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
 
@@ -1184,6 +1247,8 @@ void Boss_Rocket_Logic() {
         boss_1.idle_timer.current = 0.f;
     }
 }
+
+
 void Boss_Attack_Test(bool canparry, f32 boss_damage)
 {
     will_hit = false;

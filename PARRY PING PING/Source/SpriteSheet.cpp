@@ -47,6 +47,9 @@ void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 	if (currtimer < 0 || currtimer >= 1.f)
 	{
 		currtimer = 0.f;
+		this->Set_Col(left);
+		std::cout << "BOOM";
+		return;
 	}
 	u32 rows = right + 1 - left;
 	this->Set_Col((u32)(rows * currtimer) + left);
@@ -61,6 +64,16 @@ void SpriteSheet::Loop(u32 left, u32 right, f32 duration)
 		looper = 0;
 	}
 	this->Set_Col((u32)(rows * looper) + left);
+}
+
+u32 SpriteSheet::Get_Row()
+{
+	return curr_row;
+}
+
+u32 SpriteSheet::Get_Col()
+{
+	return curr_col;
 }
 
 void SpriteSheet::Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
