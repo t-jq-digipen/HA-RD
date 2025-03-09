@@ -642,7 +642,21 @@ void Draw_Boss()
                 World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
                 boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), BOSS_HEIGHT, boss_swing, boss_1.target_rot
             );
+
+            // Set sprite info
+            boss_1_sprite.Set_Row(9);
+            boss_1_sprite.Set_Col(0, 11, boss_1.attack_timer.current* boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
         }
+
+        else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+        {
+            // Set sprite info
+            boss_1_sprite.Set_Row(11);
+            f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+            f32 anim_time = active_curr / recover_time;
+            boss_1_sprite.Set_Col(0, 18, boss_1.recovery_timer.current);
+        }
+
         break;
     }
 
@@ -1061,10 +1075,6 @@ void Boss_Rocket_Logic() {
             will_hit = true;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-            // Set sprite info
-            boss_1_sprite.Set_Row(9);
-            boss_1_sprite.Set_Col(0, 11, boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
-
             // Set the target position to the player's current position
             boss_1.target_pos = player.pos;
 
@@ -1082,9 +1092,6 @@ void Boss_Rocket_Logic() {
             // Attack is active (spawn rocket fist)
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
-            // Set sprite info
-            boss_1_sprite.Set_Row(10);
-            boss_1_sprite.Set_Col(0);
 
             // Spawn a rocket fist
             RocketFist fist;
@@ -1096,9 +1103,6 @@ void Boss_Rocket_Logic() {
             AEMtx33Identity(&fist.transform);
             rocket_fists.push_back(fist);
 
-            // Set sprite info
-            boss_1_sprite.Set_Row(10);
-            boss_1_sprite.Set_Col(0);
 
             // Set the boss state to inactive while the rocket fist is active
             boss_1.state = BOSS_ROCKET_FIST_ACTIVE;
@@ -1110,10 +1114,6 @@ void Boss_Rocket_Logic() {
             // Attack is recovering
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
 
-            // Set sprite info
-            boss_1_sprite.Set_Row(9);
-            boss_1_sprite.Set_Col(0, 11, boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_recover);
-            std::cout << "RELOADING";
         }
     }
     else {
