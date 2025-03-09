@@ -44,6 +44,10 @@ void SpriteSheet::Set_Col(u32 col)
 
 void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 {
+	if (currtimer < 0 || currtimer >= 1.f)
+	{
+		currtimer = 0.f;
+	}
 	u32 rows = right + 1 - left;
 	this->Set_Col((u32)(rows * currtimer) + left);
 }
