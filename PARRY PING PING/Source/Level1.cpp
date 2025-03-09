@@ -16,6 +16,7 @@
 #include "Boss1.h"
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
+#include "mobs.h"
 
 
 AEGfxTexture* mapTexture = nullptr;
@@ -77,7 +78,8 @@ void Level1_Initialize()
 	stunnedtimer = Create_Timer(2.f);
 	stunnedtimer.current = 0;
 
-
+	// Mobs
+	Init_Mobs();
 
 	// Boss
 	Init_Boss1();
@@ -127,6 +129,9 @@ void Level1_Update()
 
 		// Proto boss
 		Update_Boss();
+
+		// Mobs
+		Update_Mobs();
 
 		// Player WASD Movement
 		Update_Player();
@@ -197,6 +202,9 @@ void Level1_Draw()
 
 	// Proto boss
 	Draw_Boss();
+
+	// Mobs
+	Draw_Mobs();
 
 	// Player
 	Draw_Player();
