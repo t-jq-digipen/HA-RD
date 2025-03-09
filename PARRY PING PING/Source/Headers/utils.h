@@ -183,3 +183,13 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 // param click_x - x coordinate of mouse pointer
 // param click_y - y coordinate of mouse pointer
 int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y);
+
+float CalculateDistance(float x1, float y1, float x2, float y2);
+
+bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
+
+AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
+
+float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis);
+
+bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height, f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height);

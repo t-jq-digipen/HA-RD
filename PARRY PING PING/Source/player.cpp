@@ -13,6 +13,7 @@
 #include "player.h"
 #include "Enemies.h"
 #include <vector>
+#include <algorithm>
 
 
 // Define map boundary limits
@@ -27,19 +28,21 @@ typedef struct Attack
 	int combo;
 } Attack;
 
-typedef struct Projectile 
+typedef struct Projectile
 {
 	AEVec2 pos;           // Position of the projectile
 	AEVec2 vel;           // Velocity (direction and speed)
-	//AEGfxTexture* texture; // Texture for the projectile
 	f32 speed;            // Speed of the projectile
-	f32 angle;
-	Timer lifetimeTimer;
-	bool isActive;
-	bool isHeavy;
-	// Hitbox
-	f32 radius;           // Radius of the circular hitbox
+	f32 angle;            // Angle of the projectile's trajectory
+	Timer lifetimeTimer;  // Timer to track the lifetime of the projectile
+	bool isActive;        // Is the projectile currently active
+	bool isHeavy;         // Whether the projectile is a heavy attack (rectangular hitbox)
+	f32 radius;           // Radius of the circular hitbox (for light projectiles)
+	f32 width;            // Width of the hitbox (for heavy projectiles)
+	f32 height;           // Height of the hitbox (for heavy projectiles)
+	f32 range;            // Maximum range for the laser
 } Projectile;
+
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
 
@@ -249,34 +252,126 @@ AEGfxTexture* heavy_texture;
 Projectile heavy_atk;
 Projectile new_proj;
 
+// AABB hitbox for the heavy attack (laser)
+aabb heavyAtkHitbox;
+
+//bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
+//{
+//	bool hit = false;
+//
+//	for (auto& proj : projectiles)
+//	{
+//		// Check for heavy (laser) projectile
+//		if (proj.isHeavy)
+//		{
+//			// Laser collision using AETestRectToRect (treating the laser as a thin rectangle)
+//			if (AETestRectToRect(&proj.pos, proj.width, proj.height, &target, width, height))
+//			{
+//				*damage = 10.f; // Laser deals more damage
+//				hit = true;
+//			}
+//
+//			// Update laser position (it keeps moving in the given direction)
+//			AEVec2 scaledVel;
+//			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt); // Scale the velocity by the time delta
+//			AEVec2Add(&proj.pos, &proj.pos, &scaledVel); // Move the laser
+//
+//			// If the laser exceeds its range, deactivate it
+//			if (CalculateDistance(proj.pos.x, proj.pos.y, player.pos.x, player.pos.y) > proj.range)
+//			{
+//				proj.isActive = false;
+//			}
+//		}
+//		else
+//		{
+//			// Light projectile collision using AETestCircleToRect
+//			if (AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
+//			{
+//				*damage = 5.f;  // Light projectile deals less damage
+//				hit = true;
+//				proj.isActive = false;  // Deactivate light projectile after collision
+//			}
+//
+//			// Update light projectile position
+//			AEVec2 scaledVel;
+//			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt); // Scale the velocity by the time delta
+//			AEVec2Add(&proj.pos, &proj.pos, &scaledVel); // Move the projectile
+//		}
+//	}
+//
+//	return hit; // Return true if any projectile hit
+//}
+
+
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
 {
 	bool hit = false; // Track if at least one projectile hits
 
-
 	for (auto& proj : projectiles)
 	{
-		// Update position
-		AEVec2 scaledVel;
-		AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
-		AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
+		// Only check active projectiles
+		if (!proj.isActive)
+			continue;
 
-		if (AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
+		// **Update position (only for light projectiles)**
+		if (!proj.isHeavy)
 		{
-			*damage = 5.f;
-			hit = true;      // Mark as hit
-			proj.isActive = false; // Deactivate projectile after hit
+			AEVec2 scaledVel;
+			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
+			AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
+		}
+		else
+		{
+			// Heavy attack collision check (with rotation)
+			AEVec2 bossCenter = { target.x + width * 0.5f, target.y + height * 0.5f };
+			AEVec2 corners1[4];
+			AEVec2 center1 = { proj.pos.x, proj.pos.y };
+
+			// Get the four corners after applying rotation
+			corners1[0] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
+			corners1[1] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
+			corners1[2] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
+			corners1[3] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
+
+			// Compute rotated AABB
+			float minX = corners1[0].x, maxX = corners1[0].x;
+			float minY = corners1[0].y, maxY = corners1[0].y;
+
+			for (int i = 1; i < 4; ++i) {
+				minX = min(minX, corners1[i].x);
+				maxX = max(maxX, corners1[i].x);
+				minY = min(minY, corners1[i].y);
+				maxY = max(maxY, corners1[i].y);
+			}
+
+			// Target AABB
+			float targetMinX = target.x - width * 0.5f;
+			float targetMaxX = target.x + width * 0.5f;
+			float targetMinY = target.y - height * 0.5f;
+			float targetMaxY = target.y + height * 0.5f;
+
+			// Check for AABB overlap
+			if (maxX >= targetMinX && minX <= targetMaxX &&
+				maxY >= targetMinY && minY <= targetMaxY)
+			{
+				*damage = dt * 10.f; // Heavy attack deals damage over time
+				hit = true;
+			}
 		}
 
-		if (proj.isHeavy) {
-			*damage = dt * 10.f;
+		// **Light projectile collision**
+		if (!proj.isHeavy && AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
+		{
+			*damage = 5.f;  // Light attack damage
 			hit = true;
+			proj.isActive = false; // Deactivate light projectile after hit
 		}
 	}
 
-	// fix projectiles soon
 	return hit; // Only return false if no projectiles hit
 }
+
+
 
 
 
@@ -301,6 +396,7 @@ void Attacking_Ranged()
 			// Increase the right-click timer as long as the right button is held
 			rightClickTimer += dt; 
 
+			// Fire the heavy attack when the right-click is held for the set duration
 			if (rightClickTimer >= rightClickHoldDuration)
 			{
 				// If the right mouse button has been held for 1 second, fire the heavy attack
@@ -308,36 +404,46 @@ void Attacking_Ranged()
 				f32 cursor_x = Screen_To_World_x(Mouse.x);
 				f32 cursor_y = Screen_To_World_y(Mouse.y);
 
+				// Calculate the direction vector from the player to the cursor
 				AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
-				AEVec2Normalize(&dir, &dir);
+				AEVec2Normalize(&dir, &dir);  // Normalize the direction vector
 
-				// Apply an offset to position the projectile slightly ahead of the player
+				// Apply an offset to position the heavy attack slightly ahead of the player
 				AEVec2 offset = { dir.x * 1.5f, dir.y * 1.5f }; // Adjust multiplier as needed to control distance ahead
 
-				// Set heavy attack position to player position + offset
-				heavy_atk.pos = { player.pos.x + offset.x, player.pos.y + offset.y };
-				heavy_atk.vel = dir;
-				heavy_atk.speed = 0.f; // Adjust speed as needed
+				// Set the position of the heavy attack slightly ahead of the player based on the offset
+				heavy_atk.pos.x = player.pos.x + offset.x;
+				heavy_atk.pos.y = player.pos.y + offset.y;
+
+				// Set the dimensions and other properties of the heavy attack (laser)
+				heavy_atk.width = 250.f;  // Width for the laser beam
+				heavy_atk.height = 1000.f; // Height represents the laser length
+				heavy_atk.vel = dir;  // Direction of the laser
+				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
 				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+
+				// Activate the heavy attack projectile
 				heavy_atk.isActive = true;
 				heavy_atk.isHeavy = true;
+
+				// Reset the lifetime timer
 				heavy_atk.lifetimeTimer.current = 0.f;
 
-				projectiles.push_back(heavy_atk);
+				projectiles.push_back(heavy_atk);  // Add the heavy attack to the projectiles list
 				player.ammo = 0; // Deplete ammo after firing
 
-				// Apply knockback to player (move in opposite direction of attack)
+				// Apply knockback to the player (move in opposite direction of attack)
 				float knockbackStrength = 200.f; // Adjust for stronger/weaker knockback
 				AEVec2 knockbackDirection = { -dir.x, -dir.y }; // Inverse of attack direction
 				AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength); // Apply knockback velocity
 
 				player.knockbackTimer = 0.3f; // Knockback lasts for 0.3 seconds
 
-
-				// Reset the timer after firing
+				// Reset the right-click timer
 				rightClickTimer = 0.f;
-
 			}
+
+
 		}
 		// If right mouse button is released, reset the timer
 		else if (AEInputCheckReleased(AEVK_RBUTTON))
@@ -652,13 +758,13 @@ void Init_Player()
 	player.ammo = 3;
 
 	heavy_atk;
-	heavy_atk.pos = player.pos;
+	heavy_atk.pos = {};
 	heavy_atk.vel = { 0.f, 0.f };
-	heavy_atk.speed = 150.f; // Adjust speed as needed
+	heavy_atk.speed = 0.f; // Adjust speed as needed
 	heavy_atk.angle = { 0.f };
 	heavy_atk.isActive = true;
 	heavy_atk.isHeavy = true;
-	heavy_atk.lifetimeTimer = Create_Timer(2.0f);
+	heavy_atk.lifetimeTimer = Create_Timer(1.5f);
 
 	new_proj.lifetimeTimer = Create_Timer(5.0f);
 
@@ -869,7 +975,7 @@ void Draw_Player()
 			{
 				if (heavy_atk.isActive)
 				{
-					
+
 					float offsetDistance = 500.0f;
 					float offsetX = cosf(proj.angle) * offsetDistance;
 					float offsetY = sinf(proj.angle) * offsetDistance;
@@ -920,6 +1026,7 @@ void Draw_Player()
 			{
 				if (heavy_atk.isActive)
 				{
+
 					float offsetDistance = 500.0f;
 					float offsetX = cosf(it->angle) * offsetDistance;
 					float offsetY = sinf(it->angle) * offsetDistance;

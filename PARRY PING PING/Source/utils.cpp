@@ -9,7 +9,8 @@
 //---------------------------------------------------------
 
 #include "utils.h"
-
+#include <vector>
+#include <algorithm>
 
 
 // Globals
@@ -480,6 +481,116 @@ bool AreCirclesIntersecting(f32 pos_x1, f32 pos_y1, f32 radius1, f32 pos_x2, f32
 
 	return AETestCircleToCircle(&crc1, radius1, &crc2, radius2);
 }
+
+// Check if two rectangles are intersecting
+bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height,
+	f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height)
+{
+	// Get the edges of the first rectangle
+	f32 rect1_left = rect1_x;
+	f32 rect1_right = rect1_x + rect1_width;
+	f32 rect1_top = rect1_y;
+	f32 rect1_bottom = rect1_y + rect1_height;
+
+	// Get the edges of the second rectangle
+	f32 rect2_left = rect2_x;
+	f32 rect2_right = rect2_x + rect2_width;
+	f32 rect2_top = rect2_y;
+	f32 rect2_bottom = rect2_y + rect2_height;
+
+	// Check if the rectangles overlap
+	bool isIntersecting = !(rect1_right < rect2_left ||    // rect1 is to the left of rect2
+		rect1_left > rect2_right ||    // rect1 is to the right of rect2
+		rect1_bottom < rect2_top ||    // rect1 is above rect2
+		rect1_top > rect2_bottom);     // rect1 is below rect2
+
+	return isIntersecting;
+}
+
+
+float CalculateDistance(float x1, float y1, float x2, float y2)
+{
+	return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+}
+
+
+
+// Helper function to rotate a point around a given center
+AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle)
+{
+	float s = sin(angle);
+	float c = cos(angle);
+
+	// Translate point back to origin:
+	point.x -= center.x;
+	point.y -= center.y;
+
+	// Rotate point
+	float xnew = point.x * c - point.y * s;
+	float ynew = point.x * s + point.y * c;
+
+	// Translate point back
+	point.x = xnew + center.x;
+	point.y = ynew + center.y;
+
+	return point;
+}
+
+// Function to project a point onto an axis (edge normal)
+float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis)
+{
+	return point.x * axis.x + point.y * axis.y; // Dot product of the point and axis
+}
+
+// Function to check if two rectangles are colliding using SAT
+bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2)
+{
+	// Get edges of both rectangles (4 edges for each)
+	AEVec2 edges1[4];
+	AEVec2 edges2[4];
+
+	// Create edges for both rectangles (edges are vector differences between corners)
+	for (int i = 0; i < 4; i++) {
+		edges1[i] = { corners1[(i + 1) % 4].x - corners1[i].x, corners1[(i + 1) % 4].y - corners1[i].y };
+		edges2[i] = { corners2[(i + 1) % 4].x - corners2[i].x, corners2[(i + 1) % 4].y - corners2[i].y };
+	}
+
+	// Now, we need to check the projections of both rectangles onto each edge normal of both rectangles
+	// If there exists any axis where the projections do not overlap, there's no collision.
+
+	// Check all axes (normal vectors) from the edges of the two rectangles
+	for (int i = 0; i < 4; i++) {
+		// Compute the normal for the current edge (perpendicular vector)
+		AEVec2 normal = { -edges1[i].y, edges1[i].x }; // Edge normal (rotate by 90 degrees)
+
+		// Project all corners of rectangle 1 and rectangle 2 onto this normal axis
+		float min1 = ProjectOntoAxis(corners1[0], normal);
+		float max1 = min1;
+		for (int j = 1; j < 4; j++) {
+			float projection = ProjectOntoAxis(corners1[j], normal);
+			min1 = min(min1, projection);
+			max1 = max(max1, projection);
+		}
+
+		float min2 = ProjectOntoAxis(corners2[0], normal);
+		float max2 = min2;
+		for (int j = 1; j < 4; j++) {
+			float projection = ProjectOntoAxis(corners2[j], normal);
+			min2 = min(min2, projection);
+			max2 = max(max2, projection);
+		}
+
+		// If projections do not overlap, no collision
+		if (max1 < min2 || max2 < min1) {
+			return false;  // No collision on this axis, return false
+		}
+	}
+
+	// If no separation axis is found, there is a collision
+	return true;
+}
+
+
 
 
 
