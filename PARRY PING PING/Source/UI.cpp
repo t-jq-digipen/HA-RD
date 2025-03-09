@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	UI.cpp
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	AVID PARRY ENJOYERS
+// email:	-
 //
 // brief:	UI elements
 //
@@ -11,6 +11,7 @@
 #include "UI.h"
 #include "Boss1.h"
 #include "GameStateManager.h"
+#include "SpriteSheet.h"
 
 int levelState = 0;
 
@@ -29,6 +30,8 @@ Color play_bg, pause_bg, pause_screen;
 Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 char level_timer[16];
+
+SpriteSheet crosshair;
 
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
@@ -110,6 +113,10 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	health = SetColor(0xFFFF6961);
 	parry_charging = SetColor(0xFF00255F);
 	parry_ready = SetColor(0xFF004EFF);
+
+	// Crosshair
+	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
+	crosshair.Set_Row(0);
 }
 
 void Update_Player_UI(int ammo, float hp, float parry_timer)
@@ -139,6 +146,10 @@ void Draw_Player_UI()
 		}
 		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
 	}
+
+	crosshair.Set_Col(UI_ammo);
+	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f);
+
 }
 
 void Init_Boss_UI(float hp)
@@ -675,4 +686,5 @@ void Unload_UI()
 	Unload_SpriteSheet(&ssmenu_screen);
 	Unload_SpriteSheet(&ssmenu_bar1);
 	Unload_SpriteSheet(&ssmenu_bar2);
+	crosshair.Unload();
 }

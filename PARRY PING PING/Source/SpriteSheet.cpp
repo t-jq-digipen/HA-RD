@@ -1,9 +1,23 @@
+//---------------------------------------------------------
+// file:	SpriteSheet.cpp
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Spritesheet class implementation
+//
+// Copyright © 2020 DigiPen, All rights reserved.
+//---------------------------------------------------------
+
 #include "SpriteSheet.h"
 
-SpriteSheet::SpriteSheet() : total_cols{}, total_rows{}, curr_col{}, curr_row{}, uv_height{}, uv_width{}, looper{}
-{
-
-}
+SpriteSheet::SpriteSheet() : 
+	total_cols{}, total_rows{}, 
+	curr_col{}, curr_row{}, 
+	uv_height{}, uv_width{}, 
+	looper{}, 
+	texture {nullptr},
+	mesh {nullptr}
+{}
 
 SpriteSheet::SpriteSheet(const char* texture_file, u32 cols, u32 rows) :
 	total_cols{ cols },
@@ -16,19 +30,19 @@ SpriteSheet::SpriteSheet(const char* texture_file, u32 cols, u32 rows) :
 {
 	texture = AEGfxTextureLoad(texture_file);
 
-	AEGfxMeshStart();
+	AEGfxMeshStart();										// Make the mesh based on UV size
 
 	AEGfxTriAdd(
-		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, uv_height, // bottom left
-		0.5f, -0.5f, 0xFFFFFFFF, uv_width, uv_height, // bottom right 
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // top left
+		-0.5f, -0.5f, 0xFFFFFFFF, 0.0f, uv_height,				// bottom left
+		0.5f, -0.5f, 0xFFFFFFFF, uv_width, uv_height,			// bottom right 
+		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);					// top left
 
 	AEGfxTriAdd(
-		0.5f, -0.5f, 0xFFFFFFFF, uv_width, uv_height, // bottom right 
-		0.5f, 0.5f, 0xFFFFFFFF, uv_width, 0.0f,   // top right
-		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);  // bottom left
+		0.5f, -0.5f, 0xFFFFFFFF, uv_width, uv_height,			// bottom right 
+		0.5f, 0.5f, 0xFFFFFFFF, uv_width, 0.0f,					// top right
+		-0.5f, 0.5f, 0xFFFFFFFF, 0.0f, 0.0f);					// bottom left
 
-	mesh = AEGfxMeshEnd();
+	mesh = AEGfxMeshEnd();									// End mesh
 
 }
 
@@ -44,13 +58,14 @@ void SpriteSheet::Set_Col(u32 col)
 
 void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 {
-	if (currtimer < 0 || currtimer >= 1.f)
+	if (currtimer < 0 || currtimer >= 1.f)					// If currtimer exceeds, set it to 0, something wrong!
 	{
 		currtimer = 0.f;
-		this->Set_Col(left);
-		std::cout << "BOOM";
-		return;
 	}
+
+	left = (left < 0) ? 0 : left;							// 
+	right = (right >= total_cols) ? total_rows - 1 : right;
+
 	u32 rows = right + 1 - left;
 	this->Set_Col((u32)(rows * currtimer) + left);
 }
