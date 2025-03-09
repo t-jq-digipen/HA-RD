@@ -57,34 +57,6 @@ typedef struct Boss
 
     int attack_type;
 
-    AEVec2 smash_pos;          // Position for smash attack
-    AEVec2 sweep_pos;           // Position for sweep attack
-    AEVec2 rocket_fist_pos;     // Position for rocket fist
-    f32 smash_radius;           // Radius for smash attack
-    f32 sweep_width, sweep_height; // Dimensions for sweep attack
-    f32 rocket_fist_radius;     // Radius for rocket fist
-    bool is_smash_active;       // Whether smash attack is active
-    bool is_sweep_active;       // Whether sweep attack is active
-    bool is_rocket_fist_active; // Whether rocket fist is active
-
-    // Dash Attack Variables
-    AEVec2 dash_start_pos;      // Starting position of the dash
-    AEVec2 dash_target_pos;     // Target position of the dash
-    AEVec2 dash_dir;            // Direction of the dash
-    f32 dash_distance;          // Total distance of the dash
-    f32 dash_progress;          // Progress of the dash (0 to 1)
-    bool is_dash_active;        // Whether the dash attack is active
-    f32 dash_rotation;          // Rotation angle for drawing the dash
-
-    // Rocket Attack Variables
-    AEVec2 rocket_start_pos;      // Starting position of the rocket attack
-    AEVec2 rocket_target_pos;     // Target position of the rocket attack
-    AEVec2 rocket_dir;            // Direction of the rocket attack
-    f32 rocket_distance;          // Distance to the target
-    f32 rocket_progress;          // Progress of the windup (0 to 1)
-    f32 rocket_rotation;          // Rotation angle for drawing
-    bool is_rocket_windup_active; // Whether the rocket windup is active
-
     Timer explosion_timer;
     Timer death_explosion_duration;
 } Boss;

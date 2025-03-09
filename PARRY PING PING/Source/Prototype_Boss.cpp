@@ -49,6 +49,18 @@ std::vector<Boss_Explosion> boss_death_explosion;
 
 std::vector<RocketFist> rocket_fists;
 
+// For attack logics
+const f32 SMASH_RADIUS = 200.f;
+const f32 SMASH_DAMAGE = 30.f;
+const f32 BIG_SMASH_RADIUS = 500.f;
+
+const f32 SWEEP_WIDTH = 500.f;
+const f32 SWEEP_HEIGHT = 500.f;
+
+f32 x_offset = 0.f;
+
+bool will_hit = true;
+
 void Load_Boss()
 {
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
@@ -384,132 +396,290 @@ void Update_Boss()
     std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
 }
 
-void Draw_Boss() {
-    // Default color
-    Color default_color = SetColor(0xFFFFFFFF); // White as a fallback
-    Color* color = &default_color; // Initialize to a valid color
+void Draw_Boss()
+{
+    // Existing animation and sprite sheet drawing logic (unchanged)
+    Color* color = {};
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+        color = &boss_swing;
+        break;
+    case BOSS_THREE_HIT:
+        // TBC
+        break;
+    case BOSS_PARRIED:
+        color = &boss_parried;
+        break;
+    case BOSS_RANGED_CHARGE:
+        // TBC
+        break;
+    case BOSS_RANGED_ROCKETFIST:
+        // TBC
+        break;
+    case BOSS_IDLE:
+    default:
+        color = &boss_idle;
+        break;
+    }
 
-    // Validate boss state
-    if (boss_1.state >= 0 && boss_1.state < 8) { 
-        switch (boss_1.state) {
-        case BOSS_SMASH_SWEEP:
-            color = &boss_swing;
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+    {
+        u32 row = 0;
+        u32 start_col = 0;
+        u32 end_col = 0;
+        f32 duration = 0.f;
+        switch (boss_1.attack_type)
+        {
+        case BOSS_SMASH:
+            switch (boss_1.attackstate)
+            {
+            case BOSS_ATTACK_WINDUP:
+                row = 1;
+                start_col = 0;
+                end_col = 4;
+                duration = boss_melee[boss_1.attack_type].attack_windup;
+                break;
+            case BOSS_ATTACK_ACTIVE:
+                row = 1;
+                start_col = 4;
+                end_col = 5;
+                duration = boss_melee[boss_1.attack_type].attack_active;
+                break;
+            case BOSS_ATTACK_RECOVER:
+                row = 1;
+                start_col = 5;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_recover;
+                break;
+            }
             break;
-        case BOSS_THREE_HIT:
-            // TBC
-            break;
-        case BOSS_PARRIED:
-            color = &boss_parried;
-            break;
-        case BOSS_RANGED_CHARGE:
-            color = &boss_windup;
-            break;
-        case BOSS_RANGED_ROCKETFIST:
-            color = &boss_windup;
-            break;
-        case BOSS_IDLE:
-        default:
-            color = &boss_idle;
+        case BOSS_SWEEP:
+            switch (boss_1.attackstate)
+            {
+            case BOSS_ATTACK_WINDUP:
+                row = 2;
+                start_col = 0;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_windup;
+                break;
+            case BOSS_ATTACK_ACTIVE:
+                row = 3;
+                start_col = 0;
+                end_col = 3;
+                duration = boss_melee[boss_1.attack_type].attack_active;
+                break;
+            case BOSS_ATTACK_RECOVER:
+                row = 3;
+                start_col = 3;
+                end_col = 8;
+                duration = boss_melee[boss_1.attack_type].attack_recover;
+                break;
+            }
             break;
         }
+        Set_SpriteSheet_current(&boss_sprite_sheet, row, start_col, end_col, boss_1.attack_timer, duration);
+        break;
+    }
+    case BOSS_THREE_HIT:
+    {
+        // Up to you my brother JQ
+        break;
+    }
+    case BOSS_PARRIED:
+        Loop_Timer(&boss_sprite_sheet.timer);
+        Set_SpriteSheet_current(&boss_sprite_sheet, 4, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
+        break;
+    case BOSS_IDLE:
+    default:
+        Loop_Timer(&boss_sprite_sheet.timer);
+        Set_SpriteSheet_current(&boss_sprite_sheet, 0, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
+        break;
     }
 
-    // Draw smash attack if active
-    if (boss_1.is_smash_active) {
-        DrawCircle(World_To_Screen_x(boss_1.smash_pos.x), World_To_Screen_y(boss_1.smash_pos.y), boss_1.smash_radius, *color);
+    // ====================================================
+    // NEW SWITCH CASE FOR DRAWING ATTACK HITBOXES AND EFFECTS
+    // ====================================================
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+    {
+        switch (boss_1.attack_type)
+        {
+        case BOSS_SMASH:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Draw windup animation for smash
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y),
+                    (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Draw active smash hitbox
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_idle);
+            }
+            break;
+
+        case BOSS_SWEEP:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Draw windup animation for sweep
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_windup);
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x) + ((boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH / 2.f - SWEEP_WIDTH / 2.f),
+                    World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH, SWEEP_HEIGHT, boss_swing);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Draw active sweep hitbox
+                DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_idle);
+            }
+            break;
+        }
+        break;
     }
 
-    // Draw sweep attack if active
-    if (boss_1.is_sweep_active) {
-        DrawRect(World_To_Screen_x(boss_1.sweep_pos.x), World_To_Screen_y(boss_1.sweep_pos.y), boss_1.sweep_width, boss_1.sweep_height, *color);
+    case BOSS_THREE_HIT:
+    {
+        switch (boss_1.attack_type)
+        {
+        case BOSS_LEFT_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Draw windup animation for left hit
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y),
+                    (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Draw active left hit hitbox
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_idle);
+            }
+            break;
+
+        case BOSS_RIGHT_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Draw windup animation for right hit
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y),
+                    (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Draw active right hit hitbox
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_idle);
+            }
+            break;
+
+        case BOSS_CIRCLE_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Draw windup animation for circle hit
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_windup);
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y),
+                    (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * BIG_SMASH_RADIUS, boss_swing);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Draw active circle hit hitbox
+                DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_idle);
+            }
+            break;
+        }
+        break;
     }
 
-    // Draw dash attack if active
-    if (boss_1.is_dash_active && boss_1.state == BOSS_RANGED_CHARGE) {
-        // Draw the base rectangle (full area of the attack)
-        DrawRotatedRect(
-            World_To_Screen_x(boss_1.dash_start_pos.x + boss_1.dash_dir.x * (boss_1.dash_distance / 2.f)),  // Center X (offset by half the distance)
-            World_To_Screen_y(boss_1.dash_start_pos.y + boss_1.dash_dir.y * (boss_1.dash_distance / 2.f)),  // Center Y (offset by half the distance)
-            boss_1.dash_distance,  // Length of the rectangle (full distance to target)
-            BOSS_HEIGHT,           // Height of the rectangle
-            boss_windup,           // Color for the base rectangle
-            boss_1.dash_rotation   // Rotation angle
-        );
-
-        // Draw the growing rectangle (progress of the dash)
-        DrawRotatedRect(
-            World_To_Screen_x(boss_1.dash_start_pos.x + boss_1.dash_dir.x * (boss_1.dash_distance * boss_1.dash_progress / 2.f)),  // Center X (offset by half the progress)
-            World_To_Screen_y(boss_1.dash_start_pos.y + boss_1.dash_dir.y * (boss_1.dash_distance * boss_1.dash_progress / 2.f)),  // Center Y (offset by half the progress)
-            boss_1.dash_distance * boss_1.dash_progress,  // Length of the rectangle (scaled by progress)
-            BOSS_HEIGHT,                                  // Height of the rectangle
-            boss_swing,                                   // Color for the growing rectangle
-            boss_1.dash_rotation                          // Rotation angle
-        );
+    case BOSS_RANGED_CHARGE:
+    {
+        if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+        {
+            // Draw windup animation for charge
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist / 2.f)),
+                boss_1.target_dist, BOSS_HEIGHT, boss_windup, boss_1.target_rot
+            );
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), BOSS_HEIGHT, boss_swing, boss_1.target_rot
+            );
+        }
+        else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+        {
+            // Draw active charge hitbox
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x),
+                World_To_Screen_y(boss_1.pos.y),
+                BOSS_WIDTH, BOSS_HEIGHT, boss_idle, boss_1.target_rot
+            );
+        }
+        break;
     }
 
-    // Draw rocket windup if active
-    if (boss_1.is_rocket_windup_active && boss_1.state == BOSS_RANGED_ROCKETFIST) {
-        // Draw the base rectangle (full area of the attack)
-        DrawRotatedRect(
-            World_To_Screen_x(boss_1.rocket_start_pos.x + boss_1.rocket_dir.x * (boss_1.rocket_distance / 2.f)),  // Center X (offset by half the distance)
-            World_To_Screen_y(boss_1.rocket_start_pos.y + boss_1.rocket_dir.y * (boss_1.rocket_distance / 2.f)),  // Center Y (offset by half the distance)
-            boss_1.rocket_distance,  // Length of the rectangle (full distance to target)
-            BOSS_HEIGHT,             // Height of the rectangle
-            boss_windup,            // Color for the base rectangle
-            boss_1.rocket_rotation  // Rotation angle
-        );
-
-        // Draw the growing rectangle (progress of the windup)
-        DrawRotatedRect(
-            World_To_Screen_x(boss_1.rocket_start_pos.x + boss_1.rocket_dir.x * (boss_1.rocket_distance * boss_1.rocket_progress / 2.f)),  // Center X (offset by half the progress)
-            World_To_Screen_y(boss_1.rocket_start_pos.y + boss_1.rocket_dir.y * (boss_1.rocket_distance * boss_1.rocket_progress / 2.f)),  // Center Y (offset by half the progress)
-            boss_1.rocket_distance * boss_1.rocket_progress,  // Length of the rectangle (scaled by progress)
-            BOSS_HEIGHT,                                      // Height of the rectangle
-            boss_swing,                                       // Color for the growing rectangle
-            boss_1.rocket_rotation                            // Rotation angle
-        );
+    case BOSS_RANGED_ROCKETFIST:
+    {
+        if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+        {
+            // Draw windup animation for rocket fist
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist / 2.f)),
+                boss_1.target_dist, BOSS_HEIGHT, boss_windup, boss_1.target_rot
+            );
+            DrawRotatedRect(
+                World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
+                boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), BOSS_HEIGHT, boss_swing, boss_1.target_rot
+            );
+        }
+        break;
     }
 
-    // Draw rocket fist if active
-    if (boss_1.is_rocket_fist_active) {
-        DrawCircle(World_To_Screen_x(boss_1.rocket_fist_pos.x), World_To_Screen_y(boss_1.rocket_fist_pos.y), boss_1.rocket_fist_radius, *color);
+    default:
+        break;
     }
-
     // Ranged attack warning indicator
-    if (boss_1.isShootingWarningActive && boss_1.state != BOSS_DEAD) {
+    if (boss_1.isShootingWarningActive && boss_1.state != BOSS_DEAD)
+    {
         DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_PROJECTILE_RADIUS, boss_projectile_indicator);
         DrawCircle(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), (boss_1.range_warning_timer.current / boss_1.range_warning_timer.duration) * BOSS_PROJECTILE_RADIUS, boss_projectile_color);
     }
 
     // Ranged attack projectiles
-    for (const auto& proj : boss_projectiles) {
-        if (proj.active) {
-            DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, boss_projectile_color); // Example projectile size and color
+    for (const auto& proj : boss_projectiles)
+    {
+        if (proj.active)
+        {
+            DrawCircle(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 25.f, boss_projectile_color);
         }
     }
 
     // Rocket fists
-    for (const auto& fist : rocket_fists) {
-        if (fist.active) {
+    for (const auto& fist : rocket_fists)
+    {
+        if (fist.active)
+        {
             DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
         }
     }
 
     // Death explosion
-    for (auto& exp : boss_death_explosion) {
-        if (exp.active) {
+    for (auto& exp : boss_death_explosion)
+    {
+        if (exp.active)
+        {
             f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f));
             f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f));
             DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * BOSS_DEATH_EXPLOSION_RADIUS, boss_death_explosion_color);
-            if (exp.timer.current >= exp.timer.duration) {
-                exp.active = false;
-            }
         }
-        // Remove inactive explosion particles
-        boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& p) { return !p.active; }), boss_death_explosion.end());
     }
 
-    // Draw the boss sprite
+    // Draw boss sprite
     Draw_SpriteSheet_test(boss_sprite_sheet, World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, 0.f);
 }
 
@@ -518,44 +688,82 @@ void Unload_Boss()
     Unload_SpriteSheet(&boss_sprite_sheet);
 }
 
-const f32 SMASH_RADIUS = 200.f;
-const f32 SMASH_DAMAGE = 30.f;
-const f32 BIG_SMASH_RADIUS = 500.f;
 
-const f32 SWEEP_WIDTH = 500.f;
-const f32 SWEEP_HEIGHT = 500.f;
 
-f32 x_offset = 0.f;
+void Smash_Sweep_Logic()
+{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_SMASH:
+                x_offset = -200.f;
+                boss_melee[BOSS_SMASH].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                break;
 
-bool will_hit = true;
+            case BOSS_SWEEP:
+                boss_melee[BOSS_SWEEP].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };
+                break;
 
-void Smash_Sweep_Logic() {
-    if (Update_Timer(&boss_1.attack_timer)) {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-            // Store the position and radius for drawing
-            boss_1.smash_pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
-            boss_1.smash_radius = SMASH_RADIUS;
-            boss_1.is_smash_active = true;
+            default:
+                break;
+            }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-            // Store the position and radius for drawing
-            boss_1.smash_pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
-            boss_1.smash_radius = SMASH_RADIUS;
-            boss_1.is_smash_active = true;
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_SMASH:
+                if (AETestCircleToCircle(&boss_melee[BOSS_SMASH].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_SMASH].can_parry, 30.f);
+                    }
+                }
+                break;
+
+            case BOSS_SWEEP:
+                if (AETestCircleToRect(&player.pos, player.radius, &boss_melee[BOSS_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
+                {
+                    // Parry checks
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_SWEEP].can_parry, 30.f);
+                    }
+                }
+                break;
+
+            default:
+                boss_1.attackstate = BOSS_ATTACK_RECOVER;
+                break;
+            }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-            // Attack is recovering, no drawing needed
-            boss_1.is_smash_active = false;
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
-    else {
-        if (boss_1.attack_type == BOSS_SMASH) {
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
             boss_1.attack_type++;
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
         }
-        else {
+        else
+        {
             boss_1.state = BOSS_IDLE;
             boss_1.attack_type = 0;
             boss_1.idle_timer.current = 0.f;
@@ -563,33 +771,96 @@ void Smash_Sweep_Logic() {
     }
 }
 
-void Three_Hit_Logic() {
-    if (Update_Timer(&boss_1.attack_timer)) {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-            // Store the position and radius for drawing
-            boss_1.smash_pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
-            boss_1.smash_radius = SMASH_RADIUS;
-            boss_1.is_smash_active = true;
+void Three_Hit_Logic()
+{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_LEFT_HIT:
+                x_offset = -200.f;
+                boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                break;
+
+            case BOSS_RIGHT_HIT:
+                x_offset = 200.f;
+                boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
+                break;
+
+            case BOSS_CIRCLE_HIT:
+                boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y - 150.f };
+                break;
+
+            default:
+                break;
+            }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-            // Store the position and radius for drawing
-            boss_1.smash_pos = { boss_1.pos.x + x_offset, boss_1.pos.y - 150.f };
-            boss_1.smash_radius = SMASH_RADIUS;
-            boss_1.is_smash_active = true;
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+            switch (boss_1.attack_type)
+            {
+            case BOSS_LEFT_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_LEFT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_LEFT_HIT].can_parry, 30.f);
+                    }
+                }
+                break;
+
+            case BOSS_RIGHT_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_RIGHT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_RIGHT_HIT].can_parry, 30.f);
+                    }
+                }
+                break;
+
+            case BOSS_CIRCLE_HIT:
+                if (AETestCircleToCircle(&boss_melee[BOSS_CIRCLE_HIT].pos, BIG_SMASH_RADIUS, &player.pos, player.radius))
+                {
+                    // Player damage calculation
+                    if (will_hit)
+                    {
+                        Boss_Attack_Test(boss_melee[BOSS_CIRCLE_HIT].can_parry, 30.f);
+                    }
+                }
+                break;
+
+            default:
+                boss_1.attackstate = BOSS_ATTACK_RECOVER;
+                break;
+            }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-            // Attack is recovering, no drawing needed
-            boss_1.is_smash_active = false;
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
-    else {
-        if (boss_1.attack_type == BOSS_LEFT_HIT || boss_1.attack_type == BOSS_RIGHT_HIT) {
+    else
+    {
+        if (boss_1.attack_type == BOSS_LEFT_HIT || boss_1.attack_type == BOSS_RIGHT_HIT)
+        {
             boss_1.attack_type++;
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
         }
-        else {
+        else
+        {
             boss_1.state = BOSS_IDLE;
             boss_1.attack_type = 0;
             boss_1.idle_timer.current = 0.f;
@@ -597,55 +868,60 @@ void Three_Hit_Logic() {
     }
 }
 
-void Boss_Dash_Logic() {
-    if (Update_Timer(&boss_1.attack_timer)) {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-            // Attack is winding up (store state for drawing)
-            boss_1.is_dash_active = true; // Activate the dash attack
-            boss_1.dash_start_pos = boss_1.pos; // Store the starting position
-            boss_1.dash_target_pos = player.pos; // Store the target position
+void Boss_Dash_Logic()
+{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-            // Calculate the direction and distance of the dash
-            boss_1.dash_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
-            AEVec2Normalize(&boss_1.dash_dir, &boss_1.dash_dir);
-            boss_1.dash_distance = AEVec2Distance(&boss_1.pos, &boss_1.dash_target_pos);
+            // Set the target position to the player's current position
+            boss_1.target_pos = player.pos;
 
-            // Calculate the rotation angle for drawing
-            boss_1.dash_rotation = atan2(boss_1.dash_dir.y, boss_1.dash_dir.x);
+            // Calculate the direction vector
+            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
 
-            // Reset dash progress
-            boss_1.dash_progress = 0.f;
+            // Calculate the rotation angle
+            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
+
+            // Calculate the distance
+            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-            // Attack is active (move boss and check collision)
-            boss_1.is_dash_active = true; // Keep the dash attack active for drawing
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
-            // Calculate the remaining time for the dash
+            // Calculate the remaining time for the charge attack
             f32 remaining_time = boss_melee[boss_1.attack_type].timer.duration - boss_1.attack_timer.current;
 
             // Calculate the required speed to reach the target in the remaining time
-            f32 required_speed = boss_1.dash_distance * 5.f / remaining_time;
+            f32 required_speed = boss_1.target_dist * 5.f / remaining_time;
 
             // Move boss towards the target position using the required speed
-            boss_1.pos.x += boss_1.dash_dir.x * required_speed * dt;
-            boss_1.pos.y += boss_1.dash_dir.y * required_speed * dt;
-
-            // Update dash progress for drawing
-            boss_1.dash_progress = AEVec2Distance(&boss_1.pos, &boss_1.dash_start_pos) / boss_1.dash_distance;
+            boss_1.pos.x += boss_1.target_dir.x * required_speed * dt;
+            boss_1.pos.y += boss_1.target_dir.y * required_speed * dt;
 
             // Check for collision with the player
-            if (AETestCircleToRect(&player.pos, player.radius, &boss_1.pos, BOSS_WIDTH, BOSS_HEIGHT)) {
+            if (AETestCircleToRect(&player.pos, player.radius, &boss_1.pos, BOSS_WIDTH, BOSS_HEIGHT))
+            {
                 // Parry checks
-                if (will_hit) {
+                if (will_hit)
+                {
                     Boss_Attack_Test(boss_melee[BOSS_CHARGE].can_parry, 30.f);
                 }
             }
 
             // Check if boss has reached the target position with a slight buffer
-            f32 distance_to_target = AEVec2Distance(&boss_1.pos, &boss_1.dash_target_pos);
-            if (distance_to_target <= 10.f) { // Adjust this threshold if needed
+            f32 distance_to_target = AEVec2Distance(&boss_1.pos, &boss_1.target_pos);
+            if (distance_to_target <= 10.f)  // Adjust this threshold if needed
+            {
                 // Snap the boss to the target position to ensure it stops exactly
-                boss_1.pos = boss_1.dash_target_pos;
+                boss_1.pos = boss_1.target_pos;
 
                 // Transition to the next state (e.g., BOSS_SMASH_SWEEP)
                 boss_1.attack_timer.current = 0.f;
@@ -653,19 +929,23 @@ void Boss_Dash_Logic() {
                 boss_1.state = BOSS_SMASH_SWEEP;
             }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-            // Attack is recovering (update anim)
-            boss_1.is_dash_active = false; // Stop drawing the dash attack
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
-    else {
-        if (boss_1.attack_type == BOSS_SMASH) {
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
             boss_1.attack_type++;
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
         }
-        else {
+        else
+        {
             boss_1.state = BOSS_IDLE;
             boss_1.attack_type = 0;
             boss_1.idle_timer.current = 0.f;
@@ -673,33 +953,38 @@ void Boss_Dash_Logic() {
     }
 }
 
-void Boss_Rocket_Logic() {
-    if (Update_Timer(&boss_1.attack_timer)) {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-            // Attack is winding up (store state for drawing)
-            boss_1.is_rocket_windup_active = true; // Activate the rocket windup
-            boss_1.rocket_start_pos = boss_1.pos; // Store the starting position
-            boss_1.rocket_target_pos = player.pos; // Store the target position
+void Boss_Rocket_Logic()
+{
+    if (Update_Timer(&boss_1.attack_timer))
+    {
+        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        {
+            // Attack is winding up
+            will_hit = true;
+            boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-            // Calculate the direction and distance of the rocket attack
-            boss_1.rocket_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
-            AEVec2Normalize(&boss_1.rocket_dir, &boss_1.rocket_dir);
-            boss_1.rocket_distance = AEVec2Distance(&boss_1.pos, &boss_1.rocket_target_pos);
+            // Set the target position to the player's current position
+            boss_1.target_pos = player.pos;
 
-            // Calculate the rotation angle for drawing
-            boss_1.rocket_rotation = atan2(boss_1.rocket_dir.y, boss_1.rocket_dir.x);
+            // Calculate the direction vector
+            boss_1.target_dir = { player.pos.x - boss_1.pos.x, player.pos.y - boss_1.pos.y };
+            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
 
-            // Calculate the progress of the windup (0 to 1)
-            boss_1.rocket_progress = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+            // Calculate the rotation angle
+            boss_1.target_rot = atan2(boss_1.target_dir.y, boss_1.target_dir.x);
+
+            // Calculate the distance
+            boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
             // Attack is active (spawn rocket fist)
-            boss_1.is_rocket_windup_active = false; // Deactivate the windup
+            boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
             // Spawn a rocket fist
             RocketFist fist;
             fist.pos = boss_1.pos;
-            fist.velocity = { boss_1.rocket_dir.x * BOSS_PROJECTILE_SPEED, boss_1.rocket_dir.y * BOSS_PROJECTILE_SPEED };
+            fist.velocity = { boss_1.target_dir.x * BOSS_PROJECTILE_SPEED, boss_1.target_dir.y * BOSS_PROJECTILE_SPEED };
             fist.radius = BOSS_PROJECTILE_RADIUS;
             fist.active = true;
             fist.timer = Create_Timer(4.f);
@@ -713,19 +998,23 @@ void Boss_Rocket_Logic() {
             boss_1.attack_timer.current = 0.f;
             boss_1.attack_type = BOSS_SMASH;
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
-            // Attack is recovering (update anim)
-            boss_1.is_rocket_windup_active = false; // Stop drawing the windup
+        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        {
+            // Attack is recovering
+            boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
-    else {
-        if (boss_1.attack_type == BOSS_SMASH) {
+    else
+    {
+        if (boss_1.attack_type == BOSS_SMASH)
+        {
             boss_1.attack_type++;
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
         }
-        else {
+        else
+        {
             boss_1.state = BOSS_IDLE;
             boss_1.attack_type = 0;
             boss_1.idle_timer.current = 0.f;
