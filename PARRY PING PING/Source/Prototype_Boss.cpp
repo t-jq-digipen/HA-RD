@@ -44,7 +44,7 @@ const f32 BOSS_PROJECTILE_SPEED = 500.f;
 Boss_Melee boss_melee[ATTACK_TYPES];
 
 // Boss Explosion Effects and Particles
-const f32 BOSS_DEATH_EXPLOSION_RADIUS = 50.f;
+const f32 BOSS_DEATH_EXPLOSION_RADIUS = 25.f;
 Boss_Explosion explosion_particle;
 std::vector<Boss_Explosion> boss_death_explosion;
 
@@ -82,6 +82,10 @@ void Init_Boss_Indicator()
 
 void Init_Boss()
 {
+
+    // Clear any existing death explosions
+    boss_death_explosion.clear();
+
     boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
 
     boss_1.width = BOSS_WIDTH;
@@ -720,8 +724,8 @@ void Draw_Boss()
     {
         if (exp.active)
         {
-            f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.8f));
-            f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.8f));
+            f32 spawn_x = World_To_Screen_x(exp.pos.x) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_WIDTH * 0.5f) : -(AERandFloat() * BOSS_HITBOX_WIDTH * 0.5f));
+            f32 spawn_y = World_To_Screen_y(exp.pos.y) + (AERandFloat() > 0.5f ? (AERandFloat() * BOSS_HITBOX_HEIGHT * 0.5f) : -(AERandFloat() * BOSS_HITBOX_HEIGHT * 0.5f));
             DrawCircle(spawn_x, spawn_y, (AERandFloat() + 0.5f) * BOSS_DEATH_EXPLOSION_RADIUS, boss_death_explosion_color);
         }
     }
@@ -737,8 +741,6 @@ void Unload_Boss()
     Unload_SpriteSheet(&boss_sprite_sheet);
     boss_1_sprite.Unload();
 }
-
-
 
 void Smash_Sweep_Logic()
 {
