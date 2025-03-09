@@ -130,7 +130,9 @@ void HubWorld_Update()
 	{
 		FadeIn.A = 1;
 	}
-	std::cout << '\n' << FadeIn.A << '\n';
+	//std::cout << '\n' << FadeIn.A << '\n';
+	//std::cout << f32(Env_Gate.Pos.x / (f32(AEGfxGetWindowWidth()) / 2.f));
+	//std::cout << (Env_Gate.Pos.x + f32(AEGfxGetWindowWidth() / 2.f)) / f32(AEGfxGetWindowWidth());
 }
 
 void HubWorld_Draw()
@@ -143,10 +145,11 @@ void HubWorld_Draw()
 	//Draw Parry Bots
 	Draw_DummyBotMelee();
 	Draw_DummyBotRange();
+	//f32 WinWidth{ f32(AEGfxGetWindowWidth()) }, WinHeight{ f32(AEGfxGetWindowHeight()) };
 
 	//Draw Environment
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));
-	//DrawTextBox(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width * 2, Env_Gate.Height * 2, 10.f, tempUI_font, tempUI_white, "GATE");
+	DrawTextBox(Env_Gate.Pos.x, Env_Gate.Pos.y, Env_Gate.Width * 2, Env_Gate.Height * 2, 10.f, tempUI_font, tempUI_white, "GATE");
 
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));
 	//DrawTextBox(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, 1.f, tempUI_font, tempUI_white, "CAMPFIRE");
@@ -186,7 +189,7 @@ void HubWorld_Draw()
 
 	//cool little fade in effect
 	if (FadeIn.A > 0) {
-		DrawRect(0.f, 0.f, AEGfxGetWindowWidth(), AEGfxGetWindowHeight(), FadeIn);
+		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeIn);
 		FadeIn.A -= FadeInSpeed;
 	}
 	else FadeIn.A = 0.f;
