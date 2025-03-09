@@ -597,7 +597,7 @@ void Draw_Boss()
 
     case BOSS_PARRIED:
     {
-        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
+        
         std::cout << "STUNNED";
         boss_1_sprite.Set_Row(8);
         boss_1_sprite.Loop(0, 1, 0.5f);
@@ -609,6 +609,13 @@ void Draw_Boss()
         flip = (!BossPlayerDirection(boss_1.pos, player.pos));
         boss_1_sprite.Set_Row(0);
         boss_1_sprite.Loop(0, 3, 1.f);
+        break;
+    }
+
+    case BOSS_DEAD:
+    {
+        boss_1_sprite.Set_Row(24);
+        boss_1_sprite.Set_Col(0);
         break;
     }
 

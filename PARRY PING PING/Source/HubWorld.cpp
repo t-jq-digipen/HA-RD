@@ -197,12 +197,15 @@ void HubWorld_Draw()
 
 void HubWorld_Free()
 {
-
+	Free_Player();
+	
 }
 
 void HubWorld_Unload()
 {
+	Unload_UI();
 	Unload_Mesh();
 	Unload_Player();
+	Unload_Boss();
 	std::cout << "HubWorld_unload";
 }
