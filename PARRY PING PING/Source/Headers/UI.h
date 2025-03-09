@@ -61,6 +61,8 @@ void Update_Boss_UI(float hp);
 
 void Update_LevelTimer(float *time_elapsed);
 
+void Free_UI();
+
 void Unload_UI();
 
 //void Draw_Boss1HP(float time_elapsed);

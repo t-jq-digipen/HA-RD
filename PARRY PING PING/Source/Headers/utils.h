@@ -208,3 +208,13 @@ typedef struct EnvStruct {
 	f32 Height;
 	//aabb Hitbox;		//for future implementation if want to add coll/ destructable objects etc
 }EnvStruct;
+
+float CalculateDistance(float x1, float y1, float x2, float y2);
+
+bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
+
+AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
+
+float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis);
+
+bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height, f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height);

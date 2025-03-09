@@ -36,6 +36,9 @@ SpriteSheet crosshair;
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 
+AEAudio levelBGM, levelSFX;
+AEAudioGroup gameBGM, gameSFX;
+
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
@@ -96,9 +99,19 @@ void Init_UI()
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
-	// Volume Settings
+	// BGM and SFX
+	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
+	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
+
+	gameBGM = AEAudioCreateGroup();
+	gameSFX = AEAudioCreateGroup();
+
 	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 50.f;
 	max_bgm_vol = max_sfx_vol = 100.f;
+
+	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
+	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
+	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
 }
 
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
@@ -244,6 +257,7 @@ void Draw_PauseMenu()
 		
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			levelState = PLAYING;
 		}
 	}
@@ -268,6 +282,7 @@ void Draw_PauseMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			// Initialize volumes
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			current_bgm_vol = prev_bgm_vol;
 			current_sfx_vol = prev_sfx_vol;
 
@@ -333,6 +348,7 @@ void Draw_ClearMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
 		}
 	}
@@ -355,6 +371,7 @@ void Draw_ClearMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_QUIT;
 		}
 	}
@@ -389,14 +406,7 @@ void Draw_OptionsMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, 150.f, 100.f, 425.f, 50.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_bar1, 1, 1, 1, Create_Timer(1.f), 1.f);
 
-	if (current_bgm_vol > max_bgm_vol)
-	{
-		current_bgm_vol = max_bgm_vol;
-	}
-	else if (current_bgm_vol < 0.f)
-	{
-		current_bgm_vol = 0.f;
-	}
+	std::cout << current_bgm_vol << '\n';
 
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, -150.f, 100.f, 70.f, 70.f, 0.f);
 
@@ -413,6 +423,11 @@ void Draw_OptionsMenu()
 		{
 			// lower bgm
 			current_bgm_vol -= 1.f;
+			if (current_bgm_vol <= 0.f)
+			{
+				current_bgm_vol = 0.f;
+			}
+			AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 		}
 	}
 	else
@@ -436,6 +451,11 @@ void Draw_OptionsMenu()
 		{
 			// raise bgm
 			current_bgm_vol += 1.f;
+			if (current_bgm_vol > max_bgm_vol)
+			{
+				current_bgm_vol = max_bgm_vol;
+			}
+			AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 		}
 	}
 	else
@@ -452,15 +472,6 @@ void Draw_OptionsMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar2, 150.f, -50.f, 425.f, 50.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_bar2, 1, 1, 1, Create_Timer(1.f), 1.f);
 
-	if (current_sfx_vol > max_sfx_vol)
-	{
-		current_sfx_vol = max_sfx_vol;
-	}
-	else if (current_sfx_vol < 0.f)
-	{
-		current_sfx_vol = 0.f;
-	}
-
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button3, -150.f, -50.f, 70.f, 70.f, 0.f);
 
 	if (IsAreaClicked(650.f, 500.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
@@ -476,6 +487,11 @@ void Draw_OptionsMenu()
 		{
 			// lower sfx
 			current_sfx_vol -= 1.f;
+			if (current_sfx_vol < 0.f)
+			{
+				current_sfx_vol = 0.f;
+			}
+			AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
 		}
 	}
 	else
@@ -499,6 +515,11 @@ void Draw_OptionsMenu()
 		{
 			// raise sfx
 			current_sfx_vol += 1.f;
+			if (current_sfx_vol > max_sfx_vol)
+			{
+				current_sfx_vol = max_sfx_vol;
+			}
+			AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
 		}
 	}
 	else
@@ -521,6 +542,7 @@ void Draw_OptionsMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			prev_bgm_vol = current_bgm_vol;
 			prev_sfx_vol = current_sfx_vol;
 		}
@@ -545,7 +567,10 @@ void Draw_OptionsMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			levelState = PAUSED;
+			AEAudioSetGroupVolume(gameBGM, prev_bgm_vol / max_bgm_vol);
+			AEAudioSetGroupVolume(gameSFX, prev_sfx_vol / max_sfx_vol);
 		}
 	}
 	else
@@ -582,6 +607,7 @@ void Draw_GameOverMenu()
 		}
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
 		}
 	}
@@ -603,6 +629,7 @@ void Draw_GameOverMenu()
 		}
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_QUIT;
 		}
 	}
@@ -674,6 +701,12 @@ void DrawHPBar2(float pos_x1, float pos_y1, float pos_x2, float pos_y2, float hp
 	}
 }
 
+void Free_UI()
+{
+	AEAudioStopGroup(gameBGM);
+	AEAudioStopGroup(gameSFX);
+}
+
 void Unload_UI()
 {
 	Unload_SpriteSheet(&ssmenu_play);
@@ -687,4 +720,8 @@ void Unload_UI()
 	Unload_SpriteSheet(&ssmenu_bar1);
 	Unload_SpriteSheet(&ssmenu_bar2);
 	crosshair.Unload();
+
+	AEAudioUnloadAudio(levelBGM);
+	AEAudioUnloadAudioGroup(gameBGM);
+	AEAudioUnloadAudioGroup(gameSFX);
 }

@@ -9,6 +9,7 @@
 //---------------------------------------------------------
 
 #include "utils.h"
+#include "UI.h"
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
@@ -36,6 +37,7 @@ int dummy_check;
 Timer cleartransitiontimer;
 float levelTimer;
 
+
 void Level1_Load()
 {
 	Load_Player();
@@ -45,17 +47,22 @@ void Level1_Load()
 	// Meshes
 	Load_Mesh(20);
 
-	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary2.jpg");
+	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary3.png");
 	if (!mapTexture)
 	{
 		printf("Failed to load map texture!\n");
 	}
 	std::cout << "Level 1 Loaded\n";
+
+
 }
 
 void Level1_Initialize()
 {
 	std::cout << "Level 1 Initialized\n";
+
+	// Music
+	AEAudioInit();
 
 	// Player
 	Init_Player();
@@ -104,6 +111,9 @@ void Level1_Update()
 	// Delta time
 	Get_DT();
 
+	// Music
+	AEAudioUpdate();
+
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;
@@ -147,7 +157,7 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 3000.0f, map_height = 4000.0f;
+	f32 map_width = 3000.0f, map_height = 2500.0f;
 	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
 
 	// Offset map drawing so (0,0) is centered in the camera view
@@ -225,7 +235,7 @@ void Level1_Draw()
 
 void Level1_Free()
 {
-
+	Free_UI();
 }
 
 void Level1_Unload()
