@@ -17,7 +17,7 @@ static void Update_mobs(mobs_list_type*list,Color color) {
 	for (int i = 0; i < count; ++i) 
 	{
 		mobs_type* mob = find_mob_by_index(list, i);
-		DrawCircle(mob->x, mob->y, mob->size, color);
+		DrawCircle(World_To_Screen_x(mob->x), World_To_Screen_y(mob->y), mob->size, color);
 		/*if (mob_collide_player(mob, player) == true)
 		{
 			DrawCircle(mob->x, mob->y, mob->size, color);
