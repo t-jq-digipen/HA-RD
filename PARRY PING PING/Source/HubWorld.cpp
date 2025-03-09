@@ -105,7 +105,7 @@ void HubWorld_Update()
 		// Incrementing level timer
 		if (levelState != CLEARED)
 		{
-			Update_LevelTimer(&HubWorld_LevelTimer, dt);
+			Update_LevelTimer(&HubWorld_LevelTimer);
 		}
 
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {

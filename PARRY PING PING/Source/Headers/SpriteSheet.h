@@ -11,6 +11,7 @@
 #pragma once
 
 #include "utils.h"
+#include "crtdbg.h"
 
 // SpriteSheet class
 class SpriteSheet {
@@ -72,7 +73,7 @@ public:
 	// ----------------------------------------------------------------------------
 	// Draws the sprite at specified position and size
 	// ----------------------------------------------------------------------------
-	void Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot = 0.f);
+	void Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, bool flip, f32 rot = 0.f);
 
 private:
 

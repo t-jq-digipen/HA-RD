@@ -148,7 +148,7 @@ void Draw_Player_UI()
 	}
 
 	crosshair.Set_Col(UI_ammo);
-	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f);
+	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
 
 }
 
@@ -613,7 +613,7 @@ void Draw_GameOverMenu()
 	}
 }
 
-void Update_LevelTimer(float *time_elapsed, float dt)
+void Update_LevelTimer(float *time_elapsed)
 {
 	*time_elapsed += dt;
 }

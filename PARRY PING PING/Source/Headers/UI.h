@@ -59,7 +59,7 @@ void Init_Boss_UI(float hp);
 
 void Update_Boss_UI(float hp);
 
-void Update_LevelTimer(float *time_elapsed, float dt);
+void Update_LevelTimer(float *time_elapsed);
 
 void Unload_UI();
 

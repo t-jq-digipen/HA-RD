@@ -48,11 +48,19 @@ SpriteSheet::SpriteSheet(const char* texture_file, u32 cols, u32 rows) :
 
 void SpriteSheet::Set_Row(u32 row)
 {
+	if (row < 0 || row >= total_rows)
+	{
+		_CrtDbgBreak();										// Outside spritesheet range!
+	}
 	curr_row = row;
 }
 
 void SpriteSheet::Set_Col(u32 col)
 {
+	if (col < 0 || col >= total_cols)
+	{
+		_CrtDbgBreak();										// Outside spritesheet range!
+	}
 	curr_col = col;
 }
 
@@ -63,8 +71,10 @@ void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 		currtimer = 0.f;
 	}
 
-	left = (left < 0) ? 0 : left;							// 
-	right = (right >= total_cols) ? total_rows - 1 : right;
+	if (left < 0 || right >= total_cols)					// Outside spritesheet range!
+	{
+		_CrtDbgBreak();
+	}
 
 	u32 rows = right + 1 - left;
 	this->Set_Col((u32)(rows * currtimer) + left);
@@ -72,6 +82,11 @@ void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 
 void SpriteSheet::Loop(u32 left, u32 right, f32 duration)
 {
+	if (left < 0 || right >= total_cols)					// Outside spritesheet range!
+	{
+		_CrtDbgBreak();
+	}
+
 	u32 rows = right + 1 - left;
 	looper += dt / duration;
 	if (looper > 1.f)
@@ -91,8 +106,12 @@ u32 SpriteSheet::Get_Col()
 	return curr_col;
 }
 
-void SpriteSheet::Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot)
+void SpriteSheet::Draw(f32 pos_x, f32 pos_y, f32 width, f32 height, bool flip, f32 rot)
 {
+	if (flip)
+	{
+		width = -width;
+	}
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
 	// box transform
 	AEMtx33 Transform = { 0 };

@@ -126,7 +126,7 @@ void Level1_Update()
 		// Incrementing level timer
 		if (levelState != CLEARED)
 		{
-			Update_LevelTimer(&levelTimer, dt);
+			Update_LevelTimer(&levelTimer);
 		}
 	}
 

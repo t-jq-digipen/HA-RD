@@ -394,19 +394,21 @@ void Update_Boss()
     //std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
 }
 
+bool flip = false;
+
 void Draw_Boss()
 {
     // ====================================================
     // NEW SWITCH CASE FOR DRAWING ATTACK HITBOXES AND EFFECTS
     // ====================================================
 
-    f32 windup_time = boss_melee[boss_1.attack_type].attack_windup;
     f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;
     f32 recover_time = boss_melee[boss_1.attack_type].attack_recover - boss_melee[boss_1.attack_type].attack_active;
     switch (boss_1.state)
     {
     case BOSS_SMASH_SWEEP:
     {
+        flip = false;
         switch (boss_1.attack_type)
         {
         case BOSS_SMASH:
@@ -485,6 +487,7 @@ void Draw_Boss()
 
     case BOSS_THREE_HIT:
     {
+        flip = false;
         switch (boss_1.attack_type)
         {
         case BOSS_LEFT_HIT:
@@ -594,6 +597,7 @@ void Draw_Boss()
 
     case BOSS_RANGED_CHARGE:
     {
+        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
         if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
         {
             // Draw windup animation for charge
@@ -632,6 +636,7 @@ void Draw_Boss()
     {
         if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
         {
+            flip = (!BossPlayerDirection(boss_1.pos, player.pos));
             // Draw windup animation for rocket fist
             DrawRotatedRect(
                 World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),
@@ -668,6 +673,7 @@ void Draw_Boss()
 
     case BOSS_PARRIED:
     {
+        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
         std::cout << "STUNNED";
         boss_1_sprite.Set_Row(8);
         boss_1_sprite.Loop(0, 1, 0.5f);
@@ -676,6 +682,7 @@ void Draw_Boss()
 
     case BOSS_IDLE:
     {
+        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
         boss_1_sprite.Set_Row(0);
         boss_1_sprite.Loop(0, 3, 1.f);
         break;
@@ -711,81 +718,6 @@ void Draw_Boss()
         break;
     }
 
-    switch (boss_1.state)
-    {
-    case BOSS_SMASH_SWEEP:
-    {
-        u32 row = 0;
-        u32 start_col = 0;
-        u32 end_col = 0;
-        f32 duration = 0.f;
-        switch (boss_1.attack_type)
-        {
-        case BOSS_SMASH:
-            switch (boss_1.attackstate)
-            {
-            case BOSS_ATTACK_WINDUP:
-                row = 1;
-                start_col = 0;
-                end_col = 4;
-                duration = boss_melee[boss_1.attack_type].attack_windup;
-                break;
-            case BOSS_ATTACK_ACTIVE:
-                row = 1;
-                start_col = 4;
-                end_col = 5;
-                duration = boss_melee[boss_1.attack_type].attack_active;
-                break;
-            case BOSS_ATTACK_RECOVER:
-                row = 1;
-                start_col = 5;
-                end_col = 8;
-                duration = boss_melee[boss_1.attack_type].attack_recover;
-                break;
-            }
-            break;
-        case BOSS_SWEEP:
-            switch (boss_1.attackstate)
-            {
-            case BOSS_ATTACK_WINDUP:
-                row = 2;
-                start_col = 0;
-                end_col = 8;
-                duration = boss_melee[boss_1.attack_type].attack_windup;
-                break;
-            case BOSS_ATTACK_ACTIVE:
-                row = 3;
-                start_col = 0;
-                end_col = 3;
-                duration = boss_melee[boss_1.attack_type].attack_active;
-                break;
-            case BOSS_ATTACK_RECOVER:
-                row = 3;
-                start_col = 3;
-                end_col = 8;
-                duration = boss_melee[boss_1.attack_type].attack_recover;
-                break;
-            }
-            break;
-        }
-        Set_SpriteSheet_current(&boss_sprite_sheet, row, start_col, end_col, boss_1.attack_timer, duration);
-        break;
-    }
-    case BOSS_THREE_HIT:
-    {
-        
-        break;
-    }
-    case BOSS_PARRIED:
-        Loop_Timer(&boss_sprite_sheet.timer);
-        Set_SpriteSheet_current(&boss_sprite_sheet, 4, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
-        break;
-    case BOSS_IDLE:
-    default:
-        Loop_Timer(&boss_sprite_sheet.timer);
-        Set_SpriteSheet_current(&boss_sprite_sheet, 0, 0, 8, boss_sprite_sheet.timer, boss_sprite_sheet.timer.duration);
-        break;
-    }
 
     // Ranged attack warning indicator
     if (boss_1.isShootingWarningActive && boss_1.state != BOSS_DEAD)
@@ -825,8 +757,8 @@ void Draw_Boss()
 
     // Draw boss sprite
     //Draw_SpriteSheet_test(boss_sprite_sheet, World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, 0.f);
-
-    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height);
+    
+    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, flip);
 }
 
 void Unload_Boss()
