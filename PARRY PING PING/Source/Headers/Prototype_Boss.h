@@ -1,3 +1,12 @@
+//---------------------------------------------------------
+// file:	SpriteSheet.h
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Spritesheet class declaration
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 #pragma once
 #include "Enemies.h"
 #include <vector>
