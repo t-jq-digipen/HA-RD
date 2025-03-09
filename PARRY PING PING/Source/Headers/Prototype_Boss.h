@@ -1,7 +1,9 @@
 #pragma once
 #include "Enemies.h"
 #include <vector>
-
+// ----------------------------------------------------------------------------
+// Enumeration for Boss states
+// ----------------------------------------------------------------------------
 typedef enum Boss_State
 {
     BOSS_IDLE,
@@ -9,11 +11,13 @@ typedef enum Boss_State
     BOSS_THREE_HIT,
     BOSS_RANGED_CHARGE,
     BOSS_RANGED_ROCKETFIST,
-    BOSS_ROCKET_FIST_ACTIVE,
     BOSS_PARRIED,
     BOSS_DEAD,
 } Boss_State;
 
+// ----------------------------------------------------------------------------
+// Enumeration for Boss attack states
+// ----------------------------------------------------------------------------
 typedef enum Boss_Attack_State
 {
     BOSS_ATTACK_WINDUP,
@@ -21,6 +25,9 @@ typedef enum Boss_Attack_State
     BOSS_ATTACK_RECOVER,
 } Boss_Attack_State;
 
+// ----------------------------------------------------------------------------
+// Enumeration for Boss attack types
+// ----------------------------------------------------------------------------
 typedef enum Boss_AttackType
 {
     BOSS_SMASH,
@@ -32,71 +39,84 @@ typedef enum Boss_AttackType
     BOSS_ROCKETFIST,
 } Boss_AttackType;
 
+// ----------------------------------------------------------------------------
+// Structure representing the Boss
+// ----------------------------------------------------------------------------
 typedef struct Boss
 {
-    AEVec2 pos;
-    AEVec2 target_pos;
-    f32 target_dist;
-    f32 target_rot;
-    AEVec2 target_dir;
-    f32 width, height;
-    f32 hp, max_hp;
-    Boss_State state;
-    Boss_Attack_State attackstate;
+    AEVec2 pos;                 // Position of the Boss
+    AEVec2 target_pos;          // Target position for attacks
+    f32 target_dist;            // Distance to the target
+    f32 target_rot;             // Rotation angle towards the target
+    AEVec2 target_dir;          // Direction vector towards the target
+    f32 width, height;          // Dimensions of the Boss
+    f32 hp, max_hp;             // Current and maximum health points
+    Boss_State state;           // Current state of the Boss
+    Boss_Attack_State attackstate; // Current attack state
+    aabb hitbox;                // Hitbox for collision detection
 
-    aabb hitbox;
+    Timer idle_timer;           // Timer for idle state
+    Timer attack_timer;         // Timer for attack states
+    Timer stun_timer;           // Timer for stun states
 
-    Timer idle_timer;
-    Timer attack_timer;
-    Timer stun_timer;
-    Timer recovery_timer;
+    int attack_type;            // Current attack type
 
-    int attack_type;
-
-    Timer explosion_timer;
-    Timer death_explosion_duration;
+    Timer explosion_timer;      // Timer for explosion effects
+    Timer death_explosion_duration; // Timer for death explosion duration
 } Boss;
 
+// ----------------------------------------------------------------------------
+// Structure representing a Boss melee attack
+// ----------------------------------------------------------------------------
 typedef struct Boss_Melee
 {
-    AEVec2 pos;
-    Timer timer;
-    f32 attack_windup;
-    f32 attack_active;
-    f32 attack_recover;
-    bool can_parry;
-    bool hitbox_active;
-    f32 stun_duration;
+    AEVec2 pos;                 // Position of the attack
+    Timer timer;                // Timer for the attack
+    f32 attack_windup;          // Windup time for the attack
+    f32 attack_active;          // Active time for the attack
+    f32 attack_recover;         // Recovery time after the attack
+    bool can_parry;             // Whether the attack can be parried
+    bool hitbox_active;         // Whether the hitbox is active
+    f32 stun_duration;          // Duration of stun if parried
 } Boss_Melee;
 
+// ----------------------------------------------------------------------------
+// Structure representing a Rocket Fist projectile
+// ----------------------------------------------------------------------------
 typedef struct RocketFist
 {
-    AEVec2 pos;
-    AEVec2 velocity;
-    f32 radius;
-    bool active;
-    Timer timer;
-    AEMtx33 transform;
+    AEVec2 pos;                 // Position of the projectile
+    AEVec2 velocity;            // Velocity of the projectile
+    f32 radius;                 // Radius of the projectile
+    bool active;                // Whether the projectile is active
+    Timer timer;                // Timer for the projectile
+    AEMtx33 transform;          // Transformation matrix for rendering
 } RocketFist;
 
+// ----------------------------------------------------------------------------
+// Structure representing a Boss explosion effect
+// ----------------------------------------------------------------------------
 typedef struct Boss_Explosion
 {
-    AEVec2 pos;
-    AEMtx33 transform;
-    Timer timer;
-    bool active;
+    AEVec2 pos;                 // Position of the explosion
+    AEMtx33 transform;          // Transformation matrix for rendering
+    Timer timer;                // Timer for the explosion
+    bool active;                // Whether the explosion is active
 } Boss_Explosion;
 
-void Load_Boss();
-void Init_Boss_Indicator();
-void Init_Boss();
-void Update_Boss();
-void Draw_Boss();
-void Unload_Boss();
+// ----------------------------------------------------------------------------
+// Function prototypes
+// ----------------------------------------------------------------------------
+void Load_Boss();               // Load Boss resources
+void Init_Boss_Indicator();     // Initialize Boss indicators
+void Init_Boss();               // Initialize Boss state
+void Update_Boss();             // Update Boss logic
+void Draw_Boss();               // Draw Boss and its effects
+void Unload_Boss();             // Unload Boss resources
 
-void Smash_Sweep_Logic();
-void Three_Hit_Logic();
-void Boss_Dash_Logic();
-void Boss_Rocket_Logic();
-void Boss_Attack_Test(bool canparry, f32 damage);
-void Draw_Boss_Death_Explosion(AEVec2& start);
+void Smash_Sweep_Logic();       // Logic for Smash and Sweep attacks
+void Three_Hit_Logic();         // Logic for Three Hit combo
+void Boss_Dash_Logic();         // Logic for Dash attack
+void Boss_Rocket_Logic();       // Logic for Rocket Fist attack
+void Boss_Attack_Test(bool canparry, f32 damage); // Test for Boss attack collision
+void Draw_Boss_Death_Explosion(AEVec2& start); // Draw Boss death explosion

@@ -4,70 +4,76 @@
 #include <vector>
 #include "SpriteSheet.h"
 
-Boss boss_1;
-
-Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
-
-SpriteSheet_Old boss_sprite_sheet;
-
-SpriteSheet boss_1_sprite;
-
+// Boss projectile settings
 #define MAX_PROJECTILES 3
 #define PROJECTILE_DAMAGE 10
 
+// Boss instance
+Boss boss_1;
+
+// Boss state colors
+Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
+
+// Sprite sheets
+SpriteSheet_Old boss_sprite_sheet;
+SpriteSheet boss_1_sprite;
+
+// Boss spawn position
 const f32 BOSS_SPAWN_X = 0.f;
 const f32 BOSS_SPAWN_Y = 200.f;
 
+// Boss size
 const f32 BOSS_WIDTH = 500.f;
 const f32 BOSS_HEIGHT = 500.f;
 
+// Boss hitbox size
 const f32 BOSS_HITBOX_WIDTH = 400.f;
 const f32 BOSS_HITBOX_HEIGHT = 300.f;
 
+// Boss attributes
 const f32 BOSS_MAXHP = 200.f;
+const f32 BOSS_DASH_DISTANCE = 250.f; // Dash attack distance
 
-// DASH
-const f32 BOSS_DASH_DISTANCE = 250.f;
-
-// Performs an overhead smash, followed by a wide sweep that can be parried
+// Attack timings
 const s32 ATTACK_TYPES = 7;
 const f32 BOSS_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
 const f32 BOSS_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
 const f32 BOSS_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
-
 const f32 BOSS_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 0.f, 0.f, 0.f };
 
+// Attack information
+Boss_Melee boss_melee[ATTACK_TYPES];
+
+// RocketFist attributes
+std::vector<RocketFist> rocket_fists;
 const f32 BOSS_PROJECTILE_RADIUS = 30.f;
 const f32 BOSS_PROJECTILE_DAMAGE = 20.f;
 const f32 BOSS_PROJECTILE_SPEED = 500.f;
 
-Boss_Melee boss_melee[ATTACK_TYPES];
-
-// Boss Explosion Effects and Particles
+// Explosion effects
+std::vector<Boss_Explosion> boss_death_explosion;
 const f32 BOSS_DEATH_EXPLOSION_RADIUS = 25.f;
 Boss_Explosion explosion_particle;
-std::vector<Boss_Explosion> boss_death_explosion;
 
-std::vector<RocketFist> rocket_fists;
-
-// For attack logics
+// Attack hitbox settings
 const f32 SMASH_RADIUS = 200.f;
 const f32 SMASH_DAMAGE = 30.f;
 const f32 BIG_SMASH_RADIUS = 350.f;
-
 const f32 SWEEP_WIDTH = 600.f;
 const f32 SWEEP_HEIGHT = 600.f;
 
+// Miscellaneous boss settings
 f32 x_offset = 0.f;
-
 bool will_hit = true;
 
+// Load boss assets
 void Load_Boss()
 {
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
     boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
 }
 
+// Initialize boss attack indicators
 void Init_Boss_Indicator()
 {
     boss_idle = SetColor(0xFFFF6961);
@@ -80,61 +86,49 @@ void Init_Boss_Indicator()
     boss_death_explosion_color = SetColor(0xFFED6240);
 }
 
+// Initialize boss attributes
 void Init_Boss()
 {
+    boss_death_explosion.clear(); // Clear previous explosions
 
-    // Clear any existing death explosions
-    boss_death_explosion.clear();
-
+    // Boss starting point, hitbox and size
     boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
-
     boss_1.width = BOSS_WIDTH;
     boss_1.height = BOSS_HEIGHT;
-
     boss_1.hitbox = Init_AABB(boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
-
     boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
 
+    // Starting state
     boss_1.state = BOSS_IDLE;
+    boss_1.attack_type = BOSS_SMASH;
     boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
+    // Timers
     boss_1.idle_timer = Create_Timer(1.f);
     boss_1.attack_timer = Create_Timer(1.f);
     boss_1.stun_timer = Create_Timer(3.f);
-    boss_1.recovery_timer = Create_Timer(2.f);
-
-    boss_1.attack_type = BOSS_SMASH;
-
     boss_1.death_explosion_duration = Create_Timer(4.f);
-
+ 
+    // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
     {
-        boss_melee[i].pos = { 0.f, 0.f };
         boss_melee[i].attack_windup = BOSS_WINDUP[i];
         boss_melee[i].attack_active = boss_melee[i].attack_windup + BOSS_ATTACK[i];
         boss_melee[i].attack_recover = boss_melee[i].attack_active + BOSS_RECOVER[i];
-
         boss_melee[i].timer = Create_Timer(boss_melee[i].attack_recover);
-
         boss_melee[i].stun_duration = BOSS_STUN[i];
-        if (boss_melee[i].stun_duration)
-        {
-            boss_melee[i].can_parry = true;
-        }
-        else
-        {
-            boss_melee[i].can_parry = false;
-        }
-        std::cout << "ATTACK TYPE " << i << ": \nWindup: " << boss_melee[i].attack_windup << "\nActive: " << boss_melee[i].attack_active << "\nRecover: " << boss_melee[i].attack_recover << "\n----\n";
+        boss_melee[i].can_parry = boss_melee[i].stun_duration > 0;
     }
 
     Init_Boss_UI(boss_1.hp);
 }
 
+// For damagecheck for player attacks to boss
 s32 last_hit = 0;
 s32 new_hit = 0;
 f32 damage = 0.f;
 
+// Update boss logic
 void Update_Boss()
 {
     if (boss_1.state != BOSS_DEAD)
@@ -202,9 +196,6 @@ void Update_Boss()
 
         case BOSS_RANGED_ROCKETFIST:
             Boss_Rocket_Logic();
-            break;
-
-        case BOSS_ROCKET_FIST_ACTIVE:
             break;
 
         case BOSS_PARRIED:
@@ -314,15 +305,10 @@ void Update_Boss()
 
     // Update Boss Hitbox
     Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
-
-    //std::cout << "BOSS STATES: \n0 - IDLE\n1 - ATTACK\n2 - PARRIED\nCURRENT STATE: " << boss_1.state << '\n';
 }
 
 void Draw_Boss()
 {
-    // ====================================================
-    // NEW SWITCH CASE FOR DRAWING ATTACK HITBOXES AND EFFECTS
-    // ====================================================
 
     f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;
     f32 recover_time = boss_melee[boss_1.attack_type].attack_recover - boss_melee[boss_1.attack_type].attack_active;
