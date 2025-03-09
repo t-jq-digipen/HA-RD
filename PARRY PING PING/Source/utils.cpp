@@ -371,6 +371,22 @@ void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f
 	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
 }
 
+int BossPlayerDirection(AEVec2 boss, AEVec2 player)
+{
+	if (boss.x > player.x)
+	{
+		return 1;
+	}
+	else if (boss.x < player.x)
+	{
+		return 0;
+	}
+	else
+	{
+		return 0; 
+	}
+}
+
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string)
 {
 	// box transform
