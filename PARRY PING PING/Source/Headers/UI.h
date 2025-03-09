@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	UI.h
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	AVID PARRY ENJOYERS
+// email:	-
 //
 // brief:	Declaration for all UI elements
 //
@@ -11,6 +11,10 @@
 #pragma once
 #include "utils.h"
 
+
+// ----------------------------------------------------------------------------
+// Level state enum
+// ----------------------------------------------------------------------------
 enum LEVEL_STATE
 {
 	PLAYING = 0,
@@ -22,6 +26,9 @@ enum LEVEL_STATE
 
 extern int levelState;
 
+// ----------------------------------------------------------------------------
+// UI screen struct with UI elements
+// ----------------------------------------------------------------------------
 typedef struct UIScreen 
 {
 	SpriteSheet_Old* spritesheet_screen;
@@ -47,16 +54,32 @@ typedef struct UIScreen
 //1 - draw boss hp bar, 0 - dont draw
 void Draw_UI(int DrawBossHP = 1);
 
-void Update_Player_UI(int ammo, float hp, float parry_timer);
 
 // will neaten when more player parameters are finalized
 
+// ----------------------------------------------------------------------------
+// Initialize the various screen UI elements
+// ----------------------------------------------------------------------------
 void Init_UI();
 
+// ----------------------------------------------------------------------------
+// Initialize the player UI elements
+// ----------------------------------------------------------------------------
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp);
 
+// ----------------------------------------------------------------------------
+// Update the values for player UI
+// ----------------------------------------------------------------------------
+void Update_Player_UI(int ammo, float hp, float parry_timer);
+
+// ----------------------------------------------------------------------------
+// Initialize the boss UI elements
+// ----------------------------------------------------------------------------
 void Init_Boss_UI(float hp);
 
+// ----------------------------------------------------------------------------
+// Update the boss UI elements
+// ----------------------------------------------------------------------------
 void Update_Boss_UI(float hp);
 
 void Update_LevelTimer(float *time_elapsed);
