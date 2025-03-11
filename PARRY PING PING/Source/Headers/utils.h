@@ -175,6 +175,8 @@ int BossPlayerDirection(AEVec2 boss, AEVec2 player);
 // ----------------------------------------------------------------------------
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
 
+void DrawTextToWorld(f32 world_pos_x, f32 world_pos_y, f32 width, f32 height, f32 fontsize, s8 font, Color color, const char* string);
+
 // ----------------------------------------------------------------------------
 // Draws a circle
 // param pos_x - x coordinate of center of circle

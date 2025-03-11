@@ -128,13 +128,14 @@ void HubWorld_Draw()
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);	
 
+
 	//Draw Parry Bots	
 	Draw_DummyBotMelee();														// Draw (placeholder) sprites for dummies!
 	Draw_DummyBotRange();
 
 	//Draw Environment
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	//DrawTextBox(Env_Gate.Pos.x, Env_Gate.Pos.y, Env_Gate.Width * 2, Env_Gate.Height * 2, 10.f, tempUI_font, tempUI_white, "GATE");
+	DrawTextToWorld(Env_Gate.Pos.x, Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height, 6.5f, tempUI_font, tempUI_white, "GATE");
 
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
 	//DrawTextBox(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, 1.f, tempUI_font, tempUI_white, "CAMPFIRE");

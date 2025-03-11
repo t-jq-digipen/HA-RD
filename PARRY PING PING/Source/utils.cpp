@@ -11,6 +11,7 @@
 #include "utils.h"
 #include <vector>
 #include <algorithm>
+#include "Camera.h"
 
 
 // Globals
@@ -435,6 +436,34 @@ void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font,
 
 	AEGfxGetPrintSize(font, string, 1.f, &width, &height);
 	AEGfxPrint(font, string, pos_x, pos_y, size, color.R, color.G, color.B, color.A);
+}
+
+void DrawTextToWorld(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 fontsize, s8 font, Color color, const char* string) {
+	AEMtx33 Transform = { 0 };
+	f32 NormX{}, NormY{};
+	{
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		size_t charcount = strlen(string);
+		//THIS SHIT DOES NOT WORK WIP WIP WIP WIP WIP WIP WIP WIP
+		NormX = World_To_Screen_x(pos_x - (charcount * fontsize)) * 2.f * (1.f / f32(AEGfxGetWindowWidth()));
+		NormY = World_To_Screen_y(pos_y - (charcount * fontsize)) * 2.f * (1.f / f32(AEGfxGetWindowHeight()));
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, NormX, NormY);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &tran, &scale);
+	}
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+	// Draw Text
+
+	AEGfxGetPrintSize(font, string, 1.f, &width, &height);
+	AEGfxPrint(font, string, NormX, NormY, 1.f, color.R, color.G, color.B, color.A);
 }
 
 // Draw circle
