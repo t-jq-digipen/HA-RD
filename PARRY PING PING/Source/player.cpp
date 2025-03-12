@@ -15,6 +15,8 @@
 #include "Enemies.h"
 #include <vector>
 #include <algorithm>
+#include <cmath>
+
 
 
 // Define map boundary limits
@@ -257,6 +259,110 @@ Projectile new_proj;
 aabb heavyAtkHitbox;
 
 
+//// Helper function to rotate a point around a center
+//AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle)
+//{
+//	float s = sin(angle);
+//	float c = cos(angle);
+//
+//	// Translate point back to origin
+//	point.x -= center.x;
+//	point.y -= center.y;
+//
+//	// Rotate
+//	float xNew = point.x * c - point.y * s;
+//	float yNew = point.x * s + point.y * c;
+//
+//	// Translate back
+//	return { xNew + center.x, yNew + center.y };
+//}
+
+// Rotated Rectangle Class
+class RotatedRect
+{
+public:
+	AEVec2 center;
+	float width, height, angle;
+	AEVec2 corners[4];
+
+	RotatedRect(AEVec2 c, float w, float h, float a)
+		: center(c), width(w), height(h), angle(a)
+	{
+		ComputeCorners();
+	}
+
+	void ComputeCorners()
+	{
+		// Compute half-width and half-height
+		float hw = width * 0.5f;
+		float hh = height * 0.5f;
+
+		// Define unrotated corners
+		AEVec2 localCorners[4] = {
+			{ -hw, -hh },
+			{  hw, -hh },
+			{  hw,  hh },
+			{ -hw,  hh }
+		};
+
+		// Rotate each corner
+		for (int i = 0; i < 4; i++)
+		{
+			corners[i] = RotatePoint(localCorners[i], center, angle);
+		}
+	}
+
+	// **New function: Get AABB**
+	void GetAABB(float& minX, float& maxX, float& minY, float& maxY) const
+	{
+		minX = maxX = corners[0].x;
+		minY = maxY = corners[0].y;
+
+		for (int i = 1; i < 4; i++)
+		{
+			minX = min(minX, corners[i].x);
+			maxX = max(maxX, corners[i].x);
+			minY = min(minY, corners[i].y);
+			maxY = max(maxY, corners[i].y);
+		}
+	}
+
+	bool CheckSATCollision(const RotatedRect& other) const
+	{
+		// You need to implement SAT collision check here
+		return false;
+	}
+
+
+private:
+	// Compute normal vector of an edge
+	AEVec2 GetEdgeNormal(AEVec2 p1, AEVec2 p2)
+	{
+		AEVec2 edge = { p2.x - p1.x, p2.y - p1.y };
+		return { -edge.y, edge.x };  // Perpendicular vector
+	}
+
+	// Project a rectangle onto an axis
+	void ProjectOntoAxis(AEVec2 axis, float& min, float& max) const
+	{
+		min = max = (corners[0].x * axis.x + corners[0].y * axis.y);
+		for (int i = 1; i < 4; ++i)
+		{
+			float projection = (corners[i].x * axis.x + corners[i].y * axis.y);
+			min = min(min, projection);
+			max = max(max, projection);
+		}
+	}
+
+	// Check if projections overlap on an axis
+	bool OverlapsOnAxis(AEVec2 axis, const RotatedRect& other)
+	{
+		float minA, maxA, minB, maxB;
+		ProjectOntoAxis(axis, minA, maxA);
+		other.ProjectOntoAxis(axis, minB, maxB);
+		return !(maxA < minB || maxB < minA);
+	}
+};
 
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
 {
@@ -277,44 +383,19 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		}
 		else
 		{
-			// Heavy attack collision check (with rotation)
-			AEVec2 bossCenter = { target.x + width * 0.5f, target.y + height * 0.5f };
-			AEVec2 corners1[4]{};
-			AEVec2 center1 = { proj.pos.x, proj.pos.y };
+			// **Rotated Heavy Attack Collision**
+			RotatedRect heavyAttack({ proj.pos.x, proj.pos.y }, proj.width, proj.height, proj.angle);
+			RotatedRect targetBox({ target.x + width * 0.5f, target.y + height * 0.5f }, width, height, 0.0f); // Target has no rotation
 
-			// Get the four corners after applying rotation
-			corners1[0] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
-			corners1[1] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
-			corners1[2] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
-			corners1[3] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
-
-			// Compute rotated AABB
-			float minX = corners1[0].x, maxX = corners1[0].x;
-			float minY = corners1[0].y, maxY = corners1[0].y;
-
-			for (int i = 1; i < 4; ++i) {
-				minX = min(minX, corners1[i].x);
-				maxX = max(maxX, corners1[i].x);
-				minY = min(minY, corners1[i].y);
-				maxY = max(maxY, corners1[i].y);
-			}
-
-			// Target AABB
-			float targetMinX = target.x - width * 0.5f;
-			float targetMaxX = target.x + width * 0.5f;
-			float targetMinY = target.y - height * 0.5f;
-			float targetMaxY = target.y + height * 0.5f;
-
-			// Check for AABB overlap
-			if (maxX >= targetMinX && minX <= targetMaxX &&
-				maxY >= targetMinY && minY <= targetMaxY)
+			// Use SAT (precise collision detection)
+			if (heavyAttack.CheckSATCollision(targetBox))
 			{
-				*damage = dt * 10.f; // Heavy attack deals damage over time
+				*damage += 10.f * dt; // Heavy attack deals damage over time
 				hit = true;
 			}
 		}
 
-		// **Light projectile collision**
+		// **Light projectile collision check**
 		if (!proj.isHeavy && AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
 		{
 			*damage = 5.f;  // Light attack damage
@@ -323,8 +404,9 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		}
 	}
 
-	return hit; // Only return false if no projectiles hit
+	return hit; // Return true if at least one projectile hits
 }
+
 
 
 
@@ -394,7 +476,7 @@ void Attacking_Ranged()
 				// Reset the right-click timer
 				rightClickTimer = 0.f;
 
-				player.state = HEAVY;
+				//player.state = HEAVY;
 			}
 
 
@@ -433,7 +515,7 @@ void Attacking_Ranged()
 			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength);
 			player.knockbackTimer = 0.1f;
 
-			player.state = RANGE;
+			//player.state = RANGE;
 
 			// Set cooldown
 			player.lightAttackCooldown = 1.0f;
@@ -748,8 +830,6 @@ void Update_Player()
 	{
 		if (player.knockbackTimer > 0.0f)
 		{
-			if (player.state == HEAVY)
-			{
 				// Calculate the knockback direction based on the direction of the attack
 				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
 				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
@@ -780,40 +860,39 @@ void Update_Player()
 				// Stop movement when the knockback velocity is very small
 				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
 				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
-			}
-			if (player.state == RANGE)
-			{
-				// Calculate the knockback direction based on the direction of the attack
-				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
-				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+			//if (player.state == RANGE)
+			//{
+			//	// Calculate the knockback direction based on the direction of the attack
+			//	f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+			//	f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
 
-				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
-				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+			//	AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+			//	AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
 
-				// Apply knockback in the opposite direction of the attack
-				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+			//	// Apply knockback in the opposite direction of the attack
+			//	AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
 
-				// Apply knockback boost if necessary
-				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.1f * player.speed : 0.f;
+			//	// Apply knockback boost if necessary
+			//	float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.1f * player.speed : 0.f;
 
-				// Apply knockback velocity (scaled by the speed and knockback boost)
-				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+			//	// Apply knockback velocity (scaled by the speed and knockback boost)
+			//	AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
 
-				// Move the player using the knockback velocity
-				AEVec2Add(&player.pos, &player.vel, &player.pos);
+			//	// Move the player using the knockback velocity
+			//	AEVec2Add(&player.pos, &player.vel, &player.pos);
 
-				// Apply friction to gradually slow down the knockback
-				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
-				player.vel.x *= knockbackFriction;
-				player.vel.y *= knockbackFriction;
+			//	// Apply friction to gradually slow down the knockback
+			//	float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+			//	player.vel.x *= knockbackFriction;
+			//	player.vel.y *= knockbackFriction;
 
-				// Decrease knockback timer
-				player.knockbackTimer -= dt;
+			//	// Decrease knockback timer
+			//	player.knockbackTimer -= dt;
 
-				// Stop movement when the knockback velocity is very small
-				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
-				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
-			}
+			//	// Stop movement when the knockback velocity is very small
+			//	if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+			//	if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+			//}
 		}
 
 		if (Update_Timer(&player.hittimer))
