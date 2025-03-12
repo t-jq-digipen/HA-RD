@@ -324,7 +324,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		}
 		else {
 			// Heavy attack logic
-			float offsetDistance = 500.0f;
+			float offsetDistance = 100.0f;
 			float offsetX = cosf(proj.angle) * offsetDistance;
 			float offsetY = sinf(proj.angle) * offsetDistance;
 
