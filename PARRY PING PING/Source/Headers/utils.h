@@ -175,7 +175,19 @@ int BossPlayerDirection(AEVec2 boss, AEVec2 player);
 // ----------------------------------------------------------------------------
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
 
-void DrawTextToWorld(f32 world_pos_x, f32 world_pos_y, f32 width, f32 height, f32 fontsize, s8 font, Color color, const char* string);
+// ----------------------------------------------------------------------------
+// Takes in world coords and draws text at desired position (not scaled to 
+// param pos_x - x coordinate of center of text box
+// param pos_y - y coordinate of center of text box
+// param width - width of text box
+// param height - height of text box
+// param font - set font type
+// param color - set text color
+// param string - string to print
+// param WorldToScreen - true or false, to print text on screen directly or as world object (defaults to on screen)
+// param size - scaling of text (defaults to 1)
+// ----------------------------------------------------------------------------
+void DrawTextAdvanced(f32 world_pos_x, f32 world_pos_y, s8 font, Color color, const char* string, bool WorldToScreen = false, f32 size = 1.f);
 
 // ----------------------------------------------------------------------------
 // Draws a circle

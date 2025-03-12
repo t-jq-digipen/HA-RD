@@ -20,8 +20,8 @@ EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 50.f, 
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{50.f};
 
 // TEMPORARY - Placeholder for sprites to be added
-Color tempUI_white;
-s8  tempUI_font;
+Color hubworld_white;
+s8  hubworld_font;
 
 // Fade from black transition when level starts
 Color FadeIn;
@@ -51,8 +51,8 @@ void HubWorld_Initialize()
 	DummyMelee_rad = 50.f;
 	DummyMelee_Check = 0;
 
-	tempUI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);		// Font and text colour
-	tempUI_white = SetColor(0xFFFFFFFF);
+	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
+	hubworld_white = SetColor(0xFFFFFFFF);
 
 	FadeIn = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
 	FadeInSpeed = 0.01f;
@@ -135,16 +135,19 @@ void HubWorld_Draw()
 
 	//Draw Environment
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	DrawTextToWorld(Env_Gate.Pos.x, Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height, 6.5f, tempUI_font, tempUI_white, "GATE");
+	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
 
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
-	//DrawTextBox(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, 1.f, tempUI_font, tempUI_white, "CAMPFIRE");
+	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
 
 	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	//DrawTextBox(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, 1.f, tempUI_font, tempUI_white, "SHRINE");
+	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE", true);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	//DrawTextBox(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, 1.f, tempUI_font, tempUI_white, "MODIFIERS");
+	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS", true);
+
+	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
+	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 	
 
 	// Player
