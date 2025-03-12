@@ -119,7 +119,7 @@ void Init_UI()
 	gameSFX = AEAudioCreateGroup();
 
 	// BGM and SFX (Settings)
-	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 50.f;
+	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 2.f;			//sorry fauz this shi driving me crazy HAHAHHAHAHA
 	max_bgm_vol = max_sfx_vol = 100.f;
 
 	// Initialize volume settings when entering level
@@ -328,7 +328,14 @@ void Draw_PauseMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
-			nextState = GS_QUIT;
+			if (currentState == GS_HUBWORLD)
+			{
+				nextState = GS_MAIN_MENU;
+			}
+			else
+			{
+				nextState = GS_HUBWORLD;
+			}
 		}
 	}
 	else
@@ -392,7 +399,7 @@ void Draw_ClearMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			nextState = GS_QUIT;
+			nextState = GS_HUBWORLD;
 		}
 	}
 	else
@@ -652,7 +659,7 @@ void Draw_GameOverMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			nextState = GS_QUIT;
+			nextState = GS_HUBWORLD;
 		}
 	}
 	else
