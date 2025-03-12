@@ -132,7 +132,6 @@ SpriteSheet_Old Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, f
 	temp.cols = cols;
 	temp.uv_height = 1.f / rows;
 	temp.uv_width = 1.f / cols;
-	std::cout << temp.uv_height << ' ' << temp.uv_width << '\n';
 
 	temp.current_col = 0;
 	temp.current_row = 0;
@@ -361,6 +360,9 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &tran, &scale);
 	}
+
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
@@ -390,6 +392,9 @@ void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f
 		AEMtx33Concat(&Transform, &rot, &scale);
 		AEMtx33Concat(&Transform, &tran, &Transform);
 	}
+
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
@@ -477,6 +482,8 @@ void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color)
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &tran, &scale);
 	}
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
@@ -502,6 +509,8 @@ void DrawCircleAdvanced(f32 pos_x, f32 pos_y, f32 radius_x, f32 radius_y, Color 
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &tran, &scale);
 	}
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix

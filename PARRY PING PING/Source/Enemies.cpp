@@ -173,6 +173,7 @@ void Attack_DummyBotMelee() {
 			// Player parried the bot - Swap states to parried
 			MParryBot.stun_timer.current = 0.f;
 			MParryBot.state = Parried;
+			Parried_Hit();
 			break;
 		case BLOCK:
 			Blocked_Hit(MParryBot.damage);							// Player blocks damage - takes reduced damage
@@ -213,7 +214,7 @@ void Draw_DummyBotMelee() {
 		break;
 	}
 	if (MParryBot.spark_draw) {
-		std::cout << "draw cool spark like shiiiing sheeeeoonng not the supermarket but like the sound ykwim shiiiing and also play the sound like the one i just made shiiiing ok ty\n";
+		//std::cout << "draw cool spark like shiiiing sheeeeoonng not the supermarket but like the sound ykwim shiiiing and also play the sound like the one i just made shiiiing ok ty\n";
 		//add spark anim here :), its pos is alr synced with enem anim so just need to draw here :)
 		// JQWERTY - this is for the parry warning spark
 	}

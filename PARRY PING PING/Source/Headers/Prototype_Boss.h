@@ -75,6 +75,8 @@ typedef struct Boss
     Timer death_explosion_duration; // Timer for death explosion duration
 } Boss;
 
+extern Boss boss_1;
+
 // ----------------------------------------------------------------------------
 // Structure representing a Boss melee attack
 // ----------------------------------------------------------------------------
@@ -121,6 +123,7 @@ void Load_Boss();               // Load Boss resources
 void Init_Boss_Indicator();     // Initialize Boss indicators
 void Init_Boss();               // Initialize Boss state
 void Update_Boss();             // Update Boss logic
+void Draw_Boss_Hitboxes();      // Draw boss attack hitboxes
 void Draw_Boss();               // Draw Boss and its effects
 void Unload_Boss();             // Unload Boss resources
 

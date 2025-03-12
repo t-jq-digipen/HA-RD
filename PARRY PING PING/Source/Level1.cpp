@@ -158,6 +158,9 @@ void Level1_Update()
 	}
 }
 
+const float PLAYER_BASE_OFFSET{ 50.f };
+const float BOSS_BASE_OFFSET{ 70.f };
+
 void Level1_Draw()
 {
 	AEGfxSetBackgroundColor(0, 0, 0);
@@ -203,14 +206,27 @@ void Level1_Draw()
 	// manfred Boss
 	//Draw_Boss1();
 
-	// Proto boss
-	Draw_Boss();
-
 	// Mobs
 	Draw_Mobs();
 
-	// Player
-	Draw_Player();
+	//// Proto boss
+	//Draw_Boss();
+
+	//// Player
+	//Draw_Player();
+
+	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
+	{
+		Draw_Boss_Hitboxes();
+		Draw_Player();
+		Draw_Boss();
+	}
+	else
+	{
+		Draw_Boss_Hitboxes();
+		Draw_Boss();
+		Draw_Player();
+	}
 
 	// Boss HP
 	//Draw_Boss1HP();
