@@ -259,111 +259,240 @@ Projectile new_proj;
 aabb heavyAtkHitbox;
 
 
-//// Helper function to rotate a point around a center
-//AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle)
+//// Rotated Rectangle Class
+//class RotatedRect
 //{
-//	float s = sin(angle);
-//	float c = cos(angle);
+//public:
+//	AEVec2 center;
+//	float width, height, angle;
+//	AEVec2 corners[4];
 //
-//	// Translate point back to origin
-//	point.x -= center.x;
-//	point.y -= center.y;
+//	RotatedRect(AEVec2 c, float w, float h, float a)
+//		: center(c), width(w), height(h), angle(a)
+//	{
+//		ComputeCorners();
+//	}
 //
-//	// Rotate
-//	float xNew = point.x * c - point.y * s;
-//	float yNew = point.x * s + point.y * c;
+//	void ComputeCorners()
+//	{
+//		// Compute half-width and half-height
+//		float hw = width * 0.5f;
+//		float hh = height * 0.5f;
 //
-//	// Translate back
-//	return { xNew + center.x, yNew + center.y };
-//}
+//		// Define unrotated corners
+//		AEVec2 localCorners[4] = {
+//			{ -hw, -hh },
+//			{  hw, -hh },
+//			{  hw,  hh },
+//			{ -hw,  hh }
+//		};
+//
+//		// Rotate each corner
+//		for (int i = 0; i < 4; i++)
+//		{
+//			corners[i] = RotatePoint(localCorners[i], center, angle);
+//		}
+//
+//		//// Debugging: Draw small rectangles between each pair of corners
+//		//for (int i = 0; i < 4; i++)
+//		//{
+//		//	AEVec2 start = corners[i];
+//		//	AEVec2 end = corners[(i + 1) % 4]; // Wrap around to the first corner
+//
+//		//	// Calculate the distance between the two corners
+//		//	float distX = end.x - start.x;
+//		//	float distY = end.y - start.y;
+//
+//		//	// Draw a small rectangle to simulate a line (a thin rectangle)
+//		//	DrawRect(start.x, start.y, distX, distY, { 1.f, 0.f, 0.f, 1.f }); // Red color for debugging
+//		//}
+//	}
+//
+//
+//	// **New function: Get AABB**
+//	void GetAABB(float& minX, float& maxX, float& minY, float& maxY) const
+//	{
+//		minX = maxX = corners[0].x;
+//		minY = maxY = corners[0].y;
+//
+//		// Iterate over all corners and calculate the minimum and maximum for both X and Y
+//		for (int i = 1; i < 4; ++i)
+//		{
+//			minX = min(minX, corners[i].x);
+//			maxX = max(maxX, corners[i].x);
+//			minY = min(minY, corners[i].y);
+//			maxY = max(maxY, corners[i].y);
+//		}
+//	}
+//
+//	bool CheckAABBCollision(const RotatedRect& other) const
+//	{
+//		// Compute AABBs for both rectangles
+//		float minA_X, maxA_X, minA_Y, maxA_Y;
+//		GetAABB(minA_X, maxA_X, minA_Y, maxA_Y);
+//
+//		float minB_X, maxB_X, minB_Y, maxB_Y;
+//		other.GetAABB(minB_X, maxB_X, minB_Y, maxB_Y);
+//
+//		// Check for overlap on the X axis
+//		if (maxA_X < minB_X || maxB_X < minA_X)
+//			return false; // No overlap on X-axis
+//
+//		// Check for overlap on the Y axis
+//		if (maxA_Y < minB_Y || maxB_Y < minA_Y)
+//			return false; // No overlap on Y-axis
+//
+//		// AABBs overlap, so proceed with SAT
+//		return true;
+//	}
+//
+//	bool CheckSATCollision(const RotatedRect& other)
+//	{
+//		// First, check the AABBs for early rejection
+//		if (!CheckAABBCollision(other))
+//			return false;
+//
+//		// If the AABBs overlap, proceed with SAT collision check
+//		for (int i = 0; i < 4; ++i)
+//		{
+//			// Get the axis from this rectangle's edge
+//			AEVec2 edge = corners[i];
+//			AEVec2 nextEdge = corners[(i + 1) % 4];
+//			AEVec2 axis = GetEdgeNormal(edge, nextEdge);
+//
+//			// Check projection overlap on the axis
+//			if (!OverlapsOnAxis(axis, other))  // If no overlap, return false
+//			{
+//				return false;
+//			}
+//		}
+//
+//		// Check the axes of the other rectangle
+//		for (int i = 0; i < 4; ++i)
+//		{
+//			AEVec2 edge = other.corners[i];
+//			AEVec2 nextEdge = other.corners[(i + 1) % 4];
+//			AEVec2 axis = GetEdgeNormal(edge, nextEdge);
+//
+//			if (!OverlapsOnAxis(axis, *this))  // If no overlap, return false
+//			{
+//				return false;
+//			}
+//		}
+//
+//		// If no separating axis is found, the rectangles are colliding
+//		return true;
+//	}
+//
+//
+//private:
+//	// Rotate a point around a center
+//	AEVec2 RotatePoint(const AEVec2& point, const AEVec2& center, float angle) const
+//	{
+//		float cosA = cosf(angle);
+//		float sinA = sinf(angle);
+//
+//		// Translate point to origin
+//		AEVec2 relative = { point.x - center.x, point.y - center.y };
+//
+//		// Rotate the point
+//		AEVec2 rotated = {
+//			relative.x * cosA - relative.y * sinA,
+//			relative.x * sinA + relative.y * cosA
+//		};
+//
+//		// Translate back to the original center
+//		return { rotated.x + center.x, rotated.y + center.y };
+//	}
+//
+//	// Compute normal vector of an edge
+//	AEVec2 GetEdgeNormal(AEVec2 p1, AEVec2 p2)
+//	{
+//		AEVec2 edge = { p2.x - p1.x, p2.y - p1.y };
+//		return { -edge.y, edge.x };  // Perpendicular vector
+//	}
+//
+//	// Project a rectangle's corners onto an axis
+//	void ProjectOntoAxis(AEVec2 axis, float& min, float& max) const
+//	{
+//		// Start by projecting the first corner onto the axis
+//		min = max = (corners[0].x * axis.x + corners[0].y * axis.y);
+//
+//		// Project the other corners
+//		for (int i = 1; i < 4; ++i)
+//		{
+//			float projection = (corners[i].x * axis.x + corners[i].y * axis.y);
+//			min = min(min, projection);
+//			max = max(max, projection);
+//		}
+//	}
+//
+//
+//	// Fix for checking overlap on an axis
+//	bool OverlapsOnAxis(AEVec2 axis, const RotatedRect& other)
+//	{
+//		// Calculate the projection of both rectangles onto the axis
+//		float minA, maxA, minB, maxB;
+//		ProjectOntoAxis(axis, minA, maxA);  // Projection of this rectangle
+//		other.ProjectOntoAxis(axis, minB, maxB);  // Projection of the other rectangle
+//
+//		// If the projections do not overlap, return false (no collision)
+//		return !(maxA < minB || maxB < minA);
+//	}
+//};
 
-// Rotated Rectangle Class
-class RotatedRect
-{
-public:
-	AEVec2 center;
-	float width, height, angle;
-	AEVec2 corners[4];
+// Function to rotate a point around a given center by an angle in radians
+AEVec2 RotatePoint(const AEVec2& point, const AEVec2& center, float angle) {
+	float cosAngle = cosf(angle);
+	float sinAngle = sinf(angle);
 
-	RotatedRect(AEVec2 c, float w, float h, float a)
-		: center(c), width(w), height(h), angle(a)
-	{
-		ComputeCorners();
+	AEVec2 rotatedPoint;
+	rotatedPoint.x = cosAngle * (point.x - center.x) - sinAngle * (point.y - center.y) + center.x;
+	rotatedPoint.y = sinAngle * (point.x - center.x) + cosAngle * (point.y - center.y) + center.y;
+
+	return rotatedPoint;
+}
+
+
+
+// Function to get the rotated corners of the heavy attack box
+void GetRotatedCorners(const AEVec2& center, float angle, const AEVec2* originalCorners, AEVec2* rotatedCorners) {
+	for (int i = 0; i < 4; ++i) {
+		rotatedCorners[i] = RotatePoint(originalCorners[i], center, angle);
 	}
+}
 
-	void ComputeCorners()
-	{
-		// Compute half-width and half-height
-		float hw = width * 0.5f;
-		float hh = height * 0.5f;
 
-		// Define unrotated corners
-		AEVec2 localCorners[4] = {
-			{ -hw, -hh },
-			{  hw, -hh },
-			{  hw,  hh },
-			{ -hw,  hh }
-		};
-
-		// Rotate each corner
-		for (int i = 0; i < 4; i++)
-		{
-			corners[i] = RotatePoint(localCorners[i], center, angle);
+// Function to check if any corner of the rotated attack box is inside the AABB of the target
+bool CheckAABBWithRotatedBox(const AEVec2* attackCorners, const AEVec2* targetCorners) {
+	for (int i = 0; i < 4; ++i) {
+		AEVec2 corner = attackCorners[i];
+		if (corner.x >= targetCorners[0].x && corner.x <= targetCorners[1].x &&
+			corner.y >= targetCorners[0].y && corner.y <= targetCorners[3].y) {
+			return true; // If any corner of the attack is inside the target AABB, return true
 		}
 	}
+	return false;
+}
 
-	// **New function: Get AABB**
-	void GetAABB(float& minX, float& maxX, float& minY, float& maxY) const
-	{
-		minX = maxX = corners[0].x;
-		minY = maxY = corners[0].y;
 
-		for (int i = 1; i < 4; i++)
-		{
-			minX = min(minX, corners[i].x);
-			maxX = max(maxX, corners[i].x);
-			minY = min(minY, corners[i].y);
-			maxY = max(maxY, corners[i].y);
-		}
+// Function to check if a point is inside the AABB (axis-aligned bounding box)
+bool CheckAABBWithAABB(const AEVec2& attackPos, float attackRadius, const AEVec2& targetPos, float targetWidth, float targetHeight) {
+	// AABB for the target (boss's hitbox)
+	float minX = targetPos.x - targetWidth / 2;
+	float maxX = targetPos.x + targetWidth / 2;
+	float minY = targetPos.y - targetHeight / 2;
+	float maxY = targetPos.y + targetHeight / 2;
+
+	// Check if the attack position (point) is inside the AABB of the target
+	if (attackPos.x >= minX && attackPos.x <= maxX &&
+		attackPos.y >= minY && attackPos.y <= maxY) {
+		return true;  // Collision detected
 	}
+	return false;  // No collision
+}
 
-	bool CheckSATCollision(const RotatedRect& other) const
-	{
-		// You need to implement SAT collision check here
-		return false;
-	}
-
-
-private:
-	// Compute normal vector of an edge
-	AEVec2 GetEdgeNormal(AEVec2 p1, AEVec2 p2)
-	{
-		AEVec2 edge = { p2.x - p1.x, p2.y - p1.y };
-		return { -edge.y, edge.x };  // Perpendicular vector
-	}
-
-	// Project a rectangle onto an axis
-	void ProjectOntoAxis(AEVec2 axis, float& min, float& max) const
-	{
-		min = max = (corners[0].x * axis.x + corners[0].y * axis.y);
-		for (int i = 1; i < 4; ++i)
-		{
-			float projection = (corners[i].x * axis.x + corners[i].y * axis.y);
-			min = min(min, projection);
-			max = max(max, projection);
-		}
-	}
-
-	// Check if projections overlap on an axis
-	bool OverlapsOnAxis(AEVec2 axis, const RotatedRect& other)
-	{
-		float minA, maxA, minB, maxB;
-		ProjectOntoAxis(axis, minA, maxA);
-		other.ProjectOntoAxis(axis, minB, maxB);
-		return !(maxA < minB || maxB < minA);
-	}
-};
-
+// Function to check if any projectile or attack collides with the boss's AABB hitbox
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
 {
 	bool hit = false; // Track if at least one projectile hits
@@ -383,15 +512,27 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		}
 		else
 		{
-			// **Rotated Heavy Attack Collision**
-			RotatedRect heavyAttack({ proj.pos.x, proj.pos.y }, proj.width, proj.height, proj.angle);
-			RotatedRect targetBox({ target.x + width * 0.5f, target.y + height * 0.5f }, width, height, 0.0f); // Target has no rotation
+			// Heavy attack logic
+			float offsetDistance = 500.0f;
+			float offsetX = cosf(proj.angle) * offsetDistance;
+			float offsetY = sinf(proj.angle) * offsetDistance;
 
-			// Use SAT (precise collision detection)
-			if (heavyAttack.CheckSATCollision(targetBox))
-			{
-				*damage += 10.f * dt; // Heavy attack deals damage over time
+			// Apply the offset to the projectile's position (keep it in world space)
+			AEVec2 heavyAttackPos = { proj.pos.x + offsetX, proj.pos.y + offsetY };
+
+			// Debugging: Print projectile and target info
+			std::cout << "Projectile Position: (" << proj.pos.x << ", " << proj.pos.y << ")\n";
+			std::cout << "Heavy Attack Position: (" << heavyAttackPos.x << ", " << heavyAttackPos.y << ")\n";
+			std::cout << "Target Position (Boss): (" << target.x << ", " << target.y << ")\n";
+
+			// **Check collision between heavy attack and boss AABB**
+			if (CheckAABBWithAABB(heavyAttackPos, 0, target, width, height)) {
+				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
+				std::cout << "Heavy Attack Hit!\n";
+			}
+			else {
+				std::cout << "NO HIT\n";
 			}
 		}
 
@@ -401,11 +542,15 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			*damage = 5.f;  // Light attack damage
 			hit = true;
 			proj.isActive = false; // Deactivate light projectile after hit
+			std::cout << "Light Attack Hit!\n";
 		}
 	}
 
 	return hit; // Return true if at least one projectile hits
 }
+
+
+
 
 
 
@@ -450,8 +595,8 @@ void Attacking_Ranged()
 				heavy_atk.pos.y = player.pos.y + offset.y;
 
 				// Set the dimensions and other properties of the heavy attack (laser)
-				heavy_atk.width = 250.f;  // Width for the laser beam
-				heavy_atk.height = 1000.f; // Height represents the laser length
+				heavy_atk.width = 100.f;  // Width for the laser beam
+				heavy_atk.height = 500.f; // Height represents the laser length
 				heavy_atk.vel = dir;  // Direction of the laser
 				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
 				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);

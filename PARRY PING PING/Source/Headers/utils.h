@@ -227,7 +227,7 @@ float CalculateDistance(float x1, float y1, float x2, float y2);
  * \param corners2 Array of corners (vertices) of the second polygon.
  * \return True if a collision is detected, false otherwise.
  */
-bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
+//bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
 
 /*!
  * \brief Rotates a point around a given center by a specified angle.
@@ -237,7 +237,7 @@ bool CheckCollisionSAT(const AEVec2* corners1, const AEVec2* corners2);
  * \param angle The angle in radians by which to rotate the point.
  * \return The rotated point.
  */
-AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
+//AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
 
 /*!
  * \brief Projects a point onto a specified axis.
@@ -246,7 +246,7 @@ AEVec2 RotatePoint(AEVec2 point, AEVec2 center, float angle);
  * \param axis The axis onto which the point will be projected.
  * \return The projection of the point onto the axis.
  */
-float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis);
+//float ProjectOntoAxis(const AEVec2& point, const AEVec2& axis);
 
 /*!
  * \brief Checks if two rectangles are intersecting.
