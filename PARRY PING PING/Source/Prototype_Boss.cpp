@@ -341,6 +341,8 @@ bool flip = false;
 
 void Draw_Boss()
 {
+    DrawCircleAdvanced(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y - 70.f), 120.f, 80.f, SetColor(0x92000000));			// Draw shadow under player
+    //DrawRect(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, SetColor(0x92000000));
 
     f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;
     f32 recover_time = boss_melee[boss_1.attack_type].attack_recover - boss_melee[boss_1.attack_type].attack_active;

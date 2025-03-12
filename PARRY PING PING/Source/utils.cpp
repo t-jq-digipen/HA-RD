@@ -485,6 +485,31 @@ void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color)
 	AEGfxMeshDraw(CircleMesh, AE_GFX_MDM_TRIANGLES);
 }
 
+void DrawCircleAdvanced(f32 pos_x, f32 pos_y, f32 radius_x, f32 radius_y, Color color)
+{
+	// circle transform
+	AEMtx33 Transform = { 0 };
+
+	{
+		// Scale to radius provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, radius_x, radius_y);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &tran, &scale);
+	}
+	// Add color onto blank mesh
+	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+	// DRAW :D
+	AEGfxMeshDraw(CircleMesh, AE_GFX_MDM_TRIANGLES);
+}
+
 // Draw Image
 void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image) 
 {

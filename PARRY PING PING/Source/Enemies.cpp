@@ -190,6 +190,7 @@ void Attack_DummyBotMelee() {
 }
 
 void Draw_DummyBotMelee() {
+	DrawCircleAdvanced(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y - MParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
 	//jq the almighty animation lord please do ur magic these drawrects look UNPLEASANT
 	switch (MParryBot.state)										// Placeholder sprites - Draws circles of different colours depending on state its in
 	{
@@ -363,6 +364,7 @@ void Active_DummyBotRange() {
 		//wait for timer to reset, play animation of respawn
 		if (Update_Timer(&RParryBot.respawn_timer)) {
 			//timer has not ended
+			RParryBot.projectile_draw = false;
 		}
 		else 
 		{
@@ -422,6 +424,7 @@ void Attack_DummyBotRange() {
 }
 
 void Draw_DummyBotRange() {
+	DrawCircleAdvanced(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y - RParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
 	//jq the almighty animation lord please do ur magic these drawrects look ASS
 	switch (RParryBot.state)						// Placeholder sprites - Draws circles of different colours depending on state its in
 	{

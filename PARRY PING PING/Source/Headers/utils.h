@@ -198,6 +198,8 @@ void DrawTextAdvanced(f32 world_pos_x, f32 world_pos_y, s8 font, Color color, co
 // ----------------------------------------------------------------------------
 void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color);
 
+void DrawCircleAdvanced(f32 pos_x, f32 pos_y, f32 radius_x, f32 radius_y, Color color);
+
 void DrawImageAttachedToRect(f32 rectPosX, f32 rectPosY, f32 rectWidth, f32 rectHeight, AEGfxTexture* image);
 
 // ----------------------------------------------------------------------------
