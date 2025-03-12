@@ -596,7 +596,7 @@ void Attacking_Ranged()
 
 				// Set the dimensions and other properties of the heavy attack (laser)
 				heavy_atk.width = 100.f;  // Width for the laser beam
-				heavy_atk.height = 500.f; // Height represents the laser length
+				heavy_atk.height = 1000.f; // Height represents the laser length
 				heavy_atk.vel = dir;  // Direction of the laser
 				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
 				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
