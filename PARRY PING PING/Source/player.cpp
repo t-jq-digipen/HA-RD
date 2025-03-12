@@ -67,6 +67,7 @@ Timer ranged_attack;
 Timer heavy_attack;
 
 SpriteSheet player_sprite;
+SpriteSheet laser_sprite;
 
 SpriteSheet_Old ssidle_move;
 SpriteSheet_Old ssmelee_atk;
@@ -98,12 +99,19 @@ const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.5f };
 
 const float ATTACK_COMBO_WINDOW = 1.f;
 
+float ATTACK_OFFSET[4] = { 0.f, 30.f, 40.f, 0.f };
+
+const float ATTACK_WIDTH[4] = { 0.f, 200.f, 200.f, 280.f };
+const float ATTACK_HEIGHT[4] = { 0.f,150.f,170.f,180.f };
+
 Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
 
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
 
 const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
+
+aabb melee_hitbox;
 
 bool hitbox_active = false;
 
@@ -155,9 +163,12 @@ bool Attacking_Melee()
 	if (Update_Timer(&melee_attack.active_time) && melee_attack.active_time.current * ATTACK_END_ACTIVE[melee_attack.combo] >= ATTACK_START_ACTIVE[melee_attack.combo])
 	{
 		//std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
-		DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
-		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
+		//DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
+		//DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
+		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
+		float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
+		Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
@@ -174,40 +185,104 @@ bool Attacking_Melee()
 
 }
 
+//int Attacked_Melee(AEVec2 target)
+//{
+//	// Check if:
+//	// - Hitbox is active
+//	// - Player is attacking
+//	// - Target is within range of current attack
+//	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
+//	{
+//		switch (melee_attack.combo)
+//		{
+//		case 1:
+//
+//		case 2:
+//		{
+//			// Check direction for first two swings
+//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+//			{
+//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//				return melee_attack.combo;
+//			}
+//			break;
+//		}
+//		case 3:
+//		{
+//			// No need to check direction for third swing as it is 360 circle
+//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//			return melee_attack.combo;
+//			break;
+//		}
+//		default:
+//		{
+//			break;
+//		}
+//		}
+//	}
+//	return 0;
+//}
+//
+//bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
+//{
+//	// Check if:
+//	// - Hitbox is active
+//	// - Player is attacking
+//	// - Target is within range of current attack
+//	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
+//	{
+//		switch (melee_attack.combo)
+//		{
+//		case 1:
+//		case 2:
+//		{
+//			// Check direction for first two swings
+//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+//			{
+//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//				*check_hit = melee_attack.combo;
+//				*damage = ATTACK_DAMAGE[melee_attack.combo];
+//				return true;
+//			}
+//			break;
+//		}
+//		case 3:
+//		{
+//			// No need to check direction for third swing as it is 360 circle
+//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//			*check_hit = melee_attack.combo;
+//			*damage = ATTACK_DAMAGE[melee_attack.combo];
+//			return true;
+//			break;
+//		}
+//		default:
+//		{
+//			break;
+//		}
+//		}
+//	}
+//	else if (!melee_attack.combo)
+//	{
+//		*check_hit = 0;
+//	}
+//	return false;
+//}
+
 int Attacked_Melee(AEVec2 target)
 {
 	// Check if:
 	// - Hitbox is active
 	// - Player is attacking
 	// - Target is within range of current attack
-	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
+	if (hitbox_active && melee_attack.combo)
 	{
-		switch (melee_attack.combo)
+		if (AETestCircleToRect(&target, 250.f, &player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]))
 		{
-		case 1:
-		case 2:
-		{
-			// Check direction for first two swings
-			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-			{
-				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-				return melee_attack.combo;
-			}
-			break;
-		}
-		case 3:
-		{
-			// No need to check direction for third swing as it is 360 circle
-			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
 			return melee_attack.combo;
-			break;
 		}
-		default:
-		{
-			break;
-		}
-		}
+			
 	}
 	return 0;
 }
@@ -220,40 +295,17 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
 	{
-		switch (melee_attack.combo)
+		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
-		case 1:
-		case 2:
-		{
-			// Check direction for first two swings
-			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-			{
-				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-				*check_hit = melee_attack.combo;
-				*damage = ATTACK_DAMAGE[melee_attack.combo];
-				return true;
-			}
-			break;
-		}
-		case 3:
-		{
-			// No need to check direction for third swing as it is 360 circle
-			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
 			*check_hit = melee_attack.combo;
 			*damage = ATTACK_DAMAGE[melee_attack.combo];
 			return true;
-			break;
 		}
-		default:
+		else if (!melee_attack.combo)
 		{
-			break;
+			*check_hit = 0;
 		}
-		}
-	}
-	else if (!melee_attack.combo)
-	{
-		*check_hit = 0;
+		return false;
 	}
 	return false;
 }
@@ -460,6 +512,9 @@ void Attacking_Ranged()
 		if (ranged_attack.current * ranged_attack.duration > RANGED_ATTACK_DELAY && trigger)
 		{
 			trigger = RANGED_BLANK;
+			AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
+			AEVec2Normalize(&atk_dir, &atk_dir);
+
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
@@ -492,6 +547,9 @@ void Attacking_Ranged()
 		if (heavy_attack.current * heavy_attack.duration > HEAVY_ATTACK_DELAY && trigger)
 		{
 			trigger = RANGED_BLANK;
+			AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
+			AEVec2Normalize(&atk_dir, &atk_dir);
+
 			// If the right mouse button has been held for 1 second, fire the heavy attack
 
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
@@ -795,12 +853,25 @@ void Movement() {
 				player.state = IDLE;
 			}
 		}
+		else if (player.state == RANGE)
+		{
+			float atk_vel_scale =  -.1f * (1.f - ranged_attack.current);
+
+			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
+		}
 		else // melee
 		{
-			//float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo] * melee_attack.timer.current;
 			float atk_vel_scale = .1f*(1.f-melee_attack.active_time.current);
 			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
 		}
+	}
+	else if (heavy_attack.current * HEAVY_ATTACK_DURATION >= HEAVY_ATTACK_DELAY)
+	{
+
+		float hvy_vel_scale = -1.f * (1.f - heavy_attack.current);
+		std::cout << hvy_vel_scale;
+
+		AEVec2Scale(&player.vel, &atk_dir, player.speed * hvy_vel_scale * dt);
 	}
 
 	//bool dodge_cd = Update_Timer(&player.dodgetimer);
@@ -957,6 +1028,8 @@ void Load_Player()
 
 	player_sprite = SpriteSheet("Assets/Player/Player.png", 22, 11);
 
+	laser_sprite = SpriteSheet("Assets/Player/Laser.png", 33, 1);
+
 	ssidle_move = Init_SpriteSheet("Assets/Player/IdleMove.png", 2, 8, 1.f);
 
 	ssmelee_atk = Init_SpriteSheet("Assets/Player/Melee_Attack.png", 2, 20, ATTACK_DURATION);
@@ -1006,9 +1079,14 @@ void Init_Player()
 	player_sprite.Set_Row(0);
 	player_sprite.Set_Col(0);
 
+	laser_sprite.Set_Row(0);
+	laser_sprite.Set_Col(0);
+
 	melee_attack.timer = Create_Timer(1.f);
 	melee_attack.active_time = Create_Timer(ATTACK_END[ATTACK_IDLE]);
 	melee_attack.combo = 0;
+
+	melee_hitbox = Init_AABB(player.pos.x, player.pos.y, ATTACK_WIDTH[0], ATTACK_HEIGHT[0]);
 
 	ranged_attack = Create_Timer(RANGED_ATTACK_DURATION);
 
@@ -1042,36 +1120,36 @@ void Update_Player()
 	{
 		if (player.knockbackTimer > 0.0f)
 		{
-				// Calculate the knockback direction based on the direction of the attack
-				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
-				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+				//// Calculate the knockback direction based on the direction of the attack
+				//f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+				//f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
 
-				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
-				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+				//AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+				//AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
 
-				// Apply knockback in the opposite direction of the attack
-				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+				//// Apply knockback in the opposite direction of the attack
+				//AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
 
-				// Apply knockback boost if necessary
-				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
+				//// Apply knockback boost if necessary
+				//float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
 
-				// Apply knockback velocity (scaled by the speed and knockback boost)
-				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+				//// Apply knockback velocity (scaled by the speed and knockback boost)
+				//AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
 
-				// Move the player using the knockback velocity
-				AEVec2Add(&player.pos, &player.vel, &player.pos);
+				//// Move the player using the knockback velocity
+				//AEVec2Add(&player.pos, &player.vel, &player.pos);
 
-				// Apply friction to gradually slow down the knockback
-				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
-				player.vel.x *= knockbackFriction;
-				player.vel.y *= knockbackFriction;
+				//// Apply friction to gradually slow down the knockback
+				//float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+				//player.vel.x *= knockbackFriction;
+				//player.vel.y *= knockbackFriction;
 
-				// Decrease knockback timer
-				player.knockbackTimer -= dt;
+				//// Decrease knockback timer
+				//player.knockbackTimer -= dt;
 
-				// Stop movement when the knockback velocity is very small
-				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
-				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+				//// Stop movement when the knockback velocity is very small
+				//if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+				//if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
 			//if (player.state == RANGE)
 			//{
 			//	// Calculate the knockback direction based on the direction of the attack
@@ -1110,6 +1188,7 @@ void Update_Player()
 		if (Update_Timer(&player.hittimer))
 		{
 			player.state = HIT;
+			Update_Timer(&player.blocktimer);
 		}
 		else if (Update_Timer(&player.blocked))
 		{
@@ -1355,7 +1434,7 @@ void Draw_Player()
 				if (heavy_atk.isActive)
 				{
 
-					float offsetDistance = 500.0f;
+					float offsetDistance = 400.0f;
 					float offsetX = cosf(proj.angle) * offsetDistance;
 					float offsetY = sinf(proj.angle) * offsetDistance;
 
@@ -1364,7 +1443,7 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
+					//DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
 				}
 				else {
 					projectiles.pop_back();
@@ -1374,7 +1453,7 @@ void Draw_Player()
 			{
 				if (new_proj.isActive)
 				{
-					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
+					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
 				}
 				else {
 					projectiles.pop_back();
@@ -1406,7 +1485,7 @@ void Draw_Player()
 				if (heavy_atk.isActive)
 				{
 
-					float offsetDistance = 500.0f;
+					float offsetDistance = 400.0f;
 					float offsetX = cosf(it->angle) * offsetDistance;
 					float offsetY = sinf(it->angle) * offsetDistance;
 
@@ -1415,7 +1494,9 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(it->pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
+					//DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
+					laser_sprite.Set_Col(0, 32, heavy_atk.lifetimeTimer.current);
+					laser_sprite.Draw(screenX, screenY, 1000.f, 200.f, false, it->angle);
 				}
 			}
 			else
@@ -1443,6 +1524,7 @@ void Unload_Player()
 	AEGfxTextureUnload(AtkHB);
 
 	player_sprite.Unload();
+	laser_sprite.Unload();
 
 	AEGfxTextureUnload(projectile_texture);
 	AEGfxTextureUnload(heavy_texture);

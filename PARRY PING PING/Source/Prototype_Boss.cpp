@@ -35,6 +35,10 @@ const f32 BOSS_SPAWN_Y = 200.f;
 const f32 BOSS_WIDTH = 500.f;
 const f32 BOSS_HEIGHT = 500.f;
 
+// Boss draw size
+const f32 BOSS_DRAW_WIDTH = 650.f;
+const f32 BOSS_DRAW_HEIGHT = 650.f;
+
 // Boss hitbox size
 const f32 BOSS_HITBOX_WIDTH = 400.f;
 const f32 BOSS_HITBOX_HEIGHT = 300.f;
@@ -767,7 +771,7 @@ void Draw_Boss()
     }
 
     // Draw boss sprite
-    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, flip);
+    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip);
 }
 
 void Unload_Boss()

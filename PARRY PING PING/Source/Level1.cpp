@@ -209,11 +209,6 @@ void Level1_Draw()
 	// Mobs
 	Draw_Mobs();
 
-	//// Proto boss
-	//Draw_Boss();
-
-	//// Player
-	//Draw_Player();
 
 	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
 	{

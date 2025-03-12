@@ -360,9 +360,6 @@ void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color)
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &tran, &scale);
 	}
-
-	// Render mode
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
@@ -392,9 +389,6 @@ void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f
 		AEMtx33Concat(&Transform, &rot, &scale);
 		AEMtx33Concat(&Transform, &tran, &Transform);
 	}
-
-	// Render mode
-	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
