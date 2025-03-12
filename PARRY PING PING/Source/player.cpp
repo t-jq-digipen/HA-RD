@@ -337,8 +337,8 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			std::cout << "Target Position (Boss): (" << target.x << ", " << target.y << ")\n";
 
 			// Direction of the heavy attack based on the angle (scaled by the attack's size)
-			float offsetX2 = cosf(proj.angle) * height;  // Use height to define the attack range (or use width)
-			float offsetY2 = sinf(proj.angle) * height;  // Same for Y
+			float offsetX2 = cosf(proj.angle) * 1000.f;  // Use height to define the attack range (or use width)
+			float offsetY2 = sinf(proj.angle) * 1000.f;  // Same for Y
 
 			// Apply the offset to the projectile's position to get the endpoint of the laser
 			AEVec2 heavyAttackPosEnd = { heavyAttackPos.x + offsetX2, heavyAttackPos.y + offsetY2 };
