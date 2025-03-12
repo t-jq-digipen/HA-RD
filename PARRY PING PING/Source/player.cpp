@@ -349,7 +349,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			lineSegment.mP1 = heavyAttackPosEnd;   // End of the line segment (laser moves based on attack size and direction)
 
 			// Check if the laser intersects with the boss's circle (represented by the target and radius)
-			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, height / 2)) {
+			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, width / 2)) {
 				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
 				std::cout << "Heavy Attack Hit!\n";
