@@ -196,22 +196,26 @@ void Draw_DummyBotMelee() {
 	{
 	case Idle:
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_idle);
+		// JQWERTY - Draw Idle Anim
 		break;
 	case WindUp:
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_windup);
+		// JQWERTY - Draw raising up sword to swing Anim
 		break;
 	case Swinging:
 		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			// Draw 'hitbox'
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);													// Draw attack range
+		// JQWERTY - Draw Swinging Anim (can just rip out of the player swing smear frames)
 		break;
 	case Parried:
 		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
+		// JQWERTY - Draw stunned SILLY Anim
 		break;
 	}
 	if (MParryBot.spark_draw) {
 		std::cout << "draw cool spark like shiiiing sheeeeoonng not the supermarket but like the sound ykwim shiiiing and also play the sound like the one i just made shiiiing ok ty\n";
-		//DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad * 10, MParryBot.rad, color_parried);
 		//add spark anim here :), its pos is alr synced with enem anim so just need to draw here :)
+		// JQWERTY - this is for the parry warning spark
 	}
 }
 
@@ -430,20 +434,25 @@ void Draw_DummyBotRange() {
 	{
 	case Idle:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
+		// JQWERTY - Draw Idle Anim
 		break;
 	case WindUp:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_windup);
+		// JQWERTY - Draw Raising gun/ Hunkering down before shooting Anim
 		break;
 	case Swinging:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
+		// JQWERTY - Draw shooting Anim (projecile drawing below)
 		break;
 	case Parried:
 		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
+		// JQWERTY - This one tbh can just ignore for now, we'll discuss the deflecting projectiles another time then implement
 	}
 	if (RParryBot.projectile_draw)		// If projectile needs to be drawn
 	{
 		//Temp Projectile Drawing
 		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);		// Draw circle at projectile's position
+		// JQWERTY - Draw steam/ laser bullet sprite here (currently rotation not yet implemented so itll look funky)
 	}
 }
 
