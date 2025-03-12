@@ -279,7 +279,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 		{
 			// Heavy attack collision check (with rotation)
 			AEVec2 bossCenter = { target.x + width * 0.5f, target.y + height * 0.5f };
-			AEVec2 corners1[4];
+			AEVec2 corners1[4]{};
 			AEVec2 center1 = { proj.pos.x, proj.pos.y };
 
 			// Get the four corners after applying rotation
@@ -393,6 +393,8 @@ void Attacking_Ranged()
 
 				// Reset the right-click timer
 				rightClickTimer = 0.f;
+
+				player.state = HEAVY;
 			}
 
 
@@ -403,33 +405,48 @@ void Attacking_Ranged()
 			rightClickTimer = 0.f;
 		}
 
-		// Check for light projectiles (no changes to this part)
-		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON))
+		// Light Attack Handling with Cooldown
+		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f)
 		{
-			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
 			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
 			AEVec2Normalize(&dir, &dir);
 
-			// Create a single projectile
-			new_proj.pos = player.pos; // Start at player's position
-			new_proj.vel = dir;        // Set direction
-			new_proj.speed = 250.f;    // Speed of the projectile
+			// Create projectile
+			new_proj.pos = player.pos;
+			new_proj.vel = dir;
+			new_proj.speed = 250.f;
 			new_proj.isActive = true;
 			new_proj.isHeavy = false;
 			new_proj.lifetimeTimer.current = 0.f;
 			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
 			new_proj.radius = 20.f;
 
-			// Add the single projectile to the vector
 			projectiles.push_back(new_proj);
 			player.ammo -= 1;
+
+			// Apply knockback
+			float knockbackStrength = 50.f;
+			AEVec2 knockbackDirection = { -dir.x, -dir.y };
+			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength);
+			player.knockbackTimer = 0.1f;
+
+			player.state = RANGE;
+
+			// Set cooldown
+			player.lightAttackCooldown = 1.0f;
 		}
-
-
 	}
+
+	// Reduce cooldown timer each frame
+	if (player.lightAttackCooldown > 0.f)
+	{
+		player.lightAttackCooldown -= dt;
+	}
+
+ 
 
 
 
@@ -731,36 +748,72 @@ void Update_Player()
 	{
 		if (player.knockbackTimer > 0.0f)
 		{
-			// Calculate the knockback direction based on the direction of the attack
-			f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
-			f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+			if (player.state == HEAVY)
+			{
+				// Calculate the knockback direction based on the direction of the attack
+				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
 
-			AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
-			AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
 
-			// Apply knockback in the opposite direction of the attack
-			AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+				// Apply knockback in the opposite direction of the attack
+				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
 
-			// Apply knockback boost if necessary
-			float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
+				// Apply knockback boost if necessary
+				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
 
-			// Apply knockback velocity (scaled by the speed and knockback boost)
-			AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+				// Apply knockback velocity (scaled by the speed and knockback boost)
+				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
 
-			// Move the player using the knockback velocity
-			AEVec2Add(&player.pos, &player.vel, &player.pos);
+				// Move the player using the knockback velocity
+				AEVec2Add(&player.pos, &player.vel, &player.pos);
 
-			// Apply friction to gradually slow down the knockback
-			float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
-			player.vel.x *= knockbackFriction;
-			player.vel.y *= knockbackFriction;
+				// Apply friction to gradually slow down the knockback
+				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+				player.vel.x *= knockbackFriction;
+				player.vel.y *= knockbackFriction;
 
-			// Decrease knockback timer
-			player.knockbackTimer -= dt;
+				// Decrease knockback timer
+				player.knockbackTimer -= dt;
 
-			// Stop movement when the knockback velocity is very small
-			if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
-			if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+				// Stop movement when the knockback velocity is very small
+				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+			}
+			if (player.state == RANGE)
+			{
+				// Calculate the knockback direction based on the direction of the attack
+				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+
+				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+
+				// Apply knockback in the opposite direction of the attack
+				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+
+				// Apply knockback boost if necessary
+				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.1f * player.speed : 0.f;
+
+				// Apply knockback velocity (scaled by the speed and knockback boost)
+				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+
+				// Move the player using the knockback velocity
+				AEVec2Add(&player.pos, &player.vel, &player.pos);
+
+				// Apply friction to gradually slow down the knockback
+				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+				player.vel.x *= knockbackFriction;
+				player.vel.y *= knockbackFriction;
+
+				// Decrease knockback timer
+				player.knockbackTimer -= dt;
+
+				// Stop movement when the knockback velocity is very small
+				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+			}
 		}
 
 		if (Update_Timer(&player.hittimer))
@@ -838,6 +891,7 @@ void Draw_Player()
 	//std::cout << "Playerstate = " << player.state << "\n\n";
 	switch (player.state)
 	{
+
 	case MELEE:
 		if (Screen_To_World_x(Mouse.x) > player.pos.x)
 		{
