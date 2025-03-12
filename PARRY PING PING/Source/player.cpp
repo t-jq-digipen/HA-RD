@@ -15,6 +15,8 @@
 #include "Enemies.h"
 #include <vector>
 #include <algorithm>
+#include <cmath>
+
 
 
 // Define map boundary limits
@@ -257,74 +259,128 @@ Projectile new_proj;
 aabb heavyAtkHitbox;
 
 
+// Calculate the dot product of two vectors
+float DotProduct(const AEVec2& v1, const AEVec2& v2) {
+	return v1.x * v2.x + v1.y * v2.y;
+}
 
+// Subtract two vectors
+AEVec2 Subtract(const AEVec2& v1, const AEVec2& v2) {
+	return { v1.x - v2.x, v1.y - v2.y };
+}
+
+// Get the length of a vector
+float Length(const AEVec2& v) {
+	return sqrtf(v.x * v.x + v.y * v.y);
+}
+
+// Get the closest point on a line segment from a point (the center of the circle)
+AEVec2 ClosestPointOnSegment(const AEVec2& A, const AEVec2& B, const AEVec2& C) {
+	AEVec2 AB = Subtract(B, A);
+	AEVec2 AC = Subtract(C, A);
+
+	float AB_AB = DotProduct(AB, AB); // Length squared of AB
+	float AB_AC = DotProduct(AB, AC); // Dot product of AB and AC
+
+	// The scalar projection of AC onto AB
+	float t = AB_AC / AB_AB;
+
+	// Clamp t to the range [0, 1] to ensure it falls within the line segment
+	t = fmaxf(0.0f, fminf(1.0f, t));
+
+	// Calculate the closest point on the segment
+	return { A.x + t * AB.x, A.y + t * AB.y };
+}
+
+// Function to check if the laser (line segment) collides with the boss (circle)
+bool LineSegmentCircleCollision(const AEVec2& A, const AEVec2& B, const AEVec2& circleCenter, float radius) {
+	// Find the closest point on the segment to the circle's center
+	AEVec2 closestPoint = ClosestPointOnSegment(A, B, circleCenter);
+
+	// Calculate the distance from the closest point to the circle's center
+	float distX = closestPoint.x - circleCenter.x;
+	float distY = closestPoint.y - circleCenter.y;
+	float distance = sqrtf(distX * distX + distY * distY);
+
+	// Check if the distance is less than or equal to the radius
+	return distance <= radius;
+}
+
+// Function to check if any projectile collides with the boss's hitbox using the Alpha Engine function
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage)
 {
 	bool hit = false; // Track if at least one projectile hits
 
-	for (auto& proj : projectiles)
-	{
+	for (auto& proj : projectiles) {
 		// Only check active projectiles
 		if (!proj.isActive)
 			continue;
 
 		// **Update position (only for light projectiles)**
-		if (!proj.isHeavy)
-		{
+		if (!proj.isHeavy) {
 			AEVec2 scaledVel;
 			AEVec2Scale(&scaledVel, &proj.vel, proj.speed * dt);
 			AEVec2Add(&proj.pos, &proj.pos, &scaledVel);
 		}
-		else
-		{
-			// Heavy attack collision check (with rotation)
-			AEVec2 bossCenter = { target.x + width * 0.5f, target.y + height * 0.5f };
-			AEVec2 corners1[4];
-			AEVec2 center1 = { proj.pos.x, proj.pos.y };
+		else {
+			// Heavy attack logic
+			float offsetDistance = 100.0f;
+			float offsetX = cosf(proj.angle) * offsetDistance;
+			float offsetY = sinf(proj.angle) * offsetDistance;
 
-			// Get the four corners after applying rotation
-			corners1[0] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
-			corners1[1] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y - proj.height / 2.f }, center1, proj.angle);
-			corners1[2] = RotatePoint({ proj.pos.x + proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
-			corners1[3] = RotatePoint({ proj.pos.x - proj.width / 2.f, proj.pos.y + proj.height / 2.f }, center1, proj.angle);
+			// Apply the offset to the projectile's position (keep it in world space)
+			AEVec2 heavyAttackPos = { proj.pos.x + offsetX, proj.pos.y + offsetY };
 
-			// Compute rotated AABB
-			float minX = corners1[0].x, maxX = corners1[0].x;
-			float minY = corners1[0].y, maxY = corners1[0].y;
+			// Debugging: Print projectile and target info
+			std::cout << "Projectile Position: (" << proj.pos.x << ", " << proj.pos.y << ")\n";
+			std::cout << "Heavy Attack Position: (" << heavyAttackPos.x << ", " << heavyAttackPos.y << ")\n";
+			std::cout << "Target Position (Boss): (" << target.x << ", " << target.y << ")\n";
 
-			for (int i = 1; i < 4; ++i) {
-				minX = min(minX, corners1[i].x);
-				maxX = max(maxX, corners1[i].x);
-				minY = min(minY, corners1[i].y);
-				maxY = max(maxY, corners1[i].y);
-			}
+			// Direction of the heavy attack based on the angle (scaled by the attack's size)
+			float offsetX2 = cosf(proj.angle) * 1000.f;  // Use height to define the attack range (or use width)
+			float offsetY2 = sinf(proj.angle) * 1000.f;  // Same for Y
 
-			// Target AABB
-			float targetMinX = target.x - width * 0.5f;
-			float targetMaxX = target.x + width * 0.5f;
-			float targetMinY = target.y - height * 0.5f;
-			float targetMaxY = target.y + height * 0.5f;
+			// Apply the offset to the projectile's position to get the endpoint of the laser
+			AEVec2 heavyAttackPosEnd = { heavyAttackPos.x + offsetX2, heavyAttackPos.y + offsetY2 };
 
-			// Check for AABB overlap
-			if (maxX >= targetMinX && minX <= targetMaxX &&
-				maxY >= targetMinY && minY <= targetMaxY)
-			{
-				*damage = dt * 10.f; // Heavy attack deals damage over time
+			// Create a line segment for the laser (start from heavyAttackPos, end at calculated end point)
+			AELineSegment2 lineSegment;
+			lineSegment.mP0 = heavyAttackPos;      // Start of the line segment (laser starts at heavyAttackPos)
+			lineSegment.mP1 = heavyAttackPosEnd;   // End of the line segment (laser moves based on attack size and direction)
+
+			// Check if the laser intersects with the boss's circle (represented by the target and radius)
+			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, width / 2)) {
+				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
+				std::cout << "Heavy Attack Hit!\n";
+			}
+			else {
+				std::cout << "NO HIT\n";
 			}
 		}
-
-		// **Light projectile collision**
-		if (!proj.isHeavy && AETestCircleToRect(&proj.pos, proj.radius, &target, width, height))
-		{
+		// **Light projectile collision check** (No change here, you can keep this as is)
+		if (!proj.isHeavy && AETestCircleToRect(&proj.pos, proj.radius, &target, width, height)) {
 			*damage = 5.f;  // Light attack damage
 			hit = true;
 			proj.isActive = false; // Deactivate light projectile after hit
+			std::cout << "Light Attack Hit!\n";
 		}
 	}
 
-	return hit; // Only return false if no projectiles hit
+	return hit; // Return true if at least one projectile hits
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -366,8 +422,8 @@ void Attacking_Ranged()
 				heavy_atk.pos.y = player.pos.y + offset.y;
 
 				// Set the dimensions and other properties of the heavy attack (laser)
-				heavy_atk.width = 250.f;  // Width for the laser beam
-				heavy_atk.height = 1000.f; // Height represents the laser length
+				heavy_atk.width = 100.f;  // Width for the laser beam
+				heavy_atk.height = 500.f; // Height represents the laser length
 				heavy_atk.vel = dir;  // Direction of the laser
 				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
 				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
@@ -391,6 +447,8 @@ void Attacking_Ranged()
 
 				// Reset the right-click timer
 				rightClickTimer = 0.f;
+
+				//player.state = HEAVY;
 			}
 
 
@@ -401,33 +459,48 @@ void Attacking_Ranged()
 			rightClickTimer = 0.f;
 		}
 
-		// Check for light projectiles (no changes to this part)
-		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON))
+		// Light Attack Handling with Cooldown
+		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f)
 		{
-			// Calculate direction and angle to the cursor
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
 			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
 			AEVec2Normalize(&dir, &dir);
 
-			// Create a single projectile
-			new_proj.pos = player.pos; // Start at player's position
-			new_proj.vel = dir;        // Set direction
-			new_proj.speed = 250.f;    // Speed of the projectile
+			// Create projectile
+			new_proj.pos = player.pos;
+			new_proj.vel = dir;
+			new_proj.speed = 250.f;
 			new_proj.isActive = true;
 			new_proj.isHeavy = false;
 			new_proj.lifetimeTimer.current = 0.f;
 			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
 			new_proj.radius = 20.f;
 
-			// Add the single projectile to the vector
 			projectiles.push_back(new_proj);
 			player.ammo -= 1;
+
+			// Apply knockback
+			float knockbackStrength = 50.f;
+			AEVec2 knockbackDirection = { -dir.x, -dir.y };
+			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength);
+			player.knockbackTimer = 0.1f;
+
+			//player.state = RANGE;
+
+			// Set cooldown
+			player.lightAttackCooldown = 1.0f;
 		}
-
-
 	}
+
+	// Reduce cooldown timer each frame
+	if (player.lightAttackCooldown > 0.f)
+	{
+		player.lightAttackCooldown -= dt;
+	}
+
+ 
 
 
 
@@ -729,36 +802,69 @@ void Update_Player()
 	{
 		if (player.knockbackTimer > 0.0f)
 		{
-			// Calculate the knockback direction based on the direction of the attack
-			f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
-			f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+				// Calculate the knockback direction based on the direction of the attack
+				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
 
-			AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
-			AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
 
-			// Apply knockback in the opposite direction of the attack
-			AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+				// Apply knockback in the opposite direction of the attack
+				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
 
-			// Apply knockback boost if necessary
-			float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
+				// Apply knockback boost if necessary
+				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
 
-			// Apply knockback velocity (scaled by the speed and knockback boost)
-			AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+				// Apply knockback velocity (scaled by the speed and knockback boost)
+				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
 
-			// Move the player using the knockback velocity
-			AEVec2Add(&player.pos, &player.vel, &player.pos);
+				// Move the player using the knockback velocity
+				AEVec2Add(&player.pos, &player.vel, &player.pos);
 
-			// Apply friction to gradually slow down the knockback
-			float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
-			player.vel.x *= knockbackFriction;
-			player.vel.y *= knockbackFriction;
+				// Apply friction to gradually slow down the knockback
+				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+				player.vel.x *= knockbackFriction;
+				player.vel.y *= knockbackFriction;
 
-			// Decrease knockback timer
-			player.knockbackTimer -= dt;
+				// Decrease knockback timer
+				player.knockbackTimer -= dt;
 
-			// Stop movement when the knockback velocity is very small
-			if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
-			if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+				// Stop movement when the knockback velocity is very small
+				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+			//if (player.state == RANGE)
+			//{
+			//	// Calculate the knockback direction based on the direction of the attack
+			//	f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+			//	f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+
+			//	AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+			//	AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+
+			//	// Apply knockback in the opposite direction of the attack
+			//	AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+
+			//	// Apply knockback boost if necessary
+			//	float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.1f * player.speed : 0.f;
+
+			//	// Apply knockback velocity (scaled by the speed and knockback boost)
+			//	AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+
+			//	// Move the player using the knockback velocity
+			//	AEVec2Add(&player.pos, &player.vel, &player.pos);
+
+			//	// Apply friction to gradually slow down the knockback
+			//	float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+			//	player.vel.x *= knockbackFriction;
+			//	player.vel.y *= knockbackFriction;
+
+			//	// Decrease knockback timer
+			//	player.knockbackTimer -= dt;
+
+			//	// Stop movement when the knockback velocity is very small
+			//	if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+			//	if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+			//}
 		}
 
 		if (Update_Timer(&player.hittimer))
@@ -837,6 +943,7 @@ void Draw_Player()
 	//std::cout << "Playerstate = " << player.state << "\n\n";
 	switch (player.state)
 	{
+
 	case MELEE:
 		if (Screen_To_World_x(Mouse.x) > player.pos.x)
 		{
@@ -936,7 +1043,7 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					DrawImage(screenX, screenY, 1000.f, 1000.f, proj.angle, heavy_texture);
+					DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
 				}
 				else {
 					projectiles.pop_back();
