@@ -119,10 +119,12 @@ void Level1_Update()
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;
+		AEInputShowCursor(0);
 	}
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
 	{
+		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
 		// Boss behavior
 		Update_Boss1();
@@ -148,6 +150,7 @@ void Level1_Update()
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
 	{
 		levelState = PAUSED;
+		AEInputShowCursor(1);
 	}
 	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)
 	{
@@ -244,10 +247,12 @@ void Level1_Draw()
 void Level1_Free()
 {
 	Free_UI();
+	AEInputShowCursor(1);
 }
 
 void Level1_Unload()
 {
+	AEInputShowCursor(1);
 	Unload_UI();
 	Unload_Mesh();
 	Unload_Player();

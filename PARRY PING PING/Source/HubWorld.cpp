@@ -185,19 +185,28 @@ void HubWorld_Draw()
 	// Level Timer
 	Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
 
+	AEInputShowCursor(0);						// Hides cursor
 	if (levelState == PAUSED)
 	{
 		Draw_PauseMenu();						// Draw pause menu if game is paused
+		AEInputShowCursor(1);					// Shows cursor
 	}
 	else if (levelState == GAMEOVER)
 	{
 		Draw_GameOverMenu();					// Draw game over screen when player dies
+		AEInputShowCursor(1);
+	}
+	else if (levelState == OPTIONS)
+	{
+		Draw_OptionsMenu();
+		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&HubWorld_ClearTransitionTimer))
 		{
 			Draw_ClearMenu();					// Draw level cleared menu when level is cleared
+			AEInputShowCursor(1);
 		}
 	}
 
@@ -212,10 +221,12 @@ void HubWorld_Draw()
 void HubWorld_Free()
 {
 	Free_Player();																						// Free memory!
+	AEInputShowCursor(1);
 }
 
 void HubWorld_Unload()
 {
+	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
 	Unload_Mesh();
 	Unload_Player();

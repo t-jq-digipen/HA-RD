@@ -823,7 +823,8 @@ void Update_Player()
 // Draw Player
 void Draw_Player()
 {
-	//DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
+	// SHADOW DRAWING
+	DrawCircleAdvanced(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y - player.radius * 2.f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
 
 	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
 	sword.current_row = melee_attack.combo;
