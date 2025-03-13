@@ -38,6 +38,9 @@ int dummy_check;
 Timer cleartransitiontimer;
 float levelTimer;
 
+bool showBossHitboxes = false;
+
+
 
 void Level1_Load()
 {
@@ -108,6 +111,11 @@ void Level1_Initialize()
 	cleartransitiontimer.current = 0;
 }
 
+void ToggleBossHitboxes()
+{
+	showBossHitboxes = !showBossHitboxes;
+}
+
 void Level1_Update()
 {
 	// Delta time
@@ -121,6 +129,12 @@ void Level1_Update()
 		nextState = GS_RESTART;
 		AEInputShowCursor(0);
 	}
+
+	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
+	{
+		ToggleBossHitboxes();
+	}
+
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
 	{
@@ -160,6 +174,8 @@ void Level1_Update()
 
 const float PLAYER_BASE_OFFSET{ 50.f };
 const float BOSS_BASE_OFFSET{ 70.f };
+
+
 
 void Level1_Draw()
 {
@@ -209,16 +225,27 @@ void Level1_Draw()
 	// Mobs
 	Draw_Mobs();
 
+	if (showBossHitboxes)
+	{
+		Draw_Boss_Hitboxes();
+		std::cout << "Hitboxes drawn \n";
+	}
+	else
+	{
+		std::cout << "Hitboxes not drawn\n";
+	}
+
+
 
 	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
 	{
-		Draw_Boss_Hitboxes();
+		//Draw_Boss_Hitboxes();
 		Draw_Player();
 		Draw_Boss();
 	}
 	else
 	{
-		Draw_Boss_Hitboxes();
+		//Draw_Boss_Hitboxes();
 		Draw_Boss();
 		Draw_Player();
 	}
