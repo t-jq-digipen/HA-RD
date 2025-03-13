@@ -549,7 +549,7 @@ void Draw_Boss()
                 // Set sprite info
                 boss_1_sprite.Set_Row(2);
                 f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 6, anim_time);
+                boss_1_sprite.Set_Col(0, 7, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
@@ -577,7 +577,7 @@ void Draw_Boss()
                 // Set sprite info
                 boss_1_sprite.Set_Row(5);
                 f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 9, anim_time);
+                boss_1_sprite.Set_Col(0, 10, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
@@ -611,7 +611,7 @@ void Draw_Boss()
                 // Set sprite info
                 boss_1_sprite.Set_Row(15);
                 f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 4, anim_time);
+                boss_1_sprite.Set_Col(0, 5, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
@@ -637,7 +637,7 @@ void Draw_Boss()
                 // Set sprite info
                 boss_1_sprite.Set_Row(18);
                 f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 3, anim_time);
+                boss_1_sprite.Set_Col(0, 4, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
@@ -663,7 +663,7 @@ void Draw_Boss()
                 // Set sprite info
                 boss_1_sprite.Set_Row(21);
                 f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 4, anim_time);
+                boss_1_sprite.Set_Col(0, 5, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {

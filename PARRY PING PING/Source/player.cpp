@@ -168,7 +168,7 @@ bool Attacking_Melee()
 		hitbox_active = true;
 		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
 		float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
-		Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
+		//Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{

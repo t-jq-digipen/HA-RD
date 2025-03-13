@@ -354,6 +354,7 @@ void Active_DummyBotRange() {
 			break;
 		case Parried:
 			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
+			Parried_Hit();
 			if (Update_Timer(&RParryBot.stun_timer)) {
 				//timer has not ended
 			}
