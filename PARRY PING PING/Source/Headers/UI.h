@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	UI.h
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// author:	AVID PARRY ENJOYERS
+// email:	-
 //
 // brief:	Declaration for all UI elements
 //
@@ -11,6 +11,9 @@
 #pragma once
 #include "utils.h"
 
+// ----------------------------------------------------------------------------
+// Enumeration for level states
+// ----------------------------------------------------------------------------
 enum LEVEL_STATE
 {
 	PLAYING = 0,
@@ -22,6 +25,9 @@ enum LEVEL_STATE
 
 extern int levelState;
 
+// ----------------------------------------------------------------------------
+// Structure for UI screen sprites
+// ----------------------------------------------------------------------------
 typedef struct UIScreen 
 {
 	SpriteSheet_Old* spritesheet_screen;
@@ -44,35 +50,77 @@ typedef struct UIScreen
 	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;
 } UIScreen;
 
-//1 - draw boss hp bar, 0 - dont draw
+// ----------------------------------------------------------------------------
+// Draw the various UI elements
+// ----------------------------------------------------------------------------
 void Draw_UI(int DrawBossHP = 1);
 
-void Update_Player_UI(int ammo, float hp, float parry_timer);
 
 // will neaten when more player parameters are finalized
 
+// ----------------------------------------------------------------------------
+// Initialize the various screen UI elements
+// ----------------------------------------------------------------------------
 void Init_UI();
 
+// ----------------------------------------------------------------------------
+// Initialize the player UI elements
+// ----------------------------------------------------------------------------
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp);
 
+// ----------------------------------------------------------------------------
+// Update the values for player UI
+// ----------------------------------------------------------------------------
+void Update_Player_UI(int ammo, float hp, float parry_timer);
+
+// ----------------------------------------------------------------------------
+// Initialize the boss UI elements
+// ----------------------------------------------------------------------------
 void Init_Boss_UI(float hp);
 
+// ----------------------------------------------------------------------------
+// Update the boss UI elements
+// ----------------------------------------------------------------------------
 void Update_Boss_UI(float hp);
 
+// ----------------------------------------------------------------------------
+// Update the level timer
+// ----------------------------------------------------------------------------
 void Update_LevelTimer(float *time_elapsed);
 
+// ----------------------------------------------------------------------------
+// Free the UI elements
+// ----------------------------------------------------------------------------
 void Free_UI();
 
+// ----------------------------------------------------------------------------
+// Unload the UI elements
+// ----------------------------------------------------------------------------
 void Unload_UI();
 
 //void Draw_Boss1HP(float time_elapsed);
 
+// ----------------------------------------------------------------------------
+// Open the pause menu when player pauses the game
+// ----------------------------------------------------------------------------
 void Draw_PauseMenu();
 
+// ----------------------------------------------------------------------------
+// Open the game over screen when player dies
+// ----------------------------------------------------------------------------
 void Draw_GameOverMenu();
 
+// ----------------------------------------------------------------------------
+// Open the options menu when player accesses options from the pause menu
+// ----------------------------------------------------------------------------
 void Draw_OptionsMenu();
 
+// ----------------------------------------------------------------------------
+// Open the level complete screen when player beats the boss
+// ----------------------------------------------------------------------------
 void Draw_ClearMenu();
 
+// ----------------------------------------------------------------------------
+// Draw the level timer
+// ----------------------------------------------------------------------------
 void Draw_LevelTimer(float time_elapsed);

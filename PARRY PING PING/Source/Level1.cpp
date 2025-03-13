@@ -16,6 +16,7 @@
 #include "Boss1.h"
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
+#include "mobs.h"
 
 
 AEGfxTexture* mapTexture = nullptr;
@@ -36,6 +37,9 @@ int dummy_check;
 
 Timer cleartransitiontimer;
 float levelTimer;
+
+bool showBossHitboxes = false;
+
 
 
 void Level1_Load()
@@ -77,7 +81,8 @@ void Level1_Initialize()
 	stunnedtimer = Create_Timer(2.f);
 	stunnedtimer.current = 0;
 
-
+	// Mobs
+	Init_Mobs();
 
 	// Boss
 	Init_Boss1();
@@ -106,6 +111,11 @@ void Level1_Initialize()
 	cleartransitiontimer.current = 0;
 }
 
+void ToggleBossHitboxes()
+{
+	showBossHitboxes = !showBossHitboxes;
+}
+
 void Level1_Update()
 {
 	// Delta time
@@ -117,16 +127,27 @@ void Level1_Update()
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;
+		AEInputShowCursor(0);
 	}
+
+	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
+	{
+		ToggleBossHitboxes();
+	}
+
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
 	{
+		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
 		// Boss behavior
 		Update_Boss1();
 
 		// Proto boss
 		Update_Boss();
+
+		// Mobs
+		Update_Mobs();
 
 		// Player WASD Movement
 		Update_Player();
@@ -143,12 +164,18 @@ void Level1_Update()
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
 	{
 		levelState = PAUSED;
+		AEInputShowCursor(1);
 	}
 	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)
 	{
 		levelState = PLAYING;
 	}
 }
+
+const float PLAYER_BASE_OFFSET{ 50.f };
+const float BOSS_BASE_OFFSET{ 70.f };
+
+
 
 void Level1_Draw()
 {
@@ -195,11 +222,33 @@ void Level1_Draw()
 	// manfred Boss
 	//Draw_Boss1();
 
-	// Proto boss
-	Draw_Boss();
+	// Mobs
+	Draw_Mobs();
 
-	// Player
-	Draw_Player();
+	if (showBossHitboxes)
+	{
+		Draw_Boss_Hitboxes();
+		std::cout << "Hitboxes drawn \n";
+	}
+	else
+	{
+		std::cout << "Hitboxes not drawn\n";
+	}
+
+
+
+	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
+	{
+		//Draw_Boss_Hitboxes();
+		Draw_Player();
+		Draw_Boss();
+	}
+	else
+	{
+		//Draw_Boss_Hitboxes();
+		Draw_Boss();
+		Draw_Player();
+	}
 
 	// Boss HP
 	//Draw_Boss1HP();
@@ -236,10 +285,12 @@ void Level1_Draw()
 void Level1_Free()
 {
 	Free_UI();
+	AEInputShowCursor(1);
 }
 
 void Level1_Unload()
 {
+	AEInputShowCursor(1);
 	Unload_UI();
 	Unload_Mesh();
 	Unload_Player();

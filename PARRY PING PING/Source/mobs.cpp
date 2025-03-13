@@ -1,49 +1,78 @@
+//---------------------------------------------------------
+// file:	SpriteSheet.h
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Spritesheet class declaration
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 #include "mobs.h"
 
+const f32 size = 25.f;
+const Color color = SetColor(0xFFFF0000);
 
-static void add_mobs(mobs_list_type* list, f32 x, f32 y, f32 size, Color color)
+// Define a global mobs_list_type object
+static mobs_list_type mobs_list;
+
+void Init_Mobs() 
 {
-	if (list->count < array_count(list->mobs)) 
-	{
-		mobs_type* mob = list->mobs + list->count++;
-		mob->x = x;
-		mob->y = y;
-		mob->size = size;
-		mob->color = color;
-	}
+    clear_mobs(); // Initialize by clearing the list
 }
-static void Update_mobs(mobs_list_type*list,Color color) {
-	int count = get_current_mobs(list);
-	for (int i = 0; i < count; ++i) 
-	{
-		mobs_type* mob = find_mob_by_index(list, i);
-		DrawCircle(mob->x, mob->y, mob->size, color);
-		/*if (mob_collide_player(mob, player) == true)
-		{
-			DrawCircle(mob->x, mob->y, mob->size, color);
-		}
-		else
-		{
-			if(mob->x>player.x)
-			DrawCircle(mob->x, mob->y, mob->size, color);
-		}*/
-	}
-}
-static void clear_mobs(mobs_list_type* list) 
+
+void Update_Mobs() 
 {
-	list->count = 0;
+
+    // Check for input to spawn a new mob
+    if (AEInputCheckTriggered(AEVK_I)) 
+    {
+        std::cout<<"I key pressed, attempting to spawn mob..."<<'\n';
+        // Spawn a mob at a random position
+        f32 x = AERandFloat() * 1500.f; // Map width
+        f32 y = AERandFloat() * 1250.f; // Map heght
+        std::cout<<"Spawning mob at x: "<<x<<"and y: "<< y<<'\n';
+        spawn_mob(x, y, size, color);
+    }
+    if (AEInputCheckTriggered(AEVK_O))
+    {
+        clear_mobs();
+    }
+
+    // Update logic for each mob (e.g., movement, attacking, etc.)
+    //for (int i = 0; i < mobs_list.count; ++i) 
+    //{
+    //    mobs_type* mob = &mobs_list.mobs[i];
+    //    // Example: Move mobs to the right
+    //    mob->x += 1.0f;
+    //}
 }
-static void init_mobs(mobs_list_type* list) 
+
+void Draw_Mobs() 
 {
-	clear_mobs(list);
+    AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+    AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+    for (u32 i = 0; i < mobs_list.count; ++i) 
+    {
+        mobs_type* mob = &mobs_list.mobs[i];
+        DrawCircle(World_To_Screen_x(mob->x), World_To_Screen_y(mob->y), mob->size, mob->color);
+    }
 }
-static mobs_type* find_mob_by_index(mobs_list_type* list, int index)
+
+void spawn_mob(f32 x, f32 y, f32 sizey, Color colory) 
 {
-	if (index < 0 || index >= list->count)
-		return 0;
-	return list->mobs + index;
+    if (mobs_list.count < array_count(mobs_list.mobs)) 
+    {
+        mobs_type* mob = &mobs_list.mobs[mobs_list.count++];
+        mob->x = x;
+        mob->y = y;
+        mob->size = sizey;
+        mob->color = colory;
+        mob->isattacking = false;
+        mob->attackrange = 0.0f; // Initialize attack range if needed
+    }
 }
-static int get_current_mobs(mobs_list_type* list)
+
+void clear_mobs() 
 {
-	return list->count;
+    mobs_list.count = 0;
 }

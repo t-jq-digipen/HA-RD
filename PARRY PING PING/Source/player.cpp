@@ -13,6 +13,7 @@
 
 #include "player.h"
 #include "Enemies.h"
+#include "SpriteSheet.h"
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -28,6 +29,7 @@ const float MAP_BOTTOM = -300.f;
 typedef struct Attack
 {
 	Timer timer;
+	Timer active_time;
 	int combo;
 } Attack;
 
@@ -53,12 +55,19 @@ std::vector<Projectile> projectiles; // List to hold active projectiles
 const float PLAYER_WIDTH = 250.f;
 const float PLAYER_HEIGHT = 250.f;
 
+const float PLAYER_DRAW_WIDTH = 250.f;
+const float PLAYER_DRAW_HEIGHT = 250.f;
+
 const float PLAYER_HITBOX_WIDTH = 80.f;
 const float PLAYER_HITBOX_HEIGHT = 120.f;
 
 Player player;
 Attack melee_attack;
-SpriteSheet_Old sword;
+Timer ranged_attack;
+Timer heavy_attack;
+
+SpriteSheet player_sprite;
+SpriteSheet laser_sprite;
 
 SpriteSheet_Old ssidle_move;
 SpriteSheet_Old ssmelee_atk;
@@ -82,9 +91,18 @@ const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
 const float ATTACK_DURATION = 1.f;
 const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
 const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
-const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.f };
+
+const float ATTACK_START_ACTIVE[4] = { 0.f,0.2f,0.2f,0.3f };
+const float ATTACK_END_ACTIVE[4] = { 0.f,0.4f,0.5f,0.7f };
+
+const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.5f };
 
 const float ATTACK_COMBO_WINDOW = 1.f;
+
+float ATTACK_OFFSET[4] = { 0.f, 30.f, 40.f, 0.f };
+
+const float ATTACK_WIDTH[4] = { 0.f, 200.f, 200.f, 280.f };
+const float ATTACK_HEIGHT[4] = { 0.f,150.f,170.f,180.f };
 
 Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
 
@@ -92,6 +110,8 @@ const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
 
 const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
+
+aabb melee_hitbox;
 
 bool hitbox_active = false;
 
@@ -106,6 +126,7 @@ enum ATTACK_PATTERN
 
 bool Attacking_Melee()
 {
+	
 	// if timer is fully done updating and not idling
 	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3 || !Update_Timer(&combo_window))
 	{
@@ -113,7 +134,7 @@ bool Attacking_Melee()
 		melee_attack.combo = ATTACK_IDLE;
 
 	}
-
+	Update_Timer(&melee_attack.active_time);
 	// check left click input
 	// check if melee_attack cooldown over + combo not finished
 	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
@@ -123,25 +144,31 @@ bool Attacking_Melee()
 		player.state = MELEE;
 		melee_attack.timer.current = 0.f;
 		melee_attack.combo++;
-		//std::cout << "melee_attack " << melee_attack.combo << '\n';
-		sword.timer.current = 0.f;
+
+		melee_attack.active_time.duration = ATTACK_TOTAL[melee_attack.combo];
+		melee_attack.active_time.current = 0.f;
 
 		combo_window.current = 0.f;
 		combo_window.duration = ATTACK_END[melee_attack.combo] + ATTACK_COMBO_WINDOW;
+
+		ranged_attack.current = 1.f;
+		heavy_attack.current = 1.f;
+		player.lightAttackCooldown = 0.f;
 		
 	}
 
-	// update sword swing timer
-	Update_Timer(&sword.timer);
 
 	hitbox_active = false;
-	// logic for if hitbox should be active, to be replaced with a bool return probably @raziq
-	if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
+	//if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
+	if (Update_Timer(&melee_attack.active_time) && melee_attack.active_time.current * ATTACK_END_ACTIVE[melee_attack.combo] >= ATTACK_START_ACTIVE[melee_attack.combo])
 	{
-		std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
-		DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
-		DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
+		//std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
+		//DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
+		//DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
+		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
+		float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
+		//Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
@@ -158,40 +185,104 @@ bool Attacking_Melee()
 
 }
 
+//int Attacked_Melee(AEVec2 target)
+//{
+//	// Check if:
+//	// - Hitbox is active
+//	// - Player is attacking
+//	// - Target is within range of current attack
+//	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
+//	{
+//		switch (melee_attack.combo)
+//		{
+//		case 1:
+//
+//		case 2:
+//		{
+//			// Check direction for first two swings
+//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+//			{
+//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//				return melee_attack.combo;
+//			}
+//			break;
+//		}
+//		case 3:
+//		{
+//			// No need to check direction for third swing as it is 360 circle
+//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//			return melee_attack.combo;
+//			break;
+//		}
+//		default:
+//		{
+//			break;
+//		}
+//		}
+//	}
+//	return 0;
+//}
+//
+//bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
+//{
+//	// Check if:
+//	// - Hitbox is active
+//	// - Player is attacking
+//	// - Target is within range of current attack
+//	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
+//	{
+//		switch (melee_attack.combo)
+//		{
+//		case 1:
+//		case 2:
+//		{
+//			// Check direction for first two swings
+//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
+//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
+//			{
+//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//				*check_hit = melee_attack.combo;
+//				*damage = ATTACK_DAMAGE[melee_attack.combo];
+//				return true;
+//			}
+//			break;
+//		}
+//		case 3:
+//		{
+//			// No need to check direction for third swing as it is 360 circle
+//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
+//			*check_hit = melee_attack.combo;
+//			*damage = ATTACK_DAMAGE[melee_attack.combo];
+//			return true;
+//			break;
+//		}
+//		default:
+//		{
+//			break;
+//		}
+//		}
+//	}
+//	else if (!melee_attack.combo)
+//	{
+//		*check_hit = 0;
+//	}
+//	return false;
+//}
+
 int Attacked_Melee(AEVec2 target)
 {
 	// Check if:
 	// - Hitbox is active
 	// - Player is attacking
 	// - Target is within range of current attack
-	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
+	if (hitbox_active && melee_attack.combo)
 	{
-		switch (melee_attack.combo)
+		if (AETestCircleToRect(&target, 250.f, &player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]))
 		{
-		case 1:
-		case 2:
-		{
-			// Check direction for first two swings
-			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-			{
-				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-				return melee_attack.combo;
-			}
-			break;
-		}
-		case 3:
-		{
-			// No need to check direction for third swing as it is 360 circle
-			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
 			return melee_attack.combo;
-			break;
 		}
-		default:
-		{
-			break;
-		}
-		}
+			
 	}
 	return 0;
 }
@@ -204,45 +295,23 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
 	{
-		switch (melee_attack.combo)
+		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
-		case 1:
-		case 2:
-		{
-			// Check direction for first two swings
-			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-			{
-				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-				*check_hit = melee_attack.combo;
-				*damage = ATTACK_DAMAGE[melee_attack.combo];
-				return true;
-			}
-			break;
-		}
-		case 3:
-		{
-			// No need to check direction for third swing as it is 360 circle
-			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
 			*check_hit = melee_attack.combo;
 			*damage = ATTACK_DAMAGE[melee_attack.combo];
 			return true;
-			break;
 		}
-		default:
+		else if (!melee_attack.combo)
 		{
-			break;
+			*check_hit = 0;
 		}
-		}
-	}
-	else if (!melee_attack.combo)
-	{
-		*check_hit = 0;
+		return false;
 	}
 	return false;
 }
 #pragma endregion
 // =======================================================================
+
 
 // RANGED ATTACK
 // =======================================================================
@@ -375,14 +444,22 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 
 
 
+typedef enum shoottrig {
+	RANGED_BLANK,
+	RANGED_LIGHT,
+	RANGED_HEAVY
+}shoottrig;
 
 
+shoottrig trigger = RANGED_BLANK;	// 0 - No shoot
+									// 1 - Light
+									// 2 - Heavy
 
+const float RANGED_ATTACK_DURATION = .4f;
+const float RANGED_ATTACK_DELAY = 0.1f;
 
-
-
-
-
+const float HEAVY_ATTACK_DURATION = 1.f;
+const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
@@ -394,74 +471,50 @@ void Attacking_Ranged()
 
 	if (player.ammo > 0)
 	{
-
-
-		// In your update function, handle the right-click hold event
-		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
+		if (AEInputCheckCurr(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f && player.state != HEAVY)
 		{
-			// Increase the right-click timer as long as the right button is held
-			rightClickTimer += dt; 
-
-			// Fire the heavy attack when the right-click is held for the set duration
-			if (rightClickTimer >= rightClickHoldDuration)
-			{
-				// If the right mouse button has been held for 1 second, fire the heavy attack
-
-				f32 cursor_x = Screen_To_World_x(Mouse.x);
-				f32 cursor_y = Screen_To_World_y(Mouse.y);
-
-				// Calculate the direction vector from the player to the cursor
-				AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
-				AEVec2Normalize(&dir, &dir);  // Normalize the direction vector
-
-				// Apply an offset to position the heavy attack slightly ahead of the player
-				AEVec2 offset = { dir.x * 1.5f, dir.y * 1.5f }; // Adjust multiplier as needed to control distance ahead
-
-				// Set the position of the heavy attack slightly ahead of the player based on the offset
-				heavy_atk.pos.x = player.pos.x + offset.x;
-				heavy_atk.pos.y = player.pos.y + offset.y;
-
-				// Set the dimensions and other properties of the heavy attack (laser)
-				heavy_atk.width = 100.f;  // Width for the laser beam
-				heavy_atk.height = 500.f; // Height represents the laser length
-				heavy_atk.vel = dir;  // Direction of the laser
-				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
-				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
-
-				// Activate the heavy attack projectile
-				heavy_atk.isActive = true;
-				heavy_atk.isHeavy = true;
-
-				// Reset the lifetime timer
-				heavy_atk.lifetimeTimer.current = 0.f;
-
-				projectiles.push_back(heavy_atk);  // Add the heavy attack to the projectiles list
-				player.ammo = 0; // Deplete ammo after firing
-
-				// Apply knockback to the player (move in opposite direction of attack)
-				float knockbackStrength = 200.f; // Adjust for stronger/weaker knockback
-				AEVec2 knockbackDirection = { -dir.x, -dir.y }; // Inverse of attack direction
-				AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength); // Apply knockback velocity
-
-				player.knockbackTimer = 0.3f; // Knockback lasts for 0.3 seconds
-
-				// Reset the right-click timer
-				rightClickTimer = 0.f;
-
-				//player.state = HEAVY;
-			}
-
-
+			rightClickTimer += dt;
 		}
-		// If right mouse button is released, reset the timer
-		else if (AEInputCheckReleased(AEVK_RBUTTON))
+
+		if (player.ammo == 3 && rightClickTimer >= rightClickHoldDuration)
 		{
+			trigger = RANGED_HEAVY;
+			player.state = HEAVY;
+			heavy_attack.current = 0.f;
 			rightClickTimer = 0.f;
+			player.lightAttackCooldown = 1.0f;
+
+			melee_attack.active_time.current = 1.f;
+			melee_attack.timer.current = 1.f;
 		}
 
-		// Light Attack Handling with Cooldown
-		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f)
+		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f)
 		{
+			
+			trigger = RANGED_LIGHT;
+			player.state = RANGE;
+			ranged_attack.current = 0.f;
+			
+			rightClickTimer = 0.f;
+			player.lightAttackCooldown = 1.0f;
+
+			melee_attack.active_time.current = 1.f;
+			melee_attack.timer.current = 1.f;
+		}
+
+
+
+	}
+
+	if (Update_Timer(&ranged_attack))
+	{
+		player.state = RANGE;
+		if (ranged_attack.current * ranged_attack.duration > RANGED_ATTACK_DELAY && trigger)
+		{
+			trigger = RANGED_BLANK;
+			AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
+			AEVec2Normalize(&atk_dir, &atk_dir);
+
 			f32 cursor_x = Screen_To_World_x(Mouse.x);
 			f32 cursor_y = Screen_To_World_y(Mouse.y);
 
@@ -486,11 +539,56 @@ void Attacking_Ranged()
 			AEVec2 knockbackDirection = { -dir.x, -dir.y };
 			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength);
 			player.knockbackTimer = 0.1f;
+		}
+	}
+	else if (Update_Timer(&heavy_attack))
+	{
+		player.state = HEAVY;
+		if (heavy_attack.current * heavy_attack.duration > HEAVY_ATTACK_DELAY && trigger)
+		{
+			trigger = RANGED_BLANK;
+			AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
+			AEVec2Normalize(&atk_dir, &atk_dir);
 
-			//player.state = RANGE;
+			// If the right mouse button has been held for 1 second, fire the heavy attack
 
-			// Set cooldown
-			player.lightAttackCooldown = 1.0f;
+			f32 cursor_x = Screen_To_World_x(Mouse.x);
+			f32 cursor_y = Screen_To_World_y(Mouse.y);
+
+			// Calculate the direction vector from the player to the cursor
+			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
+			AEVec2Normalize(&dir, &dir);  // Normalize the direction vector
+
+			// Apply an offset to position the heavy attack slightly ahead of the player
+			AEVec2 offset = { dir.x * 1.5f, dir.y * 1.5f }; // Adjust multiplier as needed to control distance ahead
+
+			// Set the position of the heavy attack slightly ahead of the player based on the offset
+			heavy_atk.pos.x = player.pos.x + offset.x;
+			heavy_atk.pos.y = player.pos.y + offset.y;
+
+			// Set the dimensions and other properties of the heavy attack (laser)
+			heavy_atk.width = 100.f;  // Width for the laser beam
+			heavy_atk.height = 500.f; // Height represents the laser length
+			heavy_atk.vel = dir;  // Direction of the laser
+			heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
+			heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+
+			// Activate the heavy attack projectile
+			heavy_atk.isActive = true;
+			heavy_atk.isHeavy = true;
+
+			// Reset the lifetime timer
+			heavy_atk.lifetimeTimer.current = 0.f;
+
+			projectiles.push_back(heavy_atk);  // Add the heavy attack to the projectiles list
+			player.ammo = 0; // Deplete ammo after firing
+
+			// Apply knockback to the player (move in opposite direction of attack)
+			float knockbackStrength = 200.f; // Adjust for stronger/weaker knockback
+			AEVec2 knockbackDirection = { -dir.x, -dir.y }; // Inverse of attack direction
+			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength); // Apply knockback velocity
+
+			player.knockbackTimer = 0.3f; // Knockback lasts for 0.3 seconds
 		}
 	}
 
@@ -525,6 +623,162 @@ void Attacking_Ranged()
 
 }
 
+// backup
+//void Attacking_Ranged()
+//{
+//	if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
+//	{
+//		player.ammo += 1;
+//	}
+//
+//
+//	if (player.ammo > 0)
+//	{
+//
+//
+//		// In your update function, handle the right-click hold event
+//		if (player.ammo == 3 && AEInputCheckCurr(AEVK_RBUTTON)) // AEInputCheckCurr for right-click being held
+//		{
+//			// Increase the right-click timer as long as the right button is held
+//			rightClickTimer += dt;
+//
+//			// Fire the heavy attack when the right-click is held for the set duration
+//			if (rightClickTimer >= rightClickHoldDuration)
+//			{
+//				// If the right mouse button has been held for 1 second, fire the heavy attack
+//
+//				f32 cursor_x = Screen_To_World_x(Mouse.x);
+//				f32 cursor_y = Screen_To_World_y(Mouse.y);
+//
+//				// Calculate the direction vector from the player to the cursor
+//				AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
+//				AEVec2Normalize(&dir, &dir);  // Normalize the direction vector
+//
+//				// Apply an offset to position the heavy attack slightly ahead of the player
+//				AEVec2 offset = { dir.x * 1.5f, dir.y * 1.5f }; // Adjust multiplier as needed to control distance ahead
+//
+//				// Set the position of the heavy attack slightly ahead of the player based on the offset
+//				heavy_atk.pos.x = player.pos.x + offset.x;
+//				heavy_atk.pos.y = player.pos.y + offset.y;
+//
+//				// Set the dimensions and other properties of the heavy attack (laser)
+//				heavy_atk.width = 100.f;  // Width for the laser beam
+//				heavy_atk.height = 500.f; // Height represents the laser length
+//				heavy_atk.vel = dir;  // Direction of the laser
+//				heavy_atk.speed = 0.f; // The laser doesn't move, just extends in the direction
+//				heavy_atk.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+//
+//				// Activate the heavy attack projectile
+//				heavy_atk.isActive = true;
+//				heavy_atk.isHeavy = true;
+//
+//				// Reset the lifetime timer
+//				heavy_atk.lifetimeTimer.current = 0.f;
+//
+//				projectiles.push_back(heavy_atk);  // Add the heavy attack to the projectiles list
+//				player.ammo = 0; // Deplete ammo after firing
+//
+//				// Apply knockback to the player (move in opposite direction of attack)
+//				float knockbackStrength = 200.f; // Adjust for stronger/weaker knockback
+//				AEVec2 knockbackDirection = { -dir.x, -dir.y }; // Inverse of attack direction
+//				AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength); // Apply knockback velocity
+//
+//				player.knockbackTimer = 0.3f; // Knockback lasts for 0.3 seconds
+//
+//				// Reset the right-click timer
+//				rightClickTimer = 0.f;
+//
+//				player.state = HEAVY;
+//				heavy_attack.current = 0.f;
+//			}
+//
+//
+//		}
+//		// If right mouse button is released, reset the timer
+//		else if (AEInputCheckReleased(AEVK_RBUTTON))
+//		{
+//			rightClickTimer = 0.f;
+//		}
+//
+//
+//		// Light Attack Handling with Cooldown
+//		if (player.ammo != 0 && AEInputCheckReleased(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f)
+//		{
+//			f32 cursor_x = Screen_To_World_x(Mouse.x);
+//			f32 cursor_y = Screen_To_World_y(Mouse.y);
+//
+//			AEVec2 dir = { cursor_x - player.pos.x, cursor_y - player.pos.y };
+//			AEVec2Normalize(&dir, &dir);
+//
+//			// Create projectile
+//			new_proj.pos = player.pos;
+//			new_proj.vel = dir;
+//			new_proj.speed = 250.f;
+//			new_proj.isActive = true;
+//			new_proj.isHeavy = false;
+//			new_proj.lifetimeTimer.current = 0.f;
+//			new_proj.angle = atan2f(cursor_y - player.pos.y, cursor_x - player.pos.x);
+//			new_proj.radius = 20.f;
+//
+//			projectiles.push_back(new_proj);
+//			player.ammo -= 1;
+//
+//			// Apply knockback
+//			float knockbackStrength = 50.f;
+//			AEVec2 knockbackDirection = { -dir.x, -dir.y };
+//			AEVec2Scale(&player.vel, &knockbackDirection, knockbackStrength);
+//			player.knockbackTimer = 0.1f;
+//
+//			// TRIGGER
+//			player.state = RANGE;
+//			ranged_attack.current = 0.f;
+//
+//			// Set cooldown
+//			player.lightAttackCooldown = 1.0f;
+//		}
+//
+//	}
+//
+//	if (Update_Timer(&ranged_attack))
+//	{
+//		player.state = RANGE;
+//	}
+//	else if (Update_Timer(&heavy_attack))
+//	{
+//		player.state = HEAVY;
+//	}
+//
+//	// Reduce cooldown timer each frame
+//	if (player.lightAttackCooldown > 0.f)
+//	{
+//		player.lightAttackCooldown -= dt;
+//	}
+//
+//
+//
+//
+//
+//	// Update lifetime timer
+//	bool lifetimeExpiredHeavy = Update_Timer(&heavy_atk.lifetimeTimer);
+//	bool lifetimeExpiredLight = Update_Timer(&new_proj.lifetimeTimer);
+//
+//	// Debugging print to see if the timer is updating
+//	//std::cout << "Timer: " << heavy_atk.lifetimeTimer.current << " seconds left.\n";
+//
+//
+//	if (!lifetimeExpiredHeavy)
+//	{
+//		//std::cout << "Projectile lifetime expired, deactivating.\n";
+//		heavy_atk.isActive = false;  // Mark the projectile as inactive
+//	}
+//
+//	if (!lifetimeExpiredLight)
+//	{
+//		new_proj.isActive = false;
+//	}
+//
+//}
+
 #pragma endregion
 // =======================================================================
 
@@ -549,8 +803,11 @@ void Attacking()
 
 
 
-const float DASH_COOLDOWN = 1.5f;
+const float DASH_COOLDOWN = 1.2f;
 const float DASH_DURATION = 0.3f;
+
+Timer dodge_time;
+Timer dodge_cooldown;
 
 // WASD movement
 void Movement() {
@@ -561,9 +818,9 @@ void Movement() {
 	bool moving = false;
 
 	// change when key pressed
-	if (player.state != HEAVY)
+	if (heavy_attack.current == 1.f)
 	{
-		if (player.state != MELEE)
+		if (player.state != MELEE && ranged_attack.current == 1.f)
 		{
 			if (AEInputCheckCurr(AEVK_W))
 			{
@@ -596,15 +853,29 @@ void Movement() {
 				player.state = IDLE;
 			}
 		}
-		else // melee
+		else if (player.state == RANGE)
 		{
-			float atk_vel_scale = -(melee_attack.timer.current * melee_attack.timer.current) + ATTACK_END[melee_attack.combo] * melee_attack.timer.current;
+			float atk_vel_scale =  -.1f * (1.f - ranged_attack.current);
 
 			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
 		}
+		else // melee
+		{
+			float atk_vel_scale = .1f*(1.f-melee_attack.active_time.current);
+			AEVec2Scale(&player.vel, &atk_dir, player.speed * atk_vel_scale * dt);
+		}
+	}
+	else if (heavy_attack.current * HEAVY_ATTACK_DURATION >= HEAVY_ATTACK_DELAY)
+	{
+
+		float hvy_vel_scale = -1.f * (1.f - heavy_attack.current);
+		std::cout << hvy_vel_scale;
+
+		AEVec2Scale(&player.vel, &atk_dir, player.speed * hvy_vel_scale * dt);
 	}
 
-	bool dodging = Update_Timer(&player.dodgetimer);
+	//bool dodge_cd = Update_Timer(&player.dodgetimer);
+	bool dodge_cd = Update_Timer(&dodge_cooldown);
 	if (player.vel.x || player.vel.y)
 	{
 		if (player.state == MOVING)
@@ -613,24 +884,52 @@ void Movement() {
 		}
 		AEVec2Scale(&player.vel, &player.vel, player.speed * dt);
 
-		if (!dodging)
+		if (!dodge_cd)
 		{
 			if (AEInputCheckTriggered(AEVK_SPACE))
 			{
-				AEVec2Set(&player.dodge_vel, player.vel.x, player.vel.y);
+				AEVec2 input = { 0,0 };
+				if (AEInputCheckCurr(AEVK_W))
+				{
+					input.y += 1.f;
+				}
+				if (AEInputCheckCurr(AEVK_A))
+				{
+					input.x -= 1.f;
+					player.direction_h = LEFT;
+				}
+				if (AEInputCheckCurr(AEVK_S))
+				{
+					input.y -= 1.f;
+				}
+				if (AEInputCheckCurr(AEVK_D))
+				{
+					input.x += 1.f;
+					player.direction_h = RIGHT;
+				}
+				AEVec2Set(&player.dodge_vel, input.x, input.y);
 				AEVec2Normalize(&player.dodge_vel, &player.dodge_vel);
 				player.state = DODGE;
-				player.dodgetimer.current = 0.f;
+				dodge_time.current = 0.f;
+				dodge_cooldown.current = 0.f;
+				//player.dodgetimer.current = 0.f;
+
+				// reset timers for attacks
+				melee_attack.active_time.current = 1.f;
+				melee_attack.timer.current = 1.f;
+				ranged_attack.current = 1.f;
+				heavy_attack.current = 1.f;
 			}
 		}
 	}
 
 
-	if (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION)
+	//if (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION)
+	if (Update_Timer(&dodge_time))
 	{
 		player.direction_h = (player.dodge_vel.x >= 0.f) ? RIGHT : LEFT;
 		player.state = DODGE;
-		boost = (player.dodgetimer.current * DASH_COOLDOWN <= DASH_DURATION / 2.f) ? 1.5f * player.speed : 0.f;
+		boost = (dodge_time.current <= .5f ) ? 1.5f * player.speed : 0.f;
 		AEVec2Scale(&player.vel, &player.dodge_vel, (player.speed + boost) * dt);
 	}
 
@@ -693,6 +992,7 @@ void Parrying()
 	//std::cout << "Player State: " << plystate << '\n';
 }
 
+// Refunds player ammo and reset block cooldown :>
 void Parried_Hit()
 {
 	player.state = PARRIED;
@@ -727,7 +1027,9 @@ void Load_Player()
 {
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
-	sword = Init_SpriteSheet("Assets/slash.png", 4, 10, ATTACK_DURATION);
+	player_sprite = SpriteSheet("Assets/Player/Player.png", 22, 11);
+
+	laser_sprite = SpriteSheet("Assets/Player/Laser.png", 33, 1);
 
 	ssidle_move = Init_SpriteSheet("Assets/Player/IdleMove.png", 2, 8, 1.f);
 
@@ -764,6 +1066,10 @@ void Init_Player()
 
 	player.hittimer = Create_Timer(0.5f);
 	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
+
+	dodge_cooldown = Create_Timer(DASH_COOLDOWN);
+	dodge_time = Create_Timer(DASH_DURATION);
+
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
 	player.direction_v = DOWN;
@@ -771,8 +1077,21 @@ void Init_Player()
 
 	player.spritesheet = &ssidle_move;
 
+	player_sprite.Set_Row(0);
+	player_sprite.Set_Col(0);
+
+	laser_sprite.Set_Row(0);
+	laser_sprite.Set_Col(0);
+
 	melee_attack.timer = Create_Timer(1.f);
+	melee_attack.active_time = Create_Timer(ATTACK_END[ATTACK_IDLE]);
 	melee_attack.combo = 0;
+
+	melee_hitbox = Init_AABB(player.pos.x, player.pos.y, ATTACK_WIDTH[0], ATTACK_HEIGHT[0]);
+
+	ranged_attack = Create_Timer(RANGED_ATTACK_DURATION);
+
+	heavy_attack = Create_Timer(HEAVY_ATTACK_DURATION);
 
 	player.blocked = Create_Timer(0.5f);
 
@@ -802,36 +1121,36 @@ void Update_Player()
 	{
 		if (player.knockbackTimer > 0.0f)
 		{
-				// Calculate the knockback direction based on the direction of the attack
-				f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
-				f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
+				//// Calculate the knockback direction based on the direction of the attack
+				//f32 cursor_x = Screen_To_World_x(Mouse.x); // or other method to get attack target
+				//f32 cursor_y = Screen_To_World_y(Mouse.y); // Get the attack position (e.g., mouse cursor or impact point)
 
-				AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
-				AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
+				//AEVec2 attackDirection = { cursor_x - player.pos.x, cursor_y - player.pos.y };  // Direction from player to target
+				//AEVec2Normalize(&attackDirection, &attackDirection); // Normalize to get a unit vector
 
-				// Apply knockback in the opposite direction of the attack
-				AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
+				//// Apply knockback in the opposite direction of the attack
+				//AEVec2 oppositeDirection = { -attackDirection.x, -attackDirection.y };
 
-				// Apply knockback boost if necessary
-				float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
+				//// Apply knockback boost if necessary
+				//float knockbackBoost = (player.knockbackTimer > 0.15f) ? 1.5f * player.speed : 0.f;
 
-				// Apply knockback velocity (scaled by the speed and knockback boost)
-				AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
+				//// Apply knockback velocity (scaled by the speed and knockback boost)
+				//AEVec2Scale(&player.vel, &oppositeDirection, (player.speed + knockbackBoost) * dt);
 
-				// Move the player using the knockback velocity
-				AEVec2Add(&player.pos, &player.vel, &player.pos);
+				//// Move the player using the knockback velocity
+				//AEVec2Add(&player.pos, &player.vel, &player.pos);
 
-				// Apply friction to gradually slow down the knockback
-				float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
-				player.vel.x *= knockbackFriction;
-				player.vel.y *= knockbackFriction;
+				//// Apply friction to gradually slow down the knockback
+				//float knockbackFriction = 0.92f; // Adjust this value to control the smoothness of the knockback stop
+				//player.vel.x *= knockbackFriction;
+				//player.vel.y *= knockbackFriction;
 
-				// Decrease knockback timer
-				player.knockbackTimer -= dt;
+				//// Decrease knockback timer
+				//player.knockbackTimer -= dt;
 
-				// Stop movement when the knockback velocity is very small
-				if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
-				if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
+				//// Stop movement when the knockback velocity is very small
+				//if (fabs(player.vel.x) < 1.0f) player.vel.x = 0.f;
+				//if (fabs(player.vel.y) < 1.0f) player.vel.y = 0.f;
 			//if (player.state == RANGE)
 			//{
 			//	// Calculate the knockback direction based on the direction of the attack
@@ -870,6 +1189,7 @@ void Update_Player()
 		if (Update_Timer(&player.hittimer))
 		{
 			player.state = HIT;
+			Update_Timer(&player.blocktimer);
 		}
 		else if (Update_Timer(&player.blocked))
 		{
@@ -888,9 +1208,12 @@ void Update_Player()
 			{
 				Movement();
 
-				Attacking();
+				if (player.state != DODGE)
+				{
+					Attacking();
 
-				Attacking_Ranged();
+					Attacking_Ranged();
+				}
 			}
 		}
 		player.hp = AEClamp(player.hp, 0.f, 100.f);
@@ -926,14 +1249,12 @@ void Update_Player()
 	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
 }
 
+
 // Draw Player
 void Draw_Player()
 {
-	//DrawCircle(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius, player.color);
-
-	sword.current_col = static_cast<int>(sword.timer.current * sword.cols);
-	sword.current_row = melee_attack.combo;
-	//Draw_SpriteSheet(sword, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, sword.uv_width * sword.current_col, sword.uv_height * sword.current_row, atk_rot);
+	// SHADOW DRAWING
+	DrawCircleAdvanced(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y - player.radius * 2.f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
 	
 	// DRAW HITBOX
 	//DrawRect(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.hitbox.max.x - player.hitbox.min.x, player.hitbox.max.y - player.hitbox.min.y, player.color);
@@ -956,62 +1277,143 @@ void Draw_Player()
 		{
 		case 1:
 			Set_SpriteSheet_current(&ssmelee_atk, 0, 0, 10, melee_attack.timer, ATTACK_END[1]);
+
+			//new
+			player_sprite.Set_Row(6);
+			player_sprite.Set_Col(0, 9, melee_attack.active_time.current);
 			break;
 		case 2:
 			Set_SpriteSheet_current(&ssmelee_atk, 0, 10, 20, melee_attack.timer, ATTACK_END[2]);
+
+			//new
+			player_sprite.Set_Row(7);
+			player_sprite.Set_Col(0, 9, melee_attack.active_time.current);
 			break;
 		case 3:
 			Set_SpriteSheet_current(&ssmelee_atk, 1, 0, 20, melee_attack.timer, ATTACK_END[3]);
+
+			//new
+			player_sprite.Set_Row(8);
+			player_sprite.Set_Col(0, 19, melee_attack.active_time.current);
 			break;
 		default:
 			break;
 		}
 		player.spritesheet = &ssmelee_atk;
 		break;
+		// ----------------------------------------------------------------------------
+	case RANGE:
+		if (Screen_To_World_x(Mouse.x) > player.pos.x)
+		{
+			player.direction_h = RIGHT;
+		}
+		else
+		{
+			player.direction_h = LEFT;
+		}
+		player_sprite.Set_Row(9);
+		player_sprite.Set_Col(0, 7, ranged_attack.current);
+		break;
+		// ----------------------------------------------------------------------------
+	case HEAVY:
+		if (Screen_To_World_x(Mouse.x) > player.pos.x)
+		{
+			player.direction_h = RIGHT;
+		}
+		else
+		{
+			player.direction_h = LEFT;
+		}
+		player_sprite.Set_Row(10);
+		player_sprite.Set_Col(0, 21, heavy_attack.current);
+		break;
+		// ----------------------------------------------------------------------------
+
 	case MOVING:
 		Loop_Timer(&ssidle_move.timer);
 		Set_SpriteSheet_current(&ssidle_move, 1, 0, 8, ssidle_move.timer, ssidle_move.timer.duration);
 		player.spritesheet = &ssidle_move;
+		
+		//new
+		player_sprite.Set_Row(1);
+		player_sprite.Loop(0, 7, .8f);
 		break;
+		// ----------------------------------------------------------------------------
 	case HIT:
 		Set_SpriteSheet_current(&sshitdodgeparry, 0, 0, 4, player.hittimer, player.hittimer.duration);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(2);
+		player_sprite.Set_Col(0, 3, player.hittimer.current);
 		break;
+		// ----------------------------------------------------------------------------
 	case DODGE:
 		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, DASH_DURATION);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(3);
+		player_sprite.Set_Col(0, 3, dodge_time.current);
 		break;
+		// ----------------------------------------------------------------------------
 	case PARRY:
 		Set_SpriteSheet_current(&sshitdodgeparry, 2, 0, 1, player.blocktimer, player.blocktimer.duration);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(4);
+		player_sprite.Set_Col(0);
 		break;
+		// ----------------------------------------------------------------------------
 	case PARRIED:
 		Set_SpriteSheet_current(&sshitdodgeparry, 2, 1, 4, player.blocked, player.blocked.duration);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(4);
+		player_sprite.Set_Col(1, 3, player.blocked.current);
 		break;
+		// ----------------------------------------------------------------------------
 	case BLOCK:
 		Set_SpriteSheet_current(&sshitdodgeparry, 3, 0, 1, player.blocktimer, player.blocktimer.duration);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(5);
+		player_sprite.Set_Col(0);
 		break;
+		// ----------------------------------------------------------------------------
 	case BLOCKED:
 		Set_SpriteSheet_current(&sshitdodgeparry, 3, 1, 4, player.blocked, player.blocked.duration);
 		player.spritesheet = &sshitdodgeparry;
+
+		//new
+		player_sprite.Set_Row(5);
+		player_sprite.Set_Col(1, 3, player.blocked.current);
 		break;
+		// ----------------------------------------------------------------------------
 	case IDLE:
 	default:
 		Loop_Timer(&ssidle_move.timer);
 		Set_SpriteSheet_current(&ssidle_move, 0, 0, 8, ssidle_move.timer, ssidle_move.timer.duration);
 		player.spritesheet = &ssidle_move;
+
+		//new
+		player_sprite.Set_Row(0);
+		player_sprite.Loop(0, 7, 1.f);
 		break;
 	}
 
 	switch (player.direction_h)
 	{
 	case LEFT:
-		Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, 0.f);
+		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, 0.f);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, false);
 		break;
 	case RIGHT:
-		Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), -player.radius * 10.f, player.radius * 10.f, 0.f);
+		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), -player.radius * 10.f, player.radius * 10.f, 0.f);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, true);
 		break;
 	default:
 		break;
@@ -1033,7 +1435,7 @@ void Draw_Player()
 				if (heavy_atk.isActive)
 				{
 
-					float offsetDistance = 500.0f;
+					float offsetDistance = 400.0f;
 					float offsetX = cosf(proj.angle) * offsetDistance;
 					float offsetY = sinf(proj.angle) * offsetDistance;
 
@@ -1042,7 +1444,7 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
+					//DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
 				}
 				else {
 					projectiles.pop_back();
@@ -1052,7 +1454,7 @@ void Draw_Player()
 			{
 				if (new_proj.isActive)
 				{
-					DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
+					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
 				}
 				else {
 					projectiles.pop_back();
@@ -1084,7 +1486,7 @@ void Draw_Player()
 				if (heavy_atk.isActive)
 				{
 
-					float offsetDistance = 500.0f;
+					float offsetDistance = 400.0f;
 					float offsetX = cosf(it->angle) * offsetDistance;
 					float offsetY = sinf(it->angle) * offsetDistance;
 
@@ -1093,7 +1495,9 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(it->pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
+					//DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
+					laser_sprite.Set_Col(0, 32, heavy_atk.lifetimeTimer.current);
+					laser_sprite.Draw(screenX, screenY, 1000.f, 200.f, false, it->angle);
 				}
 			}
 			else
@@ -1120,7 +1524,8 @@ void Unload_Player()
 {
 	AEGfxTextureUnload(AtkHB);
 
-	Unload_SpriteSheet(&sword);
+	player_sprite.Unload();
+	laser_sprite.Unload();
 
 	AEGfxTextureUnload(projectile_texture);
 	AEGfxTextureUnload(heavy_texture);

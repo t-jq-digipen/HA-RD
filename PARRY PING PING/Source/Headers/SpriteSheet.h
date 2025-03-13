@@ -5,7 +5,7 @@
 //
 // brief:	Spritesheet class declaration
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once

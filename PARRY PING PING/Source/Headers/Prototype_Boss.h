@@ -1,3 +1,12 @@
+//---------------------------------------------------------
+// file:	SpriteSheet.h
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Spritesheet class declaration
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 #pragma once
 #include "Enemies.h"
 #include <vector>
@@ -61,9 +70,12 @@ typedef struct Boss
 
     int attack_type;            // Current attack type
 
+    bool explosion_triggered;    // Whether an explosion effect is active  
     Timer explosion_timer;      // Timer for explosion effects
     Timer death_explosion_duration; // Timer for death explosion duration
 } Boss;
+
+extern Boss boss_1;
 
 // ----------------------------------------------------------------------------
 // Structure representing a Boss melee attack
@@ -111,6 +123,7 @@ void Load_Boss();               // Load Boss resources
 void Init_Boss_Indicator();     // Initialize Boss indicators
 void Init_Boss();               // Initialize Boss state
 void Update_Boss();             // Update Boss logic
+void Draw_Boss_Hitboxes();      // Draw boss attack hitboxes
 void Draw_Boss();               // Draw Boss and its effects
 void Unload_Boss();             // Unload Boss resources
 

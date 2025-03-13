@@ -1,3 +1,12 @@
+//---------------------------------------------------------
+// file:	SpriteSheet.h
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Spritesheet class declaration
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 #include "Prototype_Boss.h"
 #include "player.h"
 #include "UI.h"
@@ -25,6 +34,10 @@ const f32 BOSS_SPAWN_Y = 200.f;
 // Boss size
 const f32 BOSS_WIDTH = 500.f;
 const f32 BOSS_HEIGHT = 500.f;
+
+// Boss draw size
+const f32 BOSS_DRAW_WIDTH = 650.f;
+const f32 BOSS_DRAW_HEIGHT = 650.f;
 
 // Boss hitbox size
 const f32 BOSS_HITBOX_WIDTH = 400.f;
@@ -107,7 +120,11 @@ void Init_Boss()
     boss_1.idle_timer = Create_Timer(1.f);
     boss_1.attack_timer = Create_Timer(1.f);
     boss_1.stun_timer = Create_Timer(3.f);
+    boss_1.explosion_timer = Create_Timer(0.5f);
     boss_1.death_explosion_duration = Create_Timer(4.f);
+
+    // Explosion effect check
+    boss_1.explosion_triggered = 0;
  
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -293,14 +310,31 @@ void Update_Boss()
     else if (boss_1.state == BOSS_DEAD)
     {
         levelState = CLEARED;
+        for (auto& fist : rocket_fists)
+        {
+            fist.active = false;
+        }
+
         if (Update_Timer(&boss_1.death_explosion_duration))
         {
-            std::cout << boss_1.death_explosion_duration.current << '\n';
-            if (!Update_Timer(&boss_1.explosion_timer))
+            Loop_Timer(&boss_1.explosion_timer);
+            if (boss_1.explosion_timer.current == 0.f)
+            {
+                boss_1.explosion_triggered = 1;
+            }
+            if (boss_1.explosion_triggered == 1)
             {
                 Draw_Boss_Death_Explosion(boss_1.pos);
+                boss_1.explosion_triggered = 0;
             }
         }
+        else
+        {
+            boss_death_explosion.clear();
+        }
+
+        // Remove inactive explosion effects
+        boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& e) { return !e.active; }), boss_death_explosion.end());
     }
 
     // Update Boss Hitbox
@@ -309,16 +343,12 @@ void Update_Boss()
 
 bool flip = false;
 
-void Draw_Boss()
+void Draw_Boss_Hitboxes()
 {
-
-    f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;
-    f32 recover_time = boss_melee[boss_1.attack_type].attack_recover - boss_melee[boss_1.attack_type].attack_active;
     switch (boss_1.state)
     {
     case BOSS_SMASH_SWEEP:
     {
-        flip = false;
         switch (boss_1.attack_type)
         {
         case BOSS_SMASH:
@@ -329,31 +359,11 @@ void Draw_Boss()
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_windup);
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y),
                     (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(2);
-                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 6, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
                 // Draw active smash hitbox
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_SMASH].pos.x), World_To_Screen_y(boss_melee[BOSS_SMASH].pos.y), SMASH_RADIUS, boss_idle);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(3);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
-                f32 anim_time = active_curr / active_time;
-                boss_1_sprite.Set_Col(0, 2, anim_time);
-            }
-            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-            {
-                // Set sprite info
-                std::cout << "RECOVERING";
-                boss_1_sprite.Set_Row(4);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-                f32 anim_time = active_curr / recover_time;
-                boss_1_sprite.Set_Col(0, 3, anim_time);
             }
             break;
         }
@@ -365,30 +375,12 @@ void Draw_Boss()
                 DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_windup);
                 DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x) + ((boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH / 2.f - SWEEP_WIDTH / 2.f),
                     World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SWEEP_WIDTH, SWEEP_HEIGHT, boss_swing);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(5);
-                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 9, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
                 // Draw active sweep hitbox
                 DrawRect(World_To_Screen_x(boss_melee[BOSS_SWEEP].pos.x), World_To_Screen_y(boss_melee[BOSS_SWEEP].pos.y), SWEEP_WIDTH, SWEEP_HEIGHT, boss_idle);
 
-                // Set sprite info
-                boss_1_sprite.Set_Row(6);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
-                f32 anim_time = active_curr / active_time;
-                boss_1_sprite.Set_Col(0, 2, anim_time);
-            }
-            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-            {
-                // Set sprite info
-                boss_1_sprite.Set_Row(7);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-                f32 anim_time = active_curr / recover_time;
-                boss_1_sprite.Set_Col(0, 10, anim_time);
             }
             break;
         }
@@ -397,7 +389,6 @@ void Draw_Boss()
 
     case BOSS_THREE_HIT:
     {
-        flip = false;
         switch (boss_1.attack_type)
         {
         case BOSS_LEFT_HIT:
@@ -407,30 +398,11 @@ void Draw_Boss()
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_windup);
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y),
                     (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(15);
-                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 4, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
                 // Draw active left hit hitbox
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_LEFT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_LEFT_HIT].pos.y), SMASH_RADIUS, boss_idle);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(16);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
-                f32 anim_time = active_curr / active_time;
-                boss_1_sprite.Set_Col(0, 2, anim_time);
-            }
-            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-            {
-                // Set sprite info
-                boss_1_sprite.Set_Row(17);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-                f32 anim_time = active_curr / recover_time;
-                boss_1_sprite.Set_Col(0, 2, anim_time);
             }
             break;
 
@@ -441,30 +413,11 @@ void Draw_Boss()
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_windup);
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y),
                     (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * SMASH_RADIUS, boss_swing);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(18);
-                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 3, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
                 // Draw active right hit hitbox
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_RIGHT_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_RIGHT_HIT].pos.y), SMASH_RADIUS, boss_idle);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(19);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
-                f32 anim_time = active_curr / active_time;
-                boss_1_sprite.Set_Col(0, 2, anim_time);
-            }
-            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-            {
-                // Set sprite info
-                boss_1_sprite.Set_Row(20);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-                f32 anim_time = active_curr / recover_time;
-                boss_1_sprite.Set_Col(0, 1, anim_time);
             }
             break;
 
@@ -475,30 +428,11 @@ void Draw_Boss()
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_windup);
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y),
                     (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) * BIG_SMASH_RADIUS, boss_swing);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(21);
-                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
-                boss_1_sprite.Set_Col(0, 4, anim_time);
             }
             else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
             {
                 // Draw active circle hit hitbox
                 DrawCircle(World_To_Screen_x(boss_melee[BOSS_CIRCLE_HIT].pos.x), World_To_Screen_y(boss_melee[BOSS_CIRCLE_HIT].pos.y), BIG_SMASH_RADIUS, boss_idle);
-
-                // Set sprite info
-                boss_1_sprite.Set_Row(22);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
-                f32 anim_time = active_curr / active_time;
-                boss_1_sprite.Set_Col(0, 3, anim_time);
-            }
-            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-            {
-                // Set sprite info
-                boss_1_sprite.Set_Row(23);
-                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-                f32 anim_time = active_curr / recover_time;
-                boss_1_sprite.Set_Col(0, 3, anim_time);
             }
             break;
         }
@@ -507,7 +441,6 @@ void Draw_Boss()
 
     case BOSS_RANGED_CHARGE:
     {
-        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
         if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
         {
             // Draw windup animation for charge
@@ -521,10 +454,6 @@ void Draw_Boss()
                 World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
                 boss_1.target_dist * (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), BOSS_HEIGHT, boss_swing, boss_1.target_rot
             );
-
-            // Set sprite info
-            boss_1_sprite.Set_Row(12);
-            boss_1_sprite.Set_Col(0, 9, boss_1.attack_timer.current* boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
         }
         else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
         {
@@ -534,10 +463,6 @@ void Draw_Boss()
                 World_To_Screen_y(boss_1.pos.y),
                 BOSS_WIDTH, BOSS_HEIGHT, boss_idle, boss_1.target_rot
             );
-
-            // Set sprite info
-            boss_1_sprite.Set_Row(13);
-            boss_1_sprite.Loop(0, 1, 0.25f);
         }
         break;
     }
@@ -546,7 +471,6 @@ void Draw_Boss()
     {
         if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
         {
-            flip = (!BossPlayerDirection(boss_1.pos, player.pos));
             // Draw windup animation for rocket fist
             DrawRotatedRect(
                 World_To_Screen_x(boss_1.pos.x + boss_1.target_dir.x * (boss_1.target_dist / 2.f)),
@@ -558,50 +482,7 @@ void Draw_Boss()
                 World_To_Screen_y(boss_1.pos.y + boss_1.target_dir.y * (boss_1.target_dist * (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup) / 2.f)),
                 boss_1.target_dist * (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup), 10.f, boss_swing, boss_1.target_rot
             );
-
-            // Set sprite info
-            boss_1_sprite.Set_Row(9);
-            boss_1_sprite.Set_Col(0, 11, boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
         }
-        else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
-        {
-            // Set sprite info
-            //boss_1_sprite.Set_Row(10);
-            //boss_1_sprite.Set_Col(0);
-        }
-        else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
-        {
-            // Set sprite info
-            boss_1_sprite.Set_Row(11);
-            f32 active_curr = (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
-            f32 anim_time = active_curr / recover_time;
-            boss_1_sprite.Set_Col(0, 18, anim_time);
-        }
-
-        break;
-    }
-
-    case BOSS_PARRIED:
-    {
-        
-        std::cout << "STUNNED";
-        boss_1_sprite.Set_Row(8);
-        boss_1_sprite.Loop(0, 1, 0.5f);
-        break;
-    }
-
-    case BOSS_IDLE:
-    {
-        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
-        boss_1_sprite.Set_Row(0);
-        boss_1_sprite.Loop(0, 3, 1.f);
-        break;
-    }
-
-    case BOSS_DEAD:
-    {
-        boss_1_sprite.Set_Row(24);
-        boss_1_sprite.Set_Col(0);
         break;
     }
 
@@ -645,6 +526,239 @@ void Draw_Boss()
         }
     }
 
+}
+
+void Draw_Boss()
+{
+    DrawCircleAdvanced(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y - 70.f), 120.f, 80.f, SetColor(0x92000000));			// Draw shadow under
+    //DrawRect(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, SetColor(0x92000000));
+
+    f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;
+    f32 recover_time = boss_melee[boss_1.attack_type].attack_recover - boss_melee[boss_1.attack_type].attack_active;
+    switch (boss_1.state)
+    {
+    case BOSS_SMASH_SWEEP:
+    {
+        flip = false;
+        switch (boss_1.attack_type)
+        {
+        case BOSS_SMASH:
+        {
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(2);
+                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+                boss_1_sprite.Set_Col(0, 7, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(3);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
+                f32 anim_time = active_curr / active_time;
+                boss_1_sprite.Set_Col(0, 2, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+            {
+                // Set sprite info
+                std::cout << "RECOVERING";
+                boss_1_sprite.Set_Row(4);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+                f32 anim_time = active_curr / recover_time;
+                boss_1_sprite.Set_Col(0, 3, anim_time);
+            }
+            break;
+        }
+
+        case BOSS_SWEEP:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(5);
+                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+                boss_1_sprite.Set_Col(0, 10, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(6);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
+                f32 anim_time = active_curr / active_time;
+                boss_1_sprite.Set_Col(0, 2, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(7);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+                f32 anim_time = active_curr / recover_time;
+                boss_1_sprite.Set_Col(0, 10, anim_time);
+            }
+            break;
+        }
+        break;
+    }
+
+    case BOSS_THREE_HIT:
+    {
+        flip = false;
+        switch (boss_1.attack_type)
+        {
+        case BOSS_LEFT_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(15);
+                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+                boss_1_sprite.Set_Col(0, 5, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(16);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
+                f32 anim_time = active_curr / active_time;
+                boss_1_sprite.Set_Col(0, 2, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(17);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+                f32 anim_time = active_curr / recover_time;
+                boss_1_sprite.Set_Col(0, 2, anim_time);
+            }
+            break;
+
+        case BOSS_RIGHT_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(18);
+                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+                boss_1_sprite.Set_Col(0, 4, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(19);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
+                f32 anim_time = active_curr / active_time;
+                boss_1_sprite.Set_Col(0, 2, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(20);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+                f32 anim_time = active_curr / recover_time;
+                boss_1_sprite.Set_Col(0, 1, anim_time);
+            }
+            break;
+
+        case BOSS_CIRCLE_HIT:
+            if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(21);
+                f32 anim_time = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup;
+                boss_1_sprite.Set_Col(0, 5, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(22);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_windup;
+                f32 anim_time = active_curr / active_time;
+                boss_1_sprite.Set_Col(0, 3, anim_time);
+            }
+            else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+            {
+                // Set sprite info
+                boss_1_sprite.Set_Row(23);
+                f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+                f32 anim_time = active_curr / recover_time;
+                boss_1_sprite.Set_Col(0, 3, anim_time);
+            }
+            break;
+        }
+        break;
+    }
+
+    case BOSS_RANGED_CHARGE:
+    {
+        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
+        if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+        {
+            // Set sprite info
+            boss_1_sprite.Set_Row(12);
+            boss_1_sprite.Set_Col(0, 9, boss_1.attack_timer.current* boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
+        }
+        else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+        {
+            // Set sprite info
+            boss_1_sprite.Set_Row(13);
+            boss_1_sprite.Loop(0, 1, 0.25f);
+        }
+        break;
+    }
+
+    case BOSS_RANGED_ROCKETFIST:
+    {
+        if (boss_1.attackstate == BOSS_ATTACK_WINDUP)
+        {
+            flip = (!BossPlayerDirection(boss_1.pos, player.pos));
+            // Set sprite info
+            boss_1_sprite.Set_Row(9);
+            boss_1_sprite.Set_Col(0, 11, boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration / boss_melee[boss_1.attack_type].attack_windup);
+        }
+        else if (boss_1.attackstate == BOSS_ATTACK_ACTIVE)
+        {
+            // Set sprite info
+            //boss_1_sprite.Set_Row(10);
+            //boss_1_sprite.Set_Col(0);
+        }
+        else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
+        {
+            // Set sprite info
+            boss_1_sprite.Set_Row(11);
+            f32 active_curr = (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
+            f32 anim_time = active_curr / recover_time;
+            boss_1_sprite.Set_Col(0, 18, anim_time);
+        }
+
+        break;
+    }
+
+    case BOSS_PARRIED:
+    {
+        boss_1_sprite.Set_Row(8);
+        boss_1_sprite.Loop(0, 1, 0.5f);
+        break;
+    }
+
+    case BOSS_IDLE:
+    {
+        flip = (!BossPlayerDirection(boss_1.pos, player.pos));
+        boss_1_sprite.Set_Row(0);
+        boss_1_sprite.Loop(0, 3, 1.f);
+        break;
+    }
+
+    case BOSS_DEAD:
+    {
+        boss_1_sprite.Set_Row(24);
+        boss_1_sprite.Set_Col(0);
+        break;
+    }
+
+    default:
+        break;
+    }
+
+
+
     // Death explosion
     for (auto& exp : boss_death_explosion)
     {
@@ -657,9 +771,7 @@ void Draw_Boss()
     }
 
     // Draw boss sprite
-    //Draw_SpriteSheet_test(boss_sprite_sheet, World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, 0.f);
-    
-    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, flip);
+    boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip);
 }
 
 void Unload_Boss()

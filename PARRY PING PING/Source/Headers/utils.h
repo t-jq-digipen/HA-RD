@@ -21,21 +21,27 @@ void Get_DT();
 
 // Color
 // -------------------------------------------------
-// 
+
+// ----------------------------------------------------------------------------
 // Color struct holding RGBA values of type float
+// ----------------------------------------------------------------------------
 typedef struct Color 
 {
 	float R, G, B, A;
 } Color;
 
+// ----------------------------------------------------------------------------
 // Color set function takes hex code and returns a color struct with assigned RGBA values
+// ----------------------------------------------------------------------------
 Color SetColor(u32 AARRGGBB);
 
 
 // Timer
 // -------------------------------------------------
-//
+
+// ----------------------------------------------------------------------------
 // Timer struct holding current and end value
+// ----------------------------------------------------------------------------
 typedef struct Timer 
 {
 	float current;
@@ -52,7 +58,7 @@ bool Update_Timer(Timer* timer);
 void Loop_Timer(Timer* timer);
 
 
-// Spritesheet
+// Spritesheet (OUTDATED)
 // -------------------------------------------------
 //
 // Anim struct holding stuff
@@ -87,17 +93,29 @@ void Unload_SpriteSheet(SpriteSheet_Old* spritesheet);
 
 // AABB hitbox
 // -------------------------------------------------
-//
+
+// ----------------------------------------------------------------------------
+// AABB struct holding min and max values
+// ----------------------------------------------------------------------------
 typedef struct aabb
 {
 	AEVec2 min;
 	AEVec2 max;
 } aabb;
 
+// ----------------------------------------------------------------------------
+// Initialize AABB struct
+// ----------------------------------------------------------------------------
 aabb Init_AABB(f32 pos_x, f32 pos_y, f32 width, f32 height);
 
+// ----------------------------------------------------------------------------
+// Update AABB hitbox
+// ----------------------------------------------------------------------------
 void Update_AABB(aabb* hitbox, f32 pos_x, f32 pos_y, f32 width, f32 height);
 
+// ----------------------------------------------------------------------------
+// Draw the AABB hitbox (for debugging)
+// ----------------------------------------------------------------------------
 void Draw_AABB(f32 pos_x, f32 pos_y, aabb hitbox, Color color);
 
 
@@ -105,37 +123,47 @@ void Draw_AABB(f32 pos_x, f32 pos_y, aabb hitbox, Color color);
 // -------------------------------------------------
 //
 
+// ----------------------------------------------------------------------------
+// Load the base meshes, unit square and circle
+// ----------------------------------------------------------------------------
 void Load_Mesh(int circle_parts);
 
+// ----------------------------------------------------------------------------
+// Unloads the base meshes
+// ----------------------------------------------------------------------------
 void Unload_Mesh();
 
 
+// ----------------------------------------------------------------------------
 // Draws a rectangle
-// param UnitSquareMesh - unit square mesh of 1x1
 // param pos_x - x coordinate of center of rectangle
 // param pos_y - y coordinate of center of rectangle
 // param width - width of rectangle
 // param height - height of rectangle
 // param color - color of rectangle
+// ----------------------------------------------------------------------------
 void DrawRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color);
 
+// ----------------------------------------------------------------------------
 // Draws a rotated rectangle
-// param UnitSquareMesh - unit square mesh of 1x1
 // param pos_x - x coordinate of center of rectangle
 // param pos_y - y coordinate of center of rectangle
 // param width - width of rectangle
 // param height - height of rectangle
 // param color - color of rectangle
 // param angle - angle of rotation
+// ----------------------------------------------------------------------------
 void DrawRotatedRect(f32 pos_x, f32 pos_y, f32 width, f32 height, Color color, f32 angle);
 
+// ----------------------------------------------------------------------------
 // Determines if playeris to the left or right of the boss (1 if left, 0 if right)
 // param boss - position of boss
 // param player - position of player
+// ----------------------------------------------------------------------------
 int BossPlayerDirection(AEVec2 boss, AEVec2 player);
 
+// ----------------------------------------------------------------------------
 // Draws a text box
-// param UnitSquareMesh - unit square mesh of 1x1
 // param pos_x - x coordinate of center of text box
 // param pos_y - y coordinate of center of text box
 // param width - width of text box
@@ -144,18 +172,44 @@ int BossPlayerDirection(AEVec2 boss, AEVec2 player);
 // param font - set font type
 // param color - set text color
 // param string - string to print
+// ----------------------------------------------------------------------------
 void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
 
+// ----------------------------------------------------------------------------
+// Takes in world coords and draws text at desired position (not scaled to 
+// param pos_x - x coordinate of center of text box
+// param pos_y - y coordinate of center of text box
+// param width - width of text box
+// param height - height of text box
+// param font - set font type
+// param color - set text color
+// param string - string to print
+// param WorldToScreen - true or false, to print text on screen directly or as world object (defaults to on screen)
+// param size - scaling of text (defaults to 1)
+// ----------------------------------------------------------------------------
+void DrawTextAdvanced(f32 world_pos_x, f32 world_pos_y, s8 font, Color color, const char* string, bool WorldToScreen = false, f32 size = 1.f);
+
+// ----------------------------------------------------------------------------
 // Draws a circle
-// param UnitCircleMesh - unit circle mesh of radius 1
 // param pos_x - x coordinate of center of circle
 // param pos_y - y coordinate of center of circle
 // param radius - radius of circle
 // param color - color of circle
+// ----------------------------------------------------------------------------
 void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color);
+
+void DrawCircleAdvanced(f32 pos_x, f32 pos_y, f32 radius_x, f32 radius_y, Color color);
 
 void DrawImageAttachedToRect(f32 rectPosX, f32 rectPosY, f32 rectWidth, f32 rectHeight, AEGfxTexture* image);
 
+// ----------------------------------------------------------------------------
+// Draws an image
+// param pos_x - x coordinate of center of image
+// param pos_y - y coordinate of center of image
+// param width - width of image
+// param height - height of image
+// param rot - rotation of image
+// ----------------------------------------------------------------------------
 void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image);
 
 // Checks if two circles are intersecting

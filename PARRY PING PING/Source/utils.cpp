@@ -11,6 +11,7 @@
 #include "utils.h"
 #include <vector>
 #include <algorithm>
+#include "Camera.h"
 
 
 // Globals
@@ -131,7 +132,6 @@ SpriteSheet_Old Init_SpriteSheet(const char* texture_file, u32 rows, u32 cols, f
 	temp.cols = cols;
 	temp.uv_height = 1.f / rows;
 	temp.uv_width = 1.f / cols;
-	std::cout << temp.uv_height << ' ' << temp.uv_width << '\n';
 
 	temp.current_col = 0;
 	temp.current_row = 0;
@@ -437,6 +437,27 @@ void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font,
 	AEGfxPrint(font, string, pos_x, pos_y, size, color.R, color.G, color.B, color.A);
 }
 
+void DrawTextAdvanced(f32 pos_x, f32 pos_y, s8 font, Color color, const char* string, bool WorldToScreen, f32 size) 
+{
+	f32 NormX{}, NormY{};								// Converted world to screen pos (-800, 800) to (-1, 1) for AEGfxPrint()
+	f32 w, h;											// God bless the snippets
+	AEGfxGetPrintSize(font, string, 1.f, &w, &h);		// Find width and height of text to recenter
+	{
+
+		if (WorldToScreen) {							// Can specify in param if text should be on screen or world
+			NormX = World_To_Screen_x(pos_x) * 2.f * (1.f / f32(AEGfxGetWindowWidth()));
+			NormY = World_To_Screen_y(pos_y) * 2.f * (1.f / f32(AEGfxGetWindowHeight()));
+		}
+		else {
+			NormX = pos_x * (1.f / f32(AEGfxGetWindowWidth()));
+			NormY = pos_y * (1.f / f32(AEGfxGetWindowHeight()));
+		}
+	}
+	// Draw Text
+	AEGfxPrint(font, string, (-w * size) / 2 + NormX, (-h * size) / 2 + NormY, size, color.R, color.G, color.B, color.A);
+}
+
+
 // Draw circle
 void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color) 
 {
@@ -455,6 +476,35 @@ void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color)
 		// CONCATENATE
 		AEMtx33Concat(&Transform, &tran, &scale);
 	}
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	// Add color onto blank mesh
+	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+	// DRAW :D
+	AEGfxMeshDraw(CircleMesh, AE_GFX_MDM_TRIANGLES);
+}
+
+void DrawCircleAdvanced(f32 pos_x, f32 pos_y, f32 radius_x, f32 radius_y, Color color)
+{
+	// circle transform
+	AEMtx33 Transform = { 0 };
+
+	{
+		// Scale to radius provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, radius_x, radius_y);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &tran, &scale);
+	}
+	// Render mode
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
