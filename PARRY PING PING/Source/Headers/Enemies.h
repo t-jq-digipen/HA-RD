@@ -108,6 +108,10 @@ void Active_DummyBotRange();
 void Attack_DummyBotRange();
 void Draw_DummyBotRange();
 
+// Load and unload spritesheets
+void Load_DummyBot();
+void Unload_DummyBot();
+
 // ----------------------------------------------------------------------------
 // Inits colours!
 // ----------------------------------------------------------------------------

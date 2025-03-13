@@ -992,6 +992,7 @@ void Parrying()
 	//std::cout << "Player State: " << plystate << '\n';
 }
 
+// Refunds player ammo and reset block cooldown :>
 void Parried_Hit()
 {
 	player.state = PARRIED;

@@ -37,6 +37,8 @@ void HubWorld_Load()
 {
 	Load_Player();											// Load Player
 
+	Load_DummyBot();
+
 	// Meshes
 	Load_Mesh(20);
 	std::cout << "Hub World Loaded\n";
@@ -230,5 +232,6 @@ void HubWorld_Unload()
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
 	Unload_Mesh();
 	Unload_Player();
+	Unload_DummyBot();
 	std::cout << "HubWorld_unload";
 }
