@@ -18,6 +18,7 @@ int levelState = 0;
 
 // Font, colors, mouse coordinates
 s8 UI_font;
+s8 pixel_font;
 Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red;
 s32 UI_mouseX, UI_mouseY;
 
@@ -65,6 +66,7 @@ void Init_UI()
 
 	// Font
 	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
+	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", 72);
 
 	// Level state UI
 	play_bg = SetColor(0xFF666666);

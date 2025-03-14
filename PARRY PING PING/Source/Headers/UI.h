@@ -11,6 +11,9 @@
 #pragma once
 #include "utils.h"
 
+// Extern font for other files
+extern s8 pixel_font;
+
 // ----------------------------------------------------------------------------
 // Enumeration for level states
 // ----------------------------------------------------------------------------

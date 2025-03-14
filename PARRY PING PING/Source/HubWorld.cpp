@@ -13,6 +13,7 @@
 #include "Enemies.h"
 #include "HubWorld.h"
 #include "GameStateManager.h"
+#include "Tutorial.h"
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
@@ -38,6 +39,8 @@ void HubWorld_Load()
 	Load_Player();											// Load Player
 
 	Load_DummyBot();
+
+	Load_Tutorial();
 
 	// Meshes
 	Load_Mesh(20);
@@ -75,6 +78,9 @@ void HubWorld_Initialize()
 	// UI
 	Init_UI();																// Init UI
 
+	// Tutorial
+	Init_Tutorial();														// Init Tutorial elements
+
 	// Incrementing Level Timer
 	HubWorld_LevelTimer = 0.f;
 
@@ -102,11 +108,13 @@ void HubWorld_Update()
 		Active_DummyBotMelee();												// Update logic for dummies
 		Active_DummyBotRange();
 
+		Update_Tutorial();
+
 		// Incrementing level timer
-		if (levelState != CLEARED)
-		{
-			Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
-		}
+		//if (levelState != CLEARED)
+		//{
+		//	Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
+		//}
 
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {			// When player reaches the 'gate', start the Level 1 boss fight
 			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
@@ -180,12 +188,15 @@ void HubWorld_Draw()
 	// Player
 	Draw_Player();				// Draw player sprites 
 
+	// Tutorial
+	Draw_Tutorial();
+
 	// UI
 	// !!!TO DO!!! can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool 
 	Draw_UI(0);					// Draw UI - (0) added to not draw boss healthbar
 
 	// Level Timer
-	Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
+	// Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
 
 	AEInputShowCursor(0);						// Hides cursor
 	if (levelState == PAUSED)
@@ -233,5 +244,6 @@ void HubWorld_Unload()
 	Unload_Mesh();
 	Unload_Player();
 	Unload_DummyBot();
+	Unload_Tutorial();
 	std::cout << "HubWorld_unload";
 }

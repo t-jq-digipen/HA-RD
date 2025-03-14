@@ -39,6 +39,21 @@ typedef enum PlayerState
 } PlayerState;
 
 // ----------------------------------------------------------------------------
+// Enum for player states
+// ----------------------------------------------------------------------------
+/*!
+ * \brief struct for player melee attack.
+ */
+typedef struct Attack
+{
+    Timer timer;
+    Timer active_time;
+    int combo;
+} Attack;
+
+extern Attack melee_attack;
+
+// ----------------------------------------------------------------------------
 // Player struct
 // ----------------------------------------------------------------------------
 /*!

@@ -26,13 +26,6 @@ const float MAP_RIGHT = 500.f;
 const float MAP_TOP = 300.f;
 const float MAP_BOTTOM = -300.f;
 
-typedef struct Attack
-{
-	Timer timer;
-	Timer active_time;
-	int combo;
-} Attack;
-
 typedef struct Projectile
 {
 	AEVec2 pos;           // Position of the projectile
