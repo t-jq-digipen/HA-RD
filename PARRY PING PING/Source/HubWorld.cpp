@@ -103,6 +103,7 @@ void HubWorld_Update()
 	{
 		// Player WASD Movement
 		Update_Player();
+		player.hp = 100.f;
 
 		DummyMelee_Check = Attacked_Melee(DummyMelee_pos);					// Check for Player-Attacking-Bot detection
 		Active_DummyBotMelee();												// Update logic for dummies
@@ -241,9 +242,9 @@ void HubWorld_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
+	Unload_Tutorial();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_DummyBot();
-	Unload_Tutorial();
 	std::cout << "HubWorld_unload";
 }

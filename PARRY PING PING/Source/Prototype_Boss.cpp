@@ -89,11 +89,11 @@ void Load_Boss()
 // Initialize boss attack indicators
 void Init_Boss_Indicator()
 {
-    boss_idle = SetColor(0xFFFF6961);
-    boss_windup = SetColor(0xFFFFCF61);
-    boss_swing = SetColor(0xFFAFFF61);
-    boss_stunned = SetColor(0xFF000000);
-    boss_parried = SetColor(0xFFFF00FF);
+    boss_idle       = SetColor(0xFFFF6961);
+    boss_windup     = SetColor(0x508B0000);
+    boss_swing      = SetColor(0x808B0000);
+    boss_stunned     = SetColor(0xFF000000);
+    boss_parried    = SetColor(0xFFFF00FF);
     boss_projectile_indicator = SetColor(0xFFFF0000);
     boss_projectile_color = SetColor(0xFFFF13F0);
     boss_death_explosion_color = SetColor(0xFFED6240);
@@ -109,6 +109,7 @@ void Init_Boss()
     boss_1.width = BOSS_WIDTH;
     boss_1.height = BOSS_HEIGHT;
     boss_1.hitbox = Init_AABB(boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
+    boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
     boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
 
     // Starting state
@@ -517,14 +518,6 @@ void Draw_Boss_Hitboxes()
     }
 
 
-    // Rocket fists
-    for (const auto& fist : rocket_fists)
-    {
-        if (fist.active)
-        {
-            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
-        }
-    }
 
 }
 
@@ -757,6 +750,14 @@ void Draw_Boss()
         break;
     }
 
+    // Rocket fists
+    for (const auto& fist : rocket_fists)
+    {
+        if (fist.active)
+        {
+            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
+        }
+    }
 
 
     // Death explosion

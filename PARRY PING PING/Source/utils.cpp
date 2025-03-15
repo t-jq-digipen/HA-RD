@@ -434,6 +434,7 @@ void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font,
 	// Draw Text
 
 	AEGfxGetPrintSize(font, string, 1.f, &width, &height);
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxPrint(font, string, pos_x, pos_y, size, color.R, color.G, color.B, color.A);
 }
 
@@ -454,6 +455,7 @@ void DrawTextAdvanced(f32 pos_x, f32 pos_y, s8 font, Color color, const char* st
 		}
 	}
 	// Draw Text
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	AEGfxPrint(font, string, (-w * size) / 2 + NormX, (-h * size) / 2 + NormY, size, color.R, color.G, color.B, color.A);
 }
 

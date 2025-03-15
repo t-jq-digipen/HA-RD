@@ -71,7 +71,7 @@ f32 atk_pos_x, atk_pos_y, atk_rot;
 AEVec2 atk_dir;
 
 static float rightClickTimer = 0.f;
-const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
+const float rightClickHoldDuration = 0.25f; // 1 second hold to trigger heavy attack
 
 // MELEE ATTACK
 // =======================================================================
