@@ -13,6 +13,7 @@
 #include "Enemies.h"
 #include "HubWorld.h"
 #include "GameStateManager.h"
+#include "Tutorial.h"
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
@@ -38,6 +39,8 @@ void HubWorld_Load()
 	Load_Player();											// Load Player
 
 	Load_DummyBot();
+
+	Load_Tutorial();
 
 	// Meshes
 	Load_Mesh(20);
@@ -75,6 +78,9 @@ void HubWorld_Initialize()
 	// UI
 	Init_UI();																// Init UI
 
+	// Tutorial
+	Init_Tutorial();														// Init Tutorial elements
+
 	// Incrementing Level Timer
 	HubWorld_LevelTimer = 0.f;
 
@@ -97,16 +103,19 @@ void HubWorld_Update()
 	{
 		// Player WASD Movement
 		Update_Player();
+		player.hp = 100.f;
 
 		DummyMelee_Check = Attacked_Melee(DummyMelee_pos);					// Check for Player-Attacking-Bot detection
 		Active_DummyBotMelee();												// Update logic for dummies
 		Active_DummyBotRange();
 
+		Update_Tutorial();
+
 		// Incrementing level timer
-		if (levelState != CLEARED)
-		{
-			Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
-		}
+		//if (levelState != CLEARED)
+		//{
+		//	Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
+		//}
 
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {			// When player reaches the 'gate', start the Level 1 boss fight
 			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
@@ -141,19 +150,19 @@ void HubWorld_Draw()
 	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
 
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
-	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
+	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white,		"CAMPFIRE", true);
 
 	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE", true);
+	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white,			"SHRINE [WIP]", true);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS", true);
+	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white,	"MODIFIERS [WIP]", true);
 
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
 	// Draw Instructions
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
+	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
 	{
 		DrawTextAdvanced(Txt_Controls.Pos.x, Txt_Controls.Pos.y, hubworld_font, hubworld_white, "CONTROLS:", true);
 		DrawTextAdvanced(Txt_Movement.Pos.x, Txt_Movement.Pos.y, hubworld_font, hubworld_white, "WASD to move, Space to Dash", true);
@@ -162,14 +171,14 @@ void HubWorld_Draw()
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 100.f, hubworld_font, hubworld_white, "Right Click - Shoot (up to 3 ammo)", true);
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 150.f, hubworld_font, hubworld_white, "Right Hold - *FIRE LASER (requires 3 ammo)", true);
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 200.f, hubworld_font, hubworld_white, "*Laser causes player to recoil.", true);
-	}
+	}*/
 
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
+	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
 		AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyRange_pos.x, DummyRange_pos.y - 50.f, player.width, player.height))
 	{
 		DrawTextAdvanced(DummyMelee_pos.x + 100.f, DummyMelee_pos.y + 150.f, hubworld_font, hubworld_white, "Press E to parry these attacks!", true);
 		DrawTextAdvanced(DummyMelee_pos.x + 50.f, DummyMelee_pos.y + 100.f, hubworld_font, hubworld_white, "Parrying takes time to recharge, use wisely!", true);
-	}
+	}*/
 
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{
@@ -180,12 +189,15 @@ void HubWorld_Draw()
 	// Player
 	Draw_Player();				// Draw player sprites 
 
+	// Tutorial
+	Draw_Tutorial();
+
 	// UI
 	// !!!TO DO!!! can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool 
 	Draw_UI(0);					// Draw UI - (0) added to not draw boss healthbar
 
 	// Level Timer
-	Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
+	// Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
 
 	AEInputShowCursor(0);						// Hides cursor
 	if (levelState == PAUSED)
@@ -230,6 +242,7 @@ void HubWorld_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
+	Unload_Tutorial();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_DummyBot();

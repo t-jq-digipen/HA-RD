@@ -38,7 +38,7 @@ int dummy_check;
 Timer cleartransitiontimer;
 float levelTimer;
 
-bool showBossHitboxes = false;
+bool showBossHitboxes = true;
 
 
 
@@ -130,10 +130,10 @@ void Level1_Update()
 		AEInputShowCursor(0);
 	}
 
-	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
-	{
-		ToggleBossHitboxes();
-	}
+	//if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
+	//{
+	//	ToggleBossHitboxes();
+	//}
 
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
@@ -261,23 +261,28 @@ void Level1_Draw()
 	// Level Timer
 	Draw_LevelTimer(levelTimer);
 
+	AEInputShowCursor(0);
 	if (levelState == PAUSED)
 	{
 		Draw_PauseMenu();
+		AEInputShowCursor(1);
 	}
 	else if (levelState == GAMEOVER)
 	{
 		Draw_GameOverMenu();
+		AEInputShowCursor(1);
 	}
 	else if (levelState == OPTIONS)
 	{
 		Draw_OptionsMenu();
+		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&cleartransitiontimer))
 		{
 			Draw_ClearMenu();
+			AEInputShowCursor(1);
 		}
 	}
 }
