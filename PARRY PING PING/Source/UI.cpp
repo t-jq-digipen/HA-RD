@@ -48,7 +48,7 @@ SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ss
 UIScreen uiscreen;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -115,6 +115,9 @@ void Init_UI()
 	// BGM and SFX
 	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
 	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
+	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
+	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
+	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
 
 	// BGM and SFX (Audio Groups)
 	gameBGM = AEAudioCreateGroup();

@@ -14,6 +14,9 @@
 // Extern font for other files
 extern s8 pixel_font;
 
+extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj;
+extern AEAudioGroup gameBGM, gameSFX;
+
 // ----------------------------------------------------------------------------
 // Enumeration for level states
 // ----------------------------------------------------------------------------

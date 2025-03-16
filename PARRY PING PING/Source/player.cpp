@@ -54,6 +54,7 @@ const float PLAYER_DRAW_HEIGHT = 250.f;
 const float PLAYER_HITBOX_WIDTH = 80.f;
 const float PLAYER_HITBOX_HEIGHT = 120.f;
 
+
 Player player;
 Attack melee_attack;
 Timer ranged_attack;
@@ -480,6 +481,10 @@ void Attacking_Ranged()
 
 			melee_attack.active_time.current = 1.f;
 			melee_attack.timer.current = 1.f;
+
+			// **Play the light projectile sound effect**
+			std::cout << "Laser sound triggered!\n";  // Debugging
+			AEAudioPlay(heavyProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
 		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f)
@@ -494,6 +499,10 @@ void Attacking_Ranged()
 
 			melee_attack.active_time.current = 1.f;
 			melee_attack.timer.current = 1.f;
+
+			// **Play the light projectile sound effect**
+			std::cout << "Light projectile sound triggered!\n";  // Debugging
+			AEAudioPlay(lightProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
 
@@ -954,6 +963,7 @@ void Parrying()
 		{
 			player.state = PARRY;
 			std::cout << "parrying";
+
 		}
 		else if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
@@ -997,6 +1007,9 @@ void Parried_Hit()
 
 	// reset block cooldown
 	player.blocktimer.current = 1.f;
+
+	std::cout << "Parry sound triggered!\n";
+	AEAudioPlay(parryFX, gameSFX, 1.0f, 1.0f, 0);
 }
 
 const f32 BLOCK_REDUCTION = 0.5f;
