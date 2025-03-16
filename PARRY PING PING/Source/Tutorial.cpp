@@ -281,9 +281,9 @@ void Update_Tutorial_Parry()
 
 bool toofar;
 
-void Update_Arrow()
+void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 {
-	AEVec2 dummy{ 600.f, 200.f };
+	AEVec2 dummy{ target_pos_x, target_pos_y };
 
 	AEVec2Sub(&arrowdir, &dummy, &player.pos);
 	if (AEVec2Length(&arrowdir) > 500.f)
@@ -344,7 +344,7 @@ void Update_Tutorial()
 		{
 			active = false;
 		}
-		Update_Arrow();
+		Update_Arrow(600.f,200.f);
 		switch (tutstate)
 		{
 		case TUTORIAL_MOVEMENT:
@@ -383,6 +383,7 @@ void Update_Tutorial()
 	}
 	else
 	{
+		Update_Arrow(0.f, 550.f);
 		if (AEInputCheckTriggered(AEVK_T))
 		{
 			Reset_Tutorial();
@@ -407,7 +408,7 @@ void DrawCheckmark(f32 pos_x, f32 pos_y)
 	}
 }
 
-void DrawArrow()
+void DrawArrow(f32 target_x, f32 target_y)
 {
 	arrow_sprite.Set_Row(0);
 	arrow_sprite.Loop(0, 1, .5f);
@@ -419,7 +420,7 @@ void DrawArrow()
 	}
 	else
 	{
-		arrow_sprite.Draw(World_To_Screen_x(600.f), World_To_Screen_y(400.f), button_size.x, button_size.y, false, 3.f*PI/2.f);
+		arrow_sprite.Draw(World_To_Screen_x(target_x), World_To_Screen_y(target_y), button_size.x, button_size.y, false, 3.f*PI/2.f);
 	}
 }
 
@@ -469,7 +470,7 @@ void Draw_Tutorial()
 			DrawTextAdvanced(-800.f, 75.f, pixel_font, tutgray,		"Each hit restores ammo", false, .2f);
 
 			// Images
-			DrawArrow();
+			DrawArrow(600.f, 400.f);
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -499,7 +500,7 @@ void Draw_Tutorial()
 			DrawTextAdvanced(-800.f, -175.f, pixel_font, tutgray,	"much faster!                 ", false, .2f);
 
 			// Images
-			DrawArrow();
+			DrawArrow(600.f, 400.f);
 
 			for (int i = 0; i < 2; i++)
 			{
@@ -531,7 +532,7 @@ void Draw_Tutorial()
 			DrawTextAdvanced(-800.f, -250.f, pixel_font, tutgray,	"the enemy!             ", false, .2f);
 
 			// Images
-			DrawArrow();
+			DrawArrow(600.f, 400.f);
 
 			for (int i = 0; i < 2; i++)
 			{
@@ -551,7 +552,10 @@ void Draw_Tutorial()
 			if (Update_Timer(&transition_timer))
 			{
 				DrawTextAdvanced(0.f, 300.f, pixel_font, tutgreen, "Good job!", false);
-				
+				if (nextstate == TUTORIAL_CLEAR)
+				{
+					DrawTextAdvanced(0.f, 200.f, pixel_font, tutwhite, "Press T to bring up the tutorial again :)", false, 0.3);
+				}
 			}
 			else
 			{
@@ -559,10 +563,13 @@ void Draw_Tutorial()
 			}
 		}
 		break;	// TRANSITION
+
+		case TUTORIAL_CLEAR:
 		default:
 			break;
-		}		// switch tutstate
+		}			// switch tutstate
 
 
-	}
+	}				// if active
+	DrawArrow(0.f, 750.f);	// Point to gate
 }

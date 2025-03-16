@@ -162,7 +162,7 @@ void HubWorld_Draw()
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
 	// Draw Instructions
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
+	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
 	{
 		DrawTextAdvanced(Txt_Controls.Pos.x, Txt_Controls.Pos.y, hubworld_font, hubworld_white, "CONTROLS:", true);
 		DrawTextAdvanced(Txt_Movement.Pos.x, Txt_Movement.Pos.y, hubworld_font, hubworld_white, "WASD to move, Space to Dash", true);
@@ -171,14 +171,14 @@ void HubWorld_Draw()
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 100.f, hubworld_font, hubworld_white, "Right Click - Shoot (up to 3 ammo)", true);
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 150.f, hubworld_font, hubworld_white, "Right Hold - *FIRE LASER (requires 3 ammo)", true);
 		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 200.f, hubworld_font, hubworld_white, "*Laser causes player to recoil.", true);
-	}
+	}*/
 
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
+	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
 		AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyRange_pos.x, DummyRange_pos.y - 50.f, player.width, player.height))
 	{
 		DrawTextAdvanced(DummyMelee_pos.x + 100.f, DummyMelee_pos.y + 150.f, hubworld_font, hubworld_white, "Press E to parry these attacks!", true);
 		DrawTextAdvanced(DummyMelee_pos.x + 50.f, DummyMelee_pos.y + 100.f, hubworld_font, hubworld_white, "Parrying takes time to recharge, use wisely!", true);
-	}
+	}*/
 
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{

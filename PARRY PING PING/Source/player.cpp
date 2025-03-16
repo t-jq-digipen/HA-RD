@@ -456,10 +456,11 @@ const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
-	if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
-	{
-		player.ammo += 1;
-	}
+	// Only for debugging!
+	//if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
+	//{
+	//	player.ammo += 1;
+	//}
 
 
 	if (player.ammo > 0)
@@ -879,27 +880,27 @@ void Movement() {
 
 		if (!dodge_cd)
 		{
-			if (AEInputCheckTriggered(AEVK_SPACE))
+			AEVec2 input = { 0,0 };
+			if (AEInputCheckCurr(AEVK_W))
 			{
-				AEVec2 input = { 0,0 };
-				if (AEInputCheckCurr(AEVK_W))
-				{
-					input.y += 1.f;
-				}
-				if (AEInputCheckCurr(AEVK_A))
-				{
-					input.x -= 1.f;
-					player.direction_h = LEFT;
-				}
-				if (AEInputCheckCurr(AEVK_S))
-				{
-					input.y -= 1.f;
-				}
-				if (AEInputCheckCurr(AEVK_D))
-				{
-					input.x += 1.f;
-					player.direction_h = RIGHT;
-				}
+				input.y += 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_A))
+			{
+				input.x -= 1.f;
+				player.direction_h = LEFT;
+			}
+			if (AEInputCheckCurr(AEVK_S))
+			{
+				input.y -= 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_D))
+			{
+				input.x += 1.f;
+				player.direction_h = RIGHT;
+			}
+			if (AEInputCheckTriggered(AEVK_SPACE) && (input.x || input.y))
+			{
 				AEVec2Set(&player.dodge_vel, input.x, input.y);
 				AEVec2Normalize(&player.dodge_vel, &player.dodge_vel);
 				player.state = DODGE;

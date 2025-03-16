@@ -38,7 +38,7 @@ int dummy_check;
 Timer cleartransitiontimer;
 float levelTimer;
 
-bool showBossHitboxes = false;
+bool showBossHitboxes = true;
 
 
 
@@ -130,10 +130,10 @@ void Level1_Update()
 		AEInputShowCursor(0);
 	}
 
-	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
-	{
-		ToggleBossHitboxes();
-	}
+	//if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
+	//{
+	//	ToggleBossHitboxes();
+	//}
 
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
