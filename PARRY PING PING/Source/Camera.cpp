@@ -17,7 +17,10 @@
 AEVec2	cam_origin,		// Spawn of camera
 		cam_pos,		// Position of camera
 		cam_shift,		// Offset between camera spawn and current position
-		mouse_shift;	// Offset based on mouse movement
+		mouse_shift,	// Offset based on mouse movement
+		temp_campos;	// Stores locked position of camera
+
+bool LockCamera = false;
 
 void Init_Camera() 
 {
@@ -34,11 +37,18 @@ void Update_Camera()
 	cam_pos.y = player.pos.y;
 
 	// Update shift amount
-	cam_shift.x = cam_pos.x - cam_origin.x;
-	cam_shift.y = cam_pos.y - cam_origin.y;
+	if (!LockCamera) 
+	{
+		cam_shift.x = cam_pos.x - cam_origin.x;
+		cam_shift.y = cam_pos.y - cam_origin.y;
+		temp_campos = cam_pos;
+	}
+
+	
 
 	// Update mouse shift
 	AEVec2Set(&mouse_shift, Mouse.x/3.5f, Mouse.y/3.f);
+	if (!LockCamera)
 	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 }
 
@@ -61,3 +71,7 @@ f32 Screen_To_World_y(f32 pos_y)
 {
 	return pos_y + cam_shift.y;
 }
+
+//void Pan_Camera(s8 dir_vert, s8 dir_hor, f32 distance, f32 speed) {
+//
+//}

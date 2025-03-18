@@ -14,19 +14,20 @@
 #include "HubWorld.h"
 #include "GameStateManager.h"
 #include "Tutorial.h"
+#include "Camera.h"
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
-EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{-600.f, 300.f, 100.f, 200.f};
+EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
 EnvStruct Txt_Controls{ 0.f, 200.f, 200.f, 100.f }, Txt_Movement{ 0.f, 150.f, 200.f, 100.f }, Txt_Attack{ 0.f, -100.f, 200.f, 100.f };
-f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{50.f};
+f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{ 50.f };
 
 // TEMPORARY - Placeholder for sprites to be added
 Color hubworld_white;
 s8  hubworld_font;
 
 // Fade from black transition when level starts
-Color FadeIn;
+Color FadeIn, FadeOut;
 f32 FadeInSpeed;
 
 int DummyMelee_Check;										// Check for dummy logic
@@ -60,8 +61,9 @@ void HubWorld_Initialize()
 	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
 	hubworld_white = SetColor(0xFFFFFFFF);
 
-	FadeIn = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
+	FadeIn = FadeOut = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
 	FadeInSpeed = 0.01f;
+	FadeOut.A = 0.f;
 
 	// Player
 	Init_Player();															// Init Player
@@ -119,7 +121,7 @@ void HubWorld_Update()
 
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {			// When player reaches the 'gate', start the Level 1 boss fight
 			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
-			nextState = GS_LEVEL1;														
+			nextState = GS_LEVEL1;
 		}
 	}
 
@@ -138,7 +140,7 @@ void HubWorld_Draw()
 	Update_Camera();															// Camera drawing logic
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
-	AEGfxSetBlendMode(AE_GFX_BM_BLEND);	
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 
 	//Draw Parry Bots	
@@ -150,13 +152,13 @@ void HubWorld_Draw()
 	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
 
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
-	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white,		"CAMPFIRE", true);
+	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
 
 	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white,			"SHRINE [WIP]", true);
+	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE [WIP]", true);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white,	"MODIFIERS [WIP]", true);
+	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
 
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
@@ -183,6 +185,25 @@ void HubWorld_Draw()
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{
 		DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
+	}
+	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f)), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f, SetColor(0xFFFF6961));
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f))
+	{
+		//cool little fade in effect
+		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
+		FadeOut.A += FadeInSpeed;
+		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
+		if (FadeOut.A > .8f) FadeOut.A = .8f;
+		LockCamera = true;
+	}
+	else
+	{
+		if (!(FadeOut.A < 0.f)) {
+			DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);
+			FadeOut.A -= FadeInSpeed;
+		}
+		else FadeOut.A = 0.f;
+		LockCamera = false;
 	}
 
 
