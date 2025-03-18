@@ -381,14 +381,14 @@ std::string playerName = "TEST PLEASE";  // Store player's typed name
 
 void HandleTextInput()
 {
-	// Check if a key is pressed
+	// Check if the backspace key is pressed and the player name is not empty
 	if (AEInputCheckTriggered(AEVK_BACK) && playerName.length() > 0)
 	{
 		// Remove the last character (backspace)
 		playerName.pop_back();
 	}
 
-	// Loop through the possible printable characters
+	// Loop through the possible printable characters (A-Z)
 	for (int i = AEVK_A; i <= AEVK_Z; ++i) {
 		if (AEInputCheckTriggered(i)) {
 			// Append the character to the player's name
@@ -396,14 +396,20 @@ void HandleTextInput()
 		}
 	}
 
-	// Allow digits and other characters as well if needed
+	// Allow digits (0-9)
 	for (int i = AEVK_0; i <= AEVK_9; ++i) {
 		if (AEInputCheckTriggered(i)) {
 			// Append the number to the player's name
 			playerName.push_back(static_cast<char>('0' + (i - AEVK_0)));
 		}
 	}
+
+	// Allow the space bar to insert spaces
+	if (AEInputCheckTriggered(AEVK_SPACE)) {
+		playerName.push_back(' '); // Append a space to the player's name
+	}
 }
+
 
 // Open the level complete screen when player beats the boss
 void Draw_ClearMenu()
