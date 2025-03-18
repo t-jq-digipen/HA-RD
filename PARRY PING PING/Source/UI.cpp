@@ -428,7 +428,7 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
-			SubmitScore("Fauz", newScore);
+			addLeaderboardEntry("Fauz", newScore);
 		}
 	}
 	else
@@ -775,13 +775,33 @@ void Update_LevelScore()
 }
 
 
-void ReadLeaderboard() {
-	system("py leaderboard_helper.py read");
+void fetchLeaderboard() {
+	// Call the Python script to fetch the leaderboard
+	std::cout << "Fetching leaderboard..." << std::endl;
+	int result = system("py leaderboard_helper.py");
+
+	if (result != 0) {
+		std::cout << "Error fetching leaderboard!" << std::endl;
+	}
+	else {
+		std::cout << "Leaderboard fetched successfully!" << std::endl;
+	}
 }
 
-void SubmitScore(const std::string& name, int score) {
-	std::string command = "py leaderboard_helper.py write \"" + name + "\" " + std::to_string(score);
-	system(command.c_str());
+void addLeaderboardEntry(const std::string& playerName, int score) {
+	// Prepare the command to call the Python script with parameters
+	std::string command = "py leaderboard_helper.py " + playerName + " " + std::to_string(score);
+
+	// Call the Python script to add a new leaderboard entry
+	std::cout << "Adding leaderboard entry..." << std::endl;
+	int result = system(command.c_str());
+
+	if (result != 0) {
+		std::cout << "Error adding leaderboard entry!" << std::endl;
+	}
+	else {
+		std::cout << "Leaderboard entry added successfully!" << std::endl;
+	}
 }
 
 

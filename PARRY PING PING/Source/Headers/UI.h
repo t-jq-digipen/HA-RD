@@ -156,6 +156,6 @@ void Draw_Points();
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
 
-void SubmitScore(const std::string& name, int score);
+void fetchLeaderboard();
 
-void ReadLeaderboard();
+void addLeaderboardEntry(const std::string& playerName, int score);
