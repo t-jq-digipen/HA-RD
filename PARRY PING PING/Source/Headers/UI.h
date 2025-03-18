@@ -32,7 +32,7 @@ enum LEVEL_STATE
 extern int levelState;
 extern float levelTimer;
 extern int currentScore;
-extern bool displayPointsAccumulated;
+extern bool displayPointsAccumulated, isInputDisabled;
 extern int pointsAccumulated;
 extern Timer displayPointsTimer;
 
@@ -55,7 +55,7 @@ typedef struct UIScreen
 	SpriteSheet_Old* spritesheet_bar2;
 
 	Timer animationtimer;
-	int isPlayClicked;
+	int isPlayClicked, isSubmitClicked;
 	int isOptionsClicked;
 	int isExitClicked;
 	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;

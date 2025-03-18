@@ -438,6 +438,7 @@ void DrawTextBox(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font,
 	AEGfxPrint(font, string, pos_x, pos_y, size, color.R, color.G, color.B, color.A);
 }
 
+
 void DrawTextAdvanced(f32 pos_x, f32 pos_y, s8 font, Color color, const char* string, bool WorldToScreen, f32 size) 
 {
 	f32 NormX{}, NormY{};								// Converted world to screen pos (-800, 800) to (-1, 1) for AEGfxPrint()

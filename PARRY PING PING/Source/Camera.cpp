@@ -12,6 +12,7 @@
 
 #include "Camera.h"
 #include "player.h"
+#include "UI.h"
 
 
 AEVec2	cam_origin,		// Spawn of camera
@@ -29,6 +30,7 @@ void Init_Camera()
 
 void Update_Camera() 
 {
+	if (isInputDisabled) return;  // If input is disabled, do nothing
 	// Update camera position to player
 	cam_pos.x = player.pos.x;
 	cam_pos.y = player.pos.y;

@@ -112,8 +112,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Source\leaderboard_helper.py">
+    <Text Include="..\Source\leaderboard_helper.py">
       <Filter>Source Files</Filter>
-    </None>
+    </Text>
   </ItemGroup>
 </Project>

@@ -16,6 +16,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <direct.h>
 
 // Level number
 int levelState = 0;
@@ -281,6 +282,7 @@ void Draw_PauseMenu()
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
 
+
 	// Pause menu screen
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_screen, 0, 1, 1, Create_Timer(1.f), 1.f);
@@ -373,9 +375,40 @@ void Draw_PauseMenu()
 	}
 }
 
+bool isInputDisabled = false;  // Flag to disable player input
+
+std::string playerName = "TEST PLEASE";  // Store player's typed name
+
+void HandleTextInput()
+{
+	// Check if a key is pressed
+	if (AEInputCheckTriggered(AEVK_BACK) && playerName.length() > 0)
+	{
+		// Remove the last character (backspace)
+		playerName.pop_back();
+	}
+
+	// Loop through the possible printable characters
+	for (int i = AEVK_A; i <= AEVK_Z; ++i) {
+		if (AEInputCheckTriggered(i)) {
+			// Append the character to the player's name
+			playerName.push_back(static_cast<char>('A' + (i - AEVK_A)));
+		}
+	}
+
+	// Allow digits and other characters as well if needed
+	for (int i = AEVK_0; i <= AEVK_9; ++i) {
+		if (AEInputCheckTriggered(i)) {
+			// Append the number to the player's name
+			playerName.push_back(static_cast<char>('0' + (i - AEVK_0)));
+		}
+	}
+}
+
 // Open the level complete screen when player beats the boss
 void Draw_ClearMenu()
 {
+	isInputDisabled = true;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -388,6 +421,7 @@ void Draw_ClearMenu()
 	{
 		uiscreen.animationtimer.current = 0.f;
 	}
+
 
 	// play button (click to go to Level1 state)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -50.f, 300.f, 200.f, 0.f);
@@ -414,7 +448,15 @@ void Draw_ClearMenu()
 	}
 
 	// exit button (click to go to quit state)
+	// Inside your menu or game loop
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
+	// Test with a position close to the center of the screen
+	DrawTextBox(0.f, 0.f, 300.f, 50.f, 1.0f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
+
+
+	// Handle text input
+	HandleTextInput();
+
 
 	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
@@ -428,14 +470,18 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
-			addLeaderboardEntry("Fauz", newScore);
+			addLeaderboardEntry(playerName.c_str(), newScore);
+			isInputDisabled = false;
+
 		}
 	}
+
 	else
 	{
 		uiscreen.isExitClicked = 0;
 		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
+
 }
 
 // Open the options menu when player accesses options from the pause menu
@@ -778,7 +824,7 @@ void Update_LevelScore()
 void fetchLeaderboard() {
 	// Call the Python script to fetch the leaderboard
 	std::cout << "Fetching leaderboard..." << std::endl;
-	int result = system("py leaderboard_helper.py");
+	int result = system("py \\Assets\\leaderboard_helper.py");
 
 	if (result != 0) {
 		std::cout << "Error fetching leaderboard!" << std::endl;
@@ -790,7 +836,16 @@ void fetchLeaderboard() {
 
 void addLeaderboardEntry(const std::string& playerName, int score) {
 	// Prepare the command to call the Python script with parameters
-	std::string command = "py leaderboard_helper.py " + playerName + " " + std::to_string(score);
+	//std::string command = "py \"C:\\Users\\fauza\\OneDrive\\Desktop\\CSD1451\\AvidParryEnjoyers\\csd1451s25_team_avidparryenjoyers\\PARRY PING PING\\Source\\leaderboard_helper.py\" " + playerName + " " + std::to_string(score);
+
+		// Get the current working directory
+	char buffer[MAX_PATH];
+	_getcwd(buffer, MAX_PATH);  // Get current directory
+	std::string currentDir(buffer);
+
+	// Now construct the command to call the Python script
+	std::string command = "py \"" + currentDir + "\\Assets\\leaderboard_helper.py\" " + playerName + " " + std::to_string(score);
+
 
 	// Call the Python script to add a new leaderboard entry
 	std::cout << "Adding leaderboard entry..." << std::endl;
