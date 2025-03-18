@@ -13,6 +13,9 @@
 #include "GameStateManager.h"
 #include "SpriteSheet.h"
 #include "player.h"
+#include <iostream>
+#include <cstdlib>
+#include <string>
 
 // Level number
 int levelState = 0;
@@ -425,6 +428,7 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
+			SubmitScore("Fauz", newScore);
 		}
 	}
 	else
@@ -768,6 +772,16 @@ void Update_LevelScore()
 	{
 		currentScore = newScore;
 	}
+}
+
+
+void ReadLeaderboard() {
+	system("py leaderboard_helper.py read");
+}
+
+void SubmitScore(const std::string& name, int score) {
+	std::string command = "py leaderboard_helper.py write \"" + name + "\" " + std::to_string(score);
+	system(command.c_str());
 }
 
 
