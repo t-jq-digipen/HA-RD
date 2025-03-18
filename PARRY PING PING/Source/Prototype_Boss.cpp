@@ -79,6 +79,12 @@ const f32 SWEEP_HEIGHT = 600.f;
 f32 x_offset = 0.f;
 bool will_hit = true;
 
+// Level score update values
+const int SCORE_BOSS_PROJECTILES_PARRIED = 5000; // + 5000 points if boss rocket successfully parried
+const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successfully stunned via parry
+const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
+const int SCORE_TIME_BONUS = 1000; // + 1000 points for every second of time left less than the 1 minute cap
+
 // Load boss assets
 void Load_Boss()
 {
@@ -276,6 +282,7 @@ void Update_Boss()
                         switch (player.state) {
                         case PARRY:
                             Parried_Hit();
+                            Collect_Points(SCORE_BOSS_PROJECTILES_PARRIED);
                             break;
                         case BLOCK:
                             Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
@@ -303,6 +310,14 @@ void Update_Boss()
         {
             boss_1.state = BOSS_DEAD;
             boss_1.death_explosion_duration.current = boss_1.explosion_timer.current = 0.f;
+
+            // Adds time bonus (checks if time left is under _lthe 1 minute cap)
+            f32 timeLeft = SCORE_TIME_BONUS_CAP - levelTimer;
+            if (timeLeft <= 0.f)
+            {
+                timeLeft = 0.f;
+            }
+            Collect_Points(static_cast<int>(timeLeft) * SCORE_TIME_BONUS);
         }
 
         // Update Boss UI
@@ -1089,6 +1104,7 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
             boss_1.state = BOSS_PARRIED;
             boss_1.attack_type = 0;
             bullet_time.current = 0.f;
+            Collect_Points(SCORE_BOSS_MELEE_PARRIED);
             std::cout << "Boss parried\n";
         }
         else

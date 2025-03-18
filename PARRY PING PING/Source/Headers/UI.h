@@ -30,6 +30,11 @@ enum LEVEL_STATE
 };
 
 extern int levelState;
+extern float levelTimer;
+extern int currentScore;
+extern bool displayPointsAccumulated;
+extern int pointsAccumulated;
+extern Timer displayPointsTimer;
 
 // ----------------------------------------------------------------------------
 // Structure for UI screen sprites
@@ -130,3 +135,23 @@ void Draw_ClearMenu();
 // Draw the level timer
 // ----------------------------------------------------------------------------
 void Draw_LevelTimer(float time_elapsed);
+
+// ----------------------------------------------------------------------------
+// Draw the level score
+// ----------------------------------------------------------------------------
+void Draw_LevelScore();
+
+// ----------------------------------------------------------------------------
+// Accumulate points
+// ----------------------------------------------------------------------------
+void Collect_Points(int value);
+
+// ----------------------------------------------------------------------------
+// Draw points accumulated
+// ----------------------------------------------------------------------------
+void Draw_Points();
+
+// ----------------------------------------------------------------------------
+// Update the level score
+// ----------------------------------------------------------------------------
+void Update_LevelScore();

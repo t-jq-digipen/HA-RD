@@ -12,9 +12,18 @@
 #include "Boss1.h"
 #include "GameStateManager.h"
 #include "SpriteSheet.h"
+#include "player.h"
 
 // Level number
 int levelState = 0;
+float levelTimer = 0.f;
+
+// Level soore
+int currentScore = 0;
+int newScore = 0;
+int pointsAccumulated = 0;
+bool displayPointsAccumulated = false;
+Timer displayPointsTimer;
 
 // Font, colors, mouse coordinates
 s8 UI_font;
@@ -39,6 +48,10 @@ Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 // Level Timer
 char level_timer[16];
+
+// Level Score
+char points[16];
+char level_score[16];
 
 // Crosshair
 SpriteSheet crosshair;
@@ -82,6 +95,13 @@ void Init_UI()
 
 	// Starting level state
 	levelState = PLAYING;
+
+	// Level score
+	currentScore = 0;
+	newScore = 0;
+	pointsAccumulated = 0;
+	displayPointsAccumulated = false;
+	displayPointsTimer = Create_Timer(1.f);
 
 	// Menu Buttons
 	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 7, 8, 1.f);
@@ -687,10 +707,69 @@ void Draw_LevelTimer(float time_elapsed)
 	int seconds = static_cast<int>(time_elapsed) % 60;
 	int milliseconds = static_cast<int>((time_elapsed - static_cast<int>(time_elapsed)) * 100);
 
-	snprintf(level_timer, sizeof(level_timer), "%02d:%02d:%02d", minutes, seconds, milliseconds);
+	snprintf(level_timer, sizeof(level_timer), "Time: %02d:%02d:%02d", minutes, seconds, milliseconds);
 
-	DrawTextBox(0.5f, -0.9f, 200.f, 100.f, 1.f, UI_font, UI_black, level_timer);
+	DrawTextBox(0.3f, -0.9f, 200.f, 100.f, 0.8f, UI_font, UI_white, level_timer);
 }
+
+// Draw the level score
+void Draw_LevelScore()
+{
+	snprintf(level_score, sizeof(level_score), "Score: %d", currentScore);
+
+	DrawTextBox(0.3f, -0.7f, 200.f, 100.f, 0.8f, UI_font, UI_white, level_score);
+}
+
+// Accumulate points
+void Collect_Points(int value)
+{
+	currentScore = newScore;
+	pointsAccumulated += value;
+	displayPointsAccumulated = true;
+	displayPointsTimer.current = 0.f;
+}
+
+// Draw accumulated points
+void Draw_Points()
+{
+	std::cout << pointsAccumulated << '\n';
+	if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
+	{
+		if (pointsAccumulated > 0)
+		{
+			snprintf(points, sizeof(points), "+%d", pointsAccumulated);
+			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, UI_font, UI_green, points, true, 0.7f);
+		}
+		else if (pointsAccumulated < 0)
+		{
+			snprintf(points, sizeof(points), "%d", pointsAccumulated);
+			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, UI_font, UI_red, points, true, 0.7f);
+		}
+	}
+	else
+	{
+		displayPointsAccumulated = false;
+		newScore = currentScore + pointsAccumulated;
+		pointsAccumulated = 0;
+	}
+}
+
+void Update_LevelScore()
+{
+	if (currentScore + 10000 < newScore)
+	{
+		currentScore += 1000.f;
+	}
+	else if (currentScore < newScore)
+	{
+		currentScore += 100.f;
+	}
+	else
+	{
+		currentScore = newScore;
+	}
+}
+
 
 // Draw full hp bar
 // pos_x1, pos_y1 - position of top left corner

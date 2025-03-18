@@ -36,10 +36,8 @@ f32 StunCounter{ 0.f };
 int dummy_check;
 
 Timer cleartransitiontimer;
-float levelTimer;
 
 bool showBossHitboxes = true;
-
 
 
 void Level1_Load()
@@ -105,6 +103,10 @@ void Level1_Initialize()
 
 	// Incrementing Level Timer
 	levelTimer = 0.f;
+
+	// Level Score
+	currentScore = 0;
+	displayPointsAccumulated = false;
 
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(5.f);
@@ -260,6 +262,18 @@ void Level1_Draw()
 
 	// Level Timer
 	Draw_LevelTimer(levelTimer);
+	
+	// Level Score
+	Draw_LevelScore();
+
+	if (displayPointsAccumulated)
+	{
+		Draw_Points();
+	}
+	else
+	{
+		Update_LevelScore();
+	}
 
 	AEInputShowCursor(0);
 	if (levelState == PAUSED)

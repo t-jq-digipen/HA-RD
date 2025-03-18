@@ -26,6 +26,12 @@ const float MAP_RIGHT = 500.f;
 const float MAP_TOP = 300.f;
 const float MAP_BOTTOM = -300.f;
 
+// Define level score update values
+const int SCORE_MELEE_HIT = 10; // + 10 points (multiplied by ATTACK_DAMAGE) per frame
+const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
+const int SCORE_HEAVY_LASER_HIT = 50; // + 50 points per frame
+const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
+
 typedef struct Projectile
 {
 	AEVec2 pos;           // Position of the projectile
@@ -293,6 +299,7 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 		{
 			*check_hit = melee_attack.combo;
 			*damage = ATTACK_DAMAGE[melee_attack.combo];
+			Collect_Points(SCORE_MELEE_HIT * static_cast<int>(*damage));
 			return true;
 		}
 		else if (!melee_attack.combo)
@@ -416,6 +423,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
 				std::cout << "Heavy Attack Hit!\n";
+				Collect_Points(SCORE_HEAVY_LASER_HIT);
 			}
 			else {
 				std::cout << "NO HIT\n";
@@ -426,6 +434,7 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			*damage = 5.f;  // Light attack damage
 			hit = true;
 			proj.isActive = false; // Deactivate light projectile after hit
+			Collect_Points(SCORE_LIGHT_PROJECTILE_HIT); // Update score when light projectile hits
 			std::cout << "Light Attack Hit!\n";
 		}
 	}
@@ -1019,6 +1028,7 @@ void Blocked_Hit(f32 damage)
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
 	player.hp -= damage * BLOCK_REDUCTION;
+	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT);
 }
 
 void Eat_Hit(f32 damage)
@@ -1027,6 +1037,7 @@ void Eat_Hit(f32 damage)
 	player.state = HIT;
 	player.hittimer.current = 0.f;
 	player.hp -= damage;
+	Collect_Points(damage * SCORE_PLAYER_EAT_HIT);
 }
 
 
@@ -1251,6 +1262,10 @@ void Update_Player()
 	else
 	{
 		levelState = GAMEOVER;
+
+		// Halves the score when player is dead
+		Collect_Points(currentScore / 2);
+
 		std::cout << "bro is dead\n";
 	}
 	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
