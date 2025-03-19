@@ -377,7 +377,7 @@ void Draw_PauseMenu()
 
 bool isInputDisabled = false;  // Flag to disable player input
 
-std::string playerName = "TEST PLEASE";  // Store player's typed name
+std::string playerName = "(Type Name Here)";  // Store player's typed name
 
 void HandleTextInput()
 {
@@ -459,7 +459,7 @@ void Draw_ClearMenu()
 	// Inside your menu or game loop
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
 	// Test with a position close to the center of the screen
-	DrawTextBox(0.f, 0.f, 300.f, 50.f, 1.0f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
+	DrawTextBox(0.f, 0.f, 300.f, 50.f, 0.5f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
 
 
 	// Handle text input
