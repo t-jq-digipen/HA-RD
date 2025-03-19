@@ -80,6 +80,7 @@ f32 x_offset = 0.f;
 bool will_hit = true;
 
 // Level score update values
+const int SCORE_MELEE_HIT = 100; // + 100 points (multiplied by damage value) per frame
 const int SCORE_BOSS_PROJECTILES_PARRIED = 5000; // + 5000 points if boss rocket successfully parried
 const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successfully stunned via parry
 const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
@@ -252,6 +253,8 @@ void Update_Boss()
                 }
                 boss_1.hp -= damage;
                 last_hit = new_hit;
+                Collect_Points(SCORE_MELEE_HIT * static_cast<int>(damage), HIT_SCORE);
+                currentCombo += 1;
             }
         }
 
@@ -283,7 +286,8 @@ void Update_Boss()
                         switch (player.state) {
                         case PARRY:
                             Parried_Hit();
-                            Collect_Points(SCORE_BOSS_PROJECTILES_PARRIED);
+                            Collect_Points(SCORE_BOSS_PROJECTILES_PARRIED, PARRY_SCORE);
+                            currentCombo += 1;
                             break;
                         case BLOCK:
                             Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
@@ -291,7 +295,7 @@ void Update_Boss()
                         case PARRIED:
                         case BLOCKED:
                         case DODGE:
-                            Collect_Points(SCORE_DODGE);
+                            Collect_Points(SCORE_DODGE, DODGE_SCORE);
                             break;
                         case HIT:
                             break;
@@ -320,7 +324,7 @@ void Update_Boss()
             {
                 timeLeft = 0.f;
             }
-            Collect_Points(static_cast<int>(timeLeft) * SCORE_TIME_BONUS);
+            Collect_Points(static_cast<int>(timeLeft) * SCORE_TIME_BONUS, TIME_BONUS_SCORE);
         }
 
         // Update Boss UI
@@ -1107,7 +1111,8 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
             boss_1.state = BOSS_PARRIED;
             boss_1.attack_type = 0;
             bullet_time.current = 0.f;
-            Collect_Points(SCORE_BOSS_MELEE_PARRIED);
+            Collect_Points(SCORE_BOSS_MELEE_PARRIED, PARRY_SCORE);
+            currentCombo += 1;
             std::cout << "Boss parried\n";
         }
         else
@@ -1122,7 +1127,7 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
     case BLOCKED:
     case HIT:
     case DODGE:
-        Collect_Points(SCORE_DODGE);
+        Collect_Points(SCORE_DODGE, DODGE_SCORE);
         break;
     default:
         Eat_Hit(boss_damage);

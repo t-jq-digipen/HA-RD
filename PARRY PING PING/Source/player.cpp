@@ -27,10 +27,10 @@ const float MAP_TOP = 300.f;
 const float MAP_BOTTOM = -300.f;
 
 // Define level score update values
-const int SCORE_MELEE_HIT = 10; // + 10 points (multiplied by ATTACK_DAMAGE) per frame
 const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
 const int SCORE_HEAVY_LASER_HIT = 50; // + 50 points per frame
 const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
+const int SCORE_PLAYER_LOSE = -10000; // -10000 points for game over
 
 typedef struct Projectile
 {
@@ -114,6 +114,9 @@ const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
 aabb melee_hitbox;
 
 bool hitbox_active = false;
+
+// Heavy laser tick timer (for combo calcs, +1 combo ever tick)
+Timer laserTickTimer;
 
 enum ATTACK_PATTERN
 {
@@ -299,7 +302,6 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 		{
 			*check_hit = melee_attack.combo;
 			*damage = ATTACK_DAMAGE[melee_attack.combo];
-			Collect_Points(SCORE_MELEE_HIT * static_cast<int>(*damage));
 			return true;
 		}
 		else if (!melee_attack.combo)
@@ -422,8 +424,14 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, width / 2)) {
 				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
+				Collect_Points(SCORE_HEAVY_LASER_HIT, BIG_HIT_SCORE);
+				Loop_Timer(&laserTickTimer);
+				if (laserTickTimer.current >= laserTickTimer.duration)
+				{
+					currentCombo += 1;
+					laserTickTimer.current = 0.f;
+				}
 				std::cout << "Heavy Attack Hit!\n";
-				Collect_Points(SCORE_HEAVY_LASER_HIT);
 			}
 			else {
 				std::cout << "NO HIT\n";
@@ -434,7 +442,8 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			*damage = 5.f;  // Light attack damage
 			hit = true;
 			proj.isActive = false; // Deactivate light projectile after hit
-			Collect_Points(SCORE_LIGHT_PROJECTILE_HIT); // Update score when light projectile hits
+			currentCombo += 1;
+			Collect_Points(SCORE_LIGHT_PROJECTILE_HIT, HIT_SCORE); // Update score when light projectile hits
 			std::cout << "Light Attack Hit!\n";
 		}
 	}
@@ -490,6 +499,9 @@ void Attacking_Ranged()
 
 			melee_attack.active_time.current = 1.f;
 			melee_attack.timer.current = 1.f;
+
+			// Initialize laser tick timer for combo
+			laserTickTimer.current = 0.f;
 
 			// **Play the light projectile sound effect**
 			std::cout << "Laser sound triggered!\n";  // Debugging
@@ -1028,7 +1040,12 @@ void Blocked_Hit(f32 damage)
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
 	player.hp -= damage * BLOCK_REDUCTION;
-	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT);
+	if (currentCombo > highestCombo)
+	{
+		highestCombo = currentCombo;
+	}
+	currentCombo = 0;
+	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT, BLOCKED_SCORE);
 }
 
 void Eat_Hit(f32 damage)
@@ -1037,7 +1054,12 @@ void Eat_Hit(f32 damage)
 	player.state = HIT;
 	player.hittimer.current = 0.f;
 	player.hp -= damage;
-	Collect_Points(damage * SCORE_PLAYER_EAT_HIT);
+	if (currentCombo > highestCombo)
+	{
+		highestCombo = currentCombo;
+	}
+	currentCombo = 0;
+	Collect_Points(damage * SCORE_PLAYER_EAT_HIT, OUCH_SCORE);
 }
 
 
@@ -1131,6 +1153,8 @@ void Init_Player()
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
 	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
+
+	laserTickTimer = Create_Timer(0.5f);
 }
 
 void Update_Player()
@@ -1263,8 +1287,8 @@ void Update_Player()
 	{
 		levelState = GAMEOVER;
 
-		// Halves the score when player is dead
-		Collect_Points(currentScore / 2);
+		// -10000 points if player is dead
+		Collect_Points(SCORE_PLAYER_LOSE, RIP_SCORE);
 
 		std::cout << "bro is dead\n";
 	}

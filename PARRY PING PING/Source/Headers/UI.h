@@ -35,11 +35,27 @@ extern int currentScore;
 extern bool displayPointsAccumulated, isInputDisabled;
 extern int pointsAccumulated;
 extern Timer displayPointsTimer;
+extern int currentCombo, highestCombo;
+
+// ----------------------------------------------------------------------------
+// Enumeration for score types
+// ----------------------------------------------------------------------------
+enum SCORE_TYPE
+{
+	HIT_SCORE = 0,
+	BIG_HIT_SCORE,
+	DODGE_SCORE,
+	PARRY_SCORE,
+	OUCH_SCORE,
+	BLOCKED_SCORE,
+	RIP_SCORE,
+	TIME_BONUS_SCORE
+};
 
 // ----------------------------------------------------------------------------
 // Structure for UI screen sprites
 // ----------------------------------------------------------------------------
-typedef struct UIScreen 
+typedef struct UIScreen
 {
 	SpriteSheet_Old* spritesheet_screen;
 	SpriteSheet_Old* spritesheet_playbutton;
@@ -144,7 +160,7 @@ void Draw_LevelScore();
 // ----------------------------------------------------------------------------
 // Accumulate points
 // ----------------------------------------------------------------------------
-void Collect_Points(int value);
+void Collect_Points(int value, int score_index);
 
 // ----------------------------------------------------------------------------
 // Draw points accumulated
