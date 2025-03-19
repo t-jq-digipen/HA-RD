@@ -186,13 +186,14 @@ void HubWorld_Draw()
 	{
 		DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
 	}
-	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f)), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f, SetColor(0xFFFF6961));
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f))
+
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f))
 	{
 		//cool little fade in effect
 		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 		FadeOut.A += FadeInSpeed;
-		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
+		Draw_ShrineBoard();
+		//DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
 		if (FadeOut.A > .8f) FadeOut.A = .8f;
 		LockCamera = true;
 	}

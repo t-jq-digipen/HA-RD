@@ -48,8 +48,7 @@ void Update_Camera()
 
 	// Update mouse shift
 	AEVec2Set(&mouse_shift, Mouse.x/3.5f, Mouse.y/3.f);
-	if (!LockCamera)
-	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
+	if (!LockCamera) AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 }
 
 f32 World_To_Screen_x(f32 pos_x)
@@ -73,5 +72,6 @@ f32 Screen_To_World_y(f32 pos_y)
 }
 
 //void Pan_Camera(s8 dir_vert, s8 dir_hor, f32 distance, f32 speed) {
-//
+//	AEVec2 temp{ dir_hor, dir_vert };
+//	AEVec2Add(&cam_shift, &cam_shift, &temp);
 //}
