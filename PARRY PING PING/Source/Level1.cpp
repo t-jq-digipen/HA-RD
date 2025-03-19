@@ -126,7 +126,7 @@ void Level1_Update()
 	// Music
 	AEAudioUpdate();
 
-	if (AEInputCheckTriggered(AEVK_B))
+	if (AEInputCheckTriggered(AEVK_B) && levelState != CLEARED && levelState != GAMEOVER)
 	{
 		nextState = GS_RESTART;
 		AEInputShowCursor(0);

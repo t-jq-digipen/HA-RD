@@ -71,12 +71,15 @@ AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
+// Input for leaderboard
+bool isInputDisabled; // Flag to disable player input
+
 // Initialize the various screen UI elements
 void Init_UI()
 {
 	// Colors
-	UI_red = SetColor(0xFFFF6961);
-	UI_green = SetColor(0xFF88B984);
+	UI_red = SetColor(0xFFFF0000);
+	UI_green = SetColor(0xFF24FF8B);
 	UI_blue = SetColor(0xFF00008B);
 	UI_black = SetColor(0xFF000000);
 	UI_white = SetColor(0xFFFFFFFF);
@@ -156,6 +159,9 @@ void Init_UI()
 	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
 	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
+
+	// Input for leaderboard
+	isInputDisabled = false;
 }
 
 // Initialize the player UI elements
@@ -376,7 +382,7 @@ void Draw_PauseMenu()
 	}
 }
 
-bool isInputDisabled = false;  // Flag to disable player input
+// bool isInputDisabled = false;  // Flag to disable player input
 
 std::string playerName = "(Type Name Here)";  // Store player's typed name
 
@@ -421,7 +427,7 @@ void Draw_ClearMenu()
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
@@ -431,9 +437,9 @@ void Draw_ClearMenu()
 
 
 	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -250.f, 300.f, 200.f, 0.f);
 
-	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(500.f, 700.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 
@@ -456,18 +462,23 @@ void Draw_ClearMenu()
 		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
+	// Display score above player input
+	DrawTextBox(-0.4f, 0.2f, 300.f, 50.f, 0.7f, pixel_font, UI_green, level_score);
+
+	DrawTextBox(-0.45f, 0.f, 300.f, 50.f, 0.7f, pixel_font, UI_white, level_timer);
+
 	// exit button (click to go to quit state)
 	// Inside your menu or game loop
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -250.f, 300.f, 200.f, 0.f);
 	// Test with a position close to the center of the screen
-	DrawTextBox(0.f, 0.f, 300.f, 50.f, 0.5f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
+	DrawTextBox(-0.4f, -0.2f, 300.f, 50.f, 0.5f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
 
 
 	// Handle text input
 	HandleTextInput();
 
 
-	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(1100.f, 700.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -702,7 +713,7 @@ void Draw_GameOverMenu()
 
 	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_screen, 1, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
@@ -711,9 +722,9 @@ void Draw_GameOverMenu()
 	}
 
 	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -250.f, 300.f, 200.f, 0.f);
 
-	if (IsAreaClicked(500.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(500.f, 700.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -734,10 +745,21 @@ void Draw_GameOverMenu()
 		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
-	// exit button (click to go to quit state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -50.f, 300.f, 200.f, 0.f);
+	// Display score above player input
+	DrawTextBox(-0.4f, 0.2f, 300.f, 50.f, 0.7f, pixel_font, UI_red, level_score);
 
-	if (IsAreaClicked(1100.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	DrawTextBox(-0.45f, 0.f, 300.f, 50.f, 0.7f, pixel_font, UI_white, level_timer);
+
+	// exit button (click to go to quit state)
+	// Inside your menu or game loop
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -250.f, 300.f, 200.f, 0.f);
+	// Test with a position close to the center of the screen
+	DrawTextBox(-0.4f, -0.2f, 300.f, 50.f, 0.5f, pixel_font, { 1.f, 1.f, 1.f, 1.f }, playerName.c_str());
+
+	// Handle text input
+	HandleTextInput();
+
+	if (IsAreaClicked(1100.f, 700.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -748,6 +770,8 @@ void Draw_GameOverMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
+			addLeaderboardEntry(playerName.c_str(), newScore);
+			isInputDisabled = false;
 		}
 	}
 	else
@@ -772,8 +796,7 @@ void Draw_LevelTimer(float time_elapsed)
 
 	snprintf(level_timer, sizeof(level_timer), "Time: %02d:%02d:%02d", minutes, seconds, milliseconds);
 
-	DrawTextBox(0.3f, -0.9f, 200.f, 100.f, 0.8f, UI_font, UI_white, level_timer);
-
+	DrawTextBox(0.3f, -0.9f, 200.f, 100.f, 0.5f, pixel_font, UI_white, level_timer);
 }
 
 
@@ -782,7 +805,7 @@ void Draw_LevelScore()
 {
 	snprintf(level_score, sizeof(level_score), "Score: %d", currentScore);
 
-	DrawTextBox(0.3f, -0.7f, 200.f, 100.f, 0.8f, UI_font, UI_white, level_score);
+	DrawTextBox(0.3f, -0.7f, 200.f, 100.f, 0.5f, pixel_font, UI_white, level_score);
 }
 
 // Accumulate points
@@ -803,12 +826,12 @@ void Draw_Points()
 		if (pointsAccumulated > 0)
 		{
 			snprintf(points, sizeof(points), "+%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, UI_font, UI_green, points, true, 0.7f);
+			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_green, points, true, 0.5f);
 		}
 		else if (pointsAccumulated < 0)
 		{
 			snprintf(points, sizeof(points), "%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, UI_font, UI_red, points, true, 0.7f);
+			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_red, points, true, 0.5f);
 		}
 	}
 	else
