@@ -830,7 +830,7 @@ void Update_LevelScore()
 void fetchLeaderboard() {
 	// Call the Python script to fetch the leaderboard
 	std::cout << "Fetching leaderboard..." << std::endl;
-	int result = system("py \\Assets\\leaderboard_helper.py");
+	int result = system("\\Assets\\dist\\leaderboard_helper.exe");
 
 	if (result != 0) {
 		std::cout << "Error fetching leaderboard!" << std::endl;
@@ -850,7 +850,9 @@ void addLeaderboardEntry(const std::string& playerName, int score) {
 	std::string currentDir(buffer);
 
 	// Now construct the command to call the Python script
-	std::string command = "py \"" + currentDir + "\\Assets\\leaderboard_helper.py\" " + playerName + " " + std::to_string(score);
+	std::string command = "\"\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\" \"" + playerName + "\" \"" + std::to_string(score) + "\"\"";
+
+
 
 
 	// Call the Python script to add a new leaderboard entry
