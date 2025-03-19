@@ -52,6 +52,7 @@ Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 // Level Timer
 char level_timer[16];
+std::string levelTimeStr;
 
 // Level Score
 char points[16];
@@ -478,7 +479,7 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
-			addLeaderboardEntry(playerName.c_str(), newScore);
+			addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
 			isInputDisabled = false;
 
 		}
@@ -772,7 +773,9 @@ void Draw_LevelTimer(float time_elapsed)
 	snprintf(level_timer, sizeof(level_timer), "Time: %02d:%02d:%02d", minutes, seconds, milliseconds);
 
 	DrawTextBox(0.3f, -0.9f, 200.f, 100.f, 0.8f, UI_font, UI_white, level_timer);
+
 }
+
 
 // Draw the level score
 void Draw_LevelScore()
@@ -846,22 +849,17 @@ void fetchLeaderboard() {
 	}
 }
 
-void addLeaderboardEntry(const std::string& playerName, int score) {
-	// Prepare the command to call the Python script with parameters
-	//std::string command = "py \"C:\\Users\\fauza\\OneDrive\\Desktop\\CSD1451\\AvidParryEnjoyers\\csd1451s25_team_avidparryenjoyers\\PARRY PING PING\\Source\\leaderboard_helper.py\" " + playerName + " " + std::to_string(score);
-
-		// Get the current working directory
+void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer) {
 	char buffer[MAX_PATH];
-	_getcwd(buffer, MAX_PATH);  // Get current directory
+	_getcwd(buffer, MAX_PATH);
 	std::string currentDir(buffer);
 
-	// Now construct the command to call the Python script
-	std::string command = "\"\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\" \"" + playerName + "\" \"" + std::to_string(score) + "\"\"";
+	// Construct command with levelTimer
+	std::string command = "\"\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\" \""
+		+ playerName + "\" \""
+		+ std::to_string(score) + "\" \""
+		+ levelTimer + "\"\"";
 
-
-
-
-	// Call the Python script to add a new leaderboard entry
 	std::cout << "Adding leaderboard entry..." << std::endl;
 	int result = system(command.c_str());
 
