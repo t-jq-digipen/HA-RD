@@ -770,7 +770,7 @@ void Draw_GameOverMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
-			addLeaderboardEntry(playerName.c_str(), newScore);
+			addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
 			isInputDisabled = false;
 		}
 	}
