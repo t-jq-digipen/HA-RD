@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include <string>
 #include <direct.h>
+#include <thread>
 
 // Level number
 int levelState = 0;
@@ -72,6 +73,9 @@ SpriteSheet crosshair;
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 
+// Loading Image
+AEGfxTexture* loadingImage;
+
 // BGM and SFX
 AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj;
 AEAudioGroup gameBGM, gameSFX;
@@ -80,7 +84,11 @@ float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
 // For leaderboard Input
 bool isInputDisabled; // Flag to disable player input
+bool isLoading; //Loading Indicator
+float rotationAngle = 0.f; // Angle for rotation of the loading image
+float rotationSpeed = 90.f; // Rotation speed (degrees per second)
 Color isInputSubmitted;
+bool hasSubmitted;
 
 // Initialize the various screen UI elements
 void Init_UI()
@@ -97,6 +105,8 @@ void Init_UI()
 	// Font
 	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", 72);
+
+	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 
 	// Level state UI
 	play_bg = SetColor(0xFF666666);
@@ -174,6 +184,8 @@ void Init_UI()
 
 	// For leaderboard input
 	isInputDisabled = false;
+	isLoading = false;
+	hasSubmitted = false;
 	isInputSubmitted = UI_white;
 }
 
@@ -430,16 +442,156 @@ void HandleTextInput()
 	}
 }
 
+// Function to draw the loading image
+void DrawLoadingImage()
+{
+	if (loadingImage)
+	{
+		// Draw the image with a rotation angle
+		DrawImage(0.f, 0.f, 800.f, 800.f, rotationAngle, loadingImage);  // Full screen translucent background
 
-// Open the level complete screen when player beats the boss
+		// Update the rotation angle (for continuous rotation)
+		rotationAngle += 0.05f; // Adjust this value to control the speed of rotation (2.f = fast, 0.5f = slower)
+		if (rotationAngle >= 360.f)
+		{
+			rotationAngle = 0.f; // Reset the angle after one full rotation
+		}
+	}
+}
+
+
+//// Open the level complete screen when player beats the boss
+//void Draw_ClearMenu()
+//{
+//	isInputDisabled = true;
+//	// Get mouse position coordinates
+//	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+//
+//	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+//
+//	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
+//	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
+//
+//	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
+//	{
+//		uiscreen.animationtimer.current = 0.f;
+//	}
+//
+//	// submit button (click to submit score to leaderboard)
+//	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
+//
+//	if (IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+//	{
+//		uiscreen.isButton1Clicked = 1;
+//
+//		if (Update_Timer(&uiscreen.animationtimer))
+//		{
+//			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//		}
+//
+//		if (AEInputCheckTriggered(AEVK_LBUTTON))
+//		{
+//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+//
+//			isLoading = true; // Activate loading state
+//
+//			// Call the function asynchronously to prevent freezing
+//			std::thread submitThread([&]()
+//				{
+//					addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
+//					isLoading = false; // Disable loading state after completion
+//				});
+//			submitThread.detach(); // Detach thread to let it run independently
+//		}
+//
+//	}
+//	else
+//	{
+//		uiscreen.isButton1Clicked = 0;
+//		Set_SpriteSheet_current(&ssmenu_1, 7, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//	}
+//
+//	// replay button (click to go to Level1 state)
+//	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -300.f, 200.f, 100.f, 0.f);
+//
+//	if (IsAreaClicked(500.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+//	{
+//		uiscreen.isPlayClicked = 1;
+//
+//		if (Update_Timer(&uiscreen.animationtimer))
+//		{
+//			Set_SpriteSheet_current(&ssmenu_play, 1, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//		}
+//
+//		if (AEInputCheckTriggered(AEVK_LBUTTON))
+//		{
+//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+//			nextState = GS_RESTART;
+//			isInputDisabled = false;
+//		}
+//	}
+//	else
+//	{
+//		uiscreen.isPlayClicked = 0;
+//		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//	}
+//
+//	// Display score above player input
+//	DrawTextBox(-0.4f, 0.3f, 300.f, 50.f, 0.6f, pixel_font, UI_green, level_score);
+//
+//	DrawTextBox(-0.45f, 0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, level_timer);
+//
+//	snprintf(combo, sizeof(combo), "BEST COMBO: %d", highestCombo);
+//
+//	std::cout << highestCombo << '\n';
+//	
+//	DrawTextBox(-0.45f, -0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, combo);
+//
+//	// Test with a position close to the center of the screen
+//	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, playerName.c_str());
+//
+//
+//	// Handle text input
+//	HandleTextInput();
+//
+//	// exit button (click to go back to hubworld state)
+//
+//	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -300.f, 200.f, 100.f, 0.f);
+//
+//	if (IsAreaClicked(1100.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+//	{
+//		uiscreen.isExitClicked = 1;
+//		if (Update_Timer(&uiscreen.animationtimer))
+//		{
+//			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//		}
+//
+//		if (AEInputCheckTriggered(AEVK_LBUTTON))
+//		{
+//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+//			nextState = GS_HUBWORLD;
+//			isInputDisabled = false;
+//		}
+//	}
+//
+//	else
+//	{
+//		uiscreen.isExitClicked = 0;
+//		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+//	}
+//
+//
+//
+//}
+
 void Draw_ClearMenu()
 {
 	isInputDisabled = true;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-
+	// Draw translucent background
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);  // Change pause_bg to be a translucent color
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
 
@@ -448,10 +600,18 @@ void Draw_ClearMenu()
 		uiscreen.animationtimer.current = 0.f;
 	}
 
+	// If loading, display the rotating loading image
+	if (isLoading)
+	{
+		DrawLoadingImage();
+		return;
+	}
+
 	// submit button (click to submit score to leaderboard)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
 
-	if (IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	// Prevent submission if already submitted
+	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -463,9 +623,18 @@ void Draw_ClearMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
-			isInputDisabled = false;
-			isInputSubmitted = UI_green;
+
+			isLoading = true; // Activate loading state
+			hasSubmitted = true; // Set the flag to true to prevent further submissions
+
+			// Start the async thread for leaderboard submission
+			std::thread submitThread([&]()
+				{
+					addLeaderboardEntry(playerName.c_str(), newScore, level_timer); // Submit to leaderboard
+					isLoading = false; // Disable loading state after submission
+					isInputSubmitted = UI_green;
+				});
+			submitThread.detach(); // Detach to allow independent execution
 		}
 	}
 	else
@@ -474,7 +643,7 @@ void Draw_ClearMenu()
 		Set_SpriteSheet_current(&ssmenu_1, 7, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
-	// replay button (click to go to Level1 state)
+	// Replay button (click to go to Level1 state)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -300.f, 200.f, 100.f, 0.f);
 
 	if (IsAreaClicked(500.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
@@ -507,18 +676,16 @@ void Draw_ClearMenu()
 	snprintf(combo, sizeof(combo), "BEST COMBO: %d", highestCombo);
 
 	std::cout << highestCombo << '\n';
-	
+
 	DrawTextBox(-0.45f, -0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, combo);
 
 	// Test with a position close to the center of the screen
 	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, playerName.c_str());
 
-
 	// Handle text input
 	HandleTextInput();
 
-	// exit button (click to go back to hubworld state)
-
+	// Exit button (click to go back to hubworld state)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -300.f, 200.f, 100.f, 0.f);
 
 	if (IsAreaClicked(1100.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
@@ -536,14 +703,14 @@ void Draw_ClearMenu()
 			isInputDisabled = false;
 		}
 	}
-
 	else
 	{
 		uiscreen.isExitClicked = 0;
 		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
-
 }
+
+
 
 // Open the options menu when player accesses options from the pause menu
 void Draw_OptionsMenu()
