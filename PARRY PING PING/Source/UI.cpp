@@ -445,6 +445,8 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
+			isInputDisabled = false;
+
 		}
 	}
 	else
@@ -692,6 +694,8 @@ void Draw_OptionsMenu()
 // Open the game over screen when player dies
 void Draw_GameOverMenu()
 {
+	isInputDisabled = true;
+
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -719,6 +723,8 @@ void Draw_GameOverMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
+			isInputDisabled = false;
+
 		}
 	}
 	else
