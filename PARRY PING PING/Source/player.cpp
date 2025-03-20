@@ -1478,31 +1478,15 @@ void Draw_Player()
 			// Use different size depending on whether the projectile is heavy or not
 			if (proj.isHeavy) 
 			{
-				if (heavy_atk.isActive)
+				if (!heavy_atk.isActive)
 				{
-
-					float offsetDistance = 400.0f;
-					float offsetX = cosf(proj.angle) * offsetDistance;
-					float offsetY = sinf(proj.angle) * offsetDistance;
-
-					// Apply the offset to the projectile's position
-					float screenX = World_To_Screen_x(proj.pos.x + offsetX);
-					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
-
-					// Draw the heavy projectile slightly in front of the player based on angle
-					//DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
-				}
-				else {
 					projectiles.pop_back();
 				}
 			}
 			else
 			{
-				if (new_proj.isActive)
+				if (!new_proj.isActive)
 				{
-					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
-				}
-				else {
 					projectiles.pop_back();
 				}
 			}

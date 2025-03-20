@@ -1145,16 +1145,16 @@ void fetchLeaderboard() {
 	}
 }
 
-void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer) {
+void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
 	char buffer[MAX_PATH];
 	_getcwd(buffer, MAX_PATH);
 	std::string currentDir(buffer);
 
 	// Construct command with levelTimer
 	std::string command = "\"\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\" \""
-		+ playerName + "\" \""
+		+ name + "\" \""
 		+ std::to_string(score) + "\" \""
-		+ levelTimer + "\"\"";
+		+ timing + "\"\"";
 
 	std::cout << "Adding leaderboard entry..." << std::endl;
 	int result = system(command.c_str());
