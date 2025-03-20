@@ -84,6 +84,7 @@ float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
 // For leaderboard Input
 bool isInputDisabled; // Flag to disable player input
+std::string playerName;  // Store player's typed name
 bool isLoading; //Loading Indicator
 float rotationAngle = 0.f; // Angle for rotation of the loading image
 float rotationSpeed = 90.f; // Rotation speed (degrees per second)
@@ -184,6 +185,7 @@ void Init_UI()
 
 	// For leaderboard input
 	isInputDisabled = false;
+	playerName = "(Type Name Here)";
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
@@ -408,8 +410,6 @@ void Draw_PauseMenu()
 }
 
 // bool isInputDisabled = false;  // Flag to disable player input
-
-std::string playerName = "(Type Name Here)";  // Store player's typed name
 
 void HandleTextInput()
 {
@@ -636,6 +636,12 @@ void Draw_ClearMenu()
 				});
 			submitThread.detach(); // Detach to allow independent execution
 		}
+	}
+	else if (hasSubmitted)
+	{
+		uiscreen.isButton1Clicked = 0;
+		isInputDisabled = false;
+		Set_SpriteSheet_current(&ssmenu_1, 7, 8, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 	else
 	{
@@ -929,10 +935,18 @@ void Draw_GameOverMenu()
 		uiscreen.animationtimer.current = 0.f;
 	}
 
+	// If loading, display the rotating loading image
+	if (isLoading)
+	{
+		DrawLoadingImage();
+		return;
+	}
+
 	// submit button (click to submit score to leaderboard)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
 
-	if (IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	// Prevent submission if already submitted
+	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -944,10 +958,24 @@ void Draw_GameOverMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
-			isInputDisabled = false;
-			isInputSubmitted = UI_green;
+			isLoading = true; // Activate loading state
+			hasSubmitted = true; // Set the flag to true to prevent further submissions
+
+			// Start the async thread for leaderboard submission
+			std::thread submitThread([&]()
+				{
+					addLeaderboardEntry(playerName.c_str(), newScore, level_timer); // Submit to leaderboard
+					isLoading = false; // Disable loading state after submission
+					isInputSubmitted = UI_green;
+				});
+			submitThread.detach(); // Detach to allow independent execution
 		}
+	}
+	else if (hasSubmitted)
+	{
+		uiscreen.isButton1Clicked = 0;
+		isInputDisabled = false;
+		Set_SpriteSheet_current(&ssmenu_1, 7, 8, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 	else
 	{
@@ -1119,11 +1147,11 @@ void Update_LevelScore()
 {
 	if (currentScore + 10000 < newScore)
 	{
-		currentScore += 1000.f;
+		currentScore += 10000.f;
 	}
 	else if (currentScore < newScore)
 	{
-		currentScore += 100.f;
+		currentScore += 1000.f;
 	}
 	else
 	{
