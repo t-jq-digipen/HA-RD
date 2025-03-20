@@ -64,7 +64,7 @@ void HubWorld_Initialize()
 	hubworld_white = SetColor(0xFFFFFFFF);
 
 	FadeIn = FadeOut = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
-	FadeInSpeed = 0.01f;
+	FadeInSpeed = 0.03f;
 	FadeOut.A = 0.f;
 
 	InShrine = false;
@@ -122,10 +122,11 @@ void HubWorld_Update()
 		//{
 		//	Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
 		//}
-
-		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {			// When player reaches the 'gate', start the Level 1 boss fight
-			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
-			nextState = GS_LEVEL1;
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
+			if (AEInputCheckTriggered(AEVK_F)) 
+			{
+				nextState = GS_LEVEL1;
+			}
 		}
 	}
 
@@ -188,16 +189,21 @@ void HubWorld_Draw()
 
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{
-		DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
+			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		}
+		else {
+			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
+		}	
 	}
 
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 3.f))
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f))
 	{
 		Draw_FadeOut();
+		hubworld_white.A = FadeOut.A;
+		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		hubworld_white.A = 1.f;
 		
-		if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f)) {
-
-		}
 		if (AEInputCheckTriggered(AEVK_F) && InShrine == false)
 		{
 			InShrine = true;
@@ -210,6 +216,9 @@ void HubWorld_Draw()
 	else
 	{
 		Draw_FadeIn();
+		hubworld_white.A = FadeOut.A;
+		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		hubworld_white.A = 1.f;
 	}
 
 	// Player
@@ -280,6 +289,7 @@ void HubWorld_Unload()
 }
 
 void Draw_FadeIn() {
+	FadeInSpeed = 0.03f;
 	LockCamera = false;
 	if (FadeOut.A < 0.f) {
 		FadeOut.A = 0.f;
@@ -295,5 +305,6 @@ void Draw_FadeOut() {
 	LockCamera = true;
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	FadeOut.A += FadeInSpeed;
+	FadeInSpeed *= 1.05f;
 	if (FadeOut.A > .8f) FadeOut.A = .8f;
 }
