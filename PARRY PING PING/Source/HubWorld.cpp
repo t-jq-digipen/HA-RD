@@ -35,6 +35,8 @@ int DummyMelee_Check;										// Check for dummy logic
 Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
+bool InShrine;
+
 void HubWorld_Load()
 {
 	Load_Player();											// Load Player
@@ -64,6 +66,8 @@ void HubWorld_Initialize()
 	FadeIn = FadeOut = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
 	FadeInSpeed = 0.01f;
 	FadeOut.A = 0.f;
+
+	InShrine = false;
 
 	// Player
 	Init_Player();															// Init Player
@@ -187,26 +191,26 @@ void HubWorld_Draw()
 		DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
 	}
 
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f))
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 3.f))
 	{
-		//cool little fade in effect
-		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
-		FadeOut.A += FadeInSpeed;
-		Draw_ShrineBoard();
-		//DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
-		if (FadeOut.A > .8f) FadeOut.A = .8f;
-		LockCamera = true;
+		Draw_FadeOut();
+		
+		if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x - (Env_Shrine.Width / 2.f), Env_Shrine.Pos.y, Env_Shrine.Width * 4.f, Env_Shrine.Height * 4.f)) {
+
+		}
+		if (AEInputCheckTriggered(AEVK_F) && InShrine == false)
+		{
+			InShrine = true;
+		}
+		else if (AEInputCheckTriggered(AEVK_F) && InShrine == true)
+		{
+			InShrine = false;
+		}
 	}
 	else
 	{
-		if (!(FadeOut.A < 0.f)) {
-			DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);
-			FadeOut.A -= FadeInSpeed;
-		}
-		else FadeOut.A = 0.f;
-		LockCamera = false;
+		Draw_FadeIn();
 	}
-
 
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -246,6 +250,10 @@ void HubWorld_Draw()
 		}
 	}
 
+	if (InShrine) {
+		Draw_ShrineBoard();
+	}
+
 	//cool little fade in effect
 	if (FadeIn.A > 0) {
 		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeIn);			// Just adjusts alpha of a black screen drawn over the level when the level starts
@@ -269,4 +277,23 @@ void HubWorld_Unload()
 	Unload_Player();
 	Unload_DummyBot();
 	std::cout << "HubWorld_unload";
+}
+
+void Draw_FadeIn() {
+	LockCamera = false;
+	if (FadeOut.A < 0.f) {
+		FadeOut.A = 0.f;
+		return;
+	}
+	else{
+		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);
+		FadeOut.A -= FadeInSpeed;
+	}
+}
+
+void Draw_FadeOut() {
+	LockCamera = true;
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
+	FadeOut.A += FadeInSpeed;
+	if (FadeOut.A > .8f) FadeOut.A = .8f;
 }

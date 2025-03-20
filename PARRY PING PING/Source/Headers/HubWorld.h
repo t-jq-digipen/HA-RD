@@ -18,4 +18,6 @@ void HubWorld_Update();			// Handles logic on per frame basis, mainly used to up
 void HubWorld_Draw();			// Draws assets for props, player, UI etc.
 void HubWorld_Free();			// Free memory allocated for Hub World elements
 void HubWorld_Unload();			// Unload Hub World resources
+void Draw_FadeIn();
+void Draw_FadeOut();
 		
