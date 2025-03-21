@@ -86,6 +86,7 @@ const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successful
 const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
 const int SCORE_TIME_BONUS = 1000; // + 1000 points for every second of time left less than the 1 minute cap
 const int SCORE_DODGE = 2000; // + 2000 points if boss attack successfully dodged
+const int SCORE_PERFECT = 10000; // + 10000 points if player beats boss without taking damage
 
 // Load boss assets
 void Load_Boss()
@@ -325,6 +326,10 @@ void Update_Boss()
                 timeLeft = 0.f;
             }
             Collect_Points(static_cast<int>(timeLeft) * SCORE_TIME_BONUS, TIME_BONUS_SCORE);
+            if (player.hp == 100.f)
+            {
+                Collect_Points(SCORE_PERFECT, PERFECT_SCORE);
+            }
         }
 
         // Update Boss UI

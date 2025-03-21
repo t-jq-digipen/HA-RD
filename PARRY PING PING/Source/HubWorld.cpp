@@ -215,6 +215,11 @@ void HubWorld_Draw()
 		Draw_OptionsMenu();
 		AEInputShowCursor(1);
 	}
+	else if (levelState == INQUIT)
+	{
+		Draw_QuitMenu();
+		AEInputShowCursor(1);
+	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&HubWorld_ClearTransitionTimer))

@@ -9,7 +9,6 @@
 //---------------------------------------------------------
 
 #include "UI.h"
-#include "Boss1.h"
 #include "GameStateManager.h"
 #include "SpriteSheet.h"
 #include "player.h"
@@ -23,7 +22,7 @@
 int levelState = 0;
 float levelTimer = 0.f;
 
-// Level soore
+// Level score
 int currentScore = 0;
 int newScore = 0;
 int pointsAccumulated = 0;
@@ -31,11 +30,12 @@ bool displayPointsAccumulated = false;
 Timer displayPointsTimer;
 int currentCombo = 0;
 int highestCombo = 0;
+bool isPerfect = false;
 
 // Font, colors, mouse coordinates
 s8 UI_font;
 s8 pixel_font;
-Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red, UI_purple;
+Color UI_red, UI_green, UI_blue, UI_black, UI_white, UI_hover_red, UI_purple, UI_gold;
 s32 UI_mouseX, UI_mouseY;
 
 // Player UI
@@ -62,8 +62,8 @@ char points[16];
 char level_score[16];
 char score_type[16];
 char combo[16];
-const s32 NUM_OF_SCORE_TYPES = 8;
-const char* SCORE_TYPE_DISPLAY[NUM_OF_SCORE_TYPES] = { "HIT!", "BIG HIT!", "DODGE!", "PARRY!!!", "OUCH", "BLOCKED!", "RIP", "TIME BONUS!"};
+const s32 NUM_OF_SCORE_TYPES = 9;
+const char* SCORE_TYPE_DISPLAY[NUM_OF_SCORE_TYPES] = { "HIT!", "BIG HIT!", "DODGE!", "PARRY!!!", "OUCH", "BLOCKED!", "RIP", "TIME BONUS!", "PERFECT!!!"};
 Color score_color;
 
 // Crosshair
@@ -102,6 +102,7 @@ void Init_UI()
 	UI_white = SetColor(0xFFFFFFFF);
 	UI_hover_red = SetColor(0xFFFF6961);
 	UI_purple = SetColor(0xFFFF00FF);
+	UI_gold = SetColor(0xFFFFD218);
 
 	// Font
 	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
@@ -119,7 +120,6 @@ void Init_UI()
 	boss_hp_yellow = SetColor(0xFFFFEF00);
 	boss_hp_red = SetColor(0xFFFF0000);
 	boss_hp_damage = SetColor(0xFF800000);
-	boss1.hp_color = boss_hp_green;
 
 	// Starting level state
 	levelState = PLAYING;
@@ -133,6 +133,7 @@ void Init_UI()
 	currentCombo = 0;
 	highestCombo = 0;
 	score_color = UI_green;
+	isPerfect = false;
 
 	// Menu Buttons
 	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
@@ -280,34 +281,6 @@ void Draw_UI(int DrawBossHP )
 	if (DrawBossHP) { Draw_Boss_HPbar(); }
 }
 
-//void Draw_Boss1HP()
-//{
-//	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
-//	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-//
-//	// boss health logic
-//	if (boss1.current_hp >= 30.f && boss1.current_hp < 60.f)
-//	{
-//		boss1.phase = PHASE_2;
-//		boss1.hp_color = boss_hp_yellow;
-//	}
-//	if (boss1.current_hp >= 0.f && boss1.current_hp < 30.f)
-//	{
-//		boss1.phase = PHASE_3;
-//		boss1.hp_color = boss_hp_red;
-//	}
-//	if (boss1.current_hp <= 0.f)
-//	{
-//		boss1.phase = DEFEAT;
-//		boss1.current_hp = 0.f;
-//	}
-//
-//	// Draw boss health bar
-//	DrawRect(0.f, 400.f, 1200.f, 50.f, boss1.hp_color);
-//	DrawRect((boss1.current_hp / boss1.max_hp) * 1200.f, 400.f, 1200.f, 50.f, boss_hp_damage);
-//	DrawRect(800.f, 400.f, 400.f, 50.f, play_bg);
-//}
-
 // Open the pause menu when player pauses the game
 void Draw_PauseMenu() 
 {
@@ -392,14 +365,7 @@ void Draw_PauseMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
-			if (currentState == GS_HUBWORLD)
-			{
-				nextState = GS_MAIN_MENU;
-			}
-			else
-			{
-				nextState = GS_HUBWORLD;
-			}
+			levelState = INQUIT;
 		}
 	}
 	else
@@ -459,131 +425,6 @@ void DrawLoadingImage()
 	}
 }
 
-
-//// Open the level complete screen when player beats the boss
-//void Draw_ClearMenu()
-//{
-//	isInputDisabled = true;
-//	// Get mouse position coordinates
-//	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
-//
-//	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-//
-//	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
-//	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
-//
-//	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
-//	{
-//		uiscreen.animationtimer.current = 0.f;
-//	}
-//
-//	// submit button (click to submit score to leaderboard)
-//	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
-//
-//	if (IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
-//	{
-//		uiscreen.isButton1Clicked = 1;
-//
-//		if (Update_Timer(&uiscreen.animationtimer))
-//		{
-//			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//		}
-//
-//		if (AEInputCheckTriggered(AEVK_LBUTTON))
-//		{
-//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-//
-//			isLoading = true; // Activate loading state
-//
-//			// Call the function asynchronously to prevent freezing
-//			std::thread submitThread([&]()
-//				{
-//					addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
-//					isLoading = false; // Disable loading state after completion
-//				});
-//			submitThread.detach(); // Detach thread to let it run independently
-//		}
-//
-//	}
-//	else
-//	{
-//		uiscreen.isButton1Clicked = 0;
-//		Set_SpriteSheet_current(&ssmenu_1, 7, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//	}
-//
-//	// replay button (click to go to Level1 state)
-//	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -300.f, 200.f, 100.f, 0.f);
-//
-//	if (IsAreaClicked(500.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
-//	{
-//		uiscreen.isPlayClicked = 1;
-//
-//		if (Update_Timer(&uiscreen.animationtimer))
-//		{
-//			Set_SpriteSheet_current(&ssmenu_play, 1, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//		}
-//
-//		if (AEInputCheckTriggered(AEVK_LBUTTON))
-//		{
-//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-//			nextState = GS_RESTART;
-//			isInputDisabled = false;
-//		}
-//	}
-//	else
-//	{
-//		uiscreen.isPlayClicked = 0;
-//		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//	}
-//
-//	// Display score above player input
-//	DrawTextBox(-0.4f, 0.3f, 300.f, 50.f, 0.6f, pixel_font, UI_green, level_score);
-//
-//	DrawTextBox(-0.45f, 0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, level_timer);
-//
-//	snprintf(combo, sizeof(combo), "BEST COMBO: %d", highestCombo);
-//
-//	std::cout << highestCombo << '\n';
-//	
-//	DrawTextBox(-0.45f, -0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, combo);
-//
-//	// Test with a position close to the center of the screen
-//	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, playerName.c_str());
-//
-//
-//	// Handle text input
-//	HandleTextInput();
-//
-//	// exit button (click to go back to hubworld state)
-//
-//	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -300.f, 200.f, 100.f, 0.f);
-//
-//	if (IsAreaClicked(1100.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
-//	{
-//		uiscreen.isExitClicked = 1;
-//		if (Update_Timer(&uiscreen.animationtimer))
-//		{
-//			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//		}
-//
-//		if (AEInputCheckTriggered(AEVK_LBUTTON))
-//		{
-//			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-//			nextState = GS_HUBWORLD;
-//			isInputDisabled = false;
-//		}
-//	}
-//
-//	else
-//	{
-//		uiscreen.isExitClicked = 0;
-//		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-//	}
-//
-//
-//
-//}
-
 void Draw_ClearMenu()
 {
 	isInputDisabled = true;
@@ -608,10 +449,10 @@ void Draw_ClearMenu()
 	}
 
 	// submit button (click to submit score to leaderboard)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -125.f, 125.f, 75.f, 0.f);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (!hasSubmitted && IsAreaClicked(1200.f, 575.f, 125.f, 75.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -917,6 +758,90 @@ void Draw_OptionsMenu()
 	}
 }
 
+// Open the quit menu screen to allow player to think twice about their life choices
+void Draw_QuitMenu()
+{
+	// Get mouse position coordinates
+	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
+
+	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Set_SpriteSheet_current(&ssmenu_screen, 4, 1, 1, Create_Timer(1.f), 1.f);
+
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
+	{
+		uiscreen.animationtimer.current = 0.f;
+	}
+
+	// display message
+	
+	if (currentState == GS_HUBWORLD)
+	{
+		DrawTextAdvanced(40.f, 250.f, pixel_font, UI_white, "Are you sure you want to quit?", false, 0.5f);
+	}
+	else
+	{
+		DrawTextAdvanced(40.f, 400.f, pixel_font, UI_white, "Are you sure you want to quit?", false, 0.5f);
+		DrawTextAdvanced(40.f, 250.f, pixel_font, UI_white, "Your current progress will be", false, 0.5f);
+		DrawTextAdvanced(40.f, 100.f, pixel_font, UI_red, "LOST!!!", false, 0.8f);
+	}
+
+	// back button (click to go back to level state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -50.f, 200.f, 100.f, 0.f);
+
+	if (IsAreaClicked(450.f, 500.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isPlayClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_play, 5, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			levelState = PLAYING;
+		}
+	}
+	else
+	{
+		uiscreen.isPlayClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_play, 5, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// exit button (click to go to quit state)
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -50.f, 200.f, 100.f, 0.f);
+
+	if (IsAreaClicked(1150.f, 500.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	{
+		uiscreen.isExitClicked = 1;
+
+		if (Update_Timer(&uiscreen.animationtimer))
+		{
+			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+
+		if (AEInputCheckTriggered(AEVK_LBUTTON))
+		{
+			if (currentState == GS_HUBWORLD)
+			{
+				nextState = GS_MAIN_MENU;
+			}
+			else
+			{
+				nextState = GS_HUBWORLD;
+			}
+		}
+	}
+	else
+	{
+		uiscreen.isExitClicked = 0;
+		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+}
+
 // Open the game over screen when player dies
 void Draw_GameOverMenu()
 {
@@ -943,10 +868,10 @@ void Draw_GameOverMenu()
 	}
 
 	// submit button (click to submit score to leaderboard)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 125.f, 75.f, 0.f);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 125.f, 75.f, UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -1072,28 +997,35 @@ void Draw_LevelScore()
 void Collect_Points(int value, int score_index)
 {
 	currentScore = newScore;
-	snprintf(score_type, sizeof(score_type), "%s", SCORE_TYPE_DISPLAY[score_index]);
-	if (score_index == OUCH_SCORE || score_index == RIP_SCORE)
+	if (score_index == PERFECT_SCORE)
 	{
-		score_color = UI_red;
-		newScore = currentScore + pointsAccumulated;
-		currentScore = newScore;
-		pointsAccumulated = 0;
+		isPerfect = true;
 	}
-	else 
+	else
 	{
-		if (score_index == PARRY_SCORE)
+		snprintf(score_type, sizeof(score_type), "%s", SCORE_TYPE_DISPLAY[score_index]);
+		if (score_index == OUCH_SCORE || score_index == RIP_SCORE)
 		{
-			score_color = UI_purple;
+			score_color = UI_red;
+			newScore = currentScore + pointsAccumulated;
+			currentScore = newScore;
+			pointsAccumulated = 0;
 		}
 		else
 		{
-			score_color = UI_green;
-		}
-		if (pointsAccumulated < 0)
-		{
-			currentScore = currentScore + pointsAccumulated;
-			pointsAccumulated = 0;
+			if (score_index == PARRY_SCORE)
+			{
+				score_color = UI_purple;
+			}
+			else
+			{
+				score_color = UI_green;
+			}
+			if (pointsAccumulated < 0)
+			{
+				currentScore = currentScore + pointsAccumulated;
+				pointsAccumulated = 0;
+			}
 		}
 	}
 	pointsAccumulated += value;
@@ -1107,6 +1039,10 @@ void Draw_Points()
 	std::cout << pointsAccumulated << '\n';
 	if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
 	{
+		if (isPerfect)
+		{
+			DrawTextAdvanced(player.pos.x, player.pos.y + 280.f, pixel_font, UI_gold, "PERFECT!!!", true, 1.f);
+		}
 		if (currentCombo > 1)
 		{
 			snprintf(combo, sizeof(combo), "COMBO %d", currentCombo);
@@ -1147,11 +1083,11 @@ void Update_LevelScore()
 {
 	if (currentScore + 10000 < newScore)
 	{
-		currentScore += 10000.f;
+		currentScore += 1000.f;
 	}
 	else if (currentScore < newScore)
 	{
-		currentScore += 1000.f;
+		currentScore += 200.f;
 	}
 	else
 	{
