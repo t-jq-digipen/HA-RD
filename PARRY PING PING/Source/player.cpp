@@ -28,7 +28,7 @@ const float MAP_BOTTOM = -300.f;
 
 // Define level score update values
 const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
-const int SCORE_HEAVY_LASER_HIT = 50; // + 50 points per frame
+const int SCORE_HEAVY_LASER_HIT = 750; // + 750 points per tick
 const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
 const int SCORE_PLAYER_LOSE = -10000; // -10000 points for game over
 
@@ -424,11 +424,11 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, width / 2)) {
 				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
-				Collect_Points(SCORE_HEAVY_LASER_HIT, BIG_HIT_SCORE);
 				Loop_Timer(&laserTickTimer);
 				if (laserTickTimer.current >= laserTickTimer.duration)
 				{
 					currentCombo += 1;
+					Collect_Points(SCORE_HEAVY_LASER_HIT, BIG_HIT_SCORE);
 					laserTickTimer.current = 0.f;
 				}
 				std::cout << "Heavy Attack Hit!\n";

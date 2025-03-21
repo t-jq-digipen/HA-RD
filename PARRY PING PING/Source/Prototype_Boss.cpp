@@ -84,7 +84,7 @@ const int SCORE_MELEE_HIT = 100; // + 100 points (multiplied by damage value) pe
 const int SCORE_BOSS_PROJECTILES_PARRIED = 5000; // + 5000 points if boss rocket successfully parried
 const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successfully stunned via parry
 const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
-const int SCORE_TIME_BONUS = 1000; // + 1000 points for every second of time left less than the 1 minute cap
+const int SCORE_TIME_BONUS = 2000; // + 2000 points for every second of time left less than the 1 minute cap
 const int SCORE_DODGE = 2000; // + 2000 points if boss attack successfully dodged
 const int SCORE_PERFECT = 10000; // + 10000 points if player beats boss without taking damage
 
