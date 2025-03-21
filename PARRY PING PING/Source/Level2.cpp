@@ -1,0 +1,238 @@
+
+#include "utils.h"
+#include "UI.h"
+#include "player.h"
+#include "Enemies.h"
+#include "Level2.h"
+#include "Boss2.h"
+#include "GameStateManager.h"
+#include "mobs.h"
+
+
+AEGfxTexture* mapTexture2 = nullptr;
+
+Timer cleartransitiontimer2;
+float levelTimer2;
+
+bool showBossHitboxes2 = false;
+
+
+
+void Level2_Load()
+{
+	Load_Player();
+	Load_Boss2();
+
+
+	// Meshes
+	Load_Mesh(20);
+
+	mapTexture2 = AEGfxTextureLoad("Assets/testMapBoundary3.png");
+	if (!mapTexture2)
+	{
+		printf("Failed to load map texture!\n");
+	}
+	std::cout << "Level 2 Loaded\n";
+
+
+}
+
+void Level2_Initialize()
+{
+	std::cout << "Level 2 Initialized\n";
+
+	// Music
+	AEAudioInit();
+
+	// Player
+	Init_Player();
+
+	// Camera
+	Init_Camera();
+
+	// Mobs
+	Init_Mobs();
+
+	// Boss
+	Init_Boss2();
+	Init_Boss2_Indicator();
+
+	// UI
+	Init_UI();
+
+	// Incrementing Level Timer
+	levelTimer2 = 0.f;
+
+	// Level Clear Transition Timer
+	cleartransitiontimer2 = Create_Timer(5.f);
+	cleartransitiontimer2.current = 0;
+}
+
+void ToggleBossHitboxes2()
+{
+	showBossHitboxes2 = !showBossHitboxes2;
+}
+
+void Level2_Update()
+{
+	// Delta time
+	Get_DT();
+
+	// Music
+	AEAudioUpdate();
+
+	if (AEInputCheckTriggered(AEVK_B))
+	{
+		nextState = GS_RESTART;
+		AEInputShowCursor(0);
+	}
+
+	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
+	{
+		ToggleBossHitboxes2();
+	}
+
+
+	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
+	{
+		AEInputShowCursor(0);
+		//std::cout << "Playing\n";
+
+		// Boss behavior
+		Update_Boss2();
+
+		// Mobs
+		Update_Mobs();
+
+		// Player WASD Movement
+		Update_Player();
+
+		// Incrementing level timer
+		if (levelState != CLEARED)
+		{
+			Update_LevelTimer(&levelTimer2);
+		}
+	}
+
+	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
+	{
+		levelState = PAUSED;
+		AEInputShowCursor(1);
+	}
+	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)
+	{
+		levelState = PLAYING;
+	}
+}
+
+const float PLAYER_BASE_OFFSET{ 50.f };
+const float BOSS_BASE_OFFSET{ 70.f };
+
+void Level2_Draw()
+{
+	AEGfxSetBackgroundColor(0, 0, 0);
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+	// Define map size
+	f32 map_width = 3000.0f, map_height = 2500.0f;
+	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
+
+	// Offset map drawing so (0,0) is centered in the camera view
+	f32 map_x = -map_width / 2;
+	f32 map_y = -map_height / 2;
+
+	// Convert world positions to screen positions
+	f32 screen_x = World_To_Screen_x(map_x);
+	f32 screen_y = World_To_Screen_y(map_y);
+
+	// Draw map borders
+	DrawRect(screen_x + map_width / 2, screen_y, map_width, 10, borderColor); // Bottom
+	DrawRect(screen_x + map_width / 2, screen_y + map_height, map_width, 10, borderColor); // Top
+	DrawRect(screen_x, screen_y + map_height / 2, 10, map_height, borderColor); // Left
+	DrawRect(screen_x + map_width, screen_y + map_height / 2, 10, map_height, borderColor); // Right
+
+
+	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
+	DrawImageAttachedToRect(screen_x, screen_y, map_width, map_height, mapTexture2);
+
+	Update_Camera();
+
+	// Mobs
+	Draw_Mobs();
+
+	if (showBossHitboxes2)
+	{
+		Draw_Boss_Hitboxes();
+		std::cout << "Hitboxes drawn \n";
+	}
+	else
+	{
+		std::cout << "Hitboxes not drawn\n";
+	}
+
+	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
+	{
+		//Draw_Boss_Hitboxes();
+		Draw_Player();
+		Draw_Boss2();
+	}
+	else
+	{
+		//Draw_Boss_Hitboxes();
+		Draw_Boss2();
+		Draw_Player();
+	}
+
+	// UI
+	Draw_UI();
+
+	// Level Timer
+	Draw_LevelTimer(levelTimer2);
+
+	AEInputShowCursor(0);
+	if (levelState == PAUSED)
+	{
+		Draw_PauseMenu();
+		AEInputShowCursor(1);
+	}
+	else if (levelState == GAMEOVER)
+	{
+		Draw_GameOverMenu();
+		AEInputShowCursor(1);
+	}
+	else if (levelState == OPTIONS)
+	{
+		Draw_OptionsMenu();
+		AEInputShowCursor(1);
+	}
+	else if (levelState == CLEARED)
+	{
+		if (!Update_Timer(&cleartransitiontimer2))
+		{
+			Draw_ClearMenu();
+			AEInputShowCursor(1);
+		}
+	}
+}
+
+void Level2_Free()
+{
+	Free_UI();
+	AEInputShowCursor(1);
+}
+
+void Level2_Unload()
+{
+	AEInputShowCursor(1);
+	Unload_UI();
+	Unload_Mesh();
+	Unload_Player();
+	Unload_Boss2();
+	if (mapTexture2)
+	{
+		AEGfxTextureUnload(mapTexture2);
+		mapTexture2 = nullptr;
+	}
+	std::cout << "level2_unload";
+}

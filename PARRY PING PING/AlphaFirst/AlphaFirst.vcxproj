@@ -102,12 +102,15 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Boss1.cpp" />
+    <ClCompile Include="..\Source\Boss2.cpp" />
     <ClCompile Include="..\Source\Camera.cpp" />
     <ClCompile Include="..\Source\Enemies.cpp" />
     <ClCompile Include="..\Source\GameStateManager.cpp" />
+    <ClCompile Include="..\Source\Headers\Boss2.h" />
     <ClCompile Include="..\Source\HubWorld.cpp" />
     <ClCompile Include="..\Source\Input.cpp" />
     <ClCompile Include="..\Source\Level1.cpp" />
+    <ClCompile Include="..\Source\Level2.cpp" />
     <ClCompile Include="..\Source\Main.cpp" />
     <ClCompile Include="..\Source\MainMenu.cpp" />
     <ClCompile Include="..\Source\mobs.cpp" />
@@ -132,6 +135,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\SpriteSheet.h" />
     <ClInclude Include="..\Source\Headers\UI.h" />
     <ClInclude Include="..\Source\Headers\utils.h" />
+    <ClInclude Include="..\Source\Level2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

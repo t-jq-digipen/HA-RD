@@ -16,7 +16,7 @@
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
-EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{-600.f, 300.f, 100.f, 200.f};
+EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
 EnvStruct Txt_Controls{ 0.f, 200.f, 200.f, 100.f }, Txt_Movement{ 0.f, 150.f, 200.f, 100.f }, Txt_Attack{ 0.f, -100.f, 200.f, 100.f };
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{50.f};
 
@@ -111,6 +111,9 @@ void HubWorld_Update()
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {			// When player reaches the 'gate', start the Level 1 boss fight
 			//super bare bones for now, will add ability to 'hit button' and start a run w proper transitions etc
 			nextState = GS_LEVEL1;														
+		}
+		if (AEInputCheckTriggered(AEVK_L)) {
+			nextState = GS_LEVEL2;
 		}
 	}
 
