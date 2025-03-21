@@ -21,6 +21,7 @@ AEVec2	cam_origin,		// Spawn of camera
 		temp_campos;	// Stores locked position of camera
 
 bool LockCamera = false;
+bool CamPanning = false;
 
 void Init_Camera() 
 {
@@ -32,23 +33,19 @@ void Init_Camera()
 
 void Update_Camera() 
 {
+	if (LockCamera || CamPanning) return;
 	// Update camera position to player
 	cam_pos.x = player.pos.x;
 	cam_pos.y = player.pos.y;
 
 	// Update shift amount
-	if (!LockCamera) 
-	{
-		cam_shift.x = cam_pos.x - cam_origin.x;
-		cam_shift.y = cam_pos.y - cam_origin.y;
-		temp_campos = cam_pos;
-	}
-
 	
+	cam_shift.x = cam_pos.x - cam_origin.x;
+	cam_shift.y = cam_pos.y - cam_origin.y;
 
 	// Update mouse shift
 	AEVec2Set(&mouse_shift, Mouse.x/3.5f, Mouse.y/3.f);
-	if (!LockCamera) AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
+	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 }
 
 f32 World_To_Screen_x(f32 pos_x)
@@ -71,7 +68,22 @@ f32 Screen_To_World_y(f32 pos_y)
 	return pos_y + cam_shift.y;
 }
 
-//void Pan_Camera(s8 dir_vert, s8 dir_hor, f32 distance, f32 speed) {
-//	AEVec2 temp{ dir_hor, dir_vert };
-//	AEVec2Add(&cam_shift, &cam_shift, &temp);
-//}
+void Pan_Camera(f32 dir_vert, f32 dir_hor, f32 speed) {
+	LockCamera = true;
+	f32 currVert{}, currHor{};
+	currVert += dir_vert / speed;
+	currHor += dir_hor / speed;
+
+	// Update camera position to player
+	cam_pos.x = player.pos.x;
+	cam_pos.y = player.pos.y;
+
+	cam_shift.x = cam_pos.x - cam_origin.x;
+	cam_shift.y = cam_pos.y - cam_origin.y;
+	temp_campos = cam_pos;
+
+	// Update mouse shift
+	if (currVert >= dir_vert || currHor >= dir_hor) { return; }
+	AEVec2Set(&temp_campos, currHor, currVert);
+	AEVec2Add(&cam_shift, &cam_shift, &temp_campos);
+}

@@ -38,9 +38,10 @@ f32 Screen_To_World_y(f32 pos_y);
 // Just true or false to stop camera panning with mouse (default to true!)
 // ----------------------------------------------------------------------------
 extern bool LockCamera;
+extern bool CamPanning;
 
 // ----------------------------------------------------------------------------
 // Pans camera to direction, (-1: Left/ Down, 1: Right/ Up)
 // Distance: Desired distance to pan, Speed: Units travelled per frame
 // ----------------------------------------------------------------------------
-//void Pan_Camera(s8 dir_vert, s8 dir_hor, f32 distance, f32 speed);
+void Pan_Camera(f32 dir_vert, f32 dir_hor, f32 speed);

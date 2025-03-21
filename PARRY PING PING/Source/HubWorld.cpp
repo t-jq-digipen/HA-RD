@@ -27,7 +27,7 @@ Color hubworld_white;
 s8  hubworld_font;
 
 // Fade from black transition when level starts
-Color FadeIn, FadeOut;
+Color FadeIn, FadeGate, FadeShrine;
 f32 FadeInSpeed;
 
 int DummyMelee_Check;										// Check for dummy logic
@@ -63,9 +63,9 @@ void HubWorld_Initialize()
 	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
 	hubworld_white = SetColor(0xFFFFFFFF);
 
-	FadeIn = FadeOut = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
+	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
 	FadeInSpeed = 0.03f;
-	FadeOut.A = 0.f;
+	FadeShrine.A = FadeGate.A = 0.f;
 
 	InShrine = false;
 
@@ -144,6 +144,14 @@ void HubWorld_Draw()
 {
 	Update_Camera();															// Camera drawing logic
 
+	if (AEInputCheckTriggered(AEVK_1)) {
+		CamPanning = true;
+		Pan_Camera(200.f, 200.f, 10.f);
+	}
+	if (AEInputCheckTriggered(AEVK_2)) {
+		CamPanning = false;
+	}
+
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
@@ -153,20 +161,16 @@ void HubWorld_Draw()
 	Draw_DummyBotRange();
 
 	//Draw Environment
-	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
-
 	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
 	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
-
-	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE [WIP]", true);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
 	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
 
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
+
+#pragma region old tutorial
 
 	// Draw Instructions
 	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
@@ -186,9 +190,13 @@ void HubWorld_Draw()
 		DrawTextAdvanced(DummyMelee_pos.x + 100.f, DummyMelee_pos.y + 150.f, hubworld_font, hubworld_white, "Press E to parry these attacks!", true);
 		DrawTextAdvanced(DummyMelee_pos.x + 50.f, DummyMelee_pos.y + 100.f, hubworld_font, hubworld_white, "Parrying takes time to recharge, use wisely!", true);
 	}*/
+#pragma endregion
 
+	//Highlight effect when approaching gate
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{
+		Draw_FadeOut(FadeGate);
+
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
 			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		}
@@ -196,11 +204,18 @@ void HubWorld_Draw()
 			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
 		}	
 	}
+	else {
+		Draw_FadeIn(FadeGate);
+	}
+	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
+	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
 
+
+	//Highlight effect when approaching leaderboard shrine
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f))
 	{
-		Draw_FadeOut();
-		hubworld_white.A = FadeOut.A;
+		Draw_FadeOut(FadeShrine);
+		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 		
@@ -215,11 +230,13 @@ void HubWorld_Draw()
 	}
 	else
 	{
-		Draw_FadeIn();
-		hubworld_white.A = FadeOut.A;
+		Draw_FadeIn(FadeShrine);
+		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 	}
+	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
+	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE [WIP]", true);
 
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -288,23 +305,23 @@ void HubWorld_Unload()
 	std::cout << "HubWorld_unload";
 }
 
-void Draw_FadeIn() {
+void Draw_FadeIn(Color& Fade) {
 	FadeInSpeed = 0.03f;
 	LockCamera = false;
-	if (FadeOut.A < 0.f) {
-		FadeOut.A = 0.f;
+	if (Fade.A < 0.f) {
+		Fade.A = 0.f;
 		return;
 	}
 	else{
-		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);
-		FadeOut.A -= FadeInSpeed;
+		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);
+		Fade.A -= FadeInSpeed;
 	}
 }
 
-void Draw_FadeOut() {
+void Draw_FadeOut(Color& Fade) {
 	LockCamera = true;
-	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeOut);			// Just adjusts alpha of a black screen drawn over the level when the level starts
-	FadeOut.A += FadeInSpeed;
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
+	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
-	if (FadeOut.A > .8f) FadeOut.A = .8f;
+	if (Fade.A > .8f) Fade.A = .8f;
 }
