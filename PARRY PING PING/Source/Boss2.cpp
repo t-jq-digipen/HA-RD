@@ -22,6 +22,7 @@ Boss2 boss_2;
 Color red2 = SetColor(0xFFFF0000);
 Color green2 = SetColor(0xFF00FF00);
 Color blue2 = SetColor(0xFF0000FF);
+Color black2 = SetColor(0xFF000000);
 // Sprite sheets
 /*
 / fill here
@@ -32,8 +33,8 @@ const f32 BOSS2_SPAWN_X = 0.f;
 const f32 BOSS2_SPAWN_Y = 200.f;
 
 // Boss size
-const f32 BOSS2_WIDTH = 250.f;
-const f32 BOSS2_HEIGHT = 250.f;
+const f32 BOSS2_WIDTH = 100.f;
+const f32 BOSS2_HEIGHT = 100.f;
 
 // Boss draw size
 /*
@@ -50,9 +51,9 @@ const f32 BOSS2_VEL = 10.f;
 
 // Attack timings
 const s32 ATTACK_TYPES = {5};
-const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,0.f,0.5f,0.5f,0.5f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,0.f,1.f,1.f,1.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,0.f,1.f,1.f,1.f };
+const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,0.f,0.5f,0.5f,2.f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,0.f,1.f,1.f,5.f};
+const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,0.f,1.f,1.f,1.f};
 const f32 BOSS2_STUN[ATTACK_TYPES] = {0.f,0.f,3.f,3.f,0.f};
 
 // Attack information
@@ -67,6 +68,13 @@ const f32 SLASHWIDTH = 250.f;
 const f32 SLASHHEIGHT = 250.f;
 
 const f32 DASH_OFFSET = 100.f;
+
+// Lightning Wave settings
+const f32 SLAM_RADIUS = 150.f;
+f32 lightning_wave_radius = 0.f;       // Current radius of the expanding circle
+f32 lightning_wave_max_radius = 800.f; // Maximum radius of the expanding circle
+f32 lightning_wave_speed = 5.f;      // Speed at which the circle expands (units per second)
+bool lightning_wave_damaged = false;   // Whether the player has been damaged by the wave
 
 // Miscellaneous boss settings
 bool will_hit2 = true;
@@ -137,6 +145,12 @@ void Update_Boss2()
         case(PHASE1):
             switch (boss_2.state)
             {
+            case BOSS2_PARRIED:
+                if (!Update_Timer(&boss_2.stun_timer))
+                {
+                    boss_2.state = BOSS2_IDLE;
+                }
+                break;
             case BOSS_IDLE:
                 if (!Update_Timer(&boss_2.idle_timer))
                 {
@@ -146,16 +160,12 @@ void Update_Boss2()
                     if (randomizer <= 0.4f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
-                        /*boss_2.attack_timer.current = 0.f;
+                        boss_2.attack_timer.current = 0.f;
                         boss_attack[MISSILE_BARRAGE].timer.current = 0.f;
                         boss_2.missile_prep.current = 0.f;
                         boss_2.attack_type = MISSILE_BARRAGE;
-                        boss_2.state = BOSS2_MISSILE_BARRAGE;*/
-                        boss_2.attack_timer.current = 0.f;
-                        boss_attack[DASH_SLASH1].timer.current = 0.f;
-                        boss_attack[DASH_SLASH2].timer.current = 0.f;
-                        boss_2.attack_type = DASH;
-                        boss_2.state = BOSS2_DASH_SLASH;
+                        boss_2.state = BOSS2_MISSILE_BARRAGE;
+                     
                     }
                     else if (randomizer <= 0.8f) // 40% probability for Dash & Slash
                     {
@@ -170,15 +180,11 @@ void Update_Boss2()
                     else // 20% probability for Lightning Wave
                     {
                         // Do Lightning Wave
-                        /*boss_2.attack_timer.current = 0.f;
+                        boss_2.attack_timer.current = 0.f;
                         boss_attack[LIGHTNING_WAVE].timer.current = 0.f;
                         boss_2.attack_type = LIGHTNING_WAVE;
-                        boss_2.state = BOSS2_LIGHTNING_WAVE;*/
-                        boss_2.attack_timer.current = 0.f;
-                        boss_attack[DASH_SLASH1].timer.current = 0.f;
-                        boss_attack[DASH_SLASH2].timer.current = 0.f;
-                        boss_2.attack_type = DASH;
-                        boss_2.state = BOSS2_DASH_SLASH;
+                        boss_2.state = BOSS2_LIGHTNING_WAVE;
+                        
                     }
                 }
                 break;
@@ -188,20 +194,11 @@ void Update_Boss2()
                 break;
 
             case BOSS2_MISSILE_BARRAGE:
-                Dash_Slash_Logic();
-                // Missile_Barrage_Logic();
+                Missile_Barrage_Logic();
                 break;
 
             case BOSS2_LIGHTNING_WAVE:
-                Dash_Slash_Logic();
-                //Lightning_Wave_Logic(); 
-                break;
-
-            case BOSS2_PARRIED:
-                if (!Update_Timer(&boss_2.stun_timer))
-                {
-                    boss_2.state = BOSS2_IDLE;
-                }
+                Lightning_Wave_Logic(); 
                 break;
 
             default:
@@ -292,14 +289,14 @@ void Draw_Boss2_Hitboxes()
         case (DASH_SLASH1):
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
-                // Draw windup animation for sweep
+                // Draw windup animation for slash
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, red2);
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
                     World_To_Screen_y(boss_2.target_pos.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
-                // Draw active sweep hitbox
+                // Draw active slash hitbox
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, blue2);
 
             }
@@ -307,17 +304,32 @@ void Draw_Boss2_Hitboxes()
         case (DASH_SLASH2):
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
-                // Draw windup animation for sweep
+                // Draw windup animation for slash
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, red2);
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
                     World_To_Screen_y(boss_2.target_pos.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
-                // Draw active sweep hitbox
+                // Draw active slash hitbox
                 DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, blue2);
             }
             break;
+        }
+        break;
+    case BOSS2_LIGHTNING_WAVE:
+        if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+        {
+            // Draw windup animation for slam
+            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), SLAM_RADIUS, red2);
+            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y),
+                (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLAM_RADIUS, green2);
+        }
+        else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+        {
+            // Draw active slam hitbox
+            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), SLAM_RADIUS, red2);
+            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), lightning_wave_radius, blue2);
         }
         break;
     default:
@@ -331,8 +343,12 @@ void Draw_Boss2()
             DrawCircle(World_To_Screen_x(missile.pos.x), World_To_Screen_y(missile.pos.y), missile.radius, green2);
         }
     }
-
-    DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, red2);
+    std::cout << boss_2.state << '\n';
+    if (boss_2.state != BOSS2_PARRIED)
+    {
+        DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, red2);
+    }
+    else DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, black2);
 }
 void Unload_Boss2()
 {
@@ -352,7 +368,7 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
             boss_2.state = BOSS2_PARRIED;
             //boss_2.attack_type = 0;
             bullet_time.current = 0.f;
-            std::cout << "Boss parried\n";
+            std::cout << "Boss parried. State: " << boss_2.state << '\n'; // Debug log
         }
         else
         {
@@ -600,10 +616,64 @@ void Missile_Barrage_Logic() {
 
 void Lightning_Wave_Logic()
 {
+    if (Update_Timer(&boss_2.attack_timer)) {
+        f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
 
+        if (timer_progress < boss_attack[boss_2.attack_type].attack_windup) {
+            std::cout << "WINDUP \n";
+            will_hit2 = true;
+            // Attack is winding up
+            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+
+        }
+        else if (timer_progress < boss_attack[boss_2.attack_type].attack_active && lightning_wave_radius != lightning_wave_max_radius)
+        {
+            std::cout << "ACTIVE \n";
+            // Attack is active
+            boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
+
+            // Deal damage to the player if they are within the initial circle
+            if (AETestCircleToCircle(&boss_2.pos, SLAM_RADIUS, &player.pos, player.radius))
+            {
+                // Player damage calculation
+                if (will_hit2)
+                {
+                    Boss2_Attack_Test(boss_attack[LIGHTNING_WAVE].can_parry, 30.f);
+                }
+            }
+
+            lightning_wave_radius += lightning_wave_speed;
+            if (AETestCircleToCircle(&boss_2.pos, lightning_wave_radius, &player.pos, player.radius) && lightning_wave_damaged == false)
+            {
+                // Player damage calculation
+                if (will_hit2)
+                {
+                    Boss2_Attack_Test(boss_attack[LIGHTNING_WAVE].can_parry, 30.f);
+                    lightning_wave_damaged = true;
+                }
+            }
+            
+        }
+        else if (timer_progress < boss_attack[boss_2.attack_type].attack_recover) {
+            std::cout << "Recover \n";
+            // Attack is recovering
+            boss_2.attackstate = BOSS2_ATTACK_RECOVER;
+
+            // Reset the Lightning Wave attack
+            lightning_wave_radius = 0.f;
+            lightning_wave_damaged = false;
+        }
+    }
+    else
+    {
+        // If the attack timer is done, transition back to idle
+        boss_2.state = BOSS2_IDLE;
+        boss_2.idle_timer.current = 0.f;
+    }
 }
 
-AEVec2 GetRandomTargetPosAroundPlayer() {
+AEVec2 GetRandomTargetPosAroundPlayer() 
+{
     f32 offsetX = AERandFloat() * OFFSET_RANGE_X * 2 - OFFSET_RANGE_X; // Random X offset
     f32 offsetY = AERandFloat() * OFFSET_RANGE_Y * 2 - OFFSET_RANGE_Y; // Random Y offset
     return { player.pos.x + offsetX, player.pos.y + offsetY };
