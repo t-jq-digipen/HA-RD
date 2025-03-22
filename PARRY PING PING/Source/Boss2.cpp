@@ -21,7 +21,7 @@ Boss2 boss_2;
 //Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
 Color red2 = SetColor(0xFFFF0000);
 Color green2 = SetColor(0xFF00FF00);
-
+Color blue2 = SetColor(0xFF0000FF);
 // Sprite sheets
 /*
 / fill here
@@ -46,13 +46,14 @@ const f32 BOSS2_HITBOX_HEIGHT = 150.f;
 
 // Boss attributes
 const f32 BOSS2_MAXHP = 150.f;
+const f32 BOSS2_VEL = 10.f;
 
 // Attack timings
-const s32 ATTACK_TYPES = {4};
-const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,0.5f,0.5f,0.5f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,1.f,1.f,1.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,1.f,1.f,1.f };
-const f32 BOSS2_STUN[ATTACK_TYPES] = {0.f,3.f,3.f,0.f};
+const s32 ATTACK_TYPES = {5};
+const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,0.f,0.5f,0.5f,0.5f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,0.f,1.f,1.f,1.f};
+const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,0.f,1.f,1.f,1.f };
+const f32 BOSS2_STUN[ATTACK_TYPES] = {0.f,0.f,3.f,3.f,0.f};
 
 // Attack information
 Boss2_Attack boss_attack[ATTACK_TYPES];
@@ -62,11 +63,20 @@ Boss2_Attack boss_attack[ATTACK_TYPES];
 const f32 OFFSET_RANGE_X = 250.f / 2;  // Half of player width
 const f32 OFFSET_RANGE_Y = 250.f / 2; // Half of player height
 
+const f32 SLASHWIDTH = 250.f;
+const f32 SLASHHEIGHT = 250.f;
+
+const f32 DASH_OFFSET = 100.f;
+
 // Miscellaneous boss settings
 bool will_hit2 = true;
 std::vector<Missile> missiles(4);  // Vector to store active missiles
 bool prepdone = false;
 bool rocketset = false;
+bool prepdash = false;
+bool dashed = false;
+bool dashright = false;
+bool dashleft = false;
 // Load boss assets
 void Load_Boss2() 
 {
@@ -136,24 +146,26 @@ void Update_Boss2()
                     if (randomizer <= 0.4f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
-                        boss_2.attack_timer.current = 0.f;
+                        /*boss_2.attack_timer.current = 0.f;
                         boss_attack[MISSILE_BARRAGE].timer.current = 0.f;
                         boss_2.missile_prep.current = 0.f;
                         boss_2.attack_type = MISSILE_BARRAGE;
-                        boss_2.state = BOSS2_MISSILE_BARRAGE;
+                        boss_2.state = BOSS2_MISSILE_BARRAGE;*/
+                        boss_2.attack_timer.current = 0.f;
+                        boss_attack[DASH_SLASH1].timer.current = 0.f;
+                        boss_attack[DASH_SLASH2].timer.current = 0.f;
+                        boss_2.attack_type = DASH;
+                        boss_2.state = BOSS2_DASH_SLASH;
                     }
                     else if (randomizer <= 0.8f) // 40% probability for Dash & Slash
                     {
                         // Do Dash & Slash
-                        /*boss_2.attack_timer.current = 0.f;
-                        boss_attack[DASH_SLASH1].timer.current = 0.f;
-                        boss_2.attack_type = DASH_SLASH1;
-                        boss_2.state = BOSS2_DASH_SLASH;*/
                         boss_2.attack_timer.current = 0.f;
-                        boss_attack[MISSILE_BARRAGE].timer.current = 0.f;
-                        boss_2.missile_prep.current = 0.f;
-                        boss_2.attack_type = MISSILE_BARRAGE;
-                        boss_2.state = BOSS2_MISSILE_BARRAGE;
+                        boss_attack[DASH_SLASH1].timer.current = 0.f;
+                        boss_attack[DASH_SLASH2].timer.current = 0.f;
+                        boss_2.attack_type = DASH;
+                        boss_2.state = BOSS2_DASH_SLASH;
+                        
                     }
                     else // 20% probability for Lightning Wave
                     {
@@ -163,25 +175,25 @@ void Update_Boss2()
                         boss_2.attack_type = LIGHTNING_WAVE;
                         boss_2.state = BOSS2_LIGHTNING_WAVE;*/
                         boss_2.attack_timer.current = 0.f;
-                        boss_attack[MISSILE_BARRAGE].timer.current = 0.f;
-                        boss_2.missile_prep.current = 0.f;
-                        boss_2.attack_type = MISSILE_BARRAGE;
-                        boss_2.state = BOSS2_MISSILE_BARRAGE;
+                        boss_attack[DASH_SLASH1].timer.current = 0.f;
+                        boss_attack[DASH_SLASH2].timer.current = 0.f;
+                        boss_2.attack_type = DASH;
+                        boss_2.state = BOSS2_DASH_SLASH;
                     }
                 }
                 break;
 
             case BOSS2_DASH_SLASH:
-                Missile_Barrage_Logic();
-                //Dash_Slash_Logic();
+                Dash_Slash_Logic();
                 break;
 
             case BOSS2_MISSILE_BARRAGE:
-                Missile_Barrage_Logic();
+                Dash_Slash_Logic();
+                // Missile_Barrage_Logic();
                 break;
 
             case BOSS2_LIGHTNING_WAVE:
-                Missile_Barrage_Logic();
+                Dash_Slash_Logic();
                 //Lightning_Wave_Logic(); 
                 break;
 
@@ -247,23 +259,65 @@ void Update_Boss2()
     // Update Boss Hitbox
     Update_AABB(&boss_2.hitbox, boss_2.pos.x, boss_2.pos.y, BOSS2_HITBOX_WIDTH, BOSS2_HITBOX_HEIGHT);
 }
-void Draw_Boss2_Hitboxes() {
-    switch (boss_2.state) {
+void Draw_Boss2_Hitboxes() 
+{
+    f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
+    switch (boss_2.state) 
+    {
     case (BOSS2_MISSILE_BARRAGE):
-        switch (boss_2.attackstate) {
-        case (BOSS2_ATTACK_WINDUP):
-            for (const auto& missile : missiles) {
-                if (missile.active) {
+        if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+        {
+            for (const auto& missile : missiles)
+            {
+                if (missile.active)
+                {
                     DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
                 }
+            }
+        }
+        if(boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+        {
+            for (const auto& missile : missiles) 
+            {
+                if (missile.active) 
+                {
+                    DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
+                }
+            }
+        }
+        break;
+    case (BOSS2_DASH_SLASH):
+        switch (boss_2.attack_type)
+        {
+        case (DASH_SLASH1):
+            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+            {
+                // Draw windup animation for sweep
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, red2);
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
+                    World_To_Screen_y(boss_2.target_pos.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
+            }
+            else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+            {
+                // Draw active sweep hitbox
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, blue2);
+
             }
             break;
-        case (BOSS2_ATTACK_ACTIVE):
-            for (const auto& missile : missiles) {
-                if (missile.active) {
-                    DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
-                }
+        case (DASH_SLASH2):
+            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+            {
+                // Draw windup animation for sweep
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, red2);
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
+                    World_To_Screen_y(boss_2.target_pos.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
             }
+            else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+            {
+                // Draw active sweep hitbox
+                DrawRect(World_To_Screen_x(boss_2.target_pos.x), World_To_Screen_y(boss_2.target_pos.y), SLASHWIDTH, SLASHHEIGHT, blue2);
+            }
+            break;
         }
         break;
     default:
@@ -321,7 +375,105 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 
 void Dash_Slash_Logic() 
 {
+    if (!prepdash)
+    {
+        std::cout << "PREPPING DASH \n";
+        f32 randomizer = AERandFloat();
+        if (randomizer < 0.5f)
+        {
+            // Set the target position to the player's right
+            boss_2.target_pos.y = player.pos.y;
+            boss_2.target_pos.x = player.pos.x + DASH_OFFSET;
+            dashright = true;
+        }
+        else
+        {
+            // Set the target position to the player's left
+            boss_2.target_pos.y = player.pos.y;
+            boss_2.target_pos.x = player.pos.x - DASH_OFFSET;
+            dashleft = true;
+        }
+        // Calculate the direction vector
+        boss_2.target_dir = { player.pos.x - boss_2.pos.x, player.pos.y - boss_2.pos.y };
+        AEVec2Normalize(&boss_2.target_dir, &boss_2.target_dir);
+        boss_2.vel.x = boss_2.target_dir.x * BOSS2_VEL;
+        boss_2.vel.y = boss_2.target_dir.y * BOSS2_VEL;
+        prepdash = true;
+    }
+    if (prepdash && !dashed)
+    {
+        boss_2.pos.x += boss_2.vel.x;
+        boss_2.pos.y += boss_2.vel.y;
+        f32 distance_to_target = AEVec2Distance(&boss_2.pos, &boss_2.target_pos) - 100.f;
+        std::cout << distance_to_target<< '\n';
+        if (distance_to_target <= 5.f /*buffer*/)
+        {
+            std::cout << "DASH STOPP \n";
+            boss_2.pos = boss_2.target_pos;
+            if (dashleft)
+            {
+                boss_2.target_pos.x = boss_2.pos.x + DASH_OFFSET;
+                boss_2.target_pos.y = boss_2.pos.y;
+            }
+            else if (dashright)
+            {
+                boss_2.target_pos.x = boss_2.pos.x - DASH_OFFSET;
+                boss_2.target_pos.y = boss_2.pos.y;
+            }
+            boss_2.attack_type = DASH_SLASH1;
+            dashed = true;
+        }
+    }
+    if (dashed && Update_Timer(&boss_2.attack_timer))
+    {
+        f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
+        if (timer_progress < boss_attack[boss_2.attack_type].attack_windup)
+        {
+            // Attack is winding up
+            will_hit2 = true;
+            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
 
+        }
+        else if (dashed && timer_progress < boss_attack[boss_2.attack_type].attack_active)
+        {
+            // Attack is active (check collision)
+            boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
+
+            // Check for collision with the player
+            if (AETestCircleToRect(&player.pos, player.radius, &boss_2.target_pos, SLASHWIDTH, SLASHHEIGHT))
+            {
+                // Parry checks
+                if (will_hit2)
+                {
+                    Boss_Attack_Test(boss_attack[boss_2.attack_type].can_parry, 30.f);
+                }
+            }
+        }
+        else if (timer_progress < boss_attack[boss_2.attack_type].attack_recover)
+        {
+            // Attack is recovering
+            boss_2.attackstate = BOSS2_ATTACK_RECOVER;
+        }
+    }
+    if(dashed && !Update_Timer(&boss_2.attack_timer))
+    {
+        if (boss_2.attack_type == DASH_SLASH1)
+        {
+            boss_2.attack_type = DASH_SLASH2;
+            boss_attack[boss_2.attack_type].timer.current = 0.f;
+            boss_2.attack_timer = boss_attack[boss_2.attack_type].timer;
+            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+        }
+        else
+        {
+            boss_2.state = BOSS2_IDLE;
+            prepdash = false;
+            dashed = false;
+            dashright = false;
+            dashleft = false;
+            boss_2.idle_timer.current = 0.f;
+        }
+    }
 }
 
 void Missile_Barrage_Logic() {
@@ -336,16 +488,16 @@ void Missile_Barrage_Logic() {
             missiles[i].radius = 50.f;
             // Set velocities based on missile index
             switch (i) {
-            case 0: // Missile 1: Left
+            case 0: 
                 missiles[i].velocity = { -1.f, 0.f }; // Move left
                 break;
-            case 1: // Missile 2: Top-left
+            case 1: 
                 missiles[i].velocity = { -0.707f, 0.707f }; // Move top-left (normalized diagonal)
                 break;
-            case 2: // Missile 3: Top-right
+            case 2: 
                 missiles[i].velocity = { 0.707f, 0.707f }; // Move top-right (normalized diagonal)
                 break;
-            case 3: // Missile 4: Right
+            case 3: 
                 missiles[i].velocity = { 1.f, 0.f }; // Move right
                 break;
             default:

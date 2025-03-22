@@ -56,6 +56,7 @@ typedef enum Boss2_AttackType
 {
     MISSILE_BARRAGE,
 
+    DASH,
     DASH_SLASH1,
     DASH_SLASH2,
 
@@ -72,6 +73,7 @@ typedef struct Boss2
     f32 target_dist;            // Distance to the target
     f32 target_rot;             // Rotation angle towards the target
     AEVec2 target_dir;          // Direction vector towards the target
+    AEVec2 vel;                 // Velocity
     f32 width, height;          // Dimensions of the Boss
     f32 hp, max_hp;             // Current and maximum health points
     Boss2_Phase phase;          // Current phase the boss is in
