@@ -66,32 +66,6 @@ Timer Create_Timer(float duration)
 	return temp;
 }
 
-//bool Update_Timer(Timer* timer)
-//{
-//	if (timer->current < timer->end)
-//	{
-//		timer->current += dt / timer->duration;
-//
-//		return true;
-//	}
-//	else
-//	{
-//		timer->current = timer->end;
-//	}
-//	return false;
-//}
-
-//void Loop_Timer(Timer* timer)
-//{
-//	if (timer->current < timer->end)
-//	{
-//		timer->current += dt / timer->duration;
-//	}
-//	else
-//	{
-//		timer->current = 0;
-//	}
-//}
 
 bool Update_Timer(Timer* timer)
 {

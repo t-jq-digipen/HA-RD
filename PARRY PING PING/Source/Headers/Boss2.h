@@ -82,6 +82,7 @@ typedef struct Boss2
     Timer idle_timer;           // Timer for idle state
     Timer attack_timer;         // Timer for attack states
     Timer stun_timer;           // Timer for stun states
+    Timer missile_prep;
 
     Boss2_AttackType attack_type;            // Current attack type
 
@@ -109,11 +110,11 @@ typedef struct Boss2_Attack
 // ----------------------------------------------------------------------------
 typedef struct Missile {
     AEVec2 pos;                 // Position of the missile
+    AEVec2 targetpos;           // Targets for the missiles
     AEVec2 velocity;            // Velocity of the missile
     f32 radius;                 // Radius of the missile
     bool active;                // Whether the missile is active
-    Timer timer;                // Timer for the missile
-    AEMtx33 transform;          // Transformation matrix for drawing
+
 } Missile;
 
 // ----------------------------------------------------------------------------
@@ -127,6 +128,7 @@ extern void Draw_Boss2_Hitboxes();      // Draw boss attack hitboxes
 extern void Draw_Boss2();               // Draw Boss and its effects
 extern void Unload_Boss2();             // Unload Boss resources
 void Boss2_Attack_Test(bool canparry, f32 boss_damage); // Test for Boss attack collision
+AEVec2 GetRandomTargetPosAroundPlayer();
 void Dash_Slash_Logic();
 void Missile_Barrage_Logic();
 void Lightning_Wave_Logic();

@@ -14,7 +14,7 @@ AEGfxTexture* mapTexture2 = nullptr;
 Timer cleartransitiontimer2;
 float levelTimer2;
 
-bool showBossHitboxes2 = false;
+bool showBossHitboxes2 = true;
 
 
 
@@ -163,15 +163,15 @@ void Level2_Draw()
 
 	if (showBossHitboxes2)
 	{
-		Draw_Boss_Hitboxes();
-		std::cout << "Hitboxes drawn \n";
+		Draw_Boss2_Hitboxes();
+		//std::cout << "Hitboxes drawn \n";
 	}
 	else
 	{
-		std::cout << "Hitboxes not drawn\n";
+		/*std::cout << "Hitboxes not drawn\n";*/
 	}
 
-	if (player.pos.y - PLAYER_BASE_OFFSET > boss_1.pos.y - BOSS_BASE_OFFSET)
+	if (player.pos.y - PLAYER_BASE_OFFSET > boss_2.pos.y - BOSS_BASE_OFFSET)
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Player();
