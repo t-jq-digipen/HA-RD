@@ -105,6 +105,14 @@ void HubWorld_Update()
 		nextState = GS_RESTART;												// Press B to restart level
 	}
 
+	if (AEInputCheckCurr(AEVK_1)) {
+		CamPanning = true;
+		Pan_Camera(0.f, 500.f, 10.f);
+	}
+	if (AEInputCheckCurr(AEVK_2)) {
+		CamPanning = false;
+	}
+
 	if (levelState != PAUSED && levelState != GAMEOVER)
 	{
 		// Player WASD Movement
@@ -138,19 +146,14 @@ void HubWorld_Update()
 	{
 		levelState = PLAYING;
 	}
+
+	std::cout << "CamPanning: " << CamPanning << "\n";
+	std::cout << "LockCamera: " << LockCamera << "\n";
 }
 
 void HubWorld_Draw()
 {
 	Update_Camera();															// Camera drawing logic
-
-	if (AEInputCheckTriggered(AEVK_1)) {
-		CamPanning = true;
-		Pan_Camera(200.f, 200.f, 10.f);
-	}
-	if (AEInputCheckTriggered(AEVK_2)) {
-		CamPanning = false;
-	}
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
@@ -204,7 +207,8 @@ void HubWorld_Draw()
 			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
 		}	
 	}
-	else {
+	else 
+	{
 		Draw_FadeIn(FadeGate);
 	}
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
@@ -230,6 +234,7 @@ void HubWorld_Draw()
 	}
 	else
 	{
+		InShrine = false;
 		Draw_FadeIn(FadeShrine);
 		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
@@ -277,8 +282,11 @@ void HubWorld_Draw()
 	}
 
 	if (InShrine) {
+		Pan_Camera(0.f, 500.f, 10.f);
+		CamPanning = true;
 		Draw_ShrineBoard();
 	}
+	else CamPanning = false;
 
 	//cool little fade in effect
 	if (FadeIn.A > 0) {
@@ -323,5 +331,5 @@ void Draw_FadeOut(Color& Fade) {
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
-	if (Fade.A > .8f) Fade.A = .8f;
+	if (Fade.A > .7f) Fade.A = .7f;
 }
