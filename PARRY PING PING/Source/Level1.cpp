@@ -13,7 +13,6 @@
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
-#include "Boss1.h"
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
 #include "mobs.h"
@@ -36,6 +35,7 @@ f32 StunCounter{ 0.f };
 int dummy_check;
 
 Timer cleartransitiontimer;
+Timer gameovertransitiontimer;
 
 bool showBossHitboxes = true;
 
@@ -82,9 +82,6 @@ void Level1_Initialize()
 	// Mobs
 	Init_Mobs();
 
-	// Boss
-	Init_Boss1();
-
 	// UI
 	Init_UI();
 
@@ -110,7 +107,11 @@ void Level1_Initialize()
 
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(5.f);
-	cleartransitiontimer.current = 0;
+	cleartransitiontimer.current = 0.f;
+
+	// Game Over Transition Timer
+	gameovertransitiontimer = Create_Timer(2.f);
+	gameovertransitiontimer.current = 0.f;
 }
 
 void ToggleBossHitboxes()
@@ -138,12 +139,10 @@ void Level1_Update()
 	//}
 
 
-	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
+	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
 		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
-		// Boss behavior
-		Update_Boss1();
 
 		// Proto boss
 		Update_Boss();
@@ -249,7 +248,10 @@ void Level1_Draw()
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Boss();
-		Draw_Player();
+		if (player.hp > 0.f)
+		{
+			Draw_Player();
+		}
 	}
 
 	// Boss HP
@@ -283,12 +285,20 @@ void Level1_Draw()
 	}
 	else if (levelState == GAMEOVER)
 	{
-		Draw_GameOverMenu();
-		AEInputShowCursor(1);
+		if (!Update_Timer(&gameovertransitiontimer))
+		{
+			Draw_GameOverMenu();
+			AEInputShowCursor(1);
+		}
 	}
 	else if (levelState == OPTIONS)
 	{
 		Draw_OptionsMenu();
+		AEInputShowCursor(1);
+	}
+	else if (levelState == INQUIT)
+	{
+		Draw_QuitMenu();
 		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)

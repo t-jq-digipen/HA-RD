@@ -26,6 +26,7 @@ enum LEVEL_STATE
 	PAUSED,
 	GAMEOVER,
 	OPTIONS,
+	INQUIT,
 	CLEARED
 };
 
@@ -49,7 +50,8 @@ enum SCORE_TYPE
 	OUCH_SCORE,
 	BLOCKED_SCORE,
 	RIP_SCORE,
-	TIME_BONUS_SCORE
+	TIME_BONUS_SCORE,
+	PERFECT_SCORE
 };
 
 // ----------------------------------------------------------------------------
@@ -125,8 +127,6 @@ void Free_UI();
 // ----------------------------------------------------------------------------
 void Unload_UI();
 
-//void Draw_Boss1HP(float time_elapsed);
-
 // ----------------------------------------------------------------------------
 // Open the pause menu when player pauses the game
 // ----------------------------------------------------------------------------
@@ -141,6 +141,11 @@ void Draw_GameOverMenu();
 // Open the options menu when player accesses options from the pause menu
 // ----------------------------------------------------------------------------
 void Draw_OptionsMenu();
+
+// ----------------------------------------------------------------------------
+// Open the quit menu to make player think twice about their life choices
+// ----------------------------------------------------------------------------
+void Draw_QuitMenu();
 
 // ----------------------------------------------------------------------------
 // Open the level complete screen when player beats the boss
