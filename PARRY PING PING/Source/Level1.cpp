@@ -180,13 +180,13 @@ const float BOSS_BASE_OFFSET{ 70.f };
 
 void Level1_Draw()
 {
-	AEGfxSetBackgroundColor(0, 0, 0);
+	AEGfxSetBackgroundColor(0.902f, 0.725f, 0.451f); // Beige color
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
 	f32 map_width = 3072.0f, map_height = 1536.0f;
-	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
+	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	// Offset map drawing so (0,0) is centered in the camera view
 	f32 map_x = -map_width / 2;
