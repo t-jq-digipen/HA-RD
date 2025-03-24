@@ -141,6 +141,7 @@ void HubWorld_Update()
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
 	{
 		levelState = PAUSED;
+		InShrine = false;
 	}
 	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
 	{
@@ -331,5 +332,40 @@ void Draw_FadeOut(Color& Fade) {
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
+	if (InShrine) {
+		if (Fade.A > .9f) Fade.A = .9f;
+		return;
+	}
 	if (Fade.A > .7f) Fade.A = .7f;
+}
+
+//TEMP HIGHSCORES AND SHIII
+// can probs make highscores easier to do by having a 'player profile' struct or smt that holds a name score and time
+// struct can hold pos on screen to print, name, score, time, order in list? (maybe not bc alr sorted on google api), then can do array of structs or smth and just print
+const char* HS_name[3]{"Prasanna", "Ghali", "Foo()"};
+const char* HS_score[3]{ "1000", "2000", "3000" };
+const char* HS_time[3]{"00:11:22", "11:22:33", "22:33:44"};
+
+void Draw_ShrineBoard() {
+	DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
+
+	DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
+	DrawRect(-150.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
+	DrawRect(150.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
+
+	//Top 1
+	DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 1 Here", false, 0.1);
+	DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[0], false, 0.1);
+	DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[0], false, 0.1);
+	DrawTextAdvanced(0.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[0], false, 0.1);
+	//Top 2
+	DrawTextAdvanced(-300.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 2 Here", false, 0.1);
+	DrawTextAdvanced(-300.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[1], false, 0.1);
+	DrawTextAdvanced(-300.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[1], false, 0.1);
+	DrawTextAdvanced(-300.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[1], false, 0.1);
+	//Top 3
+	DrawTextAdvanced(300.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 3 Here", false, 0.1);
+	DrawTextAdvanced(300.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[2], false, 0.1);
+	DrawTextAdvanced(300.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[2], false, 0.1);
+	DrawTextAdvanced(300.f, -125.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[2], false, 0.1);
 }

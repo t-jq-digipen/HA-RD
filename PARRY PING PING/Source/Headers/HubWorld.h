@@ -21,4 +21,8 @@ void HubWorld_Unload();			// Unload Hub World resources
 
 void Draw_FadeIn(Color& Fade);	// Draws a Fade from Black transition
 void Draw_FadeOut(Color& Fade);	// Draws a Fade to Black transition
+// ----------------------------------------------------------------------------
+// Draws top 3 recorded scores
+// ----------------------------------------------------------------------------
+void Draw_ShrineBoard();
 		

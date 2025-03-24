@@ -764,16 +764,3 @@ void Unload_UI()
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
-
-void Draw_ShrineBoard() {
-	DrawTextAdvanced(0.f, 700.f, pixel_font, UI_white, "TOP 3!", false);
-	//Top 1
-	DrawTextAdvanced(0.f, 200.f, pixel_font, UI_white, "Draw Player 1 Here", false, 0.2);
-	DrawRect		(0.f, 0.f, 100.f, 100.f, UI_green);
-	//Top 2
-	DrawTextAdvanced(-200.f, 100.f, pixel_font, UI_white, "Draw Player 2 Here", false, 0.2);
-	DrawRect		(-200.f, 100.f, 100.f, 100.f, UI_blue);
-	//Top 3
-	DrawTextAdvanced(200.f, 0.f, pixel_font, UI_white, "Draw Player 3 Here", false, 0.2);
-	DrawRect(		200.f, -100.f, 100.f, 100.f, UI_red);
-}
