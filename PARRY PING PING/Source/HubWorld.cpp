@@ -51,9 +51,12 @@ float HubWorld_LevelTimer;
 bool InShrine;
 bool Draw_Top3;
 
+
+//Leaderboard fetching
 std::vector<std::string> HS_name(20);
 std::vector<std::string> HS_score(20);
 std::vector<std::string> HS_time(20);
+std::atomic<bool> isFetchingLeaderboard = false;
 
 void HubWorld_Load()
 {
