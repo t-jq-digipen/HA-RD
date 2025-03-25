@@ -24,6 +24,8 @@
 #include <cstdio>  // For popen()
 #include <direct.h>
 #include <thread>
+#include <atomic>
+#include <future>
 
 
 
@@ -61,7 +63,7 @@ void HubWorld_Load()
 
 	Load_Tutorial();
 
-	fetchLeaderboard(); // Fetch and update leaderboard before drawing
+	FetchLeaderboardAsync();
 
 	// Meshes
 	Load_Mesh(20);
@@ -432,6 +434,18 @@ void fetchLeaderboard() {
 	std::cout << "Current directory: " << currentDir << std::endl;
 
 
+}
+
+std::atomic<bool> isFetchingLeaderboard = false;
+
+void FetchLeaderboardAsync() {
+	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+	isFetchingLeaderboard = true;
+
+	std::thread([]() {
+		fetchLeaderboard(); // Fetch leaderboard data
+		isFetchingLeaderboard = false;
+		}).detach();
 }
 
 std::string sanitizeString(const std::string& input) {

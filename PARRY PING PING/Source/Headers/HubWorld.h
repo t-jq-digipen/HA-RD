@@ -27,4 +27,6 @@ void Draw_FadeOut(Color& Fade);	// Draws a Fade to Black transition
 void Draw_ShrineBoard();
 
 void fetchLeaderboard();
+
+void FetchLeaderboardAsync();
 		
