@@ -436,10 +436,8 @@ void fetchLeaderboard() {
 	//}
 	std::cout << "Current directory: " << currentDir << std::endl;
 
-
+	
 }
-
-std::atomic<bool> isFetchingLeaderboard = false;
 
 void FetchLeaderboardAsync() {
 	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
