@@ -1096,18 +1096,18 @@ void Update_LevelScore()
 }
 
 
-void fetchLeaderboard() {
-	// Call the Python script to fetch the leaderboard
-	std::cout << "Fetching leaderboard..." << std::endl;
-	int result = system("\\Assets\\dist\\leaderboard_helper.exe");
-
-	if (result != 0) {
-		std::cout << "Error fetching leaderboard!" << std::endl;
-	}
-	else {
-		std::cout << "Leaderboard fetched successfully!" << std::endl;
-	}
-}
+//void fetchLeaderboard() {
+//	// Call the Python script to fetch the leaderboard
+//	std::cout << "Fetching leaderboard..." << std::endl;
+//	int result = system("\\Assets\\dist\\leaderboard_helper.exe");
+//
+//	if (result != 0) {
+//		std::cout << "Error fetching leaderboard!" << std::endl;
+//	}
+//	else {
+//		std::cout << "Leaderboard fetched successfully!" << std::endl;
+//	}
+//}
 
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
 	char buffer[MAX_PATH];
