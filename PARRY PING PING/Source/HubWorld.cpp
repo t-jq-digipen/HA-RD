@@ -36,6 +36,7 @@ Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
 bool InShrine;
+bool Draw_Top3;
 
 void HubWorld_Load()
 {
@@ -68,6 +69,7 @@ void HubWorld_Initialize()
 	FadeShrine.A = FadeGate.A = 0.f;
 
 	InShrine = false;
+	Draw_Top3 = true;
 
 	// Player
 	Init_Player();															// Init Player
@@ -147,9 +149,6 @@ void HubWorld_Update()
 	{
 		levelState = PLAYING;
 	}
-
-	std::cout << "CamPanning: " << CamPanning << "\n";
-	std::cout << "LockCamera: " << LockCamera << "\n";
 }
 
 void HubWorld_Draw()
@@ -261,25 +260,25 @@ void HubWorld_Draw()
 	if (levelState == PAUSED)
 	{
 		Draw_PauseMenu();						// Draw pause menu if game is paused
-		AEInputShowCursor(1);					// Shows cursor
 	}
 	else if (levelState == GAMEOVER)
 	{
 		Draw_GameOverMenu();					// Draw game over screen when player dies
-		AEInputShowCursor(1);
 	}
 	else if (levelState == OPTIONS)
 	{
 		Draw_OptionsMenu();
-		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&HubWorld_ClearTransitionTimer))
 		{
 			Draw_ClearMenu();					// Draw level cleared menu when level is cleared
-			AEInputShowCursor(1);
 		}
+	}
+
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InShrine) {
+		AEInputShowCursor(1);													// Show cursor in these screens
 	}
 
 	if (InShrine) {
@@ -287,7 +286,10 @@ void HubWorld_Draw()
 		CamPanning = true;
 		Draw_ShrineBoard();
 	}
-	else CamPanning = false;
+	else {
+		CamPanning = false;
+		Draw_Top3 = true;
+	}
 
 	//cool little fade in effect
 	if (FadeIn.A > 0) {
@@ -342,30 +344,55 @@ void Draw_FadeOut(Color& Fade) {
 //TEMP HIGHSCORES AND SHIII
 // can probs make highscores easier to do by having a 'player profile' struct or smt that holds a name score and time
 // struct can hold pos on screen to print, name, score, time, order in list? (maybe not bc alr sorted on google api), then can do array of structs or smth and just print
-const char* HS_name[3]{"Prasanna", "Ghali", "Foo()"};
-const char* HS_score[3]{ "1000", "2000", "3000" };
-const char* HS_time[3]{"00:11:22", "11:22:33", "22:33:44"};
+//FAUZAN UR STUFF IS HERE!!!!
+//I might implement a cool little swipe to left/right transition but ngl idk if we got time so can just implement the google doc names teehee tyvm
+const char* HS_name[20]{"Prasanna", "Ghali", "Foo()", "Vadim", "Surov" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x"};
+const char* HS_score[20]{ "1000", "2000", "3000", "0000", "-10000" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" };
+const char* HS_time[20]{"00:11:22", "11:22:33", "22:33:44", "24:00:00", "365:00:00:00" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" };
 
 void Draw_ShrineBoard() {
-	DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
+	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		Draw_Top3 = false;
+	}
+	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		Draw_Top3 = true;
+	}
 
-	DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
-	DrawRect(-150.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
-	DrawRect(150.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
+	if (Draw_Top3) {
+		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
 
-	//Top 1
-	DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 1 Here", false, 0.1);
-	DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[0], false, 0.1);
-	DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[0], false, 0.1);
-	DrawTextAdvanced(0.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[0], false, 0.1);
-	//Top 2
-	DrawTextAdvanced(-300.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 2 Here", false, 0.1);
-	DrawTextAdvanced(-300.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[1], false, 0.1);
-	DrawTextAdvanced(-300.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[1], false, 0.1);
-	DrawTextAdvanced(-300.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[1], false, 0.1);
-	//Top 3
-	DrawTextAdvanced(300.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 3 Here", false, 0.1);
-	DrawTextAdvanced(300.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[2], false, 0.1);
-	DrawTextAdvanced(300.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[2], false, 0.1);
-	DrawTextAdvanced(300.f, -125.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[2], false, 0.1);
+		DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
+		DrawRect(-200.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
+		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
+
+		//Top 1
+		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 1 Here", false, 0.15);
+		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[0], false, 0.125);
+		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[0], false, 0.125);
+		DrawTextAdvanced(0.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[0], false, 0.125);
+		//Top 2
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 2 Here", false, 0.15);
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[1], false, 0.125);
+		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[1], false, 0.125);
+		DrawTextAdvanced(-400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[1], false, 0.125);
+		//Top 3
+		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 3 Here", false, 0.15);
+		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[2], false, 0.125);
+		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[2], false, 0.125);
+		DrawTextAdvanced(400.f, -125.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[2], false, 0.125);
+
+		//Show More
+		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
+	}
+	else {
+		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 20!", false);
+
+		for (int i = 0; i < 20; i++) {
+			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_name[i], false, 0.2);
+			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_score[i], false, 0.2);
+			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_time[i], false, 0.2);
+		}
+		//Show Less
+		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
+	}
 }
