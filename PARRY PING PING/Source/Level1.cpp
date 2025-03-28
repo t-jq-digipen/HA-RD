@@ -13,7 +13,6 @@
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
-#include "Boss1.h"
 #include "Prototype_Boss.h"
 #include "GameStateManager.h"
 #include "mobs.h"
@@ -36,10 +35,9 @@ f32 StunCounter{ 0.f };
 int dummy_check;
 
 Timer cleartransitiontimer;
-float levelTimer;
+Timer gameovertransitiontimer;
 
 bool showBossHitboxes = true;
-
 
 
 void Level1_Load()
@@ -84,9 +82,6 @@ void Level1_Initialize()
 	// Mobs
 	Init_Mobs();
 
-	// Boss
-	Init_Boss1();
-
 	// UI
 	Init_UI();
 
@@ -106,9 +101,17 @@ void Level1_Initialize()
 	// Incrementing Level Timer
 	levelTimer = 0.f;
 
+	// Level Score
+	currentScore = 0;
+	displayPointsAccumulated = false;
+
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(5.f);
-	cleartransitiontimer.current = 0;
+	cleartransitiontimer.current = 0.f;
+
+	// Game Over Transition Timer
+	gameovertransitiontimer = Create_Timer(2.f);
+	gameovertransitiontimer.current = 0.f;
 }
 
 void ToggleBossHitboxes()
@@ -124,7 +127,7 @@ void Level1_Update()
 	// Music
 	AEAudioUpdate();
 
-	if (AEInputCheckTriggered(AEVK_B))
+	if (AEInputCheckTriggered(AEVK_B) && levelState != CLEARED && levelState != GAMEOVER)
 	{
 		nextState = GS_RESTART;
 		AEInputShowCursor(0);
@@ -136,12 +139,10 @@ void Level1_Update()
 	//}
 
 
-	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
+	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
 		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
-		// Boss behavior
-		Update_Boss1();
 
 		// Proto boss
 		Update_Boss();
@@ -179,13 +180,13 @@ const float BOSS_BASE_OFFSET{ 70.f };
 
 void Level1_Draw()
 {
-	AEGfxSetBackgroundColor(0, 0, 0);
+	AEGfxSetBackgroundColor(0.902f, 0.725f, 0.451f); // Beige color
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 3000.0f, map_height = 2500.0f;
-	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
+	f32 map_width = 3072.0f, map_height = 1536.0f;
+	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	// Offset map drawing so (0,0) is centered in the camera view
 	f32 map_x = -map_width / 2;
@@ -247,7 +248,10 @@ void Level1_Draw()
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Boss();
-		Draw_Player();
+		if (player.hp > 0.f)
+		{
+			Draw_Player();
+		}
 	}
 
 	// Boss HP
@@ -260,6 +264,18 @@ void Level1_Draw()
 
 	// Level Timer
 	Draw_LevelTimer(levelTimer);
+	
+	// Level Score
+	Draw_LevelScore();
+
+	if (displayPointsAccumulated)
+	{
+		Draw_Points();
+	}
+	else
+	{
+		Update_LevelScore();
+	}
 
 	AEInputShowCursor(0);
 	if (levelState == PAUSED)
@@ -269,12 +285,20 @@ void Level1_Draw()
 	}
 	else if (levelState == GAMEOVER)
 	{
-		Draw_GameOverMenu();
-		AEInputShowCursor(1);
+		if (!Update_Timer(&gameovertransitiontimer))
+		{
+			Draw_GameOverMenu();
+			AEInputShowCursor(1);
+		}
 	}
 	else if (levelState == OPTIONS)
 	{
 		Draw_OptionsMenu();
+		AEInputShowCursor(1);
+	}
+	else if (levelState == INQUIT)
+	{
+		Draw_QuitMenu();
 		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)

@@ -39,9 +39,6 @@
     <ClCompile Include="..\Source\MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Source\Boss1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Source\Enemies.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -86,9 +83,6 @@
     <ClInclude Include="..\Source\Headers\MainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Source\Headers\Boss1.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Source\Headers\Enemies.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -110,5 +104,10 @@
     <ClInclude Include="..\Source\Headers\Tutorial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Source\leaderboard_helper.py">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
