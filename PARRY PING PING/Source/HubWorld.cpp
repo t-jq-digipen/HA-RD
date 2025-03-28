@@ -28,7 +28,6 @@
 #include <future>
 
 
-
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
 EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
@@ -51,12 +50,14 @@ float HubWorld_LevelTimer;
 bool InShrine;
 bool Draw_Top3;
 
-
 //Leaderboard fetching
 std::vector<std::string> HS_name(20);
 std::vector<std::string> HS_score(20);
 std::vector<std::string> HS_time(20);
 std::atomic<bool> isFetchingLeaderboard = false;
+
+// File IO
+std::vector<float> settings;
 
 void HubWorld_Load()
 {
@@ -71,6 +72,30 @@ void HubWorld_Load()
 	// Meshes
 	Load_Mesh(20);
 	std::cout << "Hub World Loaded\n";
+
+	// Read File
+
+	std::ifstream ifs_settings { "Assets/FileIO/Settings.txt" };
+	if (!ifs_settings)
+	{
+		std::cout << "Cannot read Settings.txt!!!\n";
+		return;
+	}
+	else
+	{
+		std::string label, value;
+		while (std::getline(ifs_settings, label))
+		{
+			int pos = label.find(":");
+			if (pos != std::string::npos)
+			{
+				value = label.substr(pos + 2);
+				settings.push_back(stof(value));
+				std::cout << "Value is: " << settings.back() << '\n';
+			}
+		}
+	}
+	ifs_settings.close();
 }
 
 void HubWorld_Initialize()
@@ -99,7 +124,7 @@ void HubWorld_Initialize()
 
 	// Camera
 	Init_Camera();															// Init Camera
-
+	
 	Init_Enemy_Indicator();													// Init Enemy Indicators (colours)
 
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);			// Init the dummies with specified stats!
@@ -108,6 +133,13 @@ void HubWorld_Initialize()
 
 	// UI
 	Init_UI();																// Init UI
+	
+	// Volume
+	current_bgm_vol = settings[0];
+	current_sfx_vol = settings[1];
+	prev_bgm_vol = current_bgm_vol;											// Init BGM Volume
+	prev_sfx_vol = current_sfx_vol;											// Init SFX Volume
+	std::cout << current_bgm_vol << " " << current_sfx_vol << "\n";
 
 	// Tutorial
 	Init_Tutorial();														// Init Tutorial elements

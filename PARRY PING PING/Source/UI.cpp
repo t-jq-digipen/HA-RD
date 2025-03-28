@@ -176,7 +176,6 @@ void Init_UI()
 	gameSFX = AEAudioCreateGroup();
 
 	// BGM and SFX (Settings)
-	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 2.f;			//sorry fauz this shi driving me crazy HAHAHHAHAHA
 	max_bgm_vol = max_sfx_vol = 100.f;
 
 	// Initialize volume settings when entering level

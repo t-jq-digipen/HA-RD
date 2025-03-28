@@ -11,6 +11,7 @@
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
 #include <AEEngine.h>
 #include "Input.h"

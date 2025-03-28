@@ -109,5 +109,8 @@
     <Text Include="..\Source\leaderboard_helper.py">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="..\Assets\FileIO\Settings.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
