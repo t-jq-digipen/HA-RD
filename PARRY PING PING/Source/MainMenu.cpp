@@ -20,6 +20,11 @@ s32 mouseX, mouseY;
 SpriteSheet_Old playbutton, exitbutton;
 MainMenu mainmenu;
 
+// Global variables
+Timer fadeTimer;   // Timer for fade-in effect
+bool isFading = true;  // Flag to track fade-in state
+AEGfxTexture* digipenLogo;  // Texture for the logo
+
 void MainMenu_Load()
 {
 	// Meshes
@@ -30,6 +35,8 @@ void MainMenu_Load()
 	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
 	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
 
+	digipenLogo = AEGfxTextureLoad("Assets/Digipen_Logo.png");
+
 	std::cout << "Main Menu Loaded\n";
 }
 
@@ -39,15 +46,19 @@ void MainMenu_Initialize()
 
 	// Colors
 	red = SetColor(0xFFFF6961);
-	//green = SetColor(0xFF88B984);
-	//blue = SetColor(0xFF00008B);
-	//black = SetColor(0xFF000000);
-	//white = SetColor(0xFFFFFFFF);
-	//hover_red = SetColor(0xFFFFA5A1);
+	// green = SetColor(0xFF88B984);  // If needed, uncomment this
+	// blue = SetColor(0xFF00008B);  // If needed, uncomment this
+	// black = SetColor(0xFF000000);  // If needed, uncomment this
+	// white = SetColor(0xFFFFFFFF);  // If needed, uncomment this
+	// hover_red = SetColor(0xFFFFA5A1);  // If needed, uncomment this
 
 	// Window width, height
 	width = (f32)AEGfxGetWindowWidth();
 	height = (f32)AEGfxGetWindowHeight();
+
+    // Initialize the fade-in timer
+    fadeTimer.current = 0.0f;  // Start the timer at 0
+    fadeTimer.duration = 2.0f; // 2 seconds fade-in time
 
 	mainmenu.spritesheet_button1 = &playbutton;
 	mainmenu.spritesheet_button2 = &exitbutton;
@@ -57,73 +68,129 @@ void MainMenu_Initialize()
 
 void MainMenu_Update()
 {
-	// Get mouse position coordinates
-	AEInputGetCursorPosition(&mouseX, &mouseY);
+    // Get the delta time for the current frame
+    Get_DT(); // Store the delta time
 
-	Get_DT();
 
-	// Basic way to trigger exiting the application
-	// when ESCAPE is hit or when the window is closed
-	if (AEInputCheckTriggered(AEVK_ESCAPE))
-	{
-		nextState = GS_QUIT;
-	}
+    f32 totalTime = fadeTimer.duration + 1.0f + fadeTimer.duration; // 2s fade-in + 1s hold + 2s fade-out
+    fadeTimer.current += dt;
 
-	// game title
-	DrawTextBox(-0.3f, 0.5f, width, 200.f, 3.f, pFont, red, "HARD");
+    // Update the fade-in timer if it's active
+    if (isFading)
+    {
+        // Always draw black background
+        AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+        AEGfxSetTransparency(1.0f);
+        DrawImage(0.f, 0.f, width, height, 0.f, nullptr);
 
-	if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0)
-	{
-		mainmenu.animationtimer.current = 0.f;
-	}
+        if (fadeTimer.current < fadeTimer.duration) // Fading in (0s to 2s)
+        {
+            // Calculate alpha for fade-in (0 1)
+            f32 alpha = fadeTimer.current / fadeTimer.duration;
 
-	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*mainmenu.spritesheet_button1, -300.f, 0.f, 300.f, 200.f, 0.f);
+            // Draw the logo with fade-in effect
+            DrawImageFading(0.f, 0.f, width, (height / 2), 0.f, digipenLogo, alpha);
+        }
+        else if (fadeTimer.current < fadeTimer.duration + 1.0f) // Hold for 1s (2s to 3s)
+        {
+            // Logo stays fully visible
+            DrawImageFading(0.f, 0.f, width, height / 2, 0.f, digipenLogo, 1.0f);
+        }
+        else if (fadeTimer.current < totalTime+ 0.1f) // Fading out (3s to 5s)
+        {
+            f32 fadeOutTime = fadeTimer.current - (fadeTimer.duration + 1.0f);
+            f32 alpha = 1.0f - (fadeOutTime / fadeTimer.duration); // Alpha fades from 1 0
 
-	if (IsAreaClicked(width / 2 - 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
-	{
-		
-		mainmenu.isPlayClicked = 1;
 
-		if (Update_Timer(&mainmenu.animationtimer))
-		{
-			Set_SpriteSheet_current(&playbutton, 0, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
-		}
+            // Draw the logo fading out
+            DrawImageFading(0.f, 0.f, width, height / 2, 0.f, digipenLogo, alpha);
+        }
+        else // Fade-out is done
+        {
+            isFading = false; // Only disable fading **after the whole process**
+        }
+    }
 
-		if (AEInputCheckTriggered(AEVK_LBUTTON))
-		{
-			nextState = GS_HUBWORLD;
-		}
-	}
-	else
-	{
-		mainmenu.isPlayClicked = 0;
-		Set_SpriteSheet_current(&playbutton, 0, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
-	}
 
-	// exit button (click to go to quit state)
-	Draw_SpriteSheet_test(*mainmenu.spritesheet_button2, 300.f, 0.f, 300.f, 200.f, 0.f);
+    else
+    {
+        // Get mouse position coordinates
+        AEInputGetCursorPosition(&mouseX, &mouseY);
 
-	if (IsAreaClicked(width / 2 + 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
-	{
-		mainmenu.isExitClicked = 1;
+        // Basic way to trigger exiting the application
+        if (AEInputCheckTriggered(AEVK_ESCAPE))
+        {
+            nextState = GS_QUIT;
+        }
 
-		if (Update_Timer(&mainmenu.animationtimer))
-		{
-			Set_SpriteSheet_current(&exitbutton, 2, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
-		}
+        // game title
+        DrawTextBox(-0.3f, 0.5f, width, 200.f, 3.f, pFont, red, "HARD");
 
-		if (AEInputCheckTriggered(AEVK_LBUTTON))
-		{
-			nextState = GS_QUIT;
-		}
-	}
-	else
-	{
-		mainmenu.isExitClicked = 0;
-		Set_SpriteSheet_current(&exitbutton, 2, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
-	}
+        if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0)
+        {
+            mainmenu.animationtimer.current = 0.f;
+        }
+
+        // play button (click to go to Level1 state)
+        Draw_SpriteSheet_test(*mainmenu.spritesheet_button1, -300.f, 0.f, 300.f, 200.f, 0.f);
+
+        if (IsAreaClicked(width / 2 - 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
+        {
+            mainmenu.isPlayClicked = 1;
+
+            // Increment animation timer by dt manually
+            mainmenu.animationtimer.current += dt;
+
+            if (mainmenu.animationtimer.current >= mainmenu.animationtimer.duration)
+            {
+                mainmenu.animationtimer.current = mainmenu.animationtimer.duration; // Clamp to max duration
+            }
+
+            Set_SpriteSheet_current(&playbutton, 0, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
+
+            if (AEInputCheckTriggered(AEVK_LBUTTON))
+            {
+                nextState = GS_HUBWORLD;
+            }
+        }
+        else
+        {
+            mainmenu.isPlayClicked = 0;
+            mainmenu.animationtimer.current = 0.f; // Reset timer when not clicked
+            Set_SpriteSheet_current(&playbutton, 0, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
+        }
+
+        // exit button (click to go to quit state)
+        Draw_SpriteSheet_test(*mainmenu.spritesheet_button2, 300.f, 0.f, 300.f, 200.f, 0.f);
+
+        if (IsAreaClicked(width / 2 + 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
+        {
+            mainmenu.isExitClicked = 1;
+
+            // Increment animation timer by dt manually
+            mainmenu.animationtimer.current += dt;
+
+            if (mainmenu.animationtimer.current >= mainmenu.animationtimer.duration)
+            {
+                mainmenu.animationtimer.current = mainmenu.animationtimer.duration; // Clamp to max duration
+            }
+
+            Set_SpriteSheet_current(&exitbutton, 2, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
+
+            if (AEInputCheckTriggered(AEVK_LBUTTON))
+            {
+                nextState = GS_QUIT;
+            }
+        }
+        else
+        {
+            mainmenu.isExitClicked = 0;
+            mainmenu.animationtimer.current = 0.f; // Reset timer when not clicked
+            Set_SpriteSheet_current(&exitbutton, 2, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
+        }
+    }
 }
+
 
 void MainMenu_Draw()
 {
