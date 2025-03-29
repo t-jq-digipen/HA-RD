@@ -375,38 +375,49 @@ void Draw_PauseMenu()
 	}
 }
 
-// bool isInputDisabled = false;  // Flag to disable player input
 
 void HandleTextInput()
 {
+	// Prevent input if the name has already been submitted
+	if (hasSubmitted)
+		return;
+
 	// Check if the backspace key is pressed and the player name is not empty
-	if (AEInputCheckTriggered(AEVK_BACK) && playerName.length() > 0)
+	if (AEInputCheckTriggered(AEVK_BACK) && !playerName.empty())
 	{
-		// Remove the last character (backspace)
-		playerName.pop_back();
+		// Clear the entire string
+		playerName.clear();
 	}
 
-	// Loop through the possible printable characters (A-Z)
-	for (int i = AEVK_A; i <= AEVK_Z; ++i) {
-		if (AEInputCheckTriggered(i)) {
-			// Append the character to the player's name
-			playerName.push_back(static_cast<char>('A' + (i - AEVK_A)));
+	// Only allow input if the name is less than 3 characters
+	if (playerName.length() < 3)
+	{
+		// Loop through the possible printable characters (A-Z)
+		for (int i = AEVK_A; i <= AEVK_Z; ++i) {
+			if (AEInputCheckTriggered(i)) {
+				// Append the character to the player's name
+				playerName.push_back(static_cast<char>('A' + (i - AEVK_A)));
+			}
 		}
-	}
 
-	// Allow digits (0-9)
-	for (int i = AEVK_0; i <= AEVK_9; ++i) {
-		if (AEInputCheckTriggered(i)) {
-			// Append the number to the player's name
-			playerName.push_back(static_cast<char>('0' + (i - AEVK_0)));
+		// Allow digits (0-9)
+		for (int i = AEVK_0; i <= AEVK_9; ++i) {
+			if (AEInputCheckTriggered(i)) {
+				// Append the number to the player's name
+				playerName.push_back(static_cast<char>('0' + (i - AEVK_0)));
+			}
 		}
-	}
 
-	// Allow the space bar to insert spaces
-	if (AEInputCheckTriggered(AEVK_SPACE)) {
-		playerName.push_back(' '); // Append a space to the player's name
+		// Allow the space bar to insert spaces
+		if (AEInputCheckTriggered(AEVK_SPACE)) {
+			playerName.push_back(' '); // Append a space to the player's name
+		}
 	}
 }
+
+
+
+
 
 // Function to draw the loading image
 void DrawLoadingImage()
@@ -526,11 +537,37 @@ void Draw_ClearMenu()
 
 	DrawTextBox(-0.45f, -0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, combo);
 
-	// Test with a position close to the center of the screen
-	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, playerName.c_str());
+	static float cursorTimer = 0.0f;
+	static bool showCursor = true;
+
+
+	if (playerName.length() < 3)
+	{
+		cursorTimer += AEFrameRateControllerGetFrameTime();
+		if (cursorTimer >= 0.5f)
+		{
+			showCursor = !showCursor;
+			cursorTimer = 0.0f;
+		}
+	}
+	else
+	{
+		showCursor = false; // Disable cursor when input is submitted or 3 characters are reached
+	}
+
+	// Create a display name with a blinking cursor if the input is active
+	std::string displayName = playerName;
+	if (playerName.length() < 3 && showCursor) // Only show cursor when active
+	{
+		displayName += '|'; // Use a vertical bar as the cursor
+	}
+
+	// Draw the textbox with the updated name
+	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, displayName.c_str());
 
 	// Handle text input
 	HandleTextInput();
+
 
 	// Exit button (click to go back to hubworld state)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -300.f, 200.f, 100.f, 0.f);
@@ -1095,19 +1132,6 @@ void Update_LevelScore()
 	}
 }
 
-
-//void fetchLeaderboard() {
-//	// Call the Python script to fetch the leaderboard
-//	std::cout << "Fetching leaderboard..." << std::endl;
-//	int result = system("\\Assets\\dist\\leaderboard_helper.exe");
-//
-//	if (result != 0) {
-//		std::cout << "Error fetching leaderboard!" << std::endl;
-//	}
-//	else {
-//		std::cout << "Leaderboard fetched successfully!" << std::endl;
-//	}
-//}
 
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
 	char buffer[MAX_PATH];
