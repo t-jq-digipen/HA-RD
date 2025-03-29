@@ -1,0 +1,11 @@
+0) Player Ranged Attack Hit Score: 500.f
+1) Player Heavy Attack Hit Score: 750.f
+2) Player Take Hit Score: -100.f
+3) Player Lose Score: -10000.f
+4) Player Melee Attack Hit Score: 100.f
+5) Player Parry Boss Ranged Score: 5000.f
+6) Player Parry Boss Melee Score: 10000.f
+7) Player Time Bonus Cap: 60.f
+8) Player Time Bonus Score: 2000.f
+9) Player Dodge Score: 2000.f
+10) Player Perfect Score: 10000.f

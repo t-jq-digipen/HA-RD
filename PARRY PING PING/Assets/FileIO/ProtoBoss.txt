@@ -1,0 +1,54 @@
+0) Proto Boss Spawn X: 0.f
+1) Proto Boss Spawn Y: 200.f
+2) Proto Boss Width: 500.f
+3) Proto Boss Height: 500.f
+4) Proto Boss Draw Width: 650.f
+5) Proto Boss Draw Height: 650.f
+6) Proto Boss Hitbox Width: 400.f
+7) Proto Boss Hitbox Height: 300.f
+8) Proto Boss Max HP: 200.f
+9) Proto Boss Dash Distance: 250.f
+10) Proto Boss Windup 1: 0.8f
+11) Proto Boss Windup 2: 0.8f
+12) Proto Boss Windup 3: 0.8f
+13) Proto Boss Windup 4: 0.8f
+14) Proto Boss Windup 5: 1.f
+15) Proto Boss Windup 6: 2.f
+16) Proto Boss Windup 7: 2.f
+17) Proto Boss Attack 1: 0.2f
+18) Proto Boss Attack 2: 0.2f
+19) Proto Boss Attack 3: 0.2f
+20) Proto Boss Attack 4: 0.2f
+21) Proto Boss Attack 5: 0.2f
+22) Proto Boss Attack 6: 1.5f
+23) Proto Boss Attack 7: 1.5f
+24) Proto Boss Recover 1: 0.4f
+25) Proto Boss Recover 2: 1.f
+26) Proto Boss Recover 3: 0.4f
+27) Proto Boss Recover 4: 0.4f
+28) Proto Boss Recover 5: 1.f
+29) Proto Boss Recover 6: 1.f
+30) Proto Boss Recover 7: 2.f
+31) Proto Boss Stun 1: 0.f
+32) Proto Boss Stun 2: 3.f
+33) Proto Boss Stun 3: 0.f
+34) Proto Boss Stun 4: 0.f
+35) Proto Boss Stun 5: 3.f
+36) Proto Boss Stun 6: 0.f
+37) Proto Boss Stun 7: 0.f
+38) Proto Boss Rocket Radius: 30.f
+39) Proto Boss Rocket Damage: 20.f
+40) Proto Boss Rocket Speed: 500.f
+41) Proto Boss Smash Radius: 200.f
+42) Proto Boss Smash Damage: 30.f
+43) Proto Boss Big Smash Radius: 350.f
+44) Proto Boss Sweep Width: 600.f
+45) Proto Boss Sweep Height: 600.f
+46) Proto Boss Death Explosion Radius: 25.f
+47) Proto Boss Idle Timer: 1.f
+48) Proto Boss Attack Timer: 1.f
+49) Proto Boss Stun Timer: 3.f
+50) Proto Boss Explosion Timer: 0.5f
+51) Proto Boss Death Explosion Duration: 4.f
+52) Proto Boss Shadow Radius 1: 120.f
+53) Proto Boss Shadow Radius 2: 80.f

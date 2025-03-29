@@ -27,10 +27,10 @@
 // const float MAP_BOTTOM = -300.f;
 
 // Define level score update values
-const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
-const int SCORE_HEAVY_LASER_HIT = 750; // + 750 points per tick
-const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
-const int SCORE_PLAYER_LOSE = -10000; // -10000 points for game over
+int SCORE_LIGHT_PROJECTILE_HIT;
+int SCORE_HEAVY_LASER_HIT;
+int SCORE_PLAYER_EAT_HIT;
+int SCORE_PLAYER_LOSE;
 
 typedef struct Projectile
 {
@@ -53,6 +53,7 @@ std::vector<Projectile> projectiles; // List to hold active projectiles
 // File IO
 std::vector<float> Player_IO;
 std::vector<float> PlayerAttack_IO;
+std::vector<float> PlayerScore_IO;
 
 Player player;
 Attack melee_attack;
@@ -1050,6 +1051,7 @@ void Load_Player()
 	// Read File IO
 	ReadFromFile("Assets/FileIO/Player.txt", Player_IO);
 	ReadFromFile("Assets/FileIO/PlayerAttack.txt", PlayerAttack_IO);
+	ReadFromFile("Assets/FileIO/PlayerScore.txt", PlayerScore_IO);
 
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
@@ -1188,6 +1190,11 @@ void Init_Player()
 	Init_Player_UI(player.ammo, player.max_ammo, player.hp, player.max_hp);
 
 	laserTickTimer = Create_Timer(PlayerAttack_IO[51]);
+
+	SCORE_LIGHT_PROJECTILE_HIT = static_cast<int>(PlayerScore_IO[0]);			// + 500 points per projectile
+	SCORE_HEAVY_LASER_HIT = static_cast<int>(PlayerScore_IO[1]);				// + 750 points per tick
+	SCORE_PLAYER_EAT_HIT = static_cast<int>(PlayerScore_IO[2]);				// - 100 points (multiplied by damage) per hit
+	SCORE_PLAYER_LOSE = static_cast<int>(PlayerScore_IO[3]);					// - 10000 points for game over
 }
 
 void Update_Player()

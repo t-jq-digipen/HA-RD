@@ -1033,7 +1033,7 @@ void Collect_Points(int value, int score_index)
 void Draw_Points()
 {
 	std::cout << pointsAccumulated << '\n';
-	if (levelState == PLAYING)
+	if (levelState == PLAYING || levelState == CLEARED)
 	{
 		if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
 		{
