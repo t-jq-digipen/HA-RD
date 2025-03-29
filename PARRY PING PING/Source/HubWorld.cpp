@@ -19,7 +19,6 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
-#include <string>
 #include <cstdlib>
 #include <cstdio>  // For popen()
 #include <direct.h>
@@ -30,8 +29,10 @@
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
-EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
-EnvStruct Txt_Controls{ 0.f, 200.f, 200.f, 100.f }, Txt_Movement{ 0.f, 150.f, 200.f, 100.f }, Txt_Attack{ 0.f, -100.f, 200.f, 100.f };
+//EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
+EnvStruct Env_Gate, Env_Campfire, Env_Shrine, Env_Modifiers;
+// EnvStruct Txt_Controls{ 0.f, 200.f, 200.f, 100.f }, Txt_Movement{ 0.f, 150.f, 200.f, 100.f }, Txt_Attack{ 0.f, -100.f, 200.f, 100.f };
+EnvStruct Txt_Controls, Txt_Movement, Txt_Attack;
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{ 50.f };
 
 // TEMPORARY - Placeholder for sprites to be added
@@ -57,7 +58,8 @@ std::vector<std::string> HS_time(20);
 std::atomic<bool> isFetchingLeaderboard = false;
 
 // File IO
-std::vector<float> settings;
+std::vector<float> HubWorld_IO_settings;
+std::vector<float> HubWorld_IO_elements;
 
 void HubWorld_Load()
 {
@@ -73,47 +75,39 @@ void HubWorld_Load()
 	Load_Mesh(20);
 	std::cout << "Hub World Loaded\n";
 
-	// Read File
-
-	std::ifstream ifs_settings { "Assets/FileIO/Settings.txt" };
-	if (!ifs_settings)
-	{
-		std::cout << "Cannot read Settings.txt!!!\n";
-		return;
-	}
-	else
-	{
-		std::string label, value;
-		while (std::getline(ifs_settings, label))
-		{
-			int pos = label.find(":");
-			if (pos != std::string::npos)
-			{
-				value = label.substr(pos + 2);
-				settings.push_back(stof(value));
-				std::cout << "Value is: " << settings.back() << '\n';
-			}
-		}
-	}
-	ifs_settings.close();
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Settings.txt", HubWorld_IO_settings);
+	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
 }
 
 void HubWorld_Initialize()
 {
 	std::cout << "Hub World Initialized\n";
 
+	// Hub World Environments
+	Env_Gate = { HubWorld_IO_elements[0], HubWorld_IO_elements[1], HubWorld_IO_elements[2], HubWorld_IO_elements[3] };
+	Env_Campfire = { HubWorld_IO_elements[4], HubWorld_IO_elements[5], HubWorld_IO_elements[6], HubWorld_IO_elements[7] };
+	Env_Shrine = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };
+	Env_Modifiers = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };
+
+	// Hub World Text
+	Txt_Controls = { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };
+	Txt_Movement = { HubWorld_IO_elements[20], HubWorld_IO_elements[21], HubWorld_IO_elements[22], HubWorld_IO_elements[23] };
+	Txt_Attack = { HubWorld_IO_elements[24], HubWorld_IO_elements[25], HubWorld_IO_elements[26], HubWorld_IO_elements[27] };
+
 	// Dummy enemy
-	DummyMelee_pos = { 600.f, 200.f };							// Init positions, and variables of Melee and Ranged Projectile Practice Range Dummy
-	DummyRange_pos = { 800.f, 200.f };
-	DummyMelee_rad = 50.f;
+	DummyMelee_pos = { HubWorld_IO_elements[28], HubWorld_IO_elements[29] };							// Init positions, and variables of Melee and Ranged Projectile Practice Range Dummy
+	DummyRange_pos = { HubWorld_IO_elements[31], HubWorld_IO_elements[32] };
+	DummyMelee_rad = static_cast<float>( HubWorld_IO_elements[30] );
 	DummyMelee_Check = 0;
 
 	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
 	hubworld_white = SetColor(0xFFFFFFFF);
 
 	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
-	FadeInSpeed = 0.03f;
-	FadeShrine.A = FadeGate.A = 0.f;
+	FadeInSpeed = HubWorld_IO_elements[33];
+	FadeShrine.A = HubWorld_IO_elements[34];
+	FadeGate.A = HubWorld_IO_elements[34];
 
 	InShrine = false;
 	Draw_Top3 = true;
@@ -130,26 +124,27 @@ void HubWorld_Initialize()
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);			// Init the dummies with specified stats!
 	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
 
+	// Volume
+	current_bgm_vol = HubWorld_IO_settings[0];								// Init BGM Volume
+	current_sfx_vol = HubWorld_IO_settings[1];								// Init SFX Volume
+	max_bgm_vol = HubWorld_IO_settings[2];
+	max_sfx_vol = HubWorld_IO_settings[3];
+	prev_bgm_vol = current_bgm_vol;
+	prev_sfx_vol = current_sfx_vol;
+	std::cout << current_bgm_vol << " " << current_sfx_vol << "\n";
 
 	// UI
 	Init_UI();																// Init UI
-	
-	// Volume
-	current_bgm_vol = settings[0];
-	current_sfx_vol = settings[1];
-	prev_bgm_vol = current_bgm_vol;											// Init BGM Volume
-	prev_sfx_vol = current_sfx_vol;											// Init SFX Volume
-	std::cout << current_bgm_vol << " " << current_sfx_vol << "\n";
 
 	// Tutorial
 	Init_Tutorial();														// Init Tutorial elements
 
 	// Incrementing Level Timer
-	HubWorld_LevelTimer = 0.f;
+	HubWorld_LevelTimer = HubWorld_IO_elements[35];
 
 	// Level Clear Transition Timer
-	HubWorld_ClearTransitionTimer = Create_Timer(5.f);
-	HubWorld_ClearTransitionTimer.current = 0;
+	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[36]);
+	HubWorld_ClearTransitionTimer.current = HubWorld_IO_elements[37];
 
 }
 

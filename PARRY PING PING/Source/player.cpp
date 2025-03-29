@@ -50,16 +50,9 @@ typedef struct Projectile
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
 
-
-const float PLAYER_WIDTH = 250.f;
-const float PLAYER_HEIGHT = 250.f;
-
-const float PLAYER_DRAW_WIDTH = 250.f;
-const float PLAYER_DRAW_HEIGHT = 250.f;
-
-const float PLAYER_HITBOX_WIDTH = 80.f;
-const float PLAYER_HITBOX_HEIGHT = 120.f;
-
+// File IO
+std::vector<float> Player_IO;
+std::vector<float> PlayerAttack_IO;
 
 Player player;
 Attack melee_attack;
@@ -467,11 +460,13 @@ shoottrig trigger = RANGED_BLANK;	// 0 - No shoot
 									// 1 - Light
 									// 2 - Heavy
 
-const float RANGED_ATTACK_DURATION = .4f;
-const float RANGED_ATTACK_DELAY = 0.1f;
+float RANGED_ATTACK_DURATION, RANGED_ATTACK_DELAY, HEAVY_ATTACK_DURATION, HEAVY_ATTACK_DELAY;
 
-const float HEAVY_ATTACK_DURATION = 1.f;
-const float HEAVY_ATTACK_DELAY = .5f;
+//const float RANGED_ATTACK_DURATION = .4f;
+//const float RANGED_ATTACK_DELAY = 0.1f;
+//
+//const float HEAVY_ATTACK_DURATION = 1.f;
+//const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
@@ -824,11 +819,7 @@ void Attacking()
 }
 
 
-
-
-
-const float DASH_COOLDOWN = 1.2f;
-const float DASH_DURATION = 0.3f;
+float dash_cooldown, dash_duration;
 
 Timer dodge_time;
 Timer dodge_cooldown;
@@ -959,8 +950,10 @@ void Movement() {
 
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
-	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
+	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_width);
 }
+
+// float parry_duration, block_duration, block_cooldown;
 
 const float PARRY_DURATION = 0.3f; // PARRY DURATION		0.2s parry
 const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
@@ -1065,6 +1058,10 @@ void Eat_Hit(f32 damage)
 
 void Load_Player()
 {
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Player.txt", Player_IO);
+	ReadFromFile("Assets/FileIO/PlayerAttack.txt", PlayerAttack_IO);
+
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
 	player_sprite = SpriteSheet("Assets/Player/Player.png", 22, 11);
@@ -1091,24 +1088,37 @@ void Load_Player()
 
 void Init_Player()
 {
-	player.pos = { 0.f,0.f };
-	player.vel = { 0.f,0.f };
-	player.speed = 500.f;
-	player.hp = 100.f;
-	player.radius = 25.f;
+	player.pos = { Player_IO[0], Player_IO[1] };
+	player.vel = { Player_IO[2], Player_IO[3] };
+	player.speed = Player_IO[4];
+	player.hp = Player_IO[5];
+	player.max_hp = Player_IO[5];
+	player.radius = Player_IO[6];
 
-	player.dodge_vel = { 0.f,0.f };
+	player.dodge_vel = { Player_IO[7], Player_IO[8] };
 
-	player.width = PLAYER_WIDTH;
-	player.height = PLAYER_HEIGHT;
+	player.width = Player_IO[9];
+	player.height = Player_IO[10];
+	player.draw_width = Player_IO[11];
+	player.draw_height = Player_IO[12];
+	player.hitbox_width = Player_IO[13];
+	player.hitbox_height = Player_IO[14];
 
-	player.hitbox = Init_AABB(player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
+	player.hitbox = Init_AABB(player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_height);
 
-	player.hittimer = Create_Timer(0.5f);
-	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
+	dash_cooldown = Player_IO[15];
+	dash_duration = Player_IO[16];
 
-	dodge_cooldown = Create_Timer(DASH_COOLDOWN);
-	dodge_time = Create_Timer(DASH_DURATION);
+	player.hittimer = Create_Timer(Player_IO[17]);
+	player.dodgetimer = Create_Timer(dash_cooldown);
+
+	dodge_cooldown = Create_Timer(dash_cooldown);
+	dodge_time = Create_Timer(dash_duration);
+
+	RANGED_ATTACK_DURATION = PlayerAttack_IO[0];
+	RANGED_ATTACK_DELAY = PlayerAttack_IO[1];
+	HEAVY_ATTACK_DURATION = PlayerAttack_IO[2];
+	HEAVY_ATTACK_DELAY = PlayerAttack_IO[3];
 
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
@@ -1138,6 +1148,7 @@ void Init_Player()
 	AEVec2Zero(&atk_dir);
 
 	player.ammo = 3;
+	player.max_ammo = 3;
 
 	heavy_atk;
 	heavy_atk.pos = {};
@@ -1152,7 +1163,7 @@ void Init_Player()
 
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
-	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
+	Init_Player_UI(player.ammo, player.max_ammo, player.hp, player.max_hp);
 
 	laserTickTimer = Create_Timer(0.5f);
 }
@@ -1395,7 +1406,7 @@ void Draw_Player()
 		break;
 		// ----------------------------------------------------------------------------
 	case DODGE:
-		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, DASH_DURATION);
+		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, dash_duration);
 		player.spritesheet = &sshitdodgeparry;
 
 		//new
@@ -1455,11 +1466,11 @@ void Draw_Player()
 	{
 	case LEFT:
 		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, 0.f);
-		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, false);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.draw_width, player.draw_height, false);
 		break;
 	case RIGHT:
 		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), -player.radius * 10.f, player.radius * 10.f, 0.f);
-		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, true);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.draw_width, player.draw_height, true);
 		break;
 	default:
 		break;

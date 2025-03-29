@@ -1,0 +1,4 @@
+0) Player Ranged Attack Duration: 0.4f
+1) Player Ranged Attack Delay: 0.1f
+2) Player Heavy Attack Duration: 1.f
+3) Player Heavy Attack Delay: 0.5f

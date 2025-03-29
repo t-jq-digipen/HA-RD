@@ -134,6 +134,9 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\Assets\FileIO\Player.txt" />
+    <Text Include="..\Assets\FileIO\HubWorld.txt" />
+    <Text Include="..\Assets\FileIO\PlayerAttack.txt" />
     <Text Include="..\Assets\FileIO\Settings.txt" />
     <Text Include="..\Source\leaderboard_helper.py">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>

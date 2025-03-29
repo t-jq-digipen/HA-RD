@@ -1,0 +1,18 @@
+0) Player Pos X: 0.f
+1) Player Pos Y: 0.f
+2) Player Vel X: 0.f
+3) Player Vel Y: 0.f
+4) Player Speed: 500.f
+5) Player HP: 100.f
+6) Player Radius: 25.f
+7) Player Dodge Vel X: 0.f
+8) Player Dodge Vel Y: 0.f
+9) Player Width: 250.f
+10) Player Height: 250.f
+11) Player Draw Width: 250.f
+12) Player Draw Height: 250.f
+13) Player Hitbox Width: 80.f
+14) Player Hitbox Height: 120.f
+15) Player Dash Cooldown: 1.2f
+16) Player Dash Duration: 0.3f
+17) Player Hit Timer: 0.5f

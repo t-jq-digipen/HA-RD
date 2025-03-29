@@ -112,5 +112,14 @@
     <Text Include="..\Assets\FileIO\Settings.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="..\Assets\FileIO\HubWorld.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\Player.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\PlayerAttack.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
