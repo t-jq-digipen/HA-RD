@@ -15,6 +15,19 @@
 #include "GameStateManager.h"
 #include "Tutorial.h"
 #include "Camera.h"
+#include <iostream>
+#include <fstream>
+#include <vector>
+#include <sstream>
+#include <string>
+#include <cstdlib>
+#include <cstdio>  // For popen()
+#include <direct.h>
+#include <thread>
+#include <atomic>
+#include <future>
+
+
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
@@ -38,6 +51,13 @@ float HubWorld_LevelTimer;
 bool InShrine;
 bool Draw_Top3;
 
+
+//Leaderboard fetching
+std::vector<std::string> HS_name(20);
+std::vector<std::string> HS_score(20);
+std::vector<std::string> HS_time(20);
+std::atomic<bool> isFetchingLeaderboard = false;
+
 void HubWorld_Load()
 {
 	Load_Player();											// Load Player
@@ -45,6 +65,8 @@ void HubWorld_Load()
 	Load_DummyBot();
 
 	Load_Tutorial();
+
+	FetchLeaderboardAsync();
 
 	// Meshes
 	Load_Mesh(20);
@@ -71,6 +93,7 @@ void HubWorld_Initialize()
 	InShrine = false;
 	Draw_Top3 = true;
 
+
 	// Player
 	Init_Player();															// Init Player
 
@@ -95,6 +118,7 @@ void HubWorld_Initialize()
 	// Level Clear Transition Timer
 	HubWorld_ClearTransitionTimer = Create_Timer(5.f);
 	HubWorld_ClearTransitionTimer.current = 0;
+
 }
 
 void HubWorld_Update()
@@ -351,9 +375,90 @@ void Draw_FadeOut(Color& Fade) {
 // struct can hold pos on screen to print, name, score, time, order in list? (maybe not bc alr sorted on google api), then can do array of structs or smth and just print
 //FAUZAN UR STUFF IS HERE!!!!
 //I might implement a cool little swipe to left/right transition but ngl idk if we got time so can just implement the google doc names teehee tyvm
-const char* HS_name[20]{"Prasanna", "Ghali", "Foo()", "Vadim", "Surov" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x"};
-const char* HS_score[20]{ "1000", "2000", "3000", "0000", "-10000" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" };
-const char* HS_time[20]{"00:11:22", "11:22:33", "22:33:44", "24:00:00", "365:00:00:00" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" , "x" };
+
+void fetchLeaderboard() {
+	// Get current directory
+	char buffer[MAX_PATH];
+	_getcwd(buffer, MAX_PATH);
+	std::string currentDir(buffer);
+
+	// Run Python script to generate leaderboard.txt
+	std::string command = "\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\"";
+	int result = system(command.c_str());
+	if (result != 0) {
+		std::cerr << "Failed to run leaderboard_helper.exe" << std::endl;
+		return;
+	}
+
+	// Open leaderboard.txt
+	std::ifstream file("leaderboard.txt");
+	if (!file) {
+		std::cerr << "Failed to open leaderboard.txt" << std::endl;
+		return;
+	}
+
+	std::vector<std::string> names, scores, times;
+	std::string line;
+
+	// Read leaderboard.txt line by line
+	while (std::getline(file, line)) {
+		std::string name, score, time;
+
+		// Split using " - " as the delimiter
+		size_t firstDash = line.find(" - ");
+		size_t secondDash = line.find(" - ", firstDash + 3);
+
+		if (firstDash != std::string::npos && secondDash != std::string::npos) {
+			name = line.substr(0, firstDash);
+			score = line.substr(firstDash + 3, secondDash - (firstDash + 3));
+			time = line.substr(secondDash + 3);
+
+			names.push_back(name);
+			scores.push_back(score);
+			times.push_back(time);
+		}
+	}
+
+	file.close();
+
+	// Store in game leaderboard variables
+	for (size_t i = 0; i < names.size() && i < 20; i++) {
+		HS_name[i] = names[i];
+		HS_score[i] = scores[i];
+		HS_time[i] = times[i];
+	}
+
+	std::cout << "Leaderboard fetched and stored successfully!" << std::endl;
+	//// After populating the arrays
+	//std::cout << "Leaderboard Entries:" << std::endl;
+	//for (int i = 0; i < 20; i++) {
+	//	std::cout << "Name: " << HS_name[i] << " | Score: " << HS_score[i] << " | Time: " << HS_time[i] << std::endl;
+	//}
+	std::cout << "Current directory: " << currentDir << std::endl;
+
+	
+}
+
+void FetchLeaderboardAsync() {
+	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+	isFetchingLeaderboard = true;
+
+	std::thread([]() {
+		fetchLeaderboard(); // Fetch leaderboard data
+		isFetchingLeaderboard = false;
+		}).detach();
+}
+
+std::string sanitizeString(const std::string& input) {
+	std::string result;
+	for (char c : input) {
+		// Remove any non-printable characters
+		if (isprint(c)) {
+			result += c;
+		}
+	}
+	return result;
+}
 
 void Draw_ShrineBoard() {
 	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
@@ -370,34 +475,36 @@ void Draw_ShrineBoard() {
 		DrawRect(-200.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
 		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
 
-		//Top 1
-		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 1 Here", false, 0.15);
-		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[0], false, 0.125);
-		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[0], false, 0.125);
-		DrawTextAdvanced(0.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[0], false, 0.125);
-		//Top 2
-		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 2 Here", false, 0.15);
-		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[1], false, 0.125);
-		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[1], false, 0.125);
-		DrawTextAdvanced(-400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[1], false, 0.125);
-		//Top 3
-		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), "Draw Player 3 Here", false, 0.15);
-		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), HS_name[2], false, 0.125);
-		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), HS_score[2], false, 0.125);
-		DrawTextAdvanced(400.f, -125.f, pixel_font, SetColor(0xFFFFFFFF), HS_time[2], false, 0.125);
+		// Top 1
+		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125);  // Convert std::string to const char*
 
-		//Show More
+		// Top 2
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125);  // Convert std::string to const char*
+
+		// Top 3
+		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125);  // Convert std::string to const char*
+
+		// Show More
 		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
 	}
 	else {
 		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 20!", false);
 
 		for (int i = 0; i < 20; i++) {
-			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_name[i], false, 0.2);
-			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_score[i], false, 0.2);
-			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), HS_time[i], false, 0.2);
+			// Reuse the X and Y positions for each row from the existing code
+			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2);  // Convert std::string to const char*
+			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2);  // Convert std::string to const char*
+
 		}
-		//Show Less
+
+		// Show Less
 		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
 	}
 }

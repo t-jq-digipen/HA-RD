@@ -7,7 +7,7 @@
 //			Recalculates position coordinates for conversion
 //			between world and screen
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "Camera.h"

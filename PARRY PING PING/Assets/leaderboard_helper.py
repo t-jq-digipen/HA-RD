@@ -9,8 +9,13 @@ def fetch_leaderboard():
         
         if response.status_code == 200:
             leaderboard = response.json()  # Returns leaderboard data as JSON
-            for entry in leaderboard:
-                print(f"{entry['name']} - {entry['score']} - {entry['level_time']}")  # Print level_time as well
+            
+            # Write to leaderboard.txt
+            with open("leaderboard.txt", "w", encoding="utf-8") as file:
+                for entry in leaderboard:
+                    file.write(f"{entry['name']} - {entry['score']} - {entry['level_time']}\n")
+            
+            print("Leaderboard fetched and saved to leaderboard.txt")
         else:
             print(f"Error fetching leaderboard: {response.status_code}")
     except requests.exceptions.RequestException as e:

@@ -177,7 +177,6 @@ void Draw_Points();
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
 
-void fetchLeaderboard();
 
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
