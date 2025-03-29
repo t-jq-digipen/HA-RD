@@ -63,12 +63,19 @@ std::vector<float> HubWorld_IO_elements;
 
 void HubWorld_Load()
 {
-	Load_Player();											// Load Player
+	// UI
+	Load_UI();
 
+	// Player
+	Load_Player();
+
+	// Dummy Bots
 	Load_DummyBot();
 
+	// Tutorial
 	Load_Tutorial();
 
+	// Leaderboard
 	FetchLeaderboardAsync();
 
 	// Meshes

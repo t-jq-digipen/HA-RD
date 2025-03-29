@@ -162,7 +162,7 @@ void Init_Boss()
     // RocketFist attributes
     BOSS_PROJECTILE_RADIUS = ProtoBoss_IO[38];                          // BOSS PROJECTILE RADIUS = 30.f
     BOSS_PROJECTILE_DAMAGE = ProtoBoss_IO[39];                          // BOSS PROJECTILE DAMAGE = 20.f
-    BOSS_PROJECTILE_SPEED = ProtoBoss_IO[40];                           // BOSS PROJECTILE SPEED = 500.f
+    BOSS_PROJECTILE_SPEED = ProtoBoss_IO[40];                           // BOSS PROJECTILE SPEED = 1000.f
 
     // Attack hitbox settings
     SMASH_RADIUS = ProtoBoss_IO[41];                                    // BOSS SMASH RADIUS = 200.f

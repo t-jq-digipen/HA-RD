@@ -38,7 +38,7 @@
 37) Proto Boss Stun 7: 0.f
 38) Proto Boss Rocket Radius: 30.f
 39) Proto Boss Rocket Damage: 20.f
-40) Proto Boss Rocket Speed: 500.f
+40) Proto Boss Rocket Speed: 1000.f
 41) Proto Boss Smash Radius: 200.f
 42) Proto Boss Smash Damage: 30.f
 43) Proto Boss Big Smash Radius: 350.f

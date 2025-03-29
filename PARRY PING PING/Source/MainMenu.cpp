@@ -9,6 +9,7 @@
 //---------------------------------------------------------
 
 #include "utils.h"
+#include "UI.h"
 #include "MainMenu.h"
 #include "GameStateManager.h"
 
@@ -22,6 +23,9 @@ MainMenu mainmenu;
 
 void MainMenu_Load()
 {
+	// UI
+	Load_UI();
+
 	// Meshes
 	Load_Mesh(20);
 
