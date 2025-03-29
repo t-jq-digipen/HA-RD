@@ -16,3 +16,4 @@
 15) Player Dash Cooldown: 1.2f
 16) Player Dash Duration: 0.3f
 17) Player Hit Timer: 0.5f
+18) Player Max Ammo: 3.f

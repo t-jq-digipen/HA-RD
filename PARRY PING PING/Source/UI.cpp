@@ -1033,46 +1033,50 @@ void Collect_Points(int value, int score_index)
 void Draw_Points()
 {
 	std::cout << pointsAccumulated << '\n';
-	if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
+	if (levelState == PLAYING)
 	{
-		if (isPerfect)
+		if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
 		{
-			DrawTextAdvanced(player.pos.x, player.pos.y + 280.f, pixel_font, UI_gold, "PERFECT!!!", true, 1.f);
-		}
-		if (currentCombo > 1)
-		{
-			snprintf(combo, sizeof(combo), "COMBO %d", currentCombo);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, UI_green, combo, true, 0.5f);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 210.f, pixel_font, score_color, score_type, true, 0.5f);
+			if (isPerfect)
+			{
+				DrawTextAdvanced(player.pos.x, player.pos.y + 280.f, pixel_font, UI_gold, "PERFECT!!!", true, 1.f);
+			}
+			if (currentCombo > 1)
+			{
+				snprintf(combo, sizeof(combo), "COMBO %d", currentCombo);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, UI_green, combo, true, 0.5f);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 210.f, pixel_font, score_color, score_type, true, 0.5f);
+			}
+			else
+			{
+				DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, score_color, score_type, true, 0.5f);
+			}
+
+			// POINTS
+			if (pointsAccumulated > 0)
+			{
+				snprintf(points, sizeof(points), "+%d", pointsAccumulated);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_green, points, true, 0.5f);
+			}
+			else if (pointsAccumulated < 0)
+			{
+				snprintf(points, sizeof(points), "%d", pointsAccumulated);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_red, points, true, 0.5f);
+			}
 		}
 		else
 		{
-			DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, score_color, score_type, true, 0.5f);
+			displayPointsAccumulated = false;
+			newScore = currentScore + pointsAccumulated;
+			pointsAccumulated = 0;
+			if (currentCombo > highestCombo)
+			{
+				highestCombo = currentCombo;
+			}
+			currentCombo = 0;
 		}
+	}
 
-		// POINTS
-		if (pointsAccumulated > 0)
-		{
-			snprintf(points, sizeof(points), "+%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_green, points, true, 0.5f);
-		}
-		else if (pointsAccumulated < 0)
-		{
-			snprintf(points, sizeof(points), "%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_red, points, true, 0.5f);
-		}
-	}
-	else
-	{
-		displayPointsAccumulated = false;
-		newScore = currentScore + pointsAccumulated;
-		pointsAccumulated = 0;
-		if (currentCombo > highestCombo)
-		{
-			highestCombo = currentCombo;
-		}
-		currentCombo = 0;
-	}
 }
 
 void Update_LevelScore()

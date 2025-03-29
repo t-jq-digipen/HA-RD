@@ -21,10 +21,10 @@
 
 
 // Define map boundary limits
-const float MAP_LEFT = -500.f;
-const float MAP_RIGHT = 500.f;
-const float MAP_TOP = 300.f;
-const float MAP_BOTTOM = -300.f;
+// const float MAP_LEFT = -500.f;
+// const float MAP_RIGHT = 500.f;
+// const float MAP_TOP = 300.f;
+// const float MAP_BOTTOM = -300.f;
 
 // Define level score update values
 const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
@@ -80,29 +80,21 @@ const float rightClickHoldDuration = 0.25f; // 1 second hold to trigger heavy at
 
 AEGfxTexture* AtkHB;
 
-const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
-const float ATTACK_DURATION = 1.f;
-const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
-const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
-
-const float ATTACK_START_ACTIVE[4] = { 0.f,0.2f,0.2f,0.3f };
-const float ATTACK_END_ACTIVE[4] = { 0.f,0.4f,0.5f,0.7f };
-
-const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.5f };
-
-const float ATTACK_COMBO_WINDOW = 1.f;
-
-float ATTACK_OFFSET[4] = { 0.f, 30.f, 40.f, 0.f };
-
-const float ATTACK_WIDTH[4] = { 0.f, 200.f, 200.f, 280.f };
-const float ATTACK_HEIGHT[4] = { 0.f,150.f,170.f,180.f };
-
-Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
-
-const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
-const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
-
-const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
+std::vector<float> ATTACK_COOLDOWN;
+float ATTACK_DURATION;
+std::vector<float> ATTACK_START;
+std::vector<float> ATTACK_END;
+std::vector<float> ATTACK_START_ACTIVE;
+std::vector<float> ATTACK_END_ACTIVE;
+std::vector<float> ATTACK_TOTAL;
+float ATTACK_COMBO_WINDOW;
+std::vector<float> ATTACK_OFFSET;
+std::vector<float> ATTACK_WIDTH;
+std::vector<float> ATTACK_HEIGHT;
+Timer combo_window;
+std::vector<float> ATTACK_ANGLE;
+std::vector<float> ATTACK_RADIUS;
+std::vector<float> ATTACK_DAMAGE;
 
 aabb melee_hitbox;
 
@@ -953,11 +945,10 @@ void Movement() {
 	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_width);
 }
 
-// float parry_duration, block_duration, block_cooldown;
-
-const float PARRY_DURATION = 0.3f; // PARRY DURATION		0.2s parry
-const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
-const float BLOCK_COOLDOWN = 3.0f; // TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
+float PARRY_DURATION; // PARRY DURATION		0.2s parry
+float BLOCK_DURATION; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
+float BLOCK_COOLDOWN;	// TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
+float BLOCK_REDUCTION;
 
 // BLOCK/PARRY CHECK
 void Parrying()
@@ -1026,8 +1017,6 @@ void Parried_Hit()
 	AEAudioPlay(parryFX, gameSFX, 1.0f, 1.0f, 0);
 }
 
-const f32 BLOCK_REDUCTION = 0.5f;
-
 void Blocked_Hit(f32 damage)
 {
 	player.state = BLOCKED;
@@ -1088,37 +1077,70 @@ void Load_Player()
 
 void Init_Player()
 {
-	player.pos = { Player_IO[0], Player_IO[1] };
-	player.vel = { Player_IO[2], Player_IO[3] };
-	player.speed = Player_IO[4];
-	player.hp = Player_IO[5];
-	player.max_hp = Player_IO[5];
-	player.radius = Player_IO[6];
+	// PLAYER STATS (see Player.txt)
 
-	player.dodge_vel = { Player_IO[7], Player_IO[8] };
+	player.pos = { Player_IO[0], Player_IO[1] };	// PLAYER POS				{ X = 0.f, Y = 0.f }
+	player.vel = { Player_IO[2], Player_IO[3] };	// PLAYER VEL				{ X = 0.f, Y = 0.f }
+	player.speed = Player_IO[4];					// PLAYER SPEED				500.f
+	player.hp = Player_IO[5];						// PLAYER HP				100.f
+	player.max_hp = Player_IO[5];					// PLAYER MAX HP			100.f
+	player.radius = Player_IO[6];					// PLAYER RADIUS			25.f
 
-	player.width = Player_IO[9];
-	player.height = Player_IO[10];
-	player.draw_width = Player_IO[11];
-	player.draw_height = Player_IO[12];
-	player.hitbox_width = Player_IO[13];
-	player.hitbox_height = Player_IO[14];
+	player.dodge_vel = { Player_IO[7], Player_IO[8] };	// PLAYER DODGE VEL	{ X = 0.f, Y = 0.f }
+
+	player.width = Player_IO[9];					// PLAYER WIDTH				250.f
+	player.height = Player_IO[10];					// PLAYER HEIGHT			250.f
+	player.draw_width = Player_IO[11];				// PLAYER DRAW WIDTH		250.f
+	player.draw_height = Player_IO[12];				// PLAYER DRAW HEIGHT		250.f
+	player.hitbox_width = Player_IO[13];			// PLAYER HITBOX WIDTH		80.f
+	player.hitbox_height = Player_IO[14];			// PLAYER HITBOX HEIGHT		120.f
 
 	player.hitbox = Init_AABB(player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_height);
 
-	dash_cooldown = Player_IO[15];
-	dash_duration = Player_IO[16];
+	dash_cooldown = Player_IO[15];					// PLAYER DASH COOLDOWN		1.2s
+	dash_duration = Player_IO[16];					// PLAYER DASH DURATION		0.3s
 
-	player.hittimer = Create_Timer(Player_IO[17]);
-	player.dodgetimer = Create_Timer(dash_cooldown);
+	player.hittimer = Create_Timer(Player_IO[17]);	// PLAYER HIT TIMER			0.5s
+	player.dodgetimer = Create_Timer(dash_cooldown);	// PLAYER DODGE TIMER	1.2s
 
-	dodge_cooldown = Create_Timer(dash_cooldown);
-	dodge_time = Create_Timer(dash_duration);
+	dodge_cooldown = Create_Timer(dash_cooldown);	// PLAYER DODGE COOLDOWN	1.2s
+	dodge_time = Create_Timer(dash_duration);		// PLAYER DODGE TIME		0.3s
 
-	RANGED_ATTACK_DURATION = PlayerAttack_IO[0];
-	RANGED_ATTACK_DELAY = PlayerAttack_IO[1];
-	HEAVY_ATTACK_DURATION = PlayerAttack_IO[2];
-	HEAVY_ATTACK_DELAY = PlayerAttack_IO[3];
+	// MELEE ATTACK (see PlayerAttack.txt)
+
+	ATTACK_COOLDOWN = { PlayerAttack_IO[0], PlayerAttack_IO[1], PlayerAttack_IO[2], PlayerAttack_IO[3] };		// MELEE COOLDOWN		{ 0.f, 0.5f, 0.5f, 0.7f }
+	ATTACK_DURATION = PlayerAttack_IO[4];																		// MELEE DURATION		1.s
+	ATTACK_START = { PlayerAttack_IO[5], PlayerAttack_IO[6], PlayerAttack_IO[7], PlayerAttack_IO[8] };			// MELEE START			{ 0.f, 0.2f, 0.2f, 0.3f }
+	ATTACK_END = { PlayerAttack_IO[9], PlayerAttack_IO[10], PlayerAttack_IO[11], PlayerAttack_IO[12] };			// MELEE END			{ 0.f, 0.4f, 0.5f, 0.7f }
+
+	ATTACK_START_ACTIVE = { PlayerAttack_IO[5], PlayerAttack_IO[6], PlayerAttack_IO[7], PlayerAttack_IO[8] };	// MELEE START ACTIVE	{ 0.f, 0.2f, 0.2f, 0.3f }
+	ATTACK_END_ACTIVE = { PlayerAttack_IO[9], PlayerAttack_IO[10], PlayerAttack_IO[11], PlayerAttack_IO[12] };	// MELEE END ACTIVE		{ 0.f, 0.4f, 0.5f, 0.7f }
+
+	ATTACK_TOTAL = { PlayerAttack_IO[13], PlayerAttack_IO[14], PlayerAttack_IO[15], PlayerAttack_IO[16] };		// MELEE TOTAL			{ 1.f, 1.f, 1.f, 1.5f }
+
+	ATTACK_COMBO_WINDOW = PlayerAttack_IO[17];																	// MELEE COMBO WINDOW	1.f
+
+	ATTACK_OFFSET = { PlayerAttack_IO[18], PlayerAttack_IO[19], PlayerAttack_IO[20], PlayerAttack_IO[21] };		// MELEE OFFSET			{ 0.f, 30.f, 40.f, 0.f }
+
+	ATTACK_WIDTH = { PlayerAttack_IO[22], PlayerAttack_IO[23], PlayerAttack_IO[24], PlayerAttack_IO[25] };		// MELEE WIDTH			{ 0.f, 200.f, 200.f, 280.f }
+	ATTACK_HEIGHT = { PlayerAttack_IO[26], PlayerAttack_IO[27], PlayerAttack_IO[28], PlayerAttack_IO[29] };		// MELEE HEIGHT			{ 0.f, 150.f, 170.f, 180.f }
+
+	combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };															// MELEE COMBO WINDOW (TIMER)
+
+	ATTACK_ANGLE = { PI / PlayerAttack_IO[30], PI / PlayerAttack_IO[31] };										// MELEE ANGLE			{ PI / 4.f, PI / 3.f }
+	ATTACK_RADIUS = { PlayerAttack_IO[32], PlayerAttack_IO[32], PlayerAttack_IO[32], PlayerAttack_IO[32] };		// MELEE RADIUS			{ 150.f, 150.f, 150.f, 150.f }
+
+	ATTACK_DAMAGE = { PlayerAttack_IO[33], PlayerAttack_IO[34], PlayerAttack_IO[35], PlayerAttack_IO[36] };		// MELEE DAMAGE			{ 0.f, 5.f, 5.f, 15.f }
+
+	PARRY_DURATION = PlayerAttack_IO[37];			// PARRY DURATION			0.3s parry
+	BLOCK_DURATION = PlayerAttack_IO[38];			// PARRY + BLOCK DURATION	1.0s block + 0.2s parry
+	BLOCK_COOLDOWN = PlayerAttack_IO[39];			// TOTAL BLOCK DURATION		0.2s parry + 1.0 block + 3.0s cooldown
+	BLOCK_REDUCTION = PlayerAttack_IO[40];			// BLOCK REDUCTION			0.5f
+
+	RANGED_ATTACK_DURATION = PlayerAttack_IO[41];	// RANGED ATTACK DURATION	0.4s unload ranged attack
+	RANGED_ATTACK_DELAY = PlayerAttack_IO[42];		// RANGED + DELAY DURATION	0.4s unload + 0.1s delay
+	HEAVY_ATTACK_DURATION = PlayerAttack_IO[43];		// HEAVY ATTACK DURATION	1.0s unload heavy attack
+	HEAVY_ATTACK_DELAY = PlayerAttack_IO[44];		// HEAVY + DELAY DURATION	1.0s unload + 0.5s delay
 
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
@@ -1147,25 +1169,25 @@ void Init_Player()
 
 	AEVec2Zero(&atk_dir);
 
-	player.ammo = 3;
-	player.max_ammo = 3;
+	player.ammo = static_cast<int>(Player_IO[18]);			// PLAYER STARTING AMMO = 3
+	player.max_ammo = static_cast<int>(Player_IO[18]);		// PLAYER MAX AMMO = 3
 
 	heavy_atk;
 	heavy_atk.pos = {};
-	heavy_atk.vel = { 0.f, 0.f };
-	heavy_atk.speed = 0.f; // Adjust speed as needed
-	heavy_atk.angle = { 0.f };
+	heavy_atk.vel = { PlayerAttack_IO[45], PlayerAttack_IO[46] };
+	heavy_atk.speed = PlayerAttack_IO[47]; // Adjust speed as needed
+	heavy_atk.angle = { PlayerAttack_IO[48] };
 	heavy_atk.isActive = true;
 	heavy_atk.isHeavy = true;
-	heavy_atk.lifetimeTimer = Create_Timer(1.5f);
+	heavy_atk.lifetimeTimer = Create_Timer(PlayerAttack_IO[49]);
 
-	new_proj.lifetimeTimer = Create_Timer(5.0f);
+	new_proj.lifetimeTimer = Create_Timer(PlayerAttack_IO[50]);
 
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
 	Init_Player_UI(player.ammo, player.max_ammo, player.hp, player.max_hp);
 
-	laserTickTimer = Create_Timer(0.5f);
+	laserTickTimer = Create_Timer(PlayerAttack_IO[51]);
 }
 
 void Update_Player()

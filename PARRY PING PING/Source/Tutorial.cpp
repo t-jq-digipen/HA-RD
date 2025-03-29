@@ -19,6 +19,9 @@ Color tutgreen, tutblack, tutgray, tutbg, tutwhite;
 
 AEVec2 arrowdir;
 
+// File IO
+std::vector<float> Tutorial_IO;
+
 // Movement bools
 // 0 - W
 // 1 - A
@@ -281,6 +284,17 @@ void Update_Tutorial_Parry()
 
 bool toofar;
 
+AEVec2 button_size;
+f32 button_offset;
+
+f32 draw_y;
+f32 movedraw_x;
+f32 meleedraw_x;
+f32 txtsize_h1, txtsize_h2, txtsize_h3, txtsize_content;
+f32 arrow_x, arrow_y, arrow_gate_x, arrow_gate_y;
+std::vector<f32> rangedraw_x;
+
+
 void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 {
 	AEVec2 dummy{ target_pos_x, target_pos_y };
@@ -297,8 +311,8 @@ void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 
 void Init_Tutorial()
 {
-	transition_timer = Create_Timer(2.f);
-	clear_delay = Create_Timer(1.f);
+	transition_timer = Create_Timer(Tutorial_IO[0]);		// TUTORIAL TRANSITION TIMER	2.0s
+	clear_delay = Create_Timer(Tutorial_IO[1]);				// TUTORIAL CLEAR DELAY			1.0s
 
 	toofar = false;
 
@@ -307,11 +321,34 @@ void Init_Tutorial()
 	tutgray		= SetColor(0xFFD9D9D9);
 	tutbg		= SetColor(0x50000000);
 	tutwhite	= SetColor(0xFFFFFFFF);
+	
+	button_size = { Tutorial_IO[6], Tutorial_IO[7] };		// TUTORIAL BUTTON SIZE			{ 50.f, 50.f }
+	button_offset = Tutorial_IO[8];							// TUTORIAL BUTTON OFFSET		100.f
+
+	draw_y = Tutorial_IO[9];								// TUTORIAL SPRITE DRAW Y		150.f					
+
+	movedraw_x = Tutorial_IO[10];							// TUTORIAL MOVE DRAW X			-150.f
+	meleedraw_x = Tutorial_IO[11];							// TUTORIAL MELEE DRAW X		-100.f
+	rangedraw_x = { Tutorial_IO[12], Tutorial_IO[13] };		// TUTORIAL RANGE DRAW X		{ -100.f, 100.f }
+
+	txtsize_h1 = Tutorial_IO[14];							// TUTORIAL TEXT SIZE H1		0.5f
+	txtsize_h2 = Tutorial_IO[15];							// TUTORIAL TEXT SIZE H2		0.35f
+	txtsize_h3 = Tutorial_IO[16];							// TUTORIAL TEXT SIZE H3		0.3f
+	txtsize_content = Tutorial_IO[17];						// TUTORIAL TEXT SIZE CONTENT	0.2f
+
+	arrow_x = Tutorial_IO[66];								// TUTORIAL ARROW X				600.f
+	arrow_y = Tutorial_IO[67];								// TUTORIAL ARROW Y				400.f
+	arrow_gate_x = Tutorial_IO[68];							// TUTORIAL ARROW TO GATE X		0.f
+	arrow_gate_y = Tutorial_IO[69];							// TUTORIAL ARROW TO GATE Y		750.f
+
 	Reset_Tutorial();
 }
 
 void Load_Tutorial()
 {
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Tutorial.txt", Tutorial_IO);
+
 	WASD_sprite =	SpriteSheet::SpriteSheet("Assets/UI/Tutorial/WASD.png", 2, 4);
 	melee_sprite =	SpriteSheet::SpriteSheet("Assets/UI/Tutorial/Melee.png", 2, 1);
 	space_sprite =	SpriteSheet::SpriteSheet("Assets/UI/Tutorial/Space.png", 2, 1);
@@ -344,7 +381,7 @@ void Update_Tutorial()
 		{
 			active = false;
 		}
-		Update_Arrow(600.f,200.f);
+		Update_Arrow(Tutorial_IO[2], Tutorial_IO[3]);
 		switch (tutstate)
 		{
 		case TUTORIAL_MOVEMENT:
@@ -383,22 +420,13 @@ void Update_Tutorial()
 	}
 	else
 	{
-		Update_Arrow(0.f, 550.f);
+		Update_Arrow(Tutorial_IO[4], Tutorial_IO[5]);
 		if (AEInputCheckTriggered(AEVK_T))
 		{
 			Reset_Tutorial();
 		}
 	}
 }
-
-AEVec2 button_size{ 50.f,50.f };
-f32 button_offset = 100.f;
-
-const f32 draw_y = 150.f;
-
-const f32 movedraw_x = -150.f;
-const f32 meleedraw_x = -100.f;
-const f32 rangedraw_x[2] = { -100.f, 100.f };
 
 void DrawCheckmark(f32 pos_x, f32 pos_y)
 {
@@ -428,18 +456,18 @@ void Draw_Tutorial()
 {
 	if (active)
 	{
-		DrawTextAdvanced(0.f, 700.f, pixel_font, tutblack, "PRESS T TO SKIP TUTORIAL", false, .5f);
+		DrawTextAdvanced(Tutorial_IO[18], Tutorial_IO[19], pixel_font, tutblack, "PRESS T TO SKIP TUTORIAL", false, txtsize_h1);
 		switch (tutstate)
 		{
 		case TUTORIAL_MOVEMENT:
 		{
 			// Text
-			DrawRect(-400.f, 150.f, 350.f, 200.f, tutbg);
+			DrawRect(Tutorial_IO[20], Tutorial_IO[21], Tutorial_IO[22], Tutorial_IO[23], tutbg);
 
-			DrawTextAdvanced(-800.f, 400.f, pixel_font, tutwhite,	"MOVEMENT", false, .5f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[25], pixel_font, tutwhite, "MOVEMENT", false, txtsize_h1);
 
-			DrawTextAdvanced(-800.f, 200.f, pixel_font, tutgray,	"Move with WASD keys", false, .2f);
-			DrawTextAdvanced(-800.f, 150.f, pixel_font, tutgray,	"dodge with SPACEBAR", false, .2f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[26], pixel_font, tutgray,	"Move with WASD keys", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[27], pixel_font, tutgray,	"dodge with SPACEBAR", false, txtsize_content);
 
 			// Images
 			for (int i = 0; i < 4; i++)
@@ -461,16 +489,16 @@ void Draw_Tutorial()
 		case TUTORIAL_MELEE:
 		{
 			// Text
-			DrawRect(-400.f, 125.f, 350.f, 250.f, tutbg);
+			DrawRect(Tutorial_IO[28], Tutorial_IO[29], Tutorial_IO[30], Tutorial_IO[31], tutbg);
 
-			DrawTextAdvanced(-800.f, 400.f, pixel_font, tutwhite,	"MELEE ATTACKS", false, .35f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[32], pixel_font, tutwhite,	"MELEE ATTACKS", false, txtsize_h2);
 
-			DrawTextAdvanced(-800.f, 200.f, pixel_font, tutgray,	"Melee with LMB        ", false, .2f);
-			DrawTextAdvanced(-800.f, 125.f, pixel_font, tutgray,	"Hit up to three times!", false, .2f);
-			DrawTextAdvanced(-800.f, 75.f, pixel_font, tutgray,		"Each hit restores ammo", false, .2f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[33], pixel_font, tutgray,	"Melee with LMB        ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[34], pixel_font, tutgray,	"Hit up to three times!", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[35], pixel_font, tutgray,	"Each hit restores ammo", false, txtsize_content);
 
 			// Images
-			DrawArrow(600.f, 400.f);
+			DrawArrow(arrow_x, arrow_y);
 
 			for (int i = 0; i < 3; i++)
 			{
@@ -487,20 +515,20 @@ void Draw_Tutorial()
 		case TUTORIAL_RANGE:
 		{
 			// Text
-			DrawRect(-400.f, 50.f, 450.f, 400.f, tutbg);
+			DrawRect(Tutorial_IO[36], Tutorial_IO[37], Tutorial_IO[38], Tutorial_IO[39], tutbg);
 
-			DrawTextAdvanced(-800.f, 400.f, pixel_font, tutwhite,	"RANGE ATTACKS", false, .35f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[40], pixel_font, tutwhite,	"RANGE ATTACKS", false, txtsize_h2);
 
-			DrawTextAdvanced(-800.f, 200.f, pixel_font, tutgray,	"Shoot with RMB               ", false, .2f);
-			DrawTextAdvanced(-800.f, 125.f, pixel_font, tutgray,	"Tap to shoot light projectile", false, .2f);
-			DrawTextAdvanced(-800.f, 50.f, pixel_font, tutgray,		"Hold to unleash a powerful   ", false, .2f);
-			DrawTextAdvanced(-800.f, 0.f, pixel_font, tutgray,		"heavy laser that uses 3 ammo!", false, .2f);
-			DrawTextAdvanced(-800.f, -75.f, pixel_font, tutgray,	"Tip: Weave light projectiles ", false, .2f);
-			DrawTextAdvanced(-800.f, -125.f, pixel_font, tutgray,	"between melee hits to attack ", false, .2f);
-			DrawTextAdvanced(-800.f, -175.f, pixel_font, tutgray,	"much faster!                 ", false, .2f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[41], pixel_font, tutgray,	"Shoot with RMB               ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[42], pixel_font, tutgray,	"Tap to shoot light projectile", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[43], pixel_font, tutgray,		"Hold to unleash a powerful   ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[44], pixel_font, tutgray,		"heavy laser that uses 3 ammo!", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[45], pixel_font, tutgray,	"Tip: Weave light projectiles ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[46], pixel_font, tutgray,	"between melee hits to attack ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[47], pixel_font, tutgray,	"much faster!                 ", false, txtsize_content);
 
 			// Images
-			DrawArrow(600.f, 400.f);
+			DrawArrow(arrow_x, arrow_y);
 
 			for (int i = 0; i < 2; i++)
 			{
@@ -517,22 +545,22 @@ void Draw_Tutorial()
 		case TUTORIAL_PARRY:
 		{
 			// Text
-			DrawRect(-400.f, 50.f, 350.f, 400.f, tutbg);
+			DrawRect(Tutorial_IO[48], Tutorial_IO[49], Tutorial_IO[50], Tutorial_IO[51], tutbg);
 
-			DrawTextAdvanced(-800.f, 400.f, pixel_font, tutwhite, "PARRYING", false, .5f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[52], pixel_font, tutwhite, "PARRYING", false, txtsize_h1);
 
-			DrawTextAdvanced(-800.f, 200.f, pixel_font, tutgray,	"Block by holding E     ", false, .2f);
-			DrawTextAdvanced(-800.f, 150.f, pixel_font, tutgray,	"to reduce damage taken ", false, .2f);
-			DrawTextAdvanced(-800.f, 75.f, pixel_font, tutgray,		"Blocking at the right  ", false, .2f);
-			DrawTextAdvanced(-800.f, 25.f, pixel_font, tutgray,		"time results in a parry", false, .2f);
-			DrawTextAdvanced(-800.f, -25.f, pixel_font, tutgray,	"which negates damage   ", false, .2f);
-			DrawTextAdvanced(-800.f, -75.f, pixel_font, tutgray,	"and restores your ammo!", false, .2f);
-			DrawTextAdvanced(-800.f, -150.f, pixel_font, tutgray,	"Parrying an attack with", false, .2f);
-			DrawTextAdvanced(-800.f, -200.f, pixel_font, tutgray,	"an orange spark stuns  ", false, .2f);
-			DrawTextAdvanced(-800.f, -250.f, pixel_font, tutgray,	"the enemy!             ", false, .2f);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[53], pixel_font, tutgray,	"Block by holding E     ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[54], pixel_font, tutgray,	"to reduce damage taken ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[55], pixel_font, tutgray,		"Blocking at the right  ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[56], pixel_font, tutgray,		"time results in a parry", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[57], pixel_font, tutgray,	"which negates damage   ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[58], pixel_font, tutgray,	"and restores your ammo!", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[59], pixel_font, tutgray,	"Parrying an attack with", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[60], pixel_font, tutgray,	"an orange spark stuns  ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[61], pixel_font, tutgray,	"the enemy!             ", false, txtsize_content);
 
 			// Images
-			DrawArrow(600.f, 400.f);
+			DrawArrow(arrow_x, arrow_y);
 
 			for (int i = 0; i < 2; i++)
 			{
@@ -551,10 +579,10 @@ void Draw_Tutorial()
 		{
 			if (Update_Timer(&transition_timer))
 			{
-				DrawTextAdvanced(0.f, 300.f, pixel_font, tutgreen, "Good job!", false);
+				DrawTextAdvanced(Tutorial_IO[62], Tutorial_IO[63], pixel_font, tutgreen, "Good job!", false);
 				if (nextstate == TUTORIAL_CLEAR)
 				{
-					DrawTextAdvanced(0.f, 200.f, pixel_font, tutwhite, "Press T to bring up the tutorial again :)", false, 0.3);
+					DrawTextAdvanced(Tutorial_IO[64], Tutorial_IO[65], pixel_font, tutwhite, "Press T to bring up the tutorial again :)", false, txtsize_h3);
 				}
 			}
 			else
@@ -571,5 +599,5 @@ void Draw_Tutorial()
 
 
 	}				// if active
-	DrawArrow(0.f, 750.f);	// Point to gate
+	DrawArrow(arrow_gate_x, arrow_gate_y);	// Point to gate
 }

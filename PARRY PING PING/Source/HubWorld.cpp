@@ -85,29 +85,30 @@ void HubWorld_Initialize()
 	std::cout << "Hub World Initialized\n";
 
 	// Hub World Environments
-	Env_Gate = { HubWorld_IO_elements[0], HubWorld_IO_elements[1], HubWorld_IO_elements[2], HubWorld_IO_elements[3] };
-	Env_Campfire = { HubWorld_IO_elements[4], HubWorld_IO_elements[5], HubWorld_IO_elements[6], HubWorld_IO_elements[7] };
-	Env_Shrine = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };
-	Env_Modifiers = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };
+	Env_Gate = { HubWorld_IO_elements[0], HubWorld_IO_elements[1], HubWorld_IO_elements[2], HubWorld_IO_elements[3] };				// ENV GATE			{ 0.f, 550.f, 500.f, 100.f } 
+	Env_Campfire = { HubWorld_IO_elements[4], HubWorld_IO_elements[5], HubWorld_IO_elements[6], HubWorld_IO_elements[7] };			// ENV CAMPFIRE		{ -50.f, 0.f, 100.f, 100.f }
+	Env_Shrine = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };			// ENV SHRINE		{ -600.f, -200.f, 70.f, 150.f }
+	Env_Modifiers = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };		// ENV MODIFIERS	{ -600.f, 300.f, 100.f, 200.f }
 
 	// Hub World Text
-	Txt_Controls = { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };
-	Txt_Movement = { HubWorld_IO_elements[20], HubWorld_IO_elements[21], HubWorld_IO_elements[22], HubWorld_IO_elements[23] };
-	Txt_Attack = { HubWorld_IO_elements[24], HubWorld_IO_elements[25], HubWorld_IO_elements[26], HubWorld_IO_elements[27] };
+	Txt_Controls = { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };		// TXT CONTROLS		{ 0.f, 200.f, 200.f, 100.f }
+	Txt_Movement = { HubWorld_IO_elements[20], HubWorld_IO_elements[21], HubWorld_IO_elements[22], HubWorld_IO_elements[23] };		// TXT MOVEMENT		{ 0.f, 150.f, 200.f, 100.f }
+	Txt_Attack = { HubWorld_IO_elements[24], HubWorld_IO_elements[25], HubWorld_IO_elements[26], HubWorld_IO_elements[27] };		// TXT ATTACK		{ 0.f, -100.f, 200.f, 100.f }
 
 	// Dummy enemy
-	DummyMelee_pos = { HubWorld_IO_elements[28], HubWorld_IO_elements[29] };							// Init positions, and variables of Melee and Ranged Projectile Practice Range Dummy
-	DummyRange_pos = { HubWorld_IO_elements[31], HubWorld_IO_elements[32] };
-	DummyMelee_rad = static_cast<float>( HubWorld_IO_elements[30] );
+	// Init positions, and variables of Melee and Ranged Projectile Practice Range Dummy
+	DummyMelee_pos = { HubWorld_IO_elements[28], HubWorld_IO_elements[29] };														// MELEE DUMMY POS	{ 600.f, 200.f }									
+	DummyRange_pos = { HubWorld_IO_elements[31], HubWorld_IO_elements[32] };														// RANGE DUMMY POS	{ 800.f, 200.f }
+	DummyMelee_rad = static_cast<float>( HubWorld_IO_elements[30] );																// MELEE DUMMY RAD	50.f
 	DummyMelee_Check = 0;
 
 	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
 	hubworld_white = SetColor(0xFFFFFFFF);
 
 	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
-	FadeInSpeed = HubWorld_IO_elements[33];
-	FadeShrine.A = HubWorld_IO_elements[34];
-	FadeGate.A = HubWorld_IO_elements[34];
+	FadeInSpeed = HubWorld_IO_elements[33];																							// FADE IN SPEED	0.03f
+	FadeShrine.A = HubWorld_IO_elements[34];																						// FADE ALPHA		0.f
+	FadeGate.A = HubWorld_IO_elements[34]; 																							// FADE ALPHA		0.f
 
 	InShrine = false;
 	Draw_Top3 = true;
@@ -140,11 +141,11 @@ void HubWorld_Initialize()
 	Init_Tutorial();														// Init Tutorial elements
 
 	// Incrementing Level Timer
-	HubWorld_LevelTimer = HubWorld_IO_elements[35];
+	HubWorld_LevelTimer = HubWorld_IO_elements[35];																					// LEVEL TIMER		0.f
 
 	// Level Clear Transition Timer
-	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[36]);
-	HubWorld_ClearTransitionTimer.current = HubWorld_IO_elements[37];
+	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[36]);															// CLEAR TRANSITION TIMER	5.f
+	HubWorld_ClearTransitionTimer.current = HubWorld_IO_elements[37];																// START CLEAR TRANSITION	0.f
 
 }
 

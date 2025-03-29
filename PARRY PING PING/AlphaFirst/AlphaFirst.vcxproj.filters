@@ -121,5 +121,8 @@
     <Text Include="..\Assets\FileIO\PlayerAttack.txt">
       <Filter>Resource Files</Filter>
     </Text>
+    <Text Include="..\Assets\FileIO\Tutorial.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
