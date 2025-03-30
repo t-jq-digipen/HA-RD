@@ -365,8 +365,9 @@ void Draw_Boss2_Hitboxes()
     }
     case (BOSS2_LIGHTNING_WAVE):
     {
-        if (boss_2.attack_type == LIGHTNING_STAB)
+        switch (boss_2.attack_type)
         {
+        case (LIGHTNING_STAB):
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
                 // Draw windup animation for slam
@@ -378,14 +379,18 @@ void Draw_Boss2_Hitboxes()
             {
                 // Draw active slam hitbox
                 DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
+
             }
-        }
-        if (boss_2.attack_type == LIGHTNING_WAVE)
-        {
-            DrawCircle(World_To_Screen_x(lightningwave.pos.x),
-                World_To_Screen_y(lightningwave.pos.y),
-                lightningwave.radius,
-                blue2);
+            break;
+        case (LIGHTNING_WAVE):
+            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+            {
+                DrawCircle(World_To_Screen_x(lightningwave.pos.x),
+                    World_To_Screen_y(lightningwave.pos.y),
+                    lightningwave.radius,
+                    blue2);
+            }
+            break;
         }
         break;
     }
