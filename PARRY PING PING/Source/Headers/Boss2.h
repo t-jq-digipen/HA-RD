@@ -118,6 +118,7 @@ typedef struct Missile {
     AEVec2 velocity;            // Velocity of the missile
     f32 radius;                 // Radius of the missile
     bool active;                // Whether the missile is active
+    Timer timer;
 
 } Missile;
 
