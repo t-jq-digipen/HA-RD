@@ -52,7 +52,7 @@ const f32 BOSS2_VEL = 10.f;
 // Attack timings
 const s32 ATTACK_TYPES = {6};
 const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 2.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,0.1f  ,0.1f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,0.1f  ,2.f};
 const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f  ,2.f};
 const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f   ,0.f};
 
@@ -75,7 +75,7 @@ const f32 BOSS2_MISSILE_HOMING_SPEED = 40.f;
 
 // Lightning Wave settings
 const f32 LIGHTNING_STAB_DAMAGE = 30.f;
-const f32 LIGHTNING_STAB_RADIUS = 50.f;
+const f32 LIGHTNING_STAB_RADIUS = 200.f;
 const f32 LIGHTNING_WAVE_DAMAGE = 30.f;
 const f32 LIGHTNING_WAVE_SPEED = 50.f;
 LightningWave lightningwave;
@@ -367,8 +367,9 @@ void Draw_Boss2_Hitboxes()
     }
     case (BOSS2_LIGHTNING_WAVE):
     {
-        if (boss_2.attack_type == LIGHTNING_STAB)
+        switch (boss_2.attack_type)
         {
+        case (LIGHTNING_STAB):
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
                 // Draw windup animation for slam
@@ -380,14 +381,14 @@ void Draw_Boss2_Hitboxes()
             {
                 // Draw active slam hitbox
                 DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
+
             }
-        }
-        if (boss_2.attack_type == LIGHTNING_WAVE)
-        {
-            DrawCircle(World_To_Screen_x(lightningwave.pos.x),
-                World_To_Screen_y(lightningwave.pos.y),
-                lightningwave.radius,
-                blue2);
+            break;
+        case (LIGHTNING_WAVE):
+            {
+                DrawCircle(World_To_Screen_x(lightningwave.pos.x),World_To_Screen_y(lightningwave.pos.y),lightningwave.radius,blue2);
+            }
+            break;
         }
         break;
     }
@@ -888,23 +889,24 @@ void Lightning_Wave_Logic()
             {
                 boss_2.attackstate = BOSS2_ATTACK_RECOVER;
             }
-            else
-            {
-                // Transition to wave phase
-                boss_2.attack_type = LIGHTNING_WAVE;
-                boss_2.attack_timer.current = 0.f;
-                lightningwave.pos = boss_2.pos;
-                lightningwave.radius = 0.f;
-                lightning_wave_damaged = false;
-                return;
-            }
+
+        }
+        else
+        {
+            // Transition to wave phase
+            boss_2.attack_type = LIGHTNING_WAVE;
+            boss_2.attack_timer.current = 0.f;
+            boss_2.attack_timer.duration = boss_attack[LIGHTNING_WAVE].timer.duration;
+            lightningwave.pos = boss_2.pos;
+            lightningwave.radius = 0.f;
+            lightning_wave_damaged = false;
         }
         break;
-    }
 
+    }
     case LIGHTNING_WAVE:
     {
-
+        std::cout << "Timer Progress: " << boss_2.attack_timer.current << " / " << boss_2.attack_timer.duration << "\n";
         if (Update_Timer(&boss_2.attack_timer))
         {
             f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
@@ -920,7 +922,7 @@ void Lightning_Wave_Logic()
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
 
                 // Expand the wave
-                lightningwave.radius += LIGHTNING_WAVE_SPEED * dt;
+                lightningwave.radius += LIGHTNING_WAVE_SPEED;
 
                 // Damage check
                 if (AETestCircleToCircle(&lightningwave.pos, lightningwave.radius, &player.pos, player.radius) &&
