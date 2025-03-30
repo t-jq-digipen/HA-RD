@@ -105,6 +105,9 @@ void Level1_Initialize()
 	currentScore = 0;
 	displayPointsAccumulated = false;
 
+	LockCamera = false;
+	player.canAttack = true;
+
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(5.f);
 	cleartransitiontimer.current = 0.f;

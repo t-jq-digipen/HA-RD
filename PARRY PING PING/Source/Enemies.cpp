@@ -384,13 +384,14 @@ void Active_DummyBotRange() {
 			break;
 		case Parried:
 			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
-			Parried_Hit();
 			if (Update_Timer(&RParryBot.stun_timer)) {
 				//timer has not ended
 			}
 			else 
 			{
-				RParryBot.idle_timer.current = 0.f;					// Parried timer has ended, change states and start timer for next state
+				RParryBot.projectile_draw = false;
+				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
+				RParryBot.projectile_pos = RParryBot.attackpos;
 				RParryBot.state = Idle;
 			}
 		}
@@ -436,10 +437,12 @@ void Attack_DummyBotRange() {
 	{
 		switch (player.state) {						// Depending on player state, there are different outcomes
 		case PARRY:
+			if (RParryBot.state == Parried) return;
 			RParryBot.stun_timer.current = 0.f;
 			RParryBot.state = Parried;				// change to just deflect proj, currently bot will get parried upon projectile parry
 			RParryBot.projectile_parry = true;
 			RParryBot.projectile_draw = false;		// set to true once deflect logic implemented
+			Parried_Hit();
 			break;
 		case BLOCK:									// Player blocks damage - takes reduced damage
 			Blocked_Hit(RParryBot.damage);

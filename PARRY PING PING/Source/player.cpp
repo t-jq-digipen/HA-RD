@@ -140,7 +140,7 @@ bool Attacking_Melee()
 	Update_Timer(&melee_attack.active_time);
 	// check left click input
 	// check if melee_attack cooldown over + combo not finished
-	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
+	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3) && player.canAttack)
 	{
 		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
 		AEVec2Normalize(&atk_dir, &atk_dir);
@@ -484,12 +484,12 @@ void Attacking_Ranged()
 
 	if (player.ammo > 0)
 	{
-		if (AEInputCheckCurr(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f && player.state != HEAVY)
+		if (AEInputCheckCurr(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f && player.state != HEAVY && player.canAttack)
 		{
 			rightClickTimer += dt;
 		}
 
-		if (player.ammo == 3 && rightClickTimer >= rightClickHoldDuration)
+		if (player.ammo == 3 && rightClickTimer >= rightClickHoldDuration && player.canAttack)
 		{
 			trigger = RANGED_HEAVY;
 			player.state = HEAVY;
@@ -508,7 +508,7 @@ void Attacking_Ranged()
 			AEAudioPlay(heavyProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
-		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f)
+		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f && player.canAttack)
 		{
 			
 			trigger = RANGED_LIGHT;
@@ -1096,6 +1096,7 @@ void Init_Player()
 	player.speed = 500.f;
 	player.hp = 100.f;
 	player.radius = 25.f;
+	player.canAttack = true;
 
 	player.dodge_vel = { 0.f,0.f };
 

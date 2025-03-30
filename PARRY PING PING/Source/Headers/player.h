@@ -65,6 +65,7 @@ extern Attack melee_attack;
  */
 typedef struct Player
 {
+    bool canAttack;        ///< Flag to disable attacks
     AEVec2 pos;            ///< Position of the player
     AEVec2 vel;            ///< Velocity of the player
     float speed;           ///< Speed of the player
