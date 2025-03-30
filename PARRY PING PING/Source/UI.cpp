@@ -248,6 +248,7 @@ void Draw_Player_UI()
 		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
 	}
 
+	if (!player.canAttack) return;
 	crosshair.Set_Col(UI_ammo);
 	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
 
@@ -292,7 +293,7 @@ void Draw_Boss_HPbar()
 }
 
 // Draw the various UI elements
-void Draw_UI(int DrawBossHP )
+void Draw_UI(int DrawBossHP)
 {
 	Draw_Player_UI();
 	if (DrawBossHP) { Draw_Boss_HPbar(); }
@@ -301,6 +302,7 @@ void Draw_UI(int DrawBossHP )
 // Open the pause menu when player pauses the game
 void Draw_PauseMenu() 
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -455,6 +457,7 @@ void DrawLoadingImage()
 
 void Draw_ClearMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	isInputDisabled = true;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
@@ -616,6 +619,7 @@ void Draw_ClearMenu()
 // Open the options menu when player accesses options from the pause menu
 void Draw_OptionsMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -815,6 +819,7 @@ void Draw_OptionsMenu()
 // Open the quit menu screen to allow player to think twice about their life choices
 void Draw_QuitMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 

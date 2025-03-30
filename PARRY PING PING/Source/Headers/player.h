@@ -65,6 +65,7 @@ extern Attack melee_attack;
  */
 typedef struct Player
 {
+    bool canAttack;        ///< Flag to disable attacks
     AEVec2 pos;            ///< Position of the player
     AEVec2 vel;            ///< Velocity of the player
     float speed;           ///< Speed of the player
@@ -81,6 +82,8 @@ typedef struct Player
     Timer blocktimer;      ///< Timer for block action
     Timer blocked;         ///< Timer for when the player is blocked
     PlayerState state;     ///< Current state of the player
+    int ragemeter;         ///< Counter for successful parries
+    int ragemeter_max;     ////< max counter for rage meter
     int direction_v;       ///< Vertical direction (up/down)
     int direction_h;       ///< Horizontal direction (left/right)
     Color color;           ///< Color of the player (for rendering)

@@ -48,7 +48,7 @@ int DummyMelee_Check;										// Check for dummy logic
 Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
-bool InShrine;
+bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;
 
 
@@ -90,7 +90,7 @@ void HubWorld_Initialize()
 	FadeInSpeed = 0.03f;
 	FadeShrine.A = FadeGate.A = 0.f;
 
-	InShrine = false;
+	InTop20 = false;
 	Draw_Top3 = true;
 
 
@@ -159,6 +159,8 @@ void HubWorld_Update()
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
+				LockCamera = false;
+				player.canAttack = true;
 				nextState = GS_LEVEL1;
 			}
 		}
@@ -166,11 +168,22 @@ void HubWorld_Update()
 			nextState = GS_LEVEL2;
 		}
 	}
+		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f)) ||
+			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
+		{
+			LockCamera = true;
+			player.canAttack = false;
+		}
+		else {
+			LockCamera = false;
+			player.canAttack = true;
+		}
+	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
 	{
 		levelState = PAUSED;
-		InShrine = false;
+		InTop20 = false;
 	}
 	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
 	{
@@ -200,28 +213,6 @@ void HubWorld_Draw()
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
-#pragma region old tutorial
-
-	// Draw Instructions
-	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
-	{
-		DrawTextAdvanced(Txt_Controls.Pos.x, Txt_Controls.Pos.y, hubworld_font, hubworld_white, "CONTROLS:", true);
-		DrawTextAdvanced(Txt_Movement.Pos.x, Txt_Movement.Pos.y, hubworld_font, hubworld_white, "WASD to move, Space to Dash", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y, hubworld_font, hubworld_white, "ATTACKS:", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 50.f, hubworld_font, hubworld_white, "Left Click - Melee Attack", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 100.f, hubworld_font, hubworld_white, "Right Click - Shoot (up to 3 ammo)", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 150.f, hubworld_font, hubworld_white, "Right Hold - *FIRE LASER (requires 3 ammo)", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 200.f, hubworld_font, hubworld_white, "*Laser causes player to recoil.", true);
-	}*/
-
-	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
-		AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyRange_pos.x, DummyRange_pos.y - 50.f, player.width, player.height))
-	{
-		DrawTextAdvanced(DummyMelee_pos.x + 100.f, DummyMelee_pos.y + 150.f, hubworld_font, hubworld_white, "Press E to parry these attacks!", true);
-		DrawTextAdvanced(DummyMelee_pos.x + 50.f, DummyMelee_pos.y + 100.f, hubworld_font, hubworld_white, "Parrying takes time to recharge, use wisely!", true);
-	}*/
-#pragma endregion
-
 	//Highlight effect when approaching gate
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 	{
@@ -250,18 +241,18 @@ void HubWorld_Draw()
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 		
-		if (AEInputCheckTriggered(AEVK_F) && InShrine == false)
+		if (AEInputCheckTriggered(AEVK_F) && InTop20 == false)
 		{
-			InShrine = true;
+			InTop20 = true;
 		}
-		else if (AEInputCheckTriggered(AEVK_F) && InShrine == true)
+		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)
 		{
-			InShrine = false;
+			InTop20 = false;
 		}
 	}
 	else
 	{
-		InShrine = false;
+		InTop20 = false;
 		Draw_FadeIn(FadeShrine);
 		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
@@ -309,11 +300,11 @@ void HubWorld_Draw()
 		}
 	}
 
-	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InShrine) {
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InTop20) {
 		AEInputShowCursor(1);													// Show cursor in these screens
 	}
 
-	if (InShrine) {
+	if (InTop20) {
 		Pan_Camera(0.f, 500.f, 10.f);
 		CamPanning = true;
 		Draw_ShrineBoard();
@@ -350,7 +341,6 @@ void HubWorld_Unload()
 
 void Draw_FadeIn(Color& Fade) {
 	FadeInSpeed = 0.03f;
-	LockCamera = false;
 	if (Fade.A < 0.f) {
 		Fade.A = 0.f;
 		return;
@@ -362,17 +352,17 @@ void Draw_FadeIn(Color& Fade) {
 }
 
 void Draw_FadeOut(Color& Fade) {
-	LockCamera = true;
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
-	if (InShrine) {
+	if (InTop20) {
 		if (Fade.A > .9f) Fade.A = .9f;
 		return;
 	}
 	if (Fade.A > .7f) Fade.A = .7f;
 }
 
+#pragma region Shrine LeaderBoard 
 //TEMP HIGHSCORES AND SHIII
 // can probs make highscores easier to do by having a 'player profile' struct or smt that holds a name score and time
 // struct can hold pos on screen to print, name, score, time, order in list? (maybe not bc alr sorted on google api), then can do array of structs or smth and just print
@@ -439,7 +429,7 @@ void fetchLeaderboard() {
 	//}
 	std::cout << "Current directory: " << currentDir << std::endl;
 
-	
+
 }
 
 void FetchLeaderboardAsync() {
@@ -464,10 +454,10 @@ std::string sanitizeString(const std::string& input) {
 }
 
 void Draw_ShrineBoard() {
-	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		Draw_Top3 = false;
 	}
-	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		Draw_Top3 = true;
 	}
 
@@ -479,19 +469,19 @@ void Draw_ShrineBoard() {
 		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
 
 		// Top 1
-		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 2
-		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 3
-		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Show More
 		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
@@ -501,9 +491,9 @@ void Draw_ShrineBoard() {
 
 		for (int i = 0; i < 20; i++) {
 			// Reuse the X and Y positions for each row from the existing code
-			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2);  // Convert std::string to const char*
-			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2);  // Convert std::string to const char*
-			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2);  // Convert std::string to const char*
+			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		}
 
@@ -511,3 +501,4 @@ void Draw_ShrineBoard() {
 		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
 	}
 }
+#pragma endregion

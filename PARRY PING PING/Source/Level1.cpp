@@ -105,6 +105,9 @@ void Level1_Initialize()
 	currentScore = 0;
 	displayPointsAccumulated = false;
 
+	LockCamera = false;
+	player.canAttack = true;
+
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(5.f);
 	cleartransitiontimer.current = 0.f;
@@ -229,11 +232,11 @@ void Level1_Draw()
 	if (showBossHitboxes)
 	{
 		Draw_Boss_Hitboxes();
-		std::cout << "Hitboxes drawn \n";
+		//std::cout << "Hitboxes drawn \n";
 	}
 	else
 	{
-		std::cout << "Hitboxes not drawn\n";
+		//std::cout << "Hitboxes not drawn\n";
 	}
 
 

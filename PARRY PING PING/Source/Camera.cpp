@@ -37,7 +37,7 @@ void Init_Camera()
 void Update_Camera() 
 {
 	if (isInputDisabled) return;  // If input is disabled, do nothing
-	if (LockCamera && CamPanning) return;
+	if (LockCamera || CamPanning) return;
 
 	currVert = currHor = 0.f;
 	deccel = 4.f;
