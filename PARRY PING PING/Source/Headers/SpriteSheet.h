@@ -36,8 +36,14 @@ public:
 	// ----------------------------------------------------------------------------
 	void Unload()
 	{
-		AEGfxMeshFree(mesh);
-		AEGfxTextureUnload(texture);
+		if (mesh)
+		{
+			AEGfxMeshFree(mesh);
+		}
+		if (texture)
+		{
+			AEGfxTextureUnload(texture);
+		}
 	}
 
 	// ----------------------------------------------------------------------------

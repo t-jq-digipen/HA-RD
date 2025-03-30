@@ -43,6 +43,7 @@ s32 UI_mouseX, UI_mouseY;
 // Player UI
 float UI_playerhp, UI_playermaxhp;
 int UI_ammo, UI_maxammo;
+int UI_rage;
 float UI_parryCD;
 Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
@@ -71,6 +72,9 @@ Color score_color;
 // Crosshair
 SpriteSheet crosshair;
 float crosshair_width, crosshair_height;
+
+// HP and ammo HUD
+SpriteSheet playerHUD;
 
 // UI Menus
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
@@ -164,13 +168,13 @@ void Init_UI()
 	menu_rot = UI_IO[32];
 
 	// Menu Buttons
-	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
 	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
 	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
@@ -262,44 +266,46 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	// Crosshair
 	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
 	crosshair.Set_Row(0);
+	
+	// HUD
+	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 7);
+	playerHUD.Set_Row(0);
 }
 
 // Update the values for player UI
-void Update_Player_UI(int ammo, float hp, float parry_timer)
+void Update_Player_UI(int ammo, float hp, float parry_timer, int rage)
 {
 	// Update player hp/ammo
 	UI_playerhp = hp;
 	UI_ammo = ammo;
 	UI_parryCD = parry_timer;
+	UI_rage = rage;
 }
 
 // Draws the player UI elements
 void Draw_Player_UI()
 {
-	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
+// HEALTH
+    playerHUD.Set_Row(0);
+    playerHUD.Set_Col(0, 40, (UI_playermaxhp - UI_playerhp)/UI_playermaxhp);
+    playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
 
-	DrawHPBar(UI_IO[1], UI_IO[2], UI_IO[3], UI_IO[4], UI_parryCD, 1.f, parry);
+    // AMMO
+    playerHUD.Set_Row(1);
+    playerHUD.Set_Col(0, 3, (f32)UI_ammo / (f32)UI_maxammo);
+    playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
 
+    // RAGE
+    if (UI_rage)
+    {
+        playerHUD.Set_Row(UI_rage + 1);
+        playerHUD.Loop(0, 3, .5f);
+        playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
+    }
 
-	DrawHPBar(UI_IO[5], UI_IO[6], UI_IO[7], UI_IO[8], UI_playerhp, UI_playermaxhp, health);
-
-	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
-	{
-		float posx = -675.f + ammo_index * 50.f;
-		float posy = -400.f;
-		if (ammo_index < UI_ammo)
-		{
-			DrawRect(posx, posy, UI_IO[9], UI_IO[10], full_ammo);
-		}
-		DrawRect(posx, posy, UI_IO[11], UI_IO[12], empty_ammo);
-	}
-
-	crosshair_width = UI_IO[13];
-	crosshair_height = UI_IO[14];
-
-	crosshair.Set_Col(UI_ammo);
-	crosshair.Draw(Mouse.x, Mouse.y, crosshair_width, crosshair_height, false);
-
+    if (!player.canAttack) return;
+    crosshair.Set_Col(UI_ammo);
+    crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
 }
 
 // Initialize the boss UI elements
@@ -331,7 +337,7 @@ void Draw_Boss_HPbar()
 }
 
 // Draw the various UI elements
-void Draw_UI(int DrawBossHP )
+void Draw_UI(int DrawBossHP)
 {
 	Draw_Player_UI();
 	if (DrawBossHP) { Draw_Boss_HPbar(); }
@@ -340,6 +346,7 @@ void Draw_UI(int DrawBossHP )
 // Open the pause menu when player pauses the game
 void Draw_PauseMenu() 
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -493,6 +500,7 @@ void DrawLoadingImage()
 
 void Draw_ClearMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	isInputDisabled = true;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
@@ -502,7 +510,7 @@ void Draw_ClearMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, endmenu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
 
-	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0 && uiscreen.isButton2Clicked == 0)
 	{
 		uiscreen.animationtimer.current = 0.f;
 	}
@@ -581,6 +589,34 @@ void Draw_ClearMenu()
 		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
+	// Next button (click to go to Level 2 state)
+	if (currentState == GS_LEVEL1)
+	{
+		Draw_SpriteSheet_test(*uiscreen.spritesheet_button2, 0.f, -300.f, 200.f, 100.f, 0.f);
+
+		if (IsAreaClicked(800.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+		{
+			uiscreen.isButton2Clicked = 1;
+
+			if (Update_Timer(&uiscreen.animationtimer))
+			{
+				Set_SpriteSheet_current(&ssmenu_2, 9, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			}
+
+			if (AEInputCheckTriggered(AEVK_LBUTTON))
+			{
+				AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+				nextState = GS_LEVEL2;
+				isInputDisabled = false;
+			}
+		}
+		else
+		{
+			uiscreen.isButton2Clicked = 0;
+			Set_SpriteSheet_current(&ssmenu_2, 9, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+	}
+
 	// Display score above player input
 	DrawTextBox(UI_IO[63], UI_IO[64], UI_IO[65], UI_IO[66], UI_IO[67], pixel_font, UI_green, level_score);
 
@@ -654,6 +690,7 @@ void Draw_ClearMenu()
 // Open the options menu when player accesses options from the pause menu
 void Draw_OptionsMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -853,6 +890,7 @@ void Draw_OptionsMenu()
 // Open the quit menu screen to allow player to think twice about their life choices
 void Draw_QuitMenu()
 {
+	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -1284,6 +1322,9 @@ void Unload_UI()
 
 	// Crosshair
 	crosshair.Unload();
+
+	// Player HUD
+	playerHUD.Unload();
 
 	// Game audio
 	AEAudioUnloadAudio(levelBGM);

@@ -8,7 +8,7 @@
 //			- Atack				72
 //			- Attacking_Ranged
 //			- Attacking_Ranged_Impact
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "player.h"
@@ -139,7 +139,8 @@ bool Attacking_Melee()
 
 	Update_Timer(&melee_attack.active_time);
 	// check left click input
-	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
+	// check if melee_attack cooldown over + combo not finished
+	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3) && player.canAttack)
 	{
 		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
 		AEVec2Normalize(&atk_dir, &atk_dir);
@@ -231,7 +232,18 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
 			*check_hit = melee_attack.combo;
-			*damage = ATTACK_DAMAGE[melee_attack.combo];
+
+			if (melee_attack.combo == 3) 
+			{
+				*damage = ATTACK_DAMAGE[melee_attack.combo] + (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER * 0.5f);		// 3rd slash was too strong
+			}
+			else
+			{
+				*damage = ATTACK_DAMAGE[melee_attack.combo] + (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER);
+			}
+
+			std::cout << "MULTIPLIER: " << (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER) << '\n';
+			std::cout << "TOTAL DMG: " << *damage << '\n';
 			return true;
 		}
 		else if (!melee_attack.combo)
@@ -419,12 +431,12 @@ void Attacking_Ranged()
 
 	if (player.ammo > 0)
 	{
-		if (AEInputCheckCurr(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f && player.state != HEAVY)
+		if (AEInputCheckCurr(AEVK_RBUTTON) && player.lightAttackCooldown <= 0.f && player.state != HEAVY && player.canAttack)
 		{
 			rightClickTimer += dt;
 		}
 
-		if (player.ammo == 3 && rightClickTimer >= rightClickHoldDuration)
+		if (player.ammo == 3 && rightClickTimer >= rightClickHoldDuration && player.canAttack)
 		{
 			trigger = RANGED_HEAVY;
 			player.state = HEAVY;
@@ -443,7 +455,7 @@ void Attacking_Ranged()
 			AEAudioPlay(heavyProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
-		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f)
+		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f && player.canAttack)
 		{
 			
 			trigger = RANGED_LIGHT;
@@ -955,6 +967,9 @@ void Parried_Hit()
 	player.state = PARRIED;
 	player.blocked.current = 0.f;
 
+	if (player.ragemeter >= player.ragemeter_max) { player.ragemeter = player.ragemeter_max; }
+	else player.ragemeter++;
+
 	// reload player ammo
 	player.ammo = 3;
 
@@ -967,6 +982,7 @@ void Parried_Hit()
 
 void Blocked_Hit(f32 damage)
 {
+	player.ragemeter = 0;
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
 	player.hp -= damage * BLOCK_REDUCTION;
@@ -981,6 +997,7 @@ void Blocked_Hit(f32 damage)
 void Eat_Hit(f32 damage)
 {
 	// take dmg
+	player.ragemeter = 0;
 	player.state = HIT;
 	player.hittimer.current = 0.f;
 	player.hp -= damage;
@@ -1281,7 +1298,7 @@ void Update_Player()
 
 		std::cout << "bro is dead\n";
 	}
-	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
+	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current, player.ragemeter);
 }
 
 

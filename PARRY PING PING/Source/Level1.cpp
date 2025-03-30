@@ -5,7 +5,7 @@
 //
 // brief:	Implementation of Level 1 functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"
@@ -123,9 +123,23 @@ void Level1_Initialize()
 	PLAYER_BASE_OFFSET = { L1_IO[8] };
 	BOSS_BASE_OFFSET = { L1_IO[9] };
 
-	// Level map
-	map_width = L1_IO[10];
-	map_height = L1_IO[11];
+	// Incrementing Level Timer
+	levelTimer = 0.f;
+
+	// Level Score
+	currentScore = 0;
+	displayPointsAccumulated = false;
+
+	LockCamera = false;
+	player.canAttack = true;
+
+	// Level Clear Transition Timer
+	cleartransitiontimer = Create_Timer(5.f);
+	cleartransitiontimer.current = 0.f;
+
+	// Game Over Transition Timer
+	gameovertransitiontimer = Create_Timer(2.f);
+	gameovertransitiontimer.current = 0.f;
 }
 
 void ToggleBossHitboxes()
@@ -238,11 +252,11 @@ void Level1_Draw()
 	if (showBossHitboxes)
 	{
 		Draw_Boss_Hitboxes();
-		std::cout << "Hitboxes drawn \n";
+		//std::cout << "Hitboxes drawn \n";
 	}
 	else
 	{
-		std::cout << "Hitboxes not drawn\n";
+		//std::cout << "Hitboxes not drawn\n";
 	}
 
 

@@ -131,5 +131,5 @@ void Smash_Sweep_Logic();       // Logic for Smash and Sweep attacks
 void Three_Hit_Logic();         // Logic for Three Hit combo
 void Boss_Dash_Logic();         // Logic for Dash attack
 void Boss_Rocket_Logic();       // Logic for Rocket Fist attack
-void Boss_Attack_Test(bool canparry, f32 damage); // Test for Boss attack collision
+void Boss_Attack_Test(bool canparry, f32 boss_damage); // Test for Boss attack collision
 void Draw_Boss_Death_Explosion(AEVec2& start); // Draw Boss death explosion

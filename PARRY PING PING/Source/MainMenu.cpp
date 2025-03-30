@@ -34,9 +34,9 @@ void MainMenu_Load()
 
 	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
-	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
-	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
 
 	digipenLogo = AEGfxTextureLoad("Assets/Digipen_Logo.png");
 

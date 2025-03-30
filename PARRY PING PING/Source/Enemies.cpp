@@ -20,6 +20,64 @@ DummyBotRange RParryBot;		//Ranged Attack
 
 SpriteSheet meleebot_sprite;
 
+
+typedef struct ParrySpark {
+	SpriteSheet sprite;
+	AEVec2 pos;
+	Timer timer;
+	bool active;
+} ParrySpark;
+
+ParrySpark spark;
+
+void Init_Parry_Spark()
+{
+	spark.pos = { 0.f,0.f };
+	spark.timer = Create_Timer(.5f);
+	spark.active = false;
+}
+
+void Load_Parry_Spark()
+{
+	spark.sprite = SpriteSheet("Assets/UI/Spark.png", 9, 1);
+}
+
+void Unload_Parry_Spark()
+{
+	spark.sprite.Unload();
+}
+
+void Set_Spark_Loc(f32 pos_x, f32 pos_y) 
+{
+	spark.pos = { pos_x, pos_y };
+}
+
+void Start_Spark(f32 duration)
+{
+	if (!spark.active)
+	{
+		spark.timer.current = 0.f;
+		spark.timer.duration = duration;
+		spark.active = true;
+	}
+}
+
+void Draw_Spark()
+{
+	if (Update_Timer(&spark.timer))
+	{
+		std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
+		spark.sprite.Set_Row(0);
+		spark.sprite.Set_Col(0, 8, spark.timer.current);
+		spark.sprite.Draw(World_To_Screen_x(spark.pos.x), World_To_Screen_y(spark.pos.y), 1500.f, 1000.f);
+	}
+	else
+	{
+		spark.active = false;
+	}
+}
+
+
 //MELEE PARRY BOT FUNCTIONS:
 // Init            - Inits values such as timers etc
 // Active (Update) - Call in Update(), handles checking of states
@@ -67,16 +125,20 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp)
 	MParryBot.attack_timer = Create_Timer(1);
 	MParryBot.stun_timer = Create_Timer(3);
 	MParryBot.respawn_timer = Create_Timer(3);
+
+	Init_Parry_Spark();
 }
 
 void Load_DummyBot()
 {
 	meleebot_sprite = SpriteSheet("Assets/Enemies/Dummy1.png", 7, 5);
+	Load_Parry_Spark();
 }
 
 void Unload_DummyBot()
 {
 	meleebot_sprite.Unload();
+	Unload_Parry_Spark();
 }
 
 int MParryBot_last_hit = 0;							// Checks for single hit detections
@@ -127,6 +189,8 @@ void Active_DummyBotMelee()
 			}
 			else 
 			{
+				Start_Spark(MParryBot.windup_timer.duration);
+				Set_Spark_Loc(MParryBot.pos.x, MParryBot.pos.y+150.f);
 				MParryBot.windup_timer.current = 0.f;				// Idle timer has ended, change states and start timer for next state
 				MParryBot.state = WindUp;
 			}
@@ -247,7 +311,7 @@ void Draw_DummyBotMelee()
 	}
 
 	meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y+50.f), 250.f, 250.f, false);
-
+	Draw_Spark();
 }
 
 
@@ -384,13 +448,14 @@ void Active_DummyBotRange() {
 			break;
 		case Parried:
 			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
-			Parried_Hit();
 			if (Update_Timer(&RParryBot.stun_timer)) {
 				//timer has not ended
 			}
 			else 
 			{
-				RParryBot.idle_timer.current = 0.f;					// Parried timer has ended, change states and start timer for next state
+				RParryBot.projectile_draw = false;
+				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
+				RParryBot.projectile_pos = RParryBot.attackpos;
 				RParryBot.state = Idle;
 			}
 		}
@@ -436,10 +501,12 @@ void Attack_DummyBotRange() {
 	{
 		switch (player.state) {						// Depending on player state, there are different outcomes
 		case PARRY:
+			if (RParryBot.state == Parried) return;
 			RParryBot.stun_timer.current = 0.f;
 			RParryBot.state = Parried;				// change to just deflect proj, currently bot will get parried upon projectile parry
 			RParryBot.projectile_parry = true;
 			RParryBot.projectile_draw = false;		// set to true once deflect logic implemented
+			Parried_Hit();
 			break;
 		case BLOCK:									// Player blocks damage - takes reduced damage
 			Blocked_Hit(RParryBot.damage);

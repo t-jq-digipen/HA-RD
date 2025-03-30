@@ -25,6 +25,7 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#include "SpriteSheet.h"
 
 
 // Variables for parry bot init
@@ -39,6 +40,10 @@ f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{ 50.f };
 Color hubworld_white;
 s8  hubworld_font;
 
+// Spritesheets
+SpriteSheet campfire_sprite;
+SpriteSheet shrine_sprite;
+
 // Fade from black transition when level starts
 Color FadeIn, FadeGate, FadeShrine;
 f32 FadeInSpeed;
@@ -48,7 +53,7 @@ int DummyMelee_Check;										// Check for dummy logic
 Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
-bool InShrine;
+bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;
 
 //Leaderboard fetching
@@ -73,6 +78,9 @@ void HubWorld_Load()
 
 	// Leaderboard
 	FetchLeaderboardAsync();
+
+	shrine_sprite = SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
+	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
 
 	// Meshes
 	Load_Mesh(20);
@@ -112,7 +120,7 @@ void HubWorld_Initialize()
 	FadeShrine.A = HubWorld_IO_elements[34];																						// FADE ALPHA		0.f
 	FadeGate.A = HubWorld_IO_elements[34]; 																							// FADE ALPHA		0.f
 
-	InShrine = false;
+	InTop20 = false;
 	Draw_Top3 = true;
 
 
@@ -183,21 +191,38 @@ void HubWorld_Update()
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
+				LockCamera = false;
+				player.canAttack = true;
 				nextState = GS_LEVEL1;
 			}
 		}
+		if (AEInputCheckTriggered(AEVK_L)) {
+			nextState = GS_LEVEL2;
+		}
+
+		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
+		{
+			levelState = PAUSED;
+			InTop20 = false;
+		}
+		else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
+		{
+			levelState = PLAYING;
+		}
+	}
+		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height)) ||
+			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
+		{
+			LockCamera = true;
+			player.canAttack = false;
+		}
+		else {
+			LockCamera = false;
+			player.canAttack = true;
+		}
 	}
 
-	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
-	{
-		levelState = PAUSED;
-		InShrine = false;
-	}
-	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
-	{
-		levelState = PLAYING;
-	}
-}
+
 
 void HubWorld_Draw()
 {
@@ -212,36 +237,17 @@ void HubWorld_Draw()
 	Draw_DummyBotRange();
 
 	//Draw Environment
-	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
-	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
+
+	// Campfire
+	campfire_sprite.Set_Row(0);
+	campfire_sprite.Loop(0, 11, 1.f);
+	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
 	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
 
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
-
-#pragma region old tutorial
-
-	// Draw Instructions
-	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, 50.f, Env_Campfire.Pos.x, Env_Campfire.Pos.y, Env_Campfire.Width, Env_Campfire.Height))
-	{
-		DrawTextAdvanced(Txt_Controls.Pos.x, Txt_Controls.Pos.y, hubworld_font, hubworld_white, "CONTROLS:", true);
-		DrawTextAdvanced(Txt_Movement.Pos.x, Txt_Movement.Pos.y, hubworld_font, hubworld_white, "WASD to move, Space to Dash", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y, hubworld_font, hubworld_white, "ATTACKS:", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 50.f, hubworld_font, hubworld_white, "Left Click - Melee Attack", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 100.f, hubworld_font, hubworld_white, "Right Click - Shoot (up to 3 ammo)", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 150.f, hubworld_font, hubworld_white, "Right Hold - *FIRE LASER (requires 3 ammo)", true);
-		DrawTextAdvanced(Txt_Attack.Pos.x, Txt_Attack.Pos.y - 200.f, hubworld_font, hubworld_white, "*Laser causes player to recoil.", true);
-	}*/
-
-	/*if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyMelee_pos.x, DummyMelee_pos.y - 50.f, player.width, player.height) ||
-		AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, DummyRange_pos.x, DummyRange_pos.y - 50.f, player.width, player.height))
-	{
-		DrawTextAdvanced(DummyMelee_pos.x + 100.f, DummyMelee_pos.y + 150.f, hubworld_font, hubworld_white, "Press E to parry these attacks!", true);
-		DrawTextAdvanced(DummyMelee_pos.x + 50.f, DummyMelee_pos.y + 100.f, hubworld_font, hubworld_white, "Parrying takes time to recharge, use wisely!", true);
-	}*/
-#pragma endregion
 
 	//Highlight effect when approaching gate
 	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
@@ -264,32 +270,34 @@ void HubWorld_Draw()
 
 
 	//Highlight effect when approaching leaderboard shrine
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f))
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height))
 	{
 		Draw_FadeOut(FadeShrine);
 		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 		
-		if (AEInputCheckTriggered(AEVK_F) && InShrine == false)
+		if (AEInputCheckTriggered(AEVK_F) && InTop20 == false)
 		{
-			InShrine = true;
+			InTop20 = true;
 		}
-		else if (AEInputCheckTriggered(AEVK_F) && InShrine == true)
+		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)
 		{
-			InShrine = false;
+			InTop20 = false;
 		}
 	}
 	else
 	{
-		InShrine = false;
+		InTop20 = false;
 		Draw_FadeIn(FadeShrine);
 		hubworld_white.A = FadeShrine.A;
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 	}
-	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE [WIP]", true);
+
+	shrine_sprite.Set_Row(0);
+	shrine_sprite.Loop(0, 12, 1.f);
+	shrine_sprite.Draw(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height);
 
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -330,11 +338,11 @@ void HubWorld_Draw()
 		}
 	}
 
-	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InShrine) {
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InTop20) {
 		AEInputShowCursor(1);													// Show cursor in these screens
 	}
 
-	if (InShrine) {
+	if (InTop20) {
 		Pan_Camera(0.f, 500.f, 10.f);
 		CamPanning = true;
 		Draw_ShrineBoard();
@@ -367,11 +375,13 @@ void HubWorld_Unload()
 	Unload_Player();
 	Unload_DummyBot();
 	std::cout << "HubWorld_unload";
+
+	campfire_sprite.Unload();
+	shrine_sprite.Unload();
 }
 
 void Draw_FadeIn(Color& Fade) {
 	FadeInSpeed = 0.03f;
-	LockCamera = false;
 	if (Fade.A < 0.f) {
 		Fade.A = 0.f;
 		return;
@@ -383,17 +393,17 @@ void Draw_FadeIn(Color& Fade) {
 }
 
 void Draw_FadeOut(Color& Fade) {
-	LockCamera = true;
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
-	if (InShrine) {
+	if (InTop20) {
 		if (Fade.A > .9f) Fade.A = .9f;
 		return;
 	}
 	if (Fade.A > .7f) Fade.A = .7f;
 }
 
+#pragma region Shrine LeaderBoard 
 //TEMP HIGHSCORES AND SHIII
 // can probs make highscores easier to do by having a 'player profile' struct or smt that holds a name score and time
 // struct can hold pos on screen to print, name, score, time, order in list? (maybe not bc alr sorted on google api), then can do array of structs or smth and just print
@@ -460,7 +470,7 @@ void fetchLeaderboard() {
 	//}
 	std::cout << "Current directory: " << currentDir << std::endl;
 
-	
+
 }
 
 void FetchLeaderboardAsync() {
@@ -532,3 +542,4 @@ void Draw_ShrineBoard() {
 		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
 	}
 }
+#pragma endregion
