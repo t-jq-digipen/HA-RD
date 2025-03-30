@@ -102,6 +102,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Source\Camera.cpp" />
+    <ClCompile Include="..\Source\Credits.cpp" />
     <ClCompile Include="..\Source\Enemies.cpp" />
     <ClCompile Include="..\Source\GameStateManager.cpp" />
     <ClCompile Include="..\Source\HubWorld.cpp" />
@@ -119,6 +120,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Headers\Camera.h" />
+    <ClInclude Include="..\Source\Headers\Credits.h" />
     <ClInclude Include="..\Source\Headers\Enemies.h" />
     <ClInclude Include="..\Source\Headers\GameStateManager.h" />
     <ClInclude Include="..\Source\Headers\HubWorld.h" />
@@ -134,6 +136,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\Assets\FileIO\Credits.txt" />
     <Text Include="..\Assets\FileIO\Level1.txt" />
     <Text Include="..\Assets\FileIO\MainMenu.txt" />
     <Text Include="..\Assets\FileIO\Player.txt" />
