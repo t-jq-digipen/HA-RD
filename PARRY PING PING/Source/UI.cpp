@@ -140,13 +140,13 @@ void Init_UI()
 	isPerfect = false;
 
 	// Menu Buttons
-	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
+	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
 	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
 	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
@@ -460,7 +460,7 @@ void Draw_ClearMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
 	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
 
-	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0 && uiscreen.isButton2Clicked == 0)
 	{
 		uiscreen.animationtimer.current = 0.f;
 	}
@@ -537,6 +537,34 @@ void Draw_ClearMenu()
 	{
 		uiscreen.isPlayClicked = 0;
 		Set_SpriteSheet_current(&ssmenu_play, 1, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	// Next button (click to go to Level 2 state)
+	if (currentState == GS_LEVEL1)
+	{
+		Draw_SpriteSheet_test(*uiscreen.spritesheet_button2, 0.f, -300.f, 200.f, 100.f, 0.f);
+
+		if (IsAreaClicked(800.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+		{
+			uiscreen.isButton2Clicked = 1;
+
+			if (Update_Timer(&uiscreen.animationtimer))
+			{
+				Set_SpriteSheet_current(&ssmenu_2, 9, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			}
+
+			if (AEInputCheckTriggered(AEVK_LBUTTON))
+			{
+				AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+				nextState = GS_LEVEL2;
+				isInputDisabled = false;
+			}
+		}
+		else
+		{
+			uiscreen.isButton2Clicked = 0;
+			Set_SpriteSheet_current(&ssmenu_2, 9, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
 	}
 
 	// Display score above player input
