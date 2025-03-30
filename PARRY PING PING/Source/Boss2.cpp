@@ -191,7 +191,7 @@ void Init_Boss2()
     boss_2.idle_timer = Create_Timer(Boss2_IO[47]);
     boss_2.attack_timer = Create_Timer(Boss2_IO[48]);
     boss_2.stun_timer = Create_Timer(Boss2_IO[49]);
-    boss_2.phasebreak_timer = Create_Timer(Boss2_IO[50]);
+    boss_2.death_timer = Create_Timer(Boss2_IO[50]);
 
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -702,11 +702,7 @@ void Draw_Boss2()
         }   // LIGHTNING WAVE
             // -------------------------------------------------
         }   // switch attack type
-
-        {
-            
-            break;
-        }   // WAVE
+            // WAVE
             // -------------------------------------------------
         flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
         break;
