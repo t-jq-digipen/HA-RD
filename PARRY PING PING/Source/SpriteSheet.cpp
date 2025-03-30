@@ -66,9 +66,13 @@ void SpriteSheet::Set_Col(u32 col)
 
 void SpriteSheet::Set_Col(u32 left, u32 right, f32 currtimer)
 {
-	if (currtimer < 0 || currtimer >= 1.f)					// If currtimer exceeds, set it to 0, something wrong!
+	if (currtimer < 0)					// If currtimer exceeds, set it to 0, something wrong!
 	{
 		currtimer = 0.f;
+	}
+	if (currtimer >= 1.f)
+	{
+		currtimer = .99f;
 	}
 
 	if (left < 0 || right >= total_cols)					// Outside spritesheet range!

@@ -9,6 +9,7 @@
 //---------------------------------------------------------
 
 #include "Boss2.h"
+#include "SpriteSheet.h"
 
 // Boss projectile settings
 #define MAX_PROJECTILES 3
@@ -23,10 +24,9 @@ Color red2 = SetColor(0xFFFF0000);
 Color green2 = SetColor(0xFF00FF00);
 Color blue2 = SetColor(0xFF0000FF);
 Color black2 = SetColor(0xFF000000);
+
 // Sprite sheets
-/*
-/ fill here
-*/
+SpriteSheet boss_2_sprite;
 
 // Boss spawn position
 const f32 BOSS2_SPAWN_X = 0.f;
@@ -37,9 +37,8 @@ const f32 BOSS2_WIDTH = 100.f;
 const f32 BOSS2_HEIGHT = 100.f;
 
 // Boss draw size
-/*
-/ fill here
-*/
+const f32 BOSS_DRAW_WIDTH = 650.f;
+const f32 BOSS_DRAW_HEIGHT = 650.f;
 
 // Boss hitbox size
 const f32 BOSS2_HITBOX_WIDTH = 200.f;
@@ -52,8 +51,8 @@ const f32 BOSS2_VEL = 10.f;
 // Attack timings
 const s32 ATTACK_TYPES = {5};
 const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,0.f,0.5f,0.5f,2.f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,0.f,1.f,1.f,5.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,0.f,1.f,1.f,1.f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES] = {5.f,0.f,.2f,.2f,5.f};
+const f32 BOSS2_RECOVER[ATTACK_TYPES] = {0.5f,0.f,1.5f,1.5f,1.f};
 const f32 BOSS2_STUN[ATTACK_TYPES] = {0.f,0.f,3.f,3.f,0.f};
 
 // Attack information
@@ -85,10 +84,11 @@ bool prepdash = false;
 bool dashed = false;
 bool dashright = false;
 bool dashleft = false;
+
 // Load boss assets
 void Load_Boss2() 
 {
-
+    boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 18);
 }
 
 // Init boss2 indicators
@@ -96,6 +96,7 @@ void Init_Boss2_Indicator()
 {
 
 }
+
 void Init_Boss2() 
 {
     // Boss starting point, hitbox and size
@@ -196,6 +197,7 @@ void Update_Boss2()
 
             case BOSS2_MISSILE_BARRAGE:
                 Missile_Barrage_Logic();
+                std::cout << "BOSS_2_MISSILE: " << boss_2.attack_timer.current << "------------\n";
                 break;
 
             case BOSS2_LIGHTNING_WAVE:
@@ -257,6 +259,7 @@ void Update_Boss2()
     // Update Boss Hitbox
     Update_AABB(&boss_2.hitbox, boss_2.pos.x, boss_2.pos.y, BOSS2_HITBOX_WIDTH, BOSS2_HITBOX_HEIGHT);
 }
+
 void Draw_Boss2_Hitboxes() 
 {
     f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
@@ -337,6 +340,9 @@ void Draw_Boss2_Hitboxes()
         break;
     }
 }
+
+bool flip_sprite = false;
+
 void Draw_Boss2()
 {
     for (const auto& missile : missiles) {
@@ -350,10 +356,160 @@ void Draw_Boss2()
         DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, red2);
     }
     else DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, black2);
+
+    f32 windup_time = BOSS2_WINDUP[boss_2.attack_type];
+    f32 active_time = BOSS2_ATTACK[boss_2.attack_type] - BOSS2_WINDUP[boss_2.attack_type];
+    f32 recover_time = BOSS2_RECOVER[boss_2.attack_type] - BOSS2_ATTACK[boss_2.attack_type];
+
+    switch (boss_2.state)
+    {
+    case BOSS2_IDLE:
+    {
+        flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
+        boss_2_sprite.Set_Row(0);
+        boss_2_sprite.Loop(0,12,1.f);
+        break;
+    }   // BOSS2_IDLE
+        // ==============================================================================
+
+    case BOSS2_PARRIED:
+    {
+        boss_2_sprite.Set_Row(1);
+        boss_2_sprite.Set_Col(0, 13, boss_2.stun_timer.current);
+        break;
+    }   // BOSS2_PARRIED
+        // ==============================================================================
+
+    case BOSS2_MISSILE_BARRAGE:
+    {
+        flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
+        break;
+    }   // BOSS2_MISSILE_BARRAGE
+        // ==============================================================================
+
+    case BOSS2_DASH_SLASH:
+    {
+        // Check if boss is dashing or slashing
+        switch (boss_2.attack_type)
+        {
+        case DASH:
+        {
+            flip_sprite = (boss_2.target_pos.x > boss_2.pos.x);
+            boss_2_sprite.Set_Row(5);
+            boss_2_sprite.Set_Col(0, 7, boss_2.attack_timer.current);
+            break;
+        }   // DASH
+            // -------------------------------------------------
+        case DASH_SLASH1:
+        {
+            switch (boss_2.attackstate)
+            {
+            case BOSS2_ATTACK_WINDUP:
+            {
+                boss_2_sprite.Set_Row(6);
+                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                boss_2_sprite.Set_Col(0, 5, anim_time);
+                break;
+            }   // WINDUP SLASH 1
+            case BOSS2_ATTACK_ACTIVE:
+            {
+                boss_2_sprite.Set_Row(7);
+                boss_2_sprite.Set_Col(0);
+                break;
+            }   // ACTIVE SLASH 1
+            case BOSS2_ATTACK_RECOVER:
+            {
+                boss_2_sprite.Set_Row(8);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 anim_time = active_curr / recover_time;
+                boss_2_sprite.Set_Col(0, 2, anim_time);
+                break;
+            }   // RECOVER SLASH 1
+            }   // switch attack state
+            break;
+        }   // SLASH 1
+            // -------------------------------------------------
+
+        case DASH_SLASH2:
+        {
+            switch (boss_2.attackstate)
+            {
+            case BOSS2_ATTACK_WINDUP:
+            {
+                boss_2_sprite.Set_Row(9);
+                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                boss_2_sprite.Set_Col(0, 6, anim_time);
+                break;
+            }   // WINDUP SLASH 1
+            case BOSS2_ATTACK_ACTIVE:
+            {
+                boss_2_sprite.Set_Row(10);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
+                f32 anim_time = active_curr / active_time;
+                boss_2_sprite.Set_Col(0,1,anim_time);
+                break;
+            }   // ACTIVE SLASH 1
+            case BOSS2_ATTACK_RECOVER:
+            {
+                boss_2_sprite.Set_Row(11);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 anim_time = active_curr / recover_time;
+                boss_2_sprite.Set_Col(0, 8, anim_time);
+                break;
+            }   // RECOVER SLASH 1
+            }   // switch attack state
+            break;
+        }   // SLASH 2
+            // -------------------------------------------------
+        }   // switch attack type
+
+        break;
+    }   // BOSS2_DASH_SLASH
+        // ==============================================================================
+
+    case BOSS2_LIGHTNING_WAVE:
+    {
+        {
+            switch (boss_2.attackstate)
+            {
+            case BOSS2_ATTACK_WINDUP:
+            {
+                boss_2_sprite.Set_Row(12);
+                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                boss_2_sprite.Set_Col(0, 9, anim_time);
+                break;
+            }   // WINDUP WAVE
+            case BOSS2_ATTACK_ACTIVE:
+            {
+                boss_2_sprite.Set_Row(13);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
+                f32 anim_time = active_curr / active_time;
+                boss_2_sprite.Set_Col(0, 1, anim_time);
+                break;
+            }   // ACTIVE WAVE
+            case BOSS2_ATTACK_RECOVER:
+            {
+                boss_2_sprite.Set_Row(14);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 anim_time = active_curr / recover_time;
+                boss_2_sprite.Set_Col(0, 2, anim_time);
+                break;
+            }   // RECOVER WAVE
+            }   // switch attack state
+            break;
+        }   // WAVE
+            // -------------------------------------------------
+        flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
+        break;
+    }   // BOSS2_LIGHTNING_WAVE
+        // ==============================================================================
+
+    }   // switch boss_2.state
+    boss_2_sprite.Draw(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip_sprite);
 }
 void Unload_Boss2()
 {
-
+    boss_2_sprite.Unload();
 }
 void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 {
@@ -470,6 +626,7 @@ void Dash_Slash_Logic()
         {
             // Attack is recovering
             boss_2.attackstate = BOSS2_ATTACK_RECOVER;
+            std::cout << "RECOVERSLASH\n";
         }
     }
     if(dashed && !Update_Timer(&boss_2.attack_timer))
