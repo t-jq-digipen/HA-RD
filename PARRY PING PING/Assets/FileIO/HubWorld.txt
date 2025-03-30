@@ -8,8 +8,8 @@
 7) Env_Campfire Height: 100.f
 8) Env_Shrine Pos X: -600.f
 9) Env_Shrine Pos Y: -200.f
-10) Env_Shrine Width: 70.f
-11) Env_Shrine Height: 150.f
+10) Env_Shrine Width: 300.f
+11) Env_Shrine Height: 300.f
 12) Env_Modifiers Pos X: -600.f
 13) Env_Modifiers Pos Y: 300.f
 14) Env_Modifiers Width: 100.f

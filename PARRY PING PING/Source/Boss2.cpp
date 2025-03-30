@@ -606,10 +606,7 @@ void Draw_Boss2()
             // -------------------------------------------------
         }   // switch attack type
 
-        {
-            
-            break;
-        }   // WAVE
+            // WAVE
             // -------------------------------------------------
         flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
         break;

@@ -27,6 +27,8 @@
 // const float MAP_TOP = 300.f;
 // const float MAP_BOTTOM = -300.f;
 
+const float ATTACK_RAGEMULTIPLER = 0.75f;
+
 // Define level score update values
 int SCORE_LIGHT_PROJECTILE_HIT;
 int SCORE_HEAVY_LASER_HIT;

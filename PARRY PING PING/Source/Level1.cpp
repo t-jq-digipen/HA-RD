@@ -230,7 +230,6 @@ void Level1_Draw()
 	DrawImageAttachedToRect(screen_x, screen_y, map_width, map_height, mapTexture);
 
 
-
 	Update_Camera();
 
 
