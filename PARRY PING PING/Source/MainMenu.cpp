@@ -80,6 +80,12 @@ void MainMenu_Update()
     f32 totalTime = fadeTimer.duration + 1.0f + fadeTimer.duration; // 2s fade-in + 1s hold + 2s fade-out
     fadeTimer.current += dt;
 
+    //Skips Logo when Right Shift is Pressed
+    if (AEInputCheckTriggered(AEVK_RSHIFT))
+    {
+        isFading = false;
+    }
+
     // Update the fade-in timer if it's active
     if (isFading)
     {
