@@ -208,4 +208,6 @@ void MainMenu_Unload()
 	Unload_Mesh();
 	Unload_SpriteSheet(&playbutton);
 	Unload_SpriteSheet(&exitbutton);
+    AEGfxTextureUnload(digipenLogo);
+
 }
