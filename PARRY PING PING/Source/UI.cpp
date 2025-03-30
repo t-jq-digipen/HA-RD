@@ -86,7 +86,7 @@ float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 AEGfxTexture* loadingImage;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -205,6 +205,7 @@ void Init_UI()
 	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
 	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
 	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
+	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
 
 	// BGM and SFX (Audio Groups)
 	gameBGM = AEAudioCreateGroup();
@@ -234,8 +235,16 @@ void Init_UI()
 	max_bgm_vol = UI_IO_settings[2];
 	max_sfx_vol = UI_IO_settings[3];
 
+	// Determine which BGM to play based on the current level
+	if (currentState == GS_LEVEL1)
+	{
+		AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1); // Looping BGM
+	}
+	else if (currentState == GS_LEVEL2)
+	{
+		AEAudioPlay(bossLevel2, gameBGM, 1.f, 1.f, -1);
+	}
 
-	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
 	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
 
