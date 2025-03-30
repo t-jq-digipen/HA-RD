@@ -164,7 +164,7 @@ void Update_Boss2()
                     // Set randomizer
                     f32 randomizer = AERandFloat();
 
-                    if (randomizer <= 0.f) // 40% probability for Missile Barrage
+                    if (randomizer <= 0.4f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
                         boss_2.attack_timer.current = 0.f;
@@ -174,7 +174,7 @@ void Update_Boss2()
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                      
                     }
-                    else if (randomizer <= 1.f) // 40% probability for Dash & Slash
+                    else if (randomizer <= 0.4f) // 40% probability for Dash & Slash
                     {
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
@@ -187,7 +187,7 @@ void Update_Boss2()
                     else // 20% probability for Lightning Wave
                     {
                         // Do Lightning Wave
-                        boss_2.attack_timer.current = 0.f;
+                        boss_2.attack_timer.current = 0.2f;
                         boss_attack[LIGHTNING_WAVE].timer.current = 0.f;
                         boss_2.attack_type = LIGHTNING_WAVE;
                         boss_2.state = BOSS2_LIGHTNING_WAVE;
