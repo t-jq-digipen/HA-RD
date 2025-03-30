@@ -41,6 +41,7 @@ s32 UI_mouseX, UI_mouseY;
 // Player UI
 float UI_playerhp, UI_playermaxhp;
 int UI_ammo, UI_maxammo;
+int UI_rage;
 float UI_parryCD;
 Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
@@ -214,43 +215,23 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	crosshair.Set_Row(0);
 	
 	// HUD
-	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 2);
+	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 7);
 	playerHUD.Set_Row(0);
 }
 
 // Update the values for player UI
-void Update_Player_UI(int ammo, float hp, float parry_timer)
+void Update_Player_UI(int ammo, float hp, float parry_timer, int rage)
 {
 	// Update player hp/ammo
 	UI_playerhp = hp;
 	UI_ammo = ammo;
 	UI_parryCD = parry_timer;
+	UI_rage = rage;
 }
 
 // Draws the player UI elements
 void Draw_Player_UI()
 {
-	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
-
-	DrawHPBar(-700.f, -300.f, -500.f, -290.f, UI_parryCD, 1.f, parry);
-
-
-	DrawHPBar(-700.f, -350.f, -300.f, -335.f, UI_playerhp, UI_playermaxhp, health);
-
-	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
-	{
-		float posx = -675.f + ammo_index * 50.f;
-		float posy = -400.f;
-		if (ammo_index < UI_ammo)
-		{
-			DrawRect(posx, posy, 15.f, 50.f, full_ammo);
-		}
-		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
-	}
-
-	if (!player.canAttack) return;
-	crosshair.Set_Col(UI_ammo);
-	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
 
 	// HEALTH
 	playerHUD.Set_Row(0);
@@ -261,6 +242,18 @@ void Draw_Player_UI()
 	playerHUD.Set_Row(1);
 	playerHUD.Set_Col(0, 3, (f32)UI_ammo / (f32)UI_maxammo);
 	playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
+
+	// RAGE
+	if (UI_rage)
+	{
+		playerHUD.Set_Row(UI_rage + 1);
+		playerHUD.Loop(0, 3, .5f);
+		playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
+	}
+
+	if (!player.canAttack) return;
+	crosshair.Set_Col(UI_ammo);
+	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
 
 }
 

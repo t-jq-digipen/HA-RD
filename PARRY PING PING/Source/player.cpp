@@ -171,7 +171,7 @@ bool Attacking_Melee()
 		//DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
 		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
-		float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
+		//float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
 		//Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
@@ -1312,7 +1312,7 @@ void Update_Player()
 
 		std::cout << "bro is dead\n";
 	}
-	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
+	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current, player.ragemeter);
 }
 
 

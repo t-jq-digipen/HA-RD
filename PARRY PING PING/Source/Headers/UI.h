@@ -100,7 +100,7 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp);
 // ----------------------------------------------------------------------------
 // Update the values for player UI
 // ----------------------------------------------------------------------------
-void Update_Player_UI(int ammo, float hp, float parry_timer);
+void Update_Player_UI(int ammo, float hp, float parry_timer, int rage);
 
 // ----------------------------------------------------------------------------
 // Initialize the boss UI elements

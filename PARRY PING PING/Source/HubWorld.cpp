@@ -167,6 +167,16 @@ void HubWorld_Update()
 		if (AEInputCheckTriggered(AEVK_L)) {
 			nextState = GS_LEVEL2;
 		}
+
+		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
+		{
+			levelState = PAUSED;
+			InTop20 = false;
+		}
+		else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
+		{
+			levelState = PLAYING;
+		}
 	}
 		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f)) ||
 			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
@@ -180,16 +190,7 @@ void HubWorld_Update()
 		}
 	}
 
-	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
-	{
-		levelState = PAUSED;
-		InTop20 = false;
-	}
-	else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
-	{
-		levelState = PLAYING;
-	}
-}
+
 
 void HubWorld_Draw()
 {

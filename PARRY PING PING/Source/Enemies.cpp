@@ -125,16 +125,20 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp)
 	MParryBot.attack_timer = Create_Timer(1);
 	MParryBot.stun_timer = Create_Timer(3);
 	MParryBot.respawn_timer = Create_Timer(3);
+
+	Init_Parry_Spark();
 }
 
 void Load_DummyBot()
 {
 	meleebot_sprite = SpriteSheet("Assets/Enemies/Dummy1.png", 7, 5);
+	Load_Parry_Spark();
 }
 
 void Unload_DummyBot()
 {
 	meleebot_sprite.Unload();
+	Unload_Parry_Spark();
 }
 
 int MParryBot_last_hit = 0;							// Checks for single hit detections
@@ -185,6 +189,8 @@ void Active_DummyBotMelee()
 			}
 			else 
 			{
+				Start_Spark(MParryBot.windup_timer.duration);
+				Set_Spark_Loc(MParryBot.pos.x, MParryBot.pos.y+150.f);
 				MParryBot.windup_timer.current = 0.f;				// Idle timer has ended, change states and start timer for next state
 				MParryBot.state = WindUp;
 			}
@@ -305,7 +311,7 @@ void Draw_DummyBotMelee()
 	}
 
 	meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y+50.f), 250.f, 250.f, false);
-
+	Draw_Spark();
 }
 
 
