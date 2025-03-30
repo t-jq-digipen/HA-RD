@@ -194,7 +194,7 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	Color borderColor = { 0.902f, 0.725f, 0.451f, 0.0f };
 
 	// Offset map drawing so (0,0) is centered in the camera view
 	f32 map_x = -map_width / 2;
