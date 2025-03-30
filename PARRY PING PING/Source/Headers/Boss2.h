@@ -124,13 +124,13 @@ typedef struct Missile {
 // ----------------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------------
-extern void Load_Boss2();               // Load Boss resources
-extern void Init_Boss2_Indicator();     // Initialize Boss indicators
-extern void Init_Boss2();               // Initialize Boss state
-extern void Update_Boss2();             // Update Boss logic
-extern void Draw_Boss2_Hitboxes();      // Draw boss attack hitboxes
-extern void Draw_Boss2();               // Draw Boss and its effects
-extern void Unload_Boss2();             // Unload Boss resources
+void Load_Boss2();               // Load Boss resources
+void Init_Boss2_Indicator();     // Initialize Boss indicators
+void Init_Boss2();               // Initialize Boss state
+void Update_Boss2();             // Update Boss logic
+void Draw_Boss2_Hitboxes();      // Draw boss attack hitboxes
+void Draw_Boss2();               // Draw Boss and its effects
+void Unload_Boss2();             // Unload Boss resources
 void Boss2_Attack_Test(bool canparry, f32 boss_damage); // Test for Boss attack collision
 AEVec2 GetRandomTargetPosAroundPlayer();
 void Dash_Slash_Logic();
