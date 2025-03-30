@@ -140,6 +140,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\Assets\FileIO\Boss2.txt" />
     <Text Include="..\Assets\FileIO\Credits.txt" />
     <Text Include="..\Assets\FileIO\CreditsInit.txt" />
     <Text Include="..\Assets\FileIO\Level1.txt" />
