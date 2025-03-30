@@ -109,7 +109,8 @@ Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
 const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
 const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
 
-const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
+const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 10.f };
+const float ATTACK_RAGEMULTIPLER = 0.75f;						// total damage = raw damage + multiplier * (meter / meter max) * raw damage
 
 aabb melee_hitbox;
 
@@ -301,7 +302,18 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
 			*check_hit = melee_attack.combo;
-			*damage = ATTACK_DAMAGE[melee_attack.combo];
+
+			if (melee_attack.combo == 3) 
+			{
+				*damage = ATTACK_DAMAGE[melee_attack.combo] + (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER * 0.5f);		// 3rd slash was too strong
+			}
+			else
+			{
+				*damage = ATTACK_DAMAGE[melee_attack.combo] + (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER);
+			}
+
+			std::cout << "MULTIPLIER: " << (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER) << '\n';
+			std::cout << "TOTAL DMG: " << *damage << '\n';
 			return true;
 		}
 		else if (!melee_attack.combo)
@@ -1023,6 +1035,9 @@ void Parried_Hit()
 	player.state = PARRIED;
 	player.blocked.current = 0.f;
 
+	if (player.ragemeter >= player.ragemeter_max) { player.ragemeter = player.ragemeter_max; }
+	else player.ragemeter++;
+
 	// reload player ammo
 	player.ammo = 3;
 
@@ -1037,6 +1052,7 @@ const f32 BLOCK_REDUCTION = 0.5f;
 
 void Blocked_Hit(f32 damage)
 {
+	player.ragemeter = 0;
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
 	player.hp -= damage * BLOCK_REDUCTION;
@@ -1051,6 +1067,7 @@ void Blocked_Hit(f32 damage)
 void Eat_Hit(f32 damage)
 {
 	// take dmg
+	player.ragemeter = 0;
 	player.state = HIT;
 	player.hittimer.current = 0.f;
 	player.hp -= damage;
@@ -1097,6 +1114,8 @@ void Init_Player()
 	player.hp = 100.f;
 	player.radius = 25.f;
 	player.canAttack = true;
+	player.ragemeter = 0;
+	player.ragemeter_max = 5;
 
 	player.dodge_vel = { 0.f,0.f };
 

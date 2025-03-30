@@ -232,11 +232,11 @@ void Level1_Draw()
 	if (showBossHitboxes)
 	{
 		Draw_Boss_Hitboxes();
-		std::cout << "Hitboxes drawn \n";
+		//std::cout << "Hitboxes drawn \n";
 	}
 	else
 	{
-		std::cout << "Hitboxes not drawn\n";
+		//std::cout << "Hitboxes not drawn\n";
 	}
 
 
