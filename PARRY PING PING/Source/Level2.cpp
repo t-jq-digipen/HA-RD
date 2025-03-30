@@ -206,6 +206,11 @@ void Level2_Draw()
 		Draw_OptionsMenu();
 		AEInputShowCursor(1);
 	}
+	else if (levelState == INQUIT)
+	{
+		Draw_QuitMenu();
+		AEInputShowCursor(1);
+	}
 	else if (levelState == CLEARED)
 	{
 		if (!Update_Timer(&cleartransitiontimer2))
