@@ -69,6 +69,9 @@ Color score_color;
 // Crosshair
 SpriteSheet crosshair;
 
+// HP and ammo HUD
+SpriteSheet playerHUD;
+
 // UI Menus
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
@@ -209,6 +212,10 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	// Crosshair
 	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
 	crosshair.Set_Row(0);
+	
+	// HUD
+	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 2);
+	playerHUD.Set_Row(0);
 }
 
 // Update the values for player UI
@@ -243,6 +250,16 @@ void Draw_Player_UI()
 
 	crosshair.Set_Col(UI_ammo);
 	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
+
+	// HEALTH
+	playerHUD.Set_Row(0);
+	playerHUD.Set_Col(0, 40, (UI_playermaxhp - UI_playerhp)/UI_playermaxhp);
+	playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
+
+	// AMMO
+	playerHUD.Set_Row(1);
+	playerHUD.Set_Col(0, 3, (f32)UI_ammo / (f32)UI_maxammo);
+	playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
 
 }
 
@@ -1225,6 +1242,9 @@ void Unload_UI()
 
 	// Crosshair
 	crosshair.Unload();
+
+	// Player HUD
+	playerHUD.Unload();
 
 	// Game audio
 	AEAudioUnloadAudio(levelBGM);

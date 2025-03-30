@@ -455,6 +455,8 @@ void DrawCircle(f32 pos_x, f32 pos_y, f32 radius, Color color)
 	}
 	// Render mode
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+	// Blend mode
+	
 	// Add color onto blank mesh
 	AEGfxSetColorToAdd(color.R, color.G, color.B, color.A);
 	// Set transformation matrix
