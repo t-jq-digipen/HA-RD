@@ -200,6 +200,7 @@ void Level1_Draw()
 	f32 map_x = -map_width / 2;
 	f32 map_y = -map_height / 2;
 
+
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
