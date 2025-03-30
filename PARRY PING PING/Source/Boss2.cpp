@@ -50,8 +50,8 @@ const f32 BOSS2_VEL = 10.f;
 
 // Attack timings
 const s32 ATTACK_TYPES = {6};
-const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 2.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,0.1f  ,2.f};
+const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 1.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.1f     ,0.3f,  .1f,  .1f ,0.1f  ,2.f};
 const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f  ,2.f};
 const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f   ,0.f};
 
@@ -69,8 +69,8 @@ const f32 SLASHHEIGHT = 250.f;
 const f32 DASH_OFFSET = 100.f;
 
 // Missiles settings
-const f32 BOSS2_MISSILE_PREP_SPEED = 20.f;
-const f32 BOSS2_MISSILE_HOMING_SPEED = 40.f;
+const f32 BOSS2_MISSILE_PREP_SPEED = 500.f;
+const f32 BOSS2_MISSILE_HOMING_SPEED = 1000.f;
 
 // Lightning Wave settings
 const f32 LIGHTNING_STAB_DAMAGE = 30.f;
@@ -86,7 +86,7 @@ bool lightning_stab_damaged = false;
 
 // Miscellaneous boss settings
 bool will_hit2 = true;
-std::vector<Missile> missiles(4);  // Vector to store active missiles
+std::vector<Missile> missiles;  // Vector to store active missiles
 bool prepdone = false;
 bool rocketset = false;
 bool prepdash = false;
@@ -108,6 +108,9 @@ void Init_Boss2_Indicator()
 
 void Init_Boss2() 
 {
+    missiles.clear();  // Clear any existing
+    missiles.reserve(4); // Reserve space (but doesn't construct)
+
     // Boss starting point, hitbox and size
     boss_2.pos = { BOSS2_SPAWN_X, BOSS2_SPAWN_Y };
     boss_2.width = BOSS2_WIDTH;
@@ -118,14 +121,12 @@ void Init_Boss2()
     // Starting state & phase
     boss_2.phase = PHASE1;
     boss_2.state = BOSS2_IDLE;
-   /* boss_1.attack_type = */
     boss_2.attackstate = BOSS2_ATTACK_WINDUP;
 
     // Timers
     boss_2.idle_timer = Create_Timer(1.f);
     boss_2.attack_timer = Create_Timer(3.f);
     boss_2.stun_timer = Create_Timer(3.f);
-    boss_2.missile_prep = Create_Timer(1.f);
     boss_2.phasebreak_timer = Create_Timer(5.f);
 
     // Initialize melee attack properties
@@ -169,7 +170,7 @@ void Update_Boss2()
                     // Set randomizer
                     f32 randomizer = AERandFloat();
 
-                    if (randomizer <= 0.f) // 40% probability for Missile Barrage
+                    if (randomizer <= 1.f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
                         boss_2.attack_timer.current = 0.f;
@@ -179,7 +180,7 @@ void Update_Boss2()
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                      
                     }
-                    else if (randomizer <= 0.f) // 40% probability for Dash & Slash
+                    else if (randomizer <= 0.8f) // 40% probability for Dash & Slash
                     {
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
@@ -208,7 +209,6 @@ void Update_Boss2()
 
             case BOSS2_MISSILE_BARRAGE:
                 Missile_Barrage_Logic();
-                std::cout << "BOSS_2_MISSILE: " << boss_2.attack_timer.current << "------------\n";
                 break;
 
             case BOSS2_LIGHTNING_WAVE:
@@ -235,13 +235,22 @@ void Update_Boss2()
                 missile.pos.y += missile.velocity.y * dt;
                 missile.timer.current += dt;
 
-                // Check for player collision
-                if (AETestCircleToCircle(&missile.pos, missile.radius, &player.pos, player.radius)) {
-                    if (will_hit2) {
-                        Boss_Attack_Test(boss_attack[MISSILE_BARRAGE].can_parry, 30.f);
+                // Check if missile reached target position
+                f32 distanceToTarget = AEVec2Distance(&missile.pos, &missile.targetpos);
+                if (distanceToTarget < 10.f) { // Small threshold for "reached target"
+                    // Check for player collision
+                    if (AETestCircleToCircle(&missile.targetpos, missile.targetradius, &player.pos, player.radius)) {
+                        if (will_hit2) {
+                            Boss_Attack_Test(boss_attack[MISSILE_BARRAGE].can_parry, 30.f);
+                        }
+                        missile.active = false;
+                        continue;
                     }
                     missile.active = false;
+                    continue; // Skip other checks since we deactivated it
                 }
+
+
 
                 // Deactivate if missile goes too far or times out
                 if (AEVec2Distance(&missile.pos, &boss_2.pos) > 1000.f || missile.timer.current >= 4.0f) {
@@ -305,23 +314,13 @@ void Draw_Boss2_Hitboxes()
     {
     case (BOSS2_MISSILE_BARRAGE):
     {
-        if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+        if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE || boss_2.attackstate == BOSS2_ATTACK_RECOVER)
         {
             for (const auto& missile : missiles)
             {
                 if (missile.active)
                 {
-                    DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
-                }
-            }
-        }
-        if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
-        {
-            for (const auto& missile : missiles)
-            {
-                if (missile.active)
-                {
-                    DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
+                    DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.targetradius, red2);
                 }
             }
         }
@@ -399,11 +398,17 @@ bool flip_sprite = false;
 
 void Draw_Boss2()
 {
-    // Draw missiles first
-    for (const auto& missile : missiles) {
-        if (missile.active) {
-            DrawCircle(World_To_Screen_x(missile.pos.x), World_To_Screen_y(missile.pos.y),
-                missile.radius, green2);
+    // Draw missiles first (so they appear behind the boss)
+    for (const auto& missile : missiles)
+    {
+        if (missile.active)
+        {
+            // Draw missile - adjust color/sprite as needed
+            DrawRect(World_To_Screen_x(missile.pos.x),
+                World_To_Screen_y(missile.pos.y),
+                missile.width,
+                missile.height,
+                blue2);
         }
     }
 
@@ -756,47 +761,65 @@ void Dash_Slash_Logic()
     }
 }
 
-void Missile_Barrage_Logic() {
-    if (Update_Timer(&boss_2.attack_timer)) {
-        f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
+void Missile_Barrage_Logic()
+{
+    std::cout << "=== MISSILE BARRAGE LOGIC ===\n";
+    std::cout << "Timer Progress: " << boss_2.attack_timer.current
+        << " / " << boss_2.attack_timer.duration << "\n";
+    // Set the attack timer duration to match current attack type
+    boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
 
-        // Windup Phase (2 seconds)
-        if (timer_progress < boss_attack[boss_2.attack_type].attack_windup) {
+    if (Update_Timer(&boss_2.attack_timer))
+    {
+        f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
+
+        // Windup Phase (missile preparation)
+        if (timer_progress < boss_attack[MISSILE_BARRAGE].attack_windup)
+        {
             boss_2.attackstate = BOSS2_ATTACK_WINDUP;
             will_hit2 = true;
 
             // Only initialize missiles once at the start of windup
-            if (!rocketset) {
+            if (!rocketset)
+            {
                 std::cout << "INITIALIZING MISSILES\n";
-                for (size_t i = 0; i < missiles.size(); ++i) {
-                    missiles[i].pos = boss_2.pos;
-                    missiles[i].active = true;
-                    missiles[i].radius = 50.f;
-                    missiles[i].timer = Create_Timer(4.0f);
+                missiles.clear(); // Clear any existing
+                for (size_t i = 0; i < 4; ++i) { // Create 4 new missiles
+                    Missile newMissile;
+                    newMissile.pos = boss_2.pos;
+                    newMissile.active = true;
+                    newMissile.width = 50.f;
+                    newMissile.height = 50.f;
+                    newMissile.targetradius = 50.f;
+                    newMissile.timer = Create_Timer(4.0f);
 
                     // Set initial spread directions
                     switch (i) {
-                    case 0: missiles[i].velocity = { -1.f, 0.f }; break;
-                    case 1: missiles[i].velocity = { -0.707f, 0.707f }; break;
-                    case 2: missiles[i].velocity = { 0.707f, 0.707f }; break;
-                    case 3: missiles[i].velocity = { 1.f, 0.f }; break;
+                    case 0: newMissile.velocity = { -1.f, 0.f }; break;
+                    case 1: newMissile.velocity = { -0.707f, 0.707f }; break;
+                    case 2: newMissile.velocity = { 0.707f, 0.707f }; break;
+                    case 3: newMissile.velocity = { 1.f, 0.f }; break;
                     }
 
-                    AEVec2Normalize(&missiles[i].velocity, &missiles[i].velocity);
-                    missiles[i].velocity.x *= BOSS2_MISSILE_PREP_SPEED;
-                    missiles[i].velocity.y *= BOSS2_MISSILE_PREP_SPEED;
+                    AEVec2Normalize(&newMissile.velocity, &newMissile.velocity);
+                    newMissile.velocity.x *= BOSS2_MISSILE_PREP_SPEED;
+                    newMissile.velocity.y *= BOSS2_MISSILE_PREP_SPEED;
+
+                    missiles.push_back(newMissile); // Add to vector
                 }
                 rocketset = true;
             }
         }
-        // Active Phase (very brief - just to set homing)
-        else if (timer_progress < boss_attack[boss_2.attack_type].attack_active) {
+        // Active Phase (missile homing)
+        else if (timer_progress < boss_attack[MISSILE_BARRAGE].attack_active)
+        {
             boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
-            std::cout << "SETTING HOMING TARGETS\n";
 
-            // Set homing targets for each missile
-            for (size_t i = 0; i < missiles.size(); ++i) {
-                if (missiles[i].active) {
+            // Set homing targets for each active missile
+            for (size_t i = 0; i < missiles.size(); ++i)
+            {
+                if (missiles[i].active)
+                {
                     missiles[i].targetpos = GetRandomTargetPosAroundPlayer();
                     missiles[i].velocity = {
                         missiles[i].targetpos.x - missiles[i].pos.x,
@@ -807,38 +830,40 @@ void Missile_Barrage_Logic() {
                     missiles[i].velocity.y *= BOSS2_MISSILE_HOMING_SPEED;
                 }
             }
-
-            // Immediately transition to recovery
-            boss_2.attackstate = BOSS2_ATTACK_RECOVER;
-            boss_2.attack_timer.current = boss_attack[boss_2.attack_type].attack_recover /
-                boss_attack[boss_2.attack_type].timer.duration;
         }
-        // Recovery Phase
-        else if (timer_progress < boss_attack[boss_2.attack_type].attack_recover) {
+        // Recover Phase (wait for missiles to hit or timeout)
+        else if (timer_progress < boss_attack[MISSILE_BARRAGE].attack_recover)
+        {
             boss_2.attackstate = BOSS2_ATTACK_RECOVER;
         }
     }
-    else {
-        // Only end attack when all missiles are gone
+    else
+    {
+        // Attack complete - check if all missiles are done
         bool anyMissilesActive = false;
-        for (const auto& missile : missiles) {
-            if (missile.active) {
+        for (const auto& missile : missiles)
+        {
+            if (missile.active)
+            {
                 anyMissilesActive = true;
                 break;
             }
         }
 
-        if (!anyMissilesActive) {
+        if (!anyMissilesActive)
+        {
+            // All missiles are done - return to idle
             boss_2.state = BOSS2_IDLE;
             boss_2.idle_timer.current = 0.f;
             missiles.clear();
             missiles.resize(4);
             rocketset = false;
         }
-        else {
-            // Keep attack going until missiles are done
-            boss_2.attack_timer.current = boss_attack[boss_2.attack_type].attack_recover /
-                boss_attack[boss_2.attack_type].timer.duration;
+        else
+        {
+            // Keep attack in recover state until missiles are done
+            boss_2.attack_timer.current = boss_attack[MISSILE_BARRAGE].attack_recover /
+                boss_attack[MISSILE_BARRAGE].timer.duration;
         }
     }
 }
