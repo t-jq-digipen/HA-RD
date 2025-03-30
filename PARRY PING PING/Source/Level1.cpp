@@ -123,6 +123,10 @@ void Level1_Initialize()
 	PLAYER_BASE_OFFSET = { L1_IO[8] };
 	BOSS_BASE_OFFSET = { L1_IO[9] };
 
+	// Level map
+	map_width = L1_IO[10];
+	map_height = L1_IO[11];
+
 	// Incrementing Level Timer
 	levelTimer = 0.f;
 
