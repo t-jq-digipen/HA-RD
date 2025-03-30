@@ -102,7 +102,7 @@ void Init_Boss_Indicator()
     boss_idle       = SetColor(0xFFFF6961);
     boss_windup     = SetColor(0x508B0000);
     boss_swing      = SetColor(0x808B0000);
-    boss_stunned     = SetColor(0xFF000000);
+    boss_stunned    = SetColor(0xFF000000);
     boss_parried    = SetColor(0xFFFF00FF);
     boss_projectile_indicator = SetColor(0xFFFF0000);
     boss_projectile_color = SetColor(0xFFFF13F0);

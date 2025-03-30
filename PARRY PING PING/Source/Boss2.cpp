@@ -20,11 +20,11 @@
 Boss2 boss_2;
 
 // Boss state colors
-//Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
-Color red2 = SetColor(0xFFFF0000);
-Color green2 = SetColor(0xFF00FF00);
-Color blue2 = SetColor(0xFF0000FF);
-Color black2 = SetColor(0xFF000000);
+
+Color red2      = SetColor(0x508B0000);
+Color red3      = SetColor(0x808B0000);
+Color blue2     = SetColor(0xFF0000FF);
+Color black2    = SetColor(0xFF000000);
 
 // Sprite sheets
 SpriteSheet boss_2_sprite;
@@ -52,9 +52,9 @@ const f32 BOSS2_VEL = 10.f;
 // Attack timings
 const s32 ATTACK_TYPES = {6};
 const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 1.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.1f     ,0.3f,  .1f,  .1f ,0.1f  ,2.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f  ,2.f};
-const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f   ,0.f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.1f, .3f,  .1f,  .1f ,0.1f  ,1.f};
+const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f ,2.f};
+const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f,  3.f,  3.f ,3.f  ,0.f};
 
 // Attack information
 Boss2_Attack boss_attack[ATTACK_TYPES];
@@ -72,6 +72,9 @@ const f32 DASH_OFFSET = 100.f;
 // Missiles settings
 const f32 BOSS2_MISSILE_PREP_SPEED = 500.f;
 const f32 BOSS2_MISSILE_HOMING_SPEED = 1000.f;
+
+// Slash setting
+const f32 SLASH_DAMAGE = 30.f;
 
 // Lightning Wave settings
 const f32 LIGHTNING_STAB_DAMAGE = 30.f;
@@ -164,15 +167,16 @@ void Update_Boss2()
                 if (!Update_Timer(&boss_2.stun_timer))
                 {
                     boss_2.state = BOSS2_IDLE;
+                    boss_2.idle_timer.current = 0.f;
                 }
                 break;
-            case BOSS_IDLE:
+            case BOSS2_IDLE:
                 if (!Update_Timer(&boss_2.idle_timer))
                 {
                     // Set randomizer
                     f32 randomizer = AERandFloat();
 
-                    if (randomizer <= 1.f) // 40% probability for Missile Barrage
+                    if (randomizer <= .3f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
                         boss_2.attack_timer.current = 0.f;
@@ -182,7 +186,7 @@ void Update_Boss2()
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                      
                     }
-                    else if (randomizer <= 0.8f) // 40% probability for Dash & Slash
+                    else if (randomizer <= .6f) // 40% probability for Dash & Slash
                     {
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
@@ -190,6 +194,8 @@ void Update_Boss2()
                         boss_attack[DASH_SLASH2].timer.current = 0.f;
                         boss_2.attack_type = DASH;
                         boss_2.state = BOSS2_DASH_SLASH;
+                        dashed = false;
+                        prepdash = false;
                         
                     }
                     else // 20% probability for Lightning Wave
@@ -338,7 +344,7 @@ void Draw_Boss2_Hitboxes()
                 // Draw windup animation for slash
                 DrawRect(World_To_Screen_x(boss_2.target_dir.x), World_To_Screen_y(boss_2.target_dir.y), SLASHWIDTH, SLASHHEIGHT, red2);
                 DrawRect(World_To_Screen_x(boss_2.target_dir.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
-                    World_To_Screen_y(boss_2.target_dir.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
+                    World_To_Screen_y(boss_2.target_dir.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, red3);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
@@ -353,7 +359,7 @@ void Draw_Boss2_Hitboxes()
                 // Draw windup animation for slash
                 DrawRect(World_To_Screen_x(boss_2.target_dir.x), World_To_Screen_y(boss_2.target_dir.y), SLASHWIDTH, SLASHHEIGHT, red2);
                 DrawRect(World_To_Screen_x(boss_2.target_dir.x) + ((timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH / 2.f - SLASHHEIGHT / 2.f),
-                    World_To_Screen_y(boss_2.target_dir.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, green2);
+                    World_To_Screen_y(boss_2.target_dir.y), (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLASHWIDTH, SLASHHEIGHT, red3);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
@@ -374,7 +380,7 @@ void Draw_Boss2_Hitboxes()
                 // Draw windup animation for slam
                 DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
                 DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y),
-                    (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, green2);
+                    (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, red3);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
@@ -426,15 +432,6 @@ void Draw_Boss2()
 
     switch (boss_2.state)
     {
-    case BOSS2_IDLE:
-    {
-        flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
-        boss_2_sprite.Set_Row(0);
-        boss_2_sprite.Loop(0,12,1.f);
-        break;
-    }   // BOSS2_IDLE
-        // ==============================================================================
-
     case BOSS2_PARRIED:
     {
         boss_2_sprite.Set_Row(1);
@@ -465,8 +462,10 @@ void Draw_Boss2()
             break;
         }   // DASH
             // -------------------------------------------------
+        
         case DASH_SLASH1:
         {
+            flip_sprite = (boss_2.target_dir.x > boss_2.pos.x);
             switch (boss_2.attackstate)
             {
             case BOSS2_ATTACK_WINDUP:
@@ -500,6 +499,7 @@ void Draw_Boss2()
 
         case DASH_SLASH2:
         {
+            flip_sprite = (boss_2.target_dir.x > boss_2.pos.x);
             switch (boss_2.attackstate)
             {
             case BOSS2_ATTACK_WINDUP:
@@ -540,6 +540,9 @@ void Draw_Boss2()
 
     case BOSS2_LIGHTNING_WAVE:
     {
+        switch (boss_2.attack_type)
+        {
+        case LIGHTNING_STAB:
         {
             switch (boss_2.attackstate)
             {
@@ -568,11 +571,59 @@ void Draw_Boss2()
             }   // RECOVER WAVE
             }   // switch attack state
             break;
+        }   // LIGHTNING STAB
+            // -------------------------------------------------
+        case LIGHTNING_WAVE:
+        {
+            switch (boss_2.attackstate)
+            {
+            case BOSS2_ATTACK_WINDUP:
+            {
+                boss_2_sprite.Set_Row(15);
+                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                boss_2_sprite.Set_Col(0, 10, anim_time);
+                break;
+            }   // WINDUP WAVE
+            case BOSS2_ATTACK_ACTIVE:
+            {
+                boss_2_sprite.Set_Row(16);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
+                f32 anim_time = active_curr / active_time;
+                boss_2_sprite.Set_Col(0, 7, anim_time);
+                break;
+            }   // ACTIVE WAVE
+            case BOSS2_ATTACK_RECOVER:
+            {
+                boss_2_sprite.Set_Row(17);
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 anim_time = active_curr / recover_time;
+                boss_2_sprite.Set_Col(0, 14, anim_time);
+                break;
+            }   // RECOVER WAVE
+            }   // switch attack state
+            break;
+        }   // LIGHTNING WAVE
+            // -------------------------------------------------
+        }   // switch attack type
+
+        {
+            
+            break;
         }   // WAVE
             // -------------------------------------------------
         flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
         break;
     }   // BOSS2_LIGHTNING_WAVE
+        // ==============================================================================
+
+    case BOSS2_IDLE:
+    default:
+    {
+        flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
+        boss_2_sprite.Set_Row(0);
+        boss_2_sprite.Loop(0, 12, 1.f);
+        break;
+    }   // BOSS2_IDLE
         // ==============================================================================
 
     }   // switch boss_2.state
@@ -598,13 +649,13 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
             boss_2.stun_timer.current = 0.f;
             boss_2.stun_timer.duration = boss_attack[boss_2.attack_type].stun_duration;
             boss_2.state = BOSS2_PARRIED;
-            //boss_2.attack_type = 0;
+            boss_2.attack_type = MISSILE_BARRAGE;
+            boss_2.attack_timer.current = 1.f;
+
             bullet_time.current = 0.f;
             std::cout << "Boss parried. State: " << boss_2.state << '\n'; // Debug log
         }
-        else
-        {
-        }
+        
         Parried_Hit();
         break;
     case BLOCK:
@@ -623,6 +674,7 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 
 void Dash_Slash_Logic()
 {
+    std::cout << "DASHSLASH\n";
     boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
     // Dash Phase
     if (!dashed)
@@ -702,21 +754,6 @@ void Dash_Slash_Logic()
         if (Update_Timer(&boss_2.attack_timer))
         {
             f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
-                //boss_attack[boss_2.attack_type].timer.duration;
-            std::string state;
-            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
-            {
-                state = "WINDUP ";
-            }
-            if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
-            {
-                state = "ACTIVE ";
-            }
-            if (boss_2.attackstate == BOSS2_ATTACK_RECOVER)
-            {
-                state = "RECOVER ";
-            }
-            std::cout << state << "TIMERPROG " << timer_progress << "\n";
             // Slash Windup
             if (timer_progress < boss_attack[boss_2.attack_type].attack_windup)
             {
@@ -733,7 +770,7 @@ void Dash_Slash_Logic()
                     &boss_2.target_dir, SLASHWIDTH, SLASHHEIGHT))
                 {
                     if (will_hit2) {
-                        Boss_Attack_Test(boss_attack[boss_2.attack_type].can_parry, 30.f);
+                        Boss2_Attack_Test(boss_attack[boss_2.attack_type].can_parry, SLASH_DAMAGE);
                     }
                 }
             }
