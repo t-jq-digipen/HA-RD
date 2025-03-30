@@ -1,0 +1,70 @@
+0) Tutorial Transition Timer: 2.f
+1) Tutorial Clear Delay: 1.f
+2) Tutorial Arrow Target X (If Tutorial Active): 600.f
+3) Tutorial Arrow Target Y (If Tutorial Active): 200.f
+4) Tutorial Arrow Target X (If Tutorial Not Active): 0.f
+5) Tutorial Arrow Target Y (If Tutorial Not Active): 550.f
+6) Tutorial Button Width: 50.f
+7) Tutorial Button Height: 50.f
+8) Tutorial Button Offset: 100.f
+9) Tutorial Sprite Draw Y: 150.f
+10) Tutorial Move Draw X: -150.f
+11) Tutorial Melee Draw X: -100.f
+12) Tutorial Range Draw X 1: -100.f
+13) Tutorial Range Draw X 2: 100.f
+14) Tutorial Text Size H1: 0.5f
+15) Tutorial Text Size H2: 0.35f
+16) Tutorial Text Size H3: 0.3f
+17) Tutorial Text Size Content: 0.2f
+18) Tutorial Skip Text X: 0.f
+19) Tutorial Skip Text Y: 700.f
+20) Tutorial Movement Background Rectangle X: -400.f
+21) Tutorial Movement Background Rectangle Y: 150.f
+22) Tutorial Movement Background Rectangle Width: 350.f
+23) Tutorial Movement Background Rectangle Height: 200.f
+24) Tutorial Text X: -800.f
+25) Tutorial Movement Text Y 1: 400.f
+26) Tutorial Movement Text Y 2: 200.f
+27) Tutorial Movement Text Y 3: 150.f
+28) Tutorial Melee Background Rectangle X: -400.f
+29) Tutorial Melee Background Rectangle Y: 125.f
+30) Tutorial Melee Background Rectangle Width: 350.f
+31) Tutorial Melee Background Rectangle Height: 250.f
+32) Tutorial Melee Text Y 1: 400.f
+33) Tutorial Melee Text Y 2: 200.f
+34) Tutorial Melee Text Y 3: 125.f
+35) Tutorial Melee Text Y 4: 75.f
+36) Tutorial Range Background Rectangle X: -400.f
+37) Tutorial Range Background Rectangle Y: 50.f
+38) Tutorial Range Background Rectangle Width: 450.f
+39) Tutorial Range Background Rectangle Height: 400.f
+40) Tutorial Range Text Y 1: 400.f
+41) Tutorial Range Text Y 2: 200.f
+42) Tutorial Range Text Y 3: 125.f
+43) Tutorial Range Text Y 4: 50.f
+44) Tutorial Range Text Y 5: 0.f
+45) Tutorial Range Text Y 6: -75.f
+46) Tutorial Range Text Y 7: -125.f
+47) Tutorial Range Text Y 8: -175.f
+48) Tutorial Parry Background Rectangle X: -400.f
+49) Tutorial Parry Background Rectangle Y: 50.f
+50) Tutorial Parry Background Rectangle Width: 350.f
+51) Tutorial Parry Background Rectangle Height: 400.f
+52) Tutorial Parry Text Y 1: 400.f
+53) Tutorial Parry Text Y 2: 200.f
+54) Tutorial Parry Text Y 3: 150.f
+55) Tutorial Parry Text Y 4: 75.f
+56) Tutorial Parry Text Y 5: 25.f
+57) Tutorial Parry Text Y 6: -25.f
+58) Tutorial Parry Text Y 7: -75.f
+59) Tutorial Parry Text Y 8: -150.f
+60) Tutorial Parry Text Y 9: -200.f
+61) Tutorial Parry Text Y 10: -250.f
+62) Tutorial Transition Green Text X: 0.f
+63) Tutorial Transition Green Text Y: 300.f
+64) Tutorial Transition Normal Text X: 0.f
+65) Tutorial Transition Normal Text Y: 200.f
+66) Tutorial Arrow X: 600.f
+67) Tutorial Arrow Y: 400.f
+68) Tutorial Arrow To Gate X: 0.f
+69) Tutorial Arrow To Gate Y: 750.f

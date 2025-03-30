@@ -70,11 +70,13 @@ typedef struct Player
     AEVec2 vel;            ///< Velocity of the player
     float speed;           ///< Speed of the player
     AEVec2 dodge_vel;      ///< Velocity during a dodge
-    float hp;              ///< Health of the player
+    float hp, max_hp;              ///< Health of the player
     float radius;          ///< Radius for collision checks
     float width, height;   ///< Dimensions of the player
     aabb hitbox;           ///< Axis-aligned bounding box for collision detection
-    int ammo;              ///< Ammo count for ranged attacks
+    float draw_width, draw_height;  ///< Draw dimensions of the player
+    float hitbox_width, hitbox_height;  ///< Hitbox dimensions of the player
+    int ammo, max_ammo;              ///< Ammo count for ranged attacks
     float knockbackTimer;  ///< Timer for knockback effect
     float lightAttackCooldown;
     Timer dodgetimer;      ///< Timer for dodge action
@@ -224,3 +226,5 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
  * \return True if the attack hits the target, false otherwise.
  */
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage);
+
+void PlayAttackSound(int combo);

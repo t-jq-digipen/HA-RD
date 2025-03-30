@@ -28,69 +28,81 @@ SpriteSheet_Old boss_sprite_sheet;
 SpriteSheet boss_1_sprite;
 
 // Boss spawn position
-const f32 BOSS_SPAWN_X = 0.f;
-const f32 BOSS_SPAWN_Y = 200.f;
+f32 BOSS_SPAWN_X;
+f32 BOSS_SPAWN_Y;
 
 // Boss size
-const f32 BOSS_WIDTH = 500.f;
-const f32 BOSS_HEIGHT = 500.f;
+f32 BOSS_WIDTH;
+f32 BOSS_HEIGHT;
 
 // Boss draw size
-const f32 BOSS_DRAW_WIDTH = 650.f;
-const f32 BOSS_DRAW_HEIGHT = 650.f;
+f32 BOSS_DRAW_WIDTH;
+f32 BOSS_DRAW_HEIGHT;
 
 // Boss hitbox size
-const f32 BOSS_HITBOX_WIDTH = 400.f;
-const f32 BOSS_HITBOX_HEIGHT = 300.f;
+f32 BOSS_HITBOX_WIDTH;
+f32 BOSS_HITBOX_HEIGHT;
 
 // Boss attributes
-const f32 BOSS_MAXHP = 200.f;
-const f32 BOSS_DASH_DISTANCE = 250.f; // Dash attack distance
+f32 BOSS_MAXHP;
+f32 BOSS_DASH_DISTANCE; // Dash attack distance
 
 // Attack timings
 const s32 ATTACK_TYPES = 7;
-const f32 BOSS_WINDUP[ATTACK_TYPES] = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
-const f32 BOSS_ATTACK[ATTACK_TYPES] = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
-const f32 BOSS_RECOVER[ATTACK_TYPES] = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
-const f32 BOSS_STUN[ATTACK_TYPES] = { 0.f, 3.f, 0.f, 0.f, 3.f, 0.f, 0.f };
+std::vector<f32> BOSS_WINDUP;
+std::vector<f32> BOSS_ATTACK;
+std::vector<f32> BOSS_RECOVER;
+std::vector<f32> BOSS_STUN;
 
 // Attack information
 Boss_Melee boss_melee[ATTACK_TYPES];
 
 // RocketFist attributes
 std::vector<RocketFist> rocket_fists;
-const f32 BOSS_PROJECTILE_RADIUS = 30.f;
-const f32 BOSS_PROJECTILE_DAMAGE = 20.f;
-const f32 BOSS_PROJECTILE_SPEED = 500.f;
+f32 BOSS_PROJECTILE_RADIUS;
+f32 BOSS_PROJECTILE_DAMAGE;
+f32 BOSS_PROJECTILE_SPEED;
+
+// Attack hitbox settings
+f32 SMASH_RADIUS = 200.f;
+f32 SMASH_DAMAGE = 30.f;
+f32 BIG_SMASH_RADIUS = 350.f;
+f32 SWEEP_WIDTH = 600.f;
+f32 SWEEP_HEIGHT = 600.f;
 
 // Explosion effects
 std::vector<Boss_Explosion> boss_death_explosion;
-const f32 BOSS_DEATH_EXPLOSION_RADIUS = 25.f;
+f32 BOSS_DEATH_EXPLOSION_RADIUS;
 Boss_Explosion explosion_particle;
 
-// Attack hitbox settings
-const f32 SMASH_RADIUS = 200.f;
-const f32 SMASH_DAMAGE = 30.f;
-const f32 BIG_SMASH_RADIUS = 350.f;
-const f32 SWEEP_WIDTH = 600.f;
-const f32 SWEEP_HEIGHT = 600.f;
+// Boss shadow
+f32 BOSS_SHADOW_WIDTH;
+f32 BOSS_SHADOW_HEIGHT;
 
 // Miscellaneous boss settings
 f32 x_offset = 0.f;
 bool will_hit = true;
 
 // Level score update values
-const int SCORE_MELEE_HIT = 100; // + 100 points (multiplied by damage value) per frame
-const int SCORE_BOSS_PROJECTILES_PARRIED = 5000; // + 5000 points if boss rocket successfully parried
-const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successfully stunned via parry
-const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
-const int SCORE_TIME_BONUS = 2000; // + 2000 points for every second of time left less than the 1 minute cap
-const int SCORE_DODGE = 2000; // + 2000 points if boss attack successfully dodged
-const int SCORE_PERFECT = 10000; // + 10000 points if player beats boss without taking damage
+int SCORE_MELEE_HIT; // + 100 points (multiplied by damage value) per frame
+int SCORE_BOSS_PROJECTILES_PARRIED; // + 5000 points if boss rocket successfully parried
+int SCORE_BOSS_MELEE_PARRIED; // + 10000 points if boss successfully stunned via parry
+f32 SCORE_TIME_BONUS_CAP; // + bonus points if player manages to beat boss within 1 minute or less
+int SCORE_TIME_BONUS; // + 2000 points for every second of time left less than the 1 minute cap
+int SCORE_DODGE; // + 2000 points if boss attack successfully dodged
+int SCORE_PERFECT; // + 10000 points if player beats boss without taking damage
+
+// File IO
+std::vector<float> ProtoBoss_IO;
+std::vector<float> ProtoBossScore_IO;
 
 // Load boss assets
 void Load_Boss()
 {
+    // Read File IO
+    ReadFromFile("Assets/FileIO/ProtoBoss.txt", ProtoBoss_IO);
+    ReadFromFile("Assets/FileIO/PlayerScore.txt", ProtoBossScore_IO);
+
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
     boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
     Load_Parry_Spark();
@@ -116,6 +128,55 @@ void Init_Boss()
 {
     boss_death_explosion.clear(); // Clear previous explosions
 
+    // Boss spawn position
+    BOSS_SPAWN_X = ProtoBoss_IO[0];                                     // BOSS SPAWN X = 0.f
+    BOSS_SPAWN_Y = ProtoBoss_IO[1];                                     // BOSS SPAWN Y = 200.f
+
+    // Boss size
+    BOSS_WIDTH = ProtoBoss_IO[2];                                       // BOSS WIDTH = 500.f
+    BOSS_HEIGHT = ProtoBoss_IO[3];                                      // BOSS HEIGHT = 500.f
+
+    // Boss draw size
+    BOSS_DRAW_WIDTH = ProtoBoss_IO[4];                                  // BOSS DRAW WIDTH = 650.f
+    BOSS_DRAW_HEIGHT = ProtoBoss_IO[5];                                 // BOSS DRAW HEIGHT = 650.f
+
+    // Boss hitbox size
+    BOSS_HITBOX_WIDTH = ProtoBoss_IO[6];                                // BOSS HITBOX WIDTH = 400.f
+    BOSS_HITBOX_HEIGHT = ProtoBoss_IO[7];                               // BOSS HITBOX HEIGHT = 300.f
+
+    // Boss attributes
+    BOSS_MAXHP = ProtoBoss_IO[8];                                       // BOSS MAX HP = 200.f
+    BOSS_DASH_DISTANCE = ProtoBoss_IO[9];                               // BOSS MAX DASH DISTANCE = 250.f
+
+    // Attack timings
+
+    // BOSS_WINDUP = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
+    BOSS_WINDUP = { ProtoBoss_IO[10], ProtoBoss_IO[11], ProtoBoss_IO[12], ProtoBoss_IO[13], ProtoBoss_IO[14], ProtoBoss_IO[15], ProtoBoss_IO[16] };
+
+    // BOSS_ATTACK = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
+    BOSS_ATTACK = { ProtoBoss_IO[17], ProtoBoss_IO[18], ProtoBoss_IO[19], ProtoBoss_IO[20], ProtoBoss_IO[21], ProtoBoss_IO[22], ProtoBoss_IO[23] };
+
+    // BOSS_RECOVER = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
+    BOSS_RECOVER = { ProtoBoss_IO[24], ProtoBoss_IO[25], ProtoBoss_IO[26], ProtoBoss_IO[27], ProtoBoss_IO[28], ProtoBoss_IO[29], ProtoBoss_IO[30] };
+
+    // BOSS_STUN = { 0.f, 3.f, 0.f, 0.f, 3.f, 0.f, 0.f };
+    BOSS_STUN = { ProtoBoss_IO[31], ProtoBoss_IO[32], ProtoBoss_IO[33], ProtoBoss_IO[34], ProtoBoss_IO[35], ProtoBoss_IO[36], ProtoBoss_IO[37] };
+
+    // RocketFist attributes
+    BOSS_PROJECTILE_RADIUS = ProtoBoss_IO[38];                          // BOSS PROJECTILE RADIUS = 30.f
+    BOSS_PROJECTILE_DAMAGE = ProtoBoss_IO[39];                          // BOSS PROJECTILE DAMAGE = 20.f
+    BOSS_PROJECTILE_SPEED = ProtoBoss_IO[40];                           // BOSS PROJECTILE SPEED = 1000.f
+
+    // Attack hitbox settings
+    SMASH_RADIUS = ProtoBoss_IO[41];                                    // BOSS SMASH RADIUS = 200.f
+    SMASH_DAMAGE = ProtoBoss_IO[42];                                    // BOSS SMASH DAMAGE = 30.f
+    BIG_SMASH_RADIUS = ProtoBoss_IO[43];                                // BOSS BIG SMASH RADIUS = 350.f
+    SWEEP_WIDTH = ProtoBoss_IO[44];                                     // BOSS SWEEP WIDTH = 600.f
+    SWEEP_HEIGHT = ProtoBoss_IO[45];                                    // BOSS SWEEP HEIGHT = 600.f
+
+    // Explosion effects
+    BOSS_DEATH_EXPLOSION_RADIUS = ProtoBoss_IO[46];                     // BOSS DEATH EXPLOSION RADIUS = 25.f
+
     // Boss starting point, hitbox and size
     boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
     boss_1.width = BOSS_WIDTH;
@@ -130,11 +191,15 @@ void Init_Boss()
     boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
     // Timers
-    boss_1.idle_timer = Create_Timer(1.f);
-    boss_1.attack_timer = Create_Timer(1.f);
-    boss_1.stun_timer = Create_Timer(3.f);
-    boss_1.explosion_timer = Create_Timer(0.5f);
-    boss_1.death_explosion_duration = Create_Timer(4.f);
+    boss_1.idle_timer = Create_Timer(ProtoBoss_IO[47]);                 // BOSS IDLE TIMER = 1.f
+    boss_1.attack_timer = Create_Timer(ProtoBoss_IO[48]);               // BOSS ATTACK TIMER = 1.f
+    boss_1.stun_timer = Create_Timer(ProtoBoss_IO[49]);                 // BOSS STUN TIMER = 3.f
+    boss_1.explosion_timer = Create_Timer(ProtoBoss_IO[50]);            // BOSS EXPLOSION TIMER = 0.5f
+    boss_1.death_explosion_duration = Create_Timer(ProtoBoss_IO[51]);   // BOSS DEATH EXPLOSION DURATION = 4.f
+
+    // Boss shadow
+    BOSS_SHADOW_WIDTH = ProtoBoss_IO[52];                               // BOSS SHADOW WIDTH = 120.f
+    BOSS_SHADOW_HEIGHT = ProtoBoss_IO[53];                              // BOSS SHADOW HEIGHT = 80.f
 
     // Explosion effect check
     boss_1.explosion_triggered = 0;
@@ -151,6 +216,14 @@ void Init_Boss()
     }
 
     Init_Boss_UI(boss_1.hp);
+
+    SCORE_MELEE_HIT = static_cast<int>(ProtoBossScore_IO[4]);                    // + 100 points (multiplied by damage value) per frame
+    SCORE_BOSS_PROJECTILES_PARRIED = static_cast<int>(ProtoBossScore_IO[5]);     // + 5000 points if boss rocket successfully parried
+    SCORE_BOSS_MELEE_PARRIED = static_cast<int>(ProtoBossScore_IO[6]);           // + 10000 points if boss successfully stunned via parry
+    SCORE_TIME_BONUS_CAP = static_cast<f32>(ProtoBossScore_IO[7]);               // + bonus points if player manages to beat boss within 1 minute or less
+    SCORE_TIME_BONUS = static_cast<int>(ProtoBossScore_IO[8]);                   // + 2000 points for every second of time left less than the 1 minute cap
+    SCORE_DODGE = static_cast<int>(ProtoBossScore_IO[9]);                        // + 2000 points if boss attack successfully dodged
+    SCORE_PERFECT = static_cast<int>(ProtoBossScore_IO[10]);                     // + 10000 points if player beats boss without taking damage
 }
 
 // For damagecheck for player attacks to boss
@@ -322,7 +395,7 @@ void Update_Boss()
             boss_1.state = BOSS_DEAD;
             boss_1.death_explosion_duration.current = boss_1.explosion_timer.current = 0.f;
 
-            // Adds time bonus (checks if time left is under _lthe 1 minute cap)
+            // Adds time bonus (checks if time left is under the 1 minute cap)
             f32 timeLeft = SCORE_TIME_BONUS_CAP - levelTimer;
             if (timeLeft <= 0.f)
             {
@@ -561,7 +634,7 @@ void Draw_Boss_Hitboxes()
 
 void Draw_Boss()
 {
-    DrawCircleAdvanced(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y - 70.f), 120.f, 80.f, SetColor(0x92000000));			// Draw shadow under
+    DrawCircleAdvanced(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y - 70.f), BOSS_SHADOW_WIDTH, BOSS_SHADOW_HEIGHT, SetColor(0x92000000));			// Draw shadow under
     //DrawRect(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), boss_1.width, boss_1.height, SetColor(0x92000000));
 
     f32 active_time = boss_melee[boss_1.attack_type].attack_active - boss_melee[boss_1.attack_type].attack_windup;

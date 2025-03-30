@@ -528,6 +528,87 @@ void DrawImage(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTextur
 	AEGfxMeshDraw(ImgBaseMesh, AE_GFX_MDM_TRIANGLES);
 }
 
+// Linear interpolation between start and end values
+f32 Lerp(f32 start, f32 end, f32 t)
+{
+	return start + t * (end - start);
+}
+
+
+// Draw Image with fading effect
+void DrawImageFading(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image, f32 alpha)
+{
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);
+
+	// Box transform
+	AEMtx33 Transform = { 0 };
+
+	{
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// Rotate
+		AEMtx33 rotm;
+		AEMtx33Rot(&rotm, rot);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &rotm, &scale);
+		AEMtx33Concat(&Transform, &tran, &Transform);
+	}
+
+	// Apply transparency using ColorToMultiply
+	AEGfxSetColorToMultiply(1.f, 1.f, 1.f, alpha);  // Alpha controls fading
+
+	AEGfxSetColorToAdd(0.f, 0.f, 0.f, 0.f);
+	AEGfxSetTransform(Transform.m);
+
+	AEGfxTextureSet(image, 0, 0);
+
+	AEGfxMeshDraw(ImgBaseMesh, AE_GFX_MDM_TRIANGLES);
+}
+
+// Draw Background with color fading effect
+void DrawBackgroundFade(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 fadeFactor)
+{
+	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
+
+	// Box transform
+	AEMtx33 Transform = { 0 };
+
+	{
+		// Scale to width and height provided
+		AEMtx33 scale;
+		AEMtx33Scale(&scale, width, height);
+
+		// Translate to position coordinates provided
+		AEMtx33 tran;
+		AEMtx33Trans(&tran, pos_x, pos_y);
+
+		// CONCATENATE
+		AEMtx33Concat(&Transform, &tran, &scale);
+	}
+
+	// Interpolate the background color for transition from black (0, 0, 0) to grey (0.4, 0.4, 0.4)
+	f32 r = Lerp(0.0f, 0.4f, fadeFactor);  // Transition red component from black (0.0f) to grey (0.4f)
+	f32 g = Lerp(0.0f, 0.4f, fadeFactor);  // Transition green component from black (0.0f) to grey (0.4f)
+	f32 b = Lerp(0.0f, 0.4f, fadeFactor);  // Transition blue component from black (0.0f) to grey (0.4f)
+
+	// Apply the background color with full opacity
+	AEGfxSetColorToAdd(r, g, b, 1.0f);  // Full opacity for background
+
+	// Set transformation matrix
+	AEGfxSetTransform(Transform.m);
+
+	// Draw background as a rectangle
+	AEGfxMeshDraw(SquareMesh, AE_GFX_MDM_TRIANGLES);
+}
+
+
 void DrawImageAttachedToRect(f32 rectPosX, f32 rectPosY, f32 rectWidth, f32 rectHeight, AEGfxTexture* image)
 {
 	// Calculate the center of the rectangle (use the rectangle's center as the image's position)
@@ -627,4 +708,95 @@ int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 
 		return 1;
 	}
 	return 0;
+}
+
+// Reads from text file
+void ReadFromFile(const char* filename, std::vector<float>& vector)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+	else
+	{
+		std::cout << "Can read " << filename << "!!!\n";
+		std::string label, value;
+		while (std::getline(ifs, label))
+		{
+			size_t pos = label.find(":");
+			if (pos != std::string::npos)
+			{
+				value = label.substr(pos + 2);
+				vector.push_back(stof(value));
+			}
+		}
+	}
+	ifs.close();
+}
+
+// Reads all lines from text file
+void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+	else
+	{
+		std::string line;
+		while (std::getline(ifs, line))
+		{
+			vector.push_back(line);
+			std::cout << line << '\n';
+		}
+	}
+	ifs.close();
+}
+
+// Updates a value in text file
+void WriteToFile(const char* filename, const std::string& name, const std::string& value)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+
+	std::vector<std::string> lines;
+	std::string line;
+
+	while (std::getline(ifs, line))
+	{
+		size_t pos = line.find(name);
+		if (pos != std::string::npos)
+		{
+			size_t value_pos = line.find(":");
+			if (value_pos != std::string::npos)
+			{
+				line = line.substr(0, value_pos + 2) + value;
+				std::cout << "Modified line: " << line;
+			}
+		}
+		lines.push_back(line);
+	}
+	ifs.close();
+
+	std::ofstream ofs{ filename };
+	if (!ofs)
+	{
+		std::cerr << "Cannot open " << filename << " for writing!!!\n";
+		return;
+	}
+
+	for (const std::string& modified_line : lines)
+	{
+		ofs << modified_line << '\n';
+	}
+	ofs.flush();
+	ofs.close();
 }

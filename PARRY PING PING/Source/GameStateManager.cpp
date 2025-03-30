@@ -14,6 +14,7 @@
 #include "Level1.h"
 #include "Level2.h"
 #include "HubWorld.h"
+#include "Credits.h"
 
 // Game states
 int currentState = 0, previousState = 0, nextState = 0;
@@ -63,6 +64,14 @@ void GSM_Update()
 		fpDraw = HubWorld_Draw;
 		fpFree = HubWorld_Free;
 		fpUnload = HubWorld_Unload;
+		break;
+	case GS_CREDITS:
+		fpLoad = Credits_Load;
+		fpInitialize = Credits_Initialize;
+		fpUpdate = Credits_Update;
+		fpDraw = Credits_Draw;
+		fpFree = Credits_Free;
+		fpUnload = Credits_Unload;
 		break;
 	case GS_RESTART:
 		break;

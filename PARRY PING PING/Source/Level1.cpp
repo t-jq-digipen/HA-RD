@@ -5,7 +5,7 @@
 //
 // brief:	Implementation of Level 1 functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"
@@ -20,35 +20,44 @@
 
 AEGfxTexture* mapTexture = nullptr;
 
+Timer cleartransitiontimer;
+Timer gameovertransitiontimer;
 
-AEVec2 dummy_pos, JQMonke_pos;
-f32 dummy_rad, JQMonke_rad;
-int JQCounter{};
+AEVec2 dummy_pos;
+f32 dummy_rad;
+// int JQCounter{};
 
 Timer enemyattacktimer;
 Timer stunnedtimer;
 
 //to be moved into enemy struct btw!
-int counter{};
-f32 StunCounter{ 0.f };
+//int counter{};
+//f32 StunCounter{ 0.f };
 
 int dummy_check;
 
-Timer cleartransitiontimer;
-Timer gameovertransitiontimer;
-
 bool showBossHitboxes = true;
 
+float PLAYER_BASE_OFFSET{};
+float BOSS_BASE_OFFSET{};
+
+f32 map_width, map_height;
+
+// File IO
+std::vector<float> L1_IO;
 
 void Level1_Load()
 {
+	// Player
 	Load_Player();
-	Load_Boss();
 
+	// Boss
+	Load_Boss();
 
 	// Meshes
 	Load_Mesh(20);
 
+	// Map Texture
 	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary3.png");
 	if (!mapTexture)
 	{
@@ -56,7 +65,8 @@ void Level1_Load()
 	}
 	std::cout << "Level 1 Loaded\n";
 
-
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Level1.txt", L1_IO);
 }
 
 void Level1_Initialize()
@@ -74,9 +84,24 @@ void Level1_Initialize()
 
 	Init_Enemy_Indicator();
 
+	// Incrementing Level Timer
+	levelTimer = L1_IO[0];
+
+	// Level Score
+	currentScore = 0;
+	displayPointsAccumulated = false;
+
+	// Level Clear Transition Timer
+	cleartransitiontimer = Create_Timer(L1_IO[1]);
+	cleartransitiontimer.current = 0.f;
+
+	// Game Over Transition Timer
+	gameovertransitiontimer = Create_Timer(L1_IO[2]);
+	gameovertransitiontimer.current = 0.f;
+
 	// Enemy Attack Timer
-	enemyattacktimer = Create_Timer(1.f);
-	stunnedtimer = Create_Timer(2.f);
+	enemyattacktimer = Create_Timer(L1_IO[3]);
+	stunnedtimer = Create_Timer(L1_IO[4]);
 	stunnedtimer.current = 0;
 
 	// Mobs
@@ -90,13 +115,17 @@ void Level1_Initialize()
 	Init_Boss_Indicator();
 
 	// Dummy enemy
-	dummy_pos = { 300.f, 200.f };
-	dummy_rad = 25.f;
+	dummy_pos = { L1_IO[5], L1_IO[6] };
+	dummy_rad = L1_IO[7];
 	dummy_check = 0;
 
-	//JQMonke
-	JQMonke_pos = { -300.f, 200.f };
-	JQMonke_rad = 50.f;
+	// Offset
+	PLAYER_BASE_OFFSET = { L1_IO[8] };
+	BOSS_BASE_OFFSET = { L1_IO[9] };
+
+	// Level map
+	map_width = L1_IO[10];
+	map_height = L1_IO[11];
 
 	// Incrementing Level Timer
 	levelTimer = 0.f;
@@ -136,11 +165,6 @@ void Level1_Update()
 		AEInputShowCursor(0);
 	}
 
-	//if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
-	//{
-	//	ToggleBossHitboxes();
-	//}
-
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
@@ -163,6 +187,9 @@ void Level1_Update()
 		{
 			Update_LevelTimer(&levelTimer);
 		}
+
+		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
+		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
@@ -176,9 +203,6 @@ void Level1_Update()
 	}
 }
 
-const float PLAYER_BASE_OFFSET{ 50.f };
-const float BOSS_BASE_OFFSET{ 70.f };
-
 
 
 void Level1_Draw()
@@ -188,12 +212,12 @@ void Level1_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 3072.0f, map_height = 1536.0f;
-	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f };
+	Color borderColor = { 0.902f, 0.725f, 0.451f, 0.0f };
 
 	// Offset map drawing so (0,0) is centered in the camera view
 	f32 map_x = -map_width / 2;
 	f32 map_y = -map_height / 2;
+
 
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
@@ -208,7 +232,6 @@ void Level1_Draw()
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
 	DrawImageAttachedToRect(screen_x, screen_y, map_width, map_height, mapTexture);
-
 
 
 	Update_Camera();
@@ -257,13 +280,8 @@ void Level1_Draw()
 		}
 	}
 
-	// Boss HP
-	//Draw_Boss1HP();
-
 	// UI
 	Draw_UI();
-
-
 
 	// Level Timer
 	Draw_LevelTimer(levelTimer);

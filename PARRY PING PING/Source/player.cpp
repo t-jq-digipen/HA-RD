@@ -8,12 +8,13 @@
 //			- Atack				72
 //			- Attacking_Ranged
 //			- Attacking_Ranged_Impact
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "player.h"
 #include "Enemies.h"
 #include "SpriteSheet.h"
+#include "GameStateManager.h"
 #include <vector>
 #include <algorithm>
 #include <cmath>
@@ -21,16 +22,18 @@
 
 
 // Define map boundary limits
-const float MAP_LEFT = -500.f;
-const float MAP_RIGHT = 500.f;
-const float MAP_TOP = 300.f;
-const float MAP_BOTTOM = -300.f;
+// const float MAP_LEFT = -500.f;
+// const float MAP_RIGHT = 500.f;
+// const float MAP_TOP = 300.f;
+// const float MAP_BOTTOM = -300.f;
+
+const float ATTACK_RAGEMULTIPLER = 0.75f;
 
 // Define level score update values
-const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
-const int SCORE_HEAVY_LASER_HIT = 750; // + 750 points per tick
-const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
-const int SCORE_PLAYER_LOSE = -10000; // -10000 points for game over
+int SCORE_LIGHT_PROJECTILE_HIT;
+int SCORE_HEAVY_LASER_HIT;
+int SCORE_PLAYER_EAT_HIT;
+int SCORE_PLAYER_LOSE;
 
 typedef struct Projectile
 {
@@ -50,16 +53,10 @@ typedef struct Projectile
 
 std::vector<Projectile> projectiles; // List to hold active projectiles
 
-
-const float PLAYER_WIDTH = 250.f;
-const float PLAYER_HEIGHT = 250.f;
-
-const float PLAYER_DRAW_WIDTH = 250.f;
-const float PLAYER_DRAW_HEIGHT = 250.f;
-
-const float PLAYER_HITBOX_WIDTH = 80.f;
-const float PLAYER_HITBOX_HEIGHT = 120.f;
-
+// File IO
+std::vector<float> Player_IO;
+std::vector<float> PlayerAttack_IO;
+std::vector<float> PlayerScore_IO;
 
 Player player;
 Attack melee_attack;
@@ -87,30 +84,21 @@ const float rightClickHoldDuration = 0.25f; // 1 second hold to trigger heavy at
 
 AEGfxTexture* AtkHB;
 
-const float ATTACK_COOLDOWN[4] = { 0.f, 0.5f, 0.7f, 0.7f };
-const float ATTACK_DURATION = 1.f;
-const float ATTACK_START[4] = { 0.f, 0.2f, 0.2f, 0.3f };
-const float ATTACK_END[4] = { 0.f, 0.4f, 0.5f, 0.7f };
-
-const float ATTACK_START_ACTIVE[4] = { 0.f,0.2f,0.2f,0.3f };
-const float ATTACK_END_ACTIVE[4] = { 0.f,0.4f,0.5f,0.7f };
-
-const float ATTACK_TOTAL[4] = { 1.f,1.f,1.f,1.5f };
-
-const float ATTACK_COMBO_WINDOW = 1.f;
-
-float ATTACK_OFFSET[4] = { 0.f, 30.f, 40.f, 0.f };
-
-const float ATTACK_WIDTH[4] = { 0.f, 200.f, 200.f, 280.f };
-const float ATTACK_HEIGHT[4] = { 0.f,150.f,170.f,180.f };
-
-Timer combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };
-
-const float ATTACK_ANGLE[2] = { PI / 4.f, PI / 3.f };
-const float ATTACK_RADIUS[4] = { 150.f,150.f,150.f,150.f };
-
-const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 10.f };
-const float ATTACK_RAGEMULTIPLER = 0.75f;						// total damage = raw damage + multiplier * (meter / meter max) * raw damage
+std::vector<float> ATTACK_COOLDOWN;
+float ATTACK_DURATION;
+std::vector<float> ATTACK_START;
+std::vector<float> ATTACK_END;
+std::vector<float> ATTACK_START_ACTIVE;
+std::vector<float> ATTACK_END_ACTIVE;
+std::vector<float> ATTACK_TOTAL;
+float ATTACK_COMBO_WINDOW;
+std::vector<float> ATTACK_OFFSET;
+std::vector<float> ATTACK_WIDTH;
+std::vector<float> ATTACK_HEIGHT;
+Timer combo_window;
+std::vector<float> ATTACK_ANGLE;
+std::vector<float> ATTACK_RADIUS;
+std::vector<float> ATTACK_DAMAGE;
 
 aabb melee_hitbox;
 
@@ -128,16 +116,29 @@ enum ATTACK_PATTERN
 };
 
 
+// Flag to track if the sound for each combo has already been played
+bool sound_played[3] = { false, false, false }; // Three phases: 1, 2, 3
+
+void ResetSound()
+{
+	// Reset all sound flags after a combo
+	for (int i = 0; i < 3; i++)
+	{
+		sound_played[i] = false; // Reset all phases to not played
+	}
+	std::cout << "Sound reset" << std::endl; // Debug print to check if it's resetting
+}
+
 bool Attacking_Melee()
 {
-	
 	// if timer is fully done updating and not idling
 	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3 || !Update_Timer(&combo_window))
 	{
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
-
+		ResetSound(); // Reset sounds after combo ends
 	}
+
 	Update_Timer(&melee_attack.active_time);
 	// check left click input
 	// check if melee_attack cooldown over + combo not finished
@@ -158,147 +159,78 @@ bool Attacking_Melee()
 		ranged_attack.current = 1.f;
 		heavy_attack.current = 1.f;
 		player.lightAttackCooldown = 0.f;
-		
 	}
 
-
 	hitbox_active = false;
-	//if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
+	// Check if the combo is active and within the active time
 	if (Update_Timer(&melee_attack.active_time) && melee_attack.active_time.current * ATTACK_END_ACTIVE[melee_attack.combo] >= ATTACK_START_ACTIVE[melee_attack.combo])
 	{
-		//std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
-		//DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
-		//DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
 		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
-		//float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
-		//Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
 		player.state = IDLE;
+		ResetSound(); // Reset sounds if the attack phase ends
 	}
 
-
-	// not idling :> not sure if return will be useful
+	// not idling
 	if (melee_attack.timer.current < ATTACK_DURATION)
 	{
 		return true;
 	}
-	return false;
 
+	return false;
 }
 
-//int Attacked_Melee(AEVec2 target)
-//{
-//	// Check if:
-//	// - Hitbox is active
-//	// - Player is attacking
-//	// - Target is within range of current attack
-//	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
-//	{
-//		switch (melee_attack.combo)
-//		{
-//		case 1:
-//
-//		case 2:
-//		{
-//			// Check direction for first two swings
-//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-//			{
-//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//				return melee_attack.combo;
-//			}
-//			break;
-//		}
-//		case 3:
-//		{
-//			// No need to check direction for third swing as it is 360 circle
-//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//			return melee_attack.combo;
-//			break;
-//		}
-//		default:
-//		{
-//			break;
-//		}
-//		}
-//	}
-//	return 0;
-//}
-//
-//bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
-//{
-//	// Check if:
-//	// - Hitbox is active
-//	// - Player is attacking
-//	// - Target is within range of current attack
-//	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
-//	{
-//		switch (melee_attack.combo)
-//		{
-//		case 1:
-//		case 2:
-//		{
-//			// Check direction for first two swings
-//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-//			{
-//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//				*check_hit = melee_attack.combo;
-//				*damage = ATTACK_DAMAGE[melee_attack.combo];
-//				return true;
-//			}
-//			break;
-//		}
-//		case 3:
-//		{
-//			// No need to check direction for third swing as it is 360 circle
-//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//			*check_hit = melee_attack.combo;
-//			*damage = ATTACK_DAMAGE[melee_attack.combo];
-//			return true;
-//			break;
-//		}
-//		default:
-//		{
-//			break;
-//		}
-//		}
-//	}
-//	else if (!melee_attack.combo)
-//	{
-//		*check_hit = 0;
-//	}
-//	return false;
-//}
+void PlayAttackSound(int combo)
+{
+	// Play sound only if it hasn't been played already for this combo
+	if (!sound_played[combo - 1]) // Combo is 1, 2, or 3
+	{
+		switch (combo)
+		{
+		case 1:
+			AEAudioPlay(sword1, gameSFX, 1.0f, 1.0f, 0); // First slash
+			break;
+		case 2:
+			AEAudioPlay(sword2, gameSFX, 1.0f, 1.0f, 0); // Second slash
+			break;
+		case 3:
+			AEAudioPlay(sword3, gameSFX, 1.0f, 1.0f, 0); // Third slash
+			break;
+		default:
+			break;
+		}
+
+		sound_played[combo - 1] = true; // Mark sound as played for this combo
+	}
+}
 
 int Attacked_Melee(AEVec2 target)
 {
-	// Check if:
-	// - Hitbox is active
-	// - Player is attacking
-	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo)
 	{
+		// Play sound only when a valid hit occurs and the combo phase hasn't been reset
+		if (!sound_played[melee_attack.combo - 1])
+		{
+			PlayAttackSound(melee_attack.combo); // Trigger sound only once per combo phase
+			sound_played[melee_attack.combo - 1] = true; // Mark this combo phase as played
+		}
+
 		if (AETestCircleToRect(&target, 250.f, &player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]))
 		{
 			return melee_attack.combo;
 		}
-			
 	}
 	return 0;
 }
 
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
 {
-	// Check if:
-	// - Hitbox is active
-	// - Player is attacking
-	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
 	{
+
 		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
 			*check_hit = melee_attack.combo;
@@ -324,6 +256,9 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 	}
 	return false;
 }
+
+
+
 #pragma endregion
 // =======================================================================
 
@@ -479,11 +414,13 @@ shoottrig trigger = RANGED_BLANK;	// 0 - No shoot
 									// 1 - Light
 									// 2 - Heavy
 
-const float RANGED_ATTACK_DURATION = .4f;
-const float RANGED_ATTACK_DELAY = 0.1f;
+float RANGED_ATTACK_DURATION, RANGED_ATTACK_DELAY, HEAVY_ATTACK_DURATION, HEAVY_ATTACK_DELAY;
 
-const float HEAVY_ATTACK_DURATION = 1.f;
-const float HEAVY_ATTACK_DELAY = .5f;
+//const float RANGED_ATTACK_DURATION = .4f;
+//const float RANGED_ATTACK_DELAY = 0.1f;
+//
+//const float HEAVY_ATTACK_DURATION = 1.f;
+//const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
@@ -836,11 +773,7 @@ void Attacking()
 }
 
 
-
-
-
-const float DASH_COOLDOWN = 1.2f;
-const float DASH_DURATION = 0.3f;
+float dash_cooldown, dash_duration;
 
 Timer dodge_time;
 Timer dodge_cooldown;
@@ -971,12 +904,13 @@ void Movement() {
 
 	// position update
 	AEVec2Add(&player.pos, &player.vel, &player.pos);
-	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
+	Update_AABB(&player.hitbox, player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_width);
 }
 
-const float PARRY_DURATION = 0.3f; // PARRY DURATION		0.2s parry
-const float BLOCK_DURATION = 1.0f; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
-const float BLOCK_COOLDOWN = 3.0f; // TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
+float PARRY_DURATION; // PARRY DURATION		0.2s parry
+float BLOCK_DURATION; // PARRY+BLOCK DURATION	0.8s block + 0.2s parry
+float BLOCK_COOLDOWN;	// TOTAL BLOCK DURATION	0.2s parry + 0.8s block + 2s cooldown
+float BLOCK_REDUCTION;
 
 // BLOCK/PARRY CHECK
 void Parrying()
@@ -1048,8 +982,6 @@ void Parried_Hit()
 	AEAudioPlay(parryFX, gameSFX, 1.0f, 1.0f, 0);
 }
 
-const f32 BLOCK_REDUCTION = 0.5f;
-
 void Blocked_Hit(f32 damage)
 {
 	player.ragemeter = 0;
@@ -1061,7 +993,7 @@ void Blocked_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT, BLOCKED_SCORE);
+	Collect_Points(static_cast<int>(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT), BLOCKED_SCORE);
 }
 
 void Eat_Hit(f32 damage)
@@ -1076,12 +1008,17 @@ void Eat_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(damage * SCORE_PLAYER_EAT_HIT, OUCH_SCORE);
+	Collect_Points(static_cast<int>(damage * SCORE_PLAYER_EAT_HIT), OUCH_SCORE);
 }
 
 
 void Load_Player()
 {
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Player.txt", Player_IO);
+	ReadFromFile("Assets/FileIO/PlayerAttack.txt", PlayerAttack_IO);
+	ReadFromFile("Assets/FileIO/PlayerScore.txt", PlayerScore_IO);
+
 	AtkHB = AEGfxTextureLoad("Assets/hitboxtest.png");
 
 	player_sprite = SpriteSheet("Assets/Player/Player.png", 22, 11);
@@ -1108,27 +1045,70 @@ void Load_Player()
 
 void Init_Player()
 {
-	player.pos = { 0.f,0.f };
-	player.vel = { 0.f,0.f };
-	player.speed = 500.f;
-	player.hp = 100.f;
-	player.radius = 25.f;
-	player.canAttack = true;
-	player.ragemeter = 0;
-	player.ragemeter_max = 5;
+	// PLAYER STATS (see Player.txt)
 
-	player.dodge_vel = { 0.f,0.f };
+	player.pos = { Player_IO[0], Player_IO[1] };	// PLAYER POS				{ X = 0.f, Y = 0.f }
+	player.vel = { Player_IO[2], Player_IO[3] };	// PLAYER VEL				{ X = 0.f, Y = 0.f }
+	player.speed = Player_IO[4];					// PLAYER SPEED				500.f
+	player.hp = Player_IO[5];						// PLAYER HP				100.f
+	player.max_hp = Player_IO[5];					// PLAYER MAX HP			100.f
+	player.radius = Player_IO[6];					// PLAYER RADIUS			25.f
 
-	player.width = PLAYER_WIDTH;
-	player.height = PLAYER_HEIGHT;
+	player.dodge_vel = { Player_IO[7], Player_IO[8] };	// PLAYER DODGE VEL	{ X = 0.f, Y = 0.f }
 
-	player.hitbox = Init_AABB(player.pos.x, player.pos.y, PLAYER_HITBOX_WIDTH, PLAYER_HITBOX_HEIGHT);
+	player.width = Player_IO[9];					// PLAYER WIDTH				250.f
+	player.height = Player_IO[10];					// PLAYER HEIGHT			250.f
+	player.draw_width = Player_IO[11];				// PLAYER DRAW WIDTH		250.f
+	player.draw_height = Player_IO[12];				// PLAYER DRAW HEIGHT		250.f
+	player.hitbox_width = Player_IO[13];			// PLAYER HITBOX WIDTH		80.f
+	player.hitbox_height = Player_IO[14];			// PLAYER HITBOX HEIGHT		120.f
 
-	player.hittimer = Create_Timer(0.5f);
-	player.dodgetimer = Create_Timer(DASH_COOLDOWN);
+	player.hitbox = Init_AABB(player.pos.x, player.pos.y, player.hitbox_width, player.hitbox_height);
 
-	dodge_cooldown = Create_Timer(DASH_COOLDOWN);
-	dodge_time = Create_Timer(DASH_DURATION);
+	dash_cooldown = Player_IO[15];					// PLAYER DASH COOLDOWN		1.2s
+	dash_duration = Player_IO[16];					// PLAYER DASH DURATION		0.3s
+
+	player.hittimer = Create_Timer(Player_IO[17]);	// PLAYER HIT TIMER			0.5s
+	player.dodgetimer = Create_Timer(dash_cooldown);	// PLAYER DODGE TIMER	1.2s
+
+	dodge_cooldown = Create_Timer(dash_cooldown);	// PLAYER DODGE COOLDOWN	1.2s
+	dodge_time = Create_Timer(dash_duration);		// PLAYER DODGE TIME		0.3s
+
+	// MELEE ATTACK (see PlayerAttack.txt)
+
+	ATTACK_COOLDOWN = { PlayerAttack_IO[0], PlayerAttack_IO[1], PlayerAttack_IO[2], PlayerAttack_IO[3] };		// MELEE COOLDOWN		{ 0.f, 0.5f, 0.5f, 0.7f }
+	ATTACK_DURATION = PlayerAttack_IO[4];																		// MELEE DURATION		1.s
+	ATTACK_START = { PlayerAttack_IO[5], PlayerAttack_IO[6], PlayerAttack_IO[7], PlayerAttack_IO[8] };			// MELEE START			{ 0.f, 0.2f, 0.2f, 0.3f }
+	ATTACK_END = { PlayerAttack_IO[9], PlayerAttack_IO[10], PlayerAttack_IO[11], PlayerAttack_IO[12] };			// MELEE END			{ 0.f, 0.4f, 0.5f, 0.7f }
+
+	ATTACK_START_ACTIVE = { PlayerAttack_IO[5], PlayerAttack_IO[6], PlayerAttack_IO[7], PlayerAttack_IO[8] };	// MELEE START ACTIVE	{ 0.f, 0.2f, 0.2f, 0.3f }
+	ATTACK_END_ACTIVE = { PlayerAttack_IO[9], PlayerAttack_IO[10], PlayerAttack_IO[11], PlayerAttack_IO[12] };	// MELEE END ACTIVE		{ 0.f, 0.4f, 0.5f, 0.7f }
+
+	ATTACK_TOTAL = { PlayerAttack_IO[13], PlayerAttack_IO[14], PlayerAttack_IO[15], PlayerAttack_IO[16] };		// MELEE TOTAL			{ 1.f, 1.f, 1.f, 1.5f }
+
+	ATTACK_COMBO_WINDOW = PlayerAttack_IO[17];																	// MELEE COMBO WINDOW	1.f
+
+	ATTACK_OFFSET = { PlayerAttack_IO[18], PlayerAttack_IO[19], PlayerAttack_IO[20], PlayerAttack_IO[21] };		// MELEE OFFSET			{ 0.f, 30.f, 40.f, 0.f }
+
+	ATTACK_WIDTH = { PlayerAttack_IO[22], PlayerAttack_IO[23], PlayerAttack_IO[24], PlayerAttack_IO[25] };		// MELEE WIDTH			{ 0.f, 200.f, 200.f, 280.f }
+	ATTACK_HEIGHT = { PlayerAttack_IO[26], PlayerAttack_IO[27], PlayerAttack_IO[28], PlayerAttack_IO[29] };		// MELEE HEIGHT			{ 0.f, 150.f, 170.f, 180.f }
+
+	combo_window = { 1.f, 1.f, ATTACK_COMBO_WINDOW };															// MELEE COMBO WINDOW (TIMER)
+
+	ATTACK_ANGLE = { PI / PlayerAttack_IO[30], PI / PlayerAttack_IO[31] };										// MELEE ANGLE			{ PI / 4.f, PI / 3.f }
+	ATTACK_RADIUS = { PlayerAttack_IO[32], PlayerAttack_IO[32], PlayerAttack_IO[32], PlayerAttack_IO[32] };		// MELEE RADIUS			{ 150.f, 150.f, 150.f, 150.f }
+
+	ATTACK_DAMAGE = { PlayerAttack_IO[33], PlayerAttack_IO[34], PlayerAttack_IO[35], PlayerAttack_IO[36] };		// MELEE DAMAGE			{ 0.f, 5.f, 5.f, 15.f }
+
+	PARRY_DURATION = PlayerAttack_IO[37];			// PARRY DURATION			0.3s parry
+	BLOCK_DURATION = PlayerAttack_IO[38];			// PARRY + BLOCK DURATION	1.0s block + 0.2s parry
+	BLOCK_COOLDOWN = PlayerAttack_IO[39];			// TOTAL BLOCK DURATION		0.2s parry + 1.0 block + 3.0s cooldown
+	BLOCK_REDUCTION = PlayerAttack_IO[40];			// BLOCK REDUCTION			0.5f
+
+	RANGED_ATTACK_DURATION = PlayerAttack_IO[41];	// RANGED ATTACK DURATION	0.4s unload ranged attack
+	RANGED_ATTACK_DELAY = PlayerAttack_IO[42];		// RANGED + DELAY DURATION	0.4s unload + 0.1s delay
+	HEAVY_ATTACK_DURATION = PlayerAttack_IO[43];		// HEAVY ATTACK DURATION	1.0s unload heavy attack
+	HEAVY_ATTACK_DELAY = PlayerAttack_IO[44];		// HEAVY + DELAY DURATION	1.0s unload + 0.5s delay
 
 	player.color = SetColor(0xFF00008B);
 	player.state = IDLE;
@@ -1157,24 +1137,30 @@ void Init_Player()
 
 	AEVec2Zero(&atk_dir);
 
-	player.ammo = 3;
+	player.ammo = static_cast<int>(Player_IO[18]);			// PLAYER STARTING AMMO = 3
+	player.max_ammo = static_cast<int>(Player_IO[18]);		// PLAYER MAX AMMO = 3
 
 	heavy_atk;
 	heavy_atk.pos = {};
-	heavy_atk.vel = { 0.f, 0.f };
-	heavy_atk.speed = 0.f; // Adjust speed as needed
-	heavy_atk.angle = { 0.f };
+	heavy_atk.vel = { PlayerAttack_IO[45], PlayerAttack_IO[46] };
+	heavy_atk.speed = PlayerAttack_IO[47]; // Adjust speed as needed
+	heavy_atk.angle = { PlayerAttack_IO[48] };
 	heavy_atk.isActive = true;
 	heavy_atk.isHeavy = true;
-	heavy_atk.lifetimeTimer = Create_Timer(1.5f);
+	heavy_atk.lifetimeTimer = Create_Timer(PlayerAttack_IO[49]);
 
-	new_proj.lifetimeTimer = Create_Timer(5.0f);
+	new_proj.lifetimeTimer = Create_Timer(PlayerAttack_IO[50]);
 
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
-	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
+	Init_Player_UI(player.ammo, player.max_ammo, player.hp, player.max_hp);
 
-	laserTickTimer = Create_Timer(0.5f);
+	laserTickTimer = Create_Timer(PlayerAttack_IO[51]);
+
+	SCORE_LIGHT_PROJECTILE_HIT = static_cast<int>(PlayerScore_IO[0]);			// + 500 points per projectile
+	SCORE_HEAVY_LASER_HIT = static_cast<int>(PlayerScore_IO[1]);				// + 750 points per tick
+	SCORE_PLAYER_EAT_HIT = static_cast<int>(PlayerScore_IO[2]);				// - 100 points (multiplied by damage) per hit
+	SCORE_PLAYER_LOSE = static_cast<int>(PlayerScore_IO[3]);					// - 10000 points for game over
 }
 
 void Update_Player()
@@ -1286,19 +1272,36 @@ void Update_Player()
 
 
 
-		f32 map_width = 2972.0f, map_height = 1536.0f;
-		f32 left_bound = -map_width / 2;
-		f32 right_bound = map_width / 2;
-		f32 top_bound = -map_height / 2;
-		f32 bottom_bound = 700.0f;
+		if (currentState == GS_LEVEL1) // Only apply boundaries in Level 1
+		{
+			f32 map_width = 2972.0f, map_height = 1136.0f;
+			f32 left_bound = -map_width / 2;
+			f32 right_bound = map_width / 2 - 80;
+			f32 top_bound = -map_height / 2;
+			f32 bottom_bound = 600.0f;
 
+			// Restrict movement within the map boundaries
+			if (player.pos.x < left_bound) player.pos.x = left_bound;
+			if (player.pos.x > right_bound) player.pos.x = right_bound;
+			if (player.pos.y < top_bound) player.pos.y = top_bound;
+			if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
+		}
 
+		else if (currentState == GS_LEVEL2) // Only apply boundaries in Level 2
+		{
+			f32 map_width = 2972.0f, map_height = 1136.0f;
+			f32 left_bound = -map_width / 2;
+			f32 right_bound = map_width / 2 - 80;
+			f32 top_bound = -map_height / 2;
+			f32 bottom_bound = 500.0f;
 
-		// Restrict movement within the map boundaries
-		if (player.pos.x < left_bound) player.pos.x = left_bound;
-		if (player.pos.x > right_bound) player.pos.x = right_bound;
-		if (player.pos.y < top_bound) player.pos.y = top_bound;
-		if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
+			// Restrict movement within the map boundaries
+			if (player.pos.x < left_bound) player.pos.x = left_bound;
+			if (player.pos.x > right_bound) player.pos.x = right_bound;
+			if (player.pos.y < top_bound) player.pos.y = top_bound;
+			if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
+		}
+
 
 
 		
@@ -1415,7 +1418,7 @@ void Draw_Player()
 		break;
 		// ----------------------------------------------------------------------------
 	case DODGE:
-		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, DASH_DURATION);
+		Set_SpriteSheet_current(&sshitdodgeparry, 1, 0, 4, player.dodgetimer, dash_duration);
 		player.spritesheet = &sshitdodgeparry;
 
 		//new
@@ -1475,11 +1478,11 @@ void Draw_Player()
 	{
 	case LEFT:
 		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.radius * 10.f, player.radius * 10.f, 0.f);
-		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, false);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.draw_width, player.draw_height, false);
 		break;
 	case RIGHT:
 		//Draw_SpriteSheet_test(*player.spritesheet, World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), -player.radius * 10.f, player.radius * 10.f, 0.f);
-		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), PLAYER_DRAW_WIDTH, PLAYER_DRAW_HEIGHT, true);
+		player_sprite.Draw(World_To_Screen_x(player.pos.x), World_To_Screen_y(player.pos.y), player.draw_width, player.draw_height, true);
 		break;
 	default:
 		break;

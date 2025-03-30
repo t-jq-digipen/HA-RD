@@ -103,6 +103,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   <ItemGroup>
     <ClCompile Include="..\Source\Boss2.cpp" />
     <ClCompile Include="..\Source\Camera.cpp" />
+    <ClCompile Include="..\Source\Credits.cpp" />
     <ClCompile Include="..\Source\Enemies.cpp" />
     <ClCompile Include="..\Source\GameStateManager.cpp" />
     <ClCompile Include="..\Source\HubWorld.cpp" />
@@ -122,6 +123,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
   <ItemGroup>
     <ClInclude Include="..\Source\Headers\Boss2.h" />
     <ClInclude Include="..\Source\Headers\Camera.h" />
+    <ClInclude Include="..\Source\Headers\Credits.h" />
     <ClInclude Include="..\Source\Headers\Enemies.h" />
     <ClInclude Include="..\Source\Headers\GameStateManager.h" />
     <ClInclude Include="..\Source\Headers\HubWorld.h" />
@@ -138,6 +140,19 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="..\Assets\FileIO\Boss2.txt" />
+    <Text Include="..\Assets\FileIO\Credits.txt" />
+    <Text Include="..\Assets\FileIO\CreditsInit.txt" />
+    <Text Include="..\Assets\FileIO\Level1.txt" />
+    <Text Include="..\Assets\FileIO\MainMenu.txt" />
+    <Text Include="..\Assets\FileIO\Player.txt" />
+    <Text Include="..\Assets\FileIO\HubWorld.txt" />
+    <Text Include="..\Assets\FileIO\PlayerAttack.txt" />
+    <Text Include="..\Assets\FileIO\PlayerScore.txt" />
+    <Text Include="..\Assets\FileIO\ProtoBoss.txt" />
+    <Text Include="..\Assets\FileIO\Settings.txt" />
+    <Text Include="..\Assets\FileIO\Tutorial.txt" />
+    <Text Include="..\Assets\FileIO\UI.txt" />
     <Text Include="..\Source\leaderboard_helper.py">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <FileType>Document</FileType>

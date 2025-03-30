@@ -1,0 +1,167 @@
+0) UI Font Size: 72.f
+1) UI Parry Cooldown Bar Pos X1: -700.f
+2) UI Parry Cooldown Bar Pos Y1: -300.f
+3) UI Parry Cooldown Bar Pos X2: -500.f
+4) UI Parry Cooldown Bar Pos Y2: -290.f
+5) UI Player HP Bar Pos X1: -700.f
+6) UI Player HP Bar Pos Y1: -350.f
+7) UI Player HP Bar Pos X2: -300.f
+8) UI Player HP Bar Pos Y2: -335.f
+9) UI Full Ammo Bar Width: 15.f
+10) UI Full Ammo Bar Height: 50.f
+11) UI Empty Ammo Bar Width: 25.f
+12) UI Empty Ammo Bar Height: 60.f
+13) UI Player Crosshair Width: 80.f
+14) UI Player Crosshair Height: 80.f
+15) UI Boss HP Damage Bar Pos X: 0.f
+16) UI Boss HP Damage Bar Pos Y: 400.f
+17) UI Boss HP Damage Bar Width: 1200.f
+18) UI Boss HP Damage Bar Height: 50.f
+19) UI Boss Current HP Bar Pos X1: -600.f
+20) UI Boss Current HP Bar Pos Y1: 425.f
+21) UI Boss Current HP Bar Pos X2: 600.f
+22) UI Boss Current HP Bar Pos Y2: 375.f
+23) UI Menu Background Rect Pos X: 0.f
+24) UI Menu Background Rect Pos Y: 0.f
+25) UI Menu Background Rect Width: 1600.f
+26) UI Menu Background Rect Height: 900.f
+27) UI Menu Screen Pos X: 0.f
+28) UI Menu Screen Pos Y: 0.f
+29) UI Menu Screen Width: 1200.f
+30) UI Menu Screen Height: 600.f
+31) UI End Menu Screen Height: 800.f
+32) UI Menu Screen Rotation: 0.f
+33) UI Pause Menu Play Button Pos X: -350.f
+34) UI Pause Menu Play Button Pos Y: -50.f
+35) UI Pause Menu Play Button Width: 300.f
+36) UI Pause Menu Play Button Height: 200.f
+37) UI Pause Menu Play Button Rotation: 0.f
+38) UI Pause Menu Options Button Pos X: 0.f
+39) UI Pause Menu Options Button Pos Y: -50.f
+40) UI Pause Menu Options Button Width: 300.f
+41) UI Pause Menu Options Button Height: 200.f
+42) UI Pause Menu Options Button Rotation: 0.f
+43) UI Pause Menu Quit Button Pos X: 350.f
+44) UI Pause Menu Quit Button Pos Y: -50.f
+45) UI Pause Menu Quit Button Width: 300.f
+46) UI Pause Menu Quit Button Height: 200.f
+47) UI Pause Menu Quit Button Rotation: 0.f
+48) UI Submit Score Button Pos X: 400.f
+49) UI Submit Score Button Pos Y: -125.f
+50) UI Submit Score Button Width: 125.f
+51) UI Submit Score Button Height: 75.f
+52) UI Submit Score Button Rotation: 0.f
+53) UI Replay Button Pos X: -300.f
+54) UI Replay Button Pos Y: -300.f
+55) UI Replay Button Width: 200.f
+56) UI Replay Button Height: 100.f
+57) UI Replay Button Rotation: 0.f
+58) UI Exit Button Pos X: 300.f
+59) UI Exit Button Pos Y: -300.f
+60) UI Exit Button Width: 200.f
+61) UI Exit Button Height: 100.f
+62) UI Exit Button Rotation: 0.f
+63) UI Display Score Pos X: -0.4f
+64) UI Display Score Pos Y: 0.3f
+65) UI Display Score Width: 300.f
+66) UI Display Score Height: 50.f
+67) UI Display Score Size: 0.6f
+68) UI Display Timer Pos X: -0.45f
+69) UI Display Timer Pos Y: 0.1f
+70) UI Display Timer Width: 300.f
+71) UI Display Timer Height: 50.f
+72) UI Display Timer Size: 0.6f
+73) UI Display Combo Pos X: -0.45f
+74) UI Display Combo Pos Y: -0.1f
+75) UI Display Combo Width: 300.f
+76) UI Display Combo Height: 50.f
+77) UI Display Combo Size: 0.6f
+78) UI Display Username Pos X: -0.4f
+79) UI Display Username Pos Y: -0.3f
+80) UI Display Username Width: 300.f
+81) UI Display Username Height: 50.f
+82) UI Display Username Size: 0.5f
+83) UI Options BGM Label Pos X: -0.5f
+84) UI Options BGM Label Pos Y: 0.15f
+85) UI Options BGM Label Width: 100.f
+86) UI Options BGM Label Height: 100.f
+87) UI Options BGM Label Size: 1.f
+88) UI Options BGM Bar Pos X1: -50.f
+89) UI Options BGM Bar Pos Y1: 75.f
+90) UI Options BGM Bar Pos X2: 350.f
+91) UI Options BGM Bar Pos Y2: 125.f
+92) UI Options BGM Bar Sprite Pos X: 150.f
+93) UI Options BGM Bar Sprite Pos Y: 100.f
+94) UI Options BGM Bar Sprite Width: 425.f
+95) UI Options BGM Bar Sprite Height: 50.f
+96) UI Options BGM Bar Sprite Rotation: 0.f
+97) UI Options Lower BGM Button Pos X: -150.f
+98) UI Options Lower BGM Button Pos Y: 100.f
+99) UI Options Lower BGM Button Width: 70.f
+100) UI Options Lower BGM Button Height: 70.f
+101) UI Options Lower BGM Button Rotation: 0.f
+102) UI Options Raise BGM Button Pos X: 450.f
+103) UI Options Raise BGM Button Pos Y: 100.f
+104) UI Options Raise BGM Button Width: 70.f
+105) UI Options Raise BGM Button Height: 70.f
+106) UI Options Raise BGM Button Rotation: 0.f
+107) UI Options SFX Label Pos X: -0.5f
+108) UI Options SFX Label Pos Y: -0.15f
+109) UI Options SFX Label Width: 100.f
+110) UI Options SFX Label Height: 100.f
+111) UI Options SFX Label Size: 1.f
+112) UI Options SFX Bar Pos X1: -50.f
+113) UI Options SFX Bar Pos Y1: -75.f
+114) UI Options SFX Bar Pos X2: 350.f
+115) UI Options SFX Bar Pos Y2: -25.f
+116) UI Options SFX Bar Sprite Pos X: 150.f
+117) UI Options SFX Bar Sprite Pos Y: -50.f
+118) UI Options SFX Bar Sprite Width: 425.f
+119) UI Options SFX Bar Sprite Height: 50.f
+120) UI Options SFX Bar Sprite Rotation: 0.f
+121) UI Options Lower SFX Button Pos X: -150.f
+122) UI Options Lower SFX Button Pos Y: -50.f
+123) UI Options Lower SFX Button Width: 70.f
+124) UI Options Lower SFX Button Height: 70.f
+125) UI Options Lower SFX Button Rotation: 0.f
+126) UI Options Raise SFX Button Pos X: 450.f
+127) UI Options Raise SFX Button Pos Y: -50.f
+128) UI Options Raise SFX Button Width: 70.f
+129) UI Options Raise SFX Button Height: 70.f
+130) UI Options Raise SFX Button Rotation: 0.f
+131) UI Options Save Button Pos X: -350.f
+132) UI Options Save Button Pos Y: -200.f
+133) UI Options Save Button Width: 200.f
+134) UI Options Save Button Height: 100.f
+135) UI Options Save Button Rotation: 0.f
+136) UI Options Back Button Pos X: 350.f
+137) UI Options Back Button Pos Y: -200.f
+138) UI Options Back Button Width: 200.f
+139) UI Options Back Button Height: 100.f
+140) UI Options Back Button Rotation: 0.f
+141) UI Quit Menu Message Pos X: 40.f
+142) UI Quit Menu Message 1 Pos Y: 400.f
+143) UI Quit Menu Message 2 Pos Y: 250.f
+144) UI Quit Menu Message 3 Pos Y: 100.f
+145) UI Quit Menu Message Size 1: 0.5f
+146) UI Quit Menu Message Size 2: 0.8f
+147) UI Quit Menu Back Button Pos X: -350.f
+148) UI Quit Menu Back Button Pos Y: -50.f
+149) UI Quit Menu Back Button Width: 200.f
+150) UI Quit Menu Back Button Height: 100.f
+151) UI Quit Menu Back Button Rotation: 0.f
+152) UI Quit Menu Exit Button Pos X: 350.f
+153) UI Quit Menu Exit Button Pos Y: -50.f
+154) UI Quit Menu Exit Button Width: 200.f
+155) UI Quit Menu Exit Button Height: 100.f
+156) UI Quit Menu Exit Button Rotation: 0.f
+157) UI Level Timer Pos X: 0.3f
+158) UI Level Timer Pos Y: -0.9f
+159) UI Level Timer Width: 200.f
+160) UI Level Timer Height: 100.f
+161) UI Level Timer Size: 0.5f
+162) UI Level Score Pos X: 0.3f
+163) UI Level Score Pos Y: -0.7f
+164) UI Level Score Width: 200.f
+165) UI Level Score Height: 100.f
+166) UI Level Score Size: 0.5f

@@ -5,15 +5,18 @@
 //
 // brief:	Declaration of utility structs and functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+#include <string>
 #include <AEEngine.h>
 #include "Input.h"
+#include <vector>
 
 extern f32 dt;
 
@@ -317,4 +320,30 @@ float CalculateDistance(float x1, float y1, float x2, float y2);
  */
 bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height, f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height);
 
-void DrawTextBoxGame(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
+void DrawImageFading(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image, f32 alpha);
+
+f32 Lerp(f32 start, f32 end, f32 t);
+
+void DrawBackgroundFade(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 fadeFactor);
+
+// ----------------------------------------------------------------------------
+// Reads from text file
+// param filename - name of text file
+// param vector - vector to store values from text file
+// ----------------------------------------------------------------------------
+void ReadFromFile(const char* filename, std::vector<float>& vector);
+
+// ----------------------------------------------------------------------------
+// Reads all lines from text file
+// param filename - name of text file
+// param vector - vector to store lines from text file
+// ----------------------------------------------------------------------------
+void ReadWholeFile(const char* filename, std::vector<std::string>& vector);
+
+// ----------------------------------------------------------------------------
+// Updates a value in text file
+// param filename - name of text file
+// param name - label of value to be changed
+// param value - new value
+// ----------------------------------------------------------------------------
+void WriteToFile(const char* filename, const std::string& name, const std::string& value);

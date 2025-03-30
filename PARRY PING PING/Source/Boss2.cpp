@@ -30,61 +30,61 @@ Color black2    = SetColor(0xFF000000);
 SpriteSheet boss_2_sprite;
 
 // Boss spawn position
-const f32 BOSS2_SPAWN_X = 0.f;
-const f32 BOSS2_SPAWN_Y = 200.f;
+f32 BOSS2_SPAWN_X;
+f32 BOSS2_SPAWN_Y;
 
 // Boss size
-const f32 BOSS2_WIDTH = 100.f;
-const f32 BOSS2_HEIGHT = 100.f;
+f32 BOSS2_WIDTH;
+f32 BOSS2_HEIGHT;
 
 // Boss draw size
-const f32 BOSS_DRAW_WIDTH = 600.f;
-const f32 BOSS_DRAW_HEIGHT = 600.f;
+f32 BOSS2_DRAW_WIDTH;
+f32 BOSS2_DRAW_HEIGHT;
 
 // Boss hitbox size
-const f32 BOSS2_HITBOX_WIDTH = 250.f;
-const f32 BOSS2_HITBOX_HEIGHT = 450.f;
+f32 BOSS2_HITBOX_WIDTH;
+f32 BOSS2_HITBOX_HEIGHT;
 
 // Boss attributes
-const f32 BOSS2_MAXHP = 150.f;
-const f32 BOSS2_VEL = 10.f;
+f32 BOSS2_MAXHP;
+f32 BOSS2_VEL;
 
 // Attack timings
 const s32 ATTACK_TYPES = {6};
-const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 1.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.1f, .3f,  .1f,  .1f ,0.1f  ,1.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f ,2.f};
-const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f,  3.f,  3.f ,3.f  ,0.f};
+std::vector<f32> BOSS2_WINDUP;
+std::vector<f32> BOSS2_ATTACK;
+std::vector<f32> BOSS2_RECOVER;
+std::vector<f32> BOSS2_STUN;
 
 // Attack information
 Boss2_Attack boss_attack[ATTACK_TYPES];
 
 
 // Attack hitbox settings
-const f32 OFFSET_RANGE_X = 250.f / 2;  // Half of player width
-const f32 OFFSET_RANGE_Y = 250.f / 2; // Half of player height
+f32 OFFSET_RANGE_X;     // Half of player width
+f32 OFFSET_RANGE_Y;     // Half of player height
 
-const f32 SLASHWIDTH = 250.f;
-const f32 SLASHHEIGHT = 250.f;
+f32 SLASHWIDTH;
+f32 SLASHHEIGHT;
 
-const f32 DASH_OFFSET = 100.f;
+f32 DASH_OFFSET;
 
 // Missiles settings
-const f32 BOSS2_MISSILE_PREP_SPEED = 500.f;
-const f32 BOSS2_MISSILE_HOMING_SPEED = 1000.f;
+f32 BOSS2_MISSILE_PREP_SPEED;
+f32 BOSS2_MISSILE_HOMING_SPEED;
 
 // Slash setting
-const f32 SLASH_DAMAGE = 30.f;
+f32 SLASH_DAMAGE;
 
 // Lightning Wave settings
-const f32 LIGHTNING_STAB_DAMAGE = 30.f;
-const f32 LIGHTNING_STAB_RADIUS = 200.f;
-const f32 LIGHTNING_WAVE_DAMAGE = 30.f;
-const f32 LIGHTNING_WAVE_SPEED = 50.f;
+f32 LIGHTNING_STAB_DAMAGE;
+f32 LIGHTNING_STAB_RADIUS;
+f32 LIGHTNING_WAVE_DAMAGE;
+f32 LIGHTNING_WAVE_SPEED;
 LightningWave lightningwave;
 bool lightning_wave_damaged = false;   // Whether the player has been damaged by the wave
 bool lightning_stab_damaged = false;
-#define LIGHTNING_WAVE_MAX_RADIUS 800.f
+f32 LIGHTNING_WAVE_MAX_RADIUS;
 
 
 
@@ -98,9 +98,15 @@ bool dashed = false;
 bool dashright = false;
 bool dashleft = false;
 
+// File IO
+std::vector<float> Boss2_IO;
+
 // Load boss assets
 void Load_Boss2() 
 {
+    // Read File IO
+    ReadFromFile("Assets/FileIO/Boss2.txt", Boss2_IO);
+
     boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 19);
     Load_Parry_Spark();
 }
@@ -116,6 +122,59 @@ void Init_Boss2()
     missiles.clear();  // Clear any existing
     missiles.reserve(4); // Reserve space (but doesn't construct)
 
+    // Boss spawn position
+    BOSS2_SPAWN_X = Boss2_IO[0];
+    BOSS2_SPAWN_Y = Boss2_IO[1];
+
+    // Boss size
+    BOSS2_WIDTH = Boss2_IO[2];
+    BOSS2_HEIGHT = Boss2_IO[3];
+
+    // Boss draw size
+    BOSS2_DRAW_WIDTH = Boss2_IO[4];
+    BOSS2_DRAW_HEIGHT = Boss2_IO[5];
+
+    // Boss hitbox size
+    BOSS2_HITBOX_WIDTH = Boss2_IO[6];
+    BOSS2_HITBOX_HEIGHT = Boss2_IO[7];
+
+    // Boss attributes
+    BOSS2_MAXHP = Boss2_IO[8];
+    BOSS2_VEL = Boss2_IO[9];
+
+    // Attack timings
+    BOSS2_WINDUP = { Boss2_IO[10], Boss2_IO[11], Boss2_IO[12], Boss2_IO[13], Boss2_IO[14], Boss2_IO[15] };   // { 1.f, 0.2f, 0.5f, 0.5f, 0.5f, 0.8f }
+    BOSS2_ATTACK = { Boss2_IO[16], Boss2_IO[17], Boss2_IO[18], Boss2_IO[19], Boss2_IO[20], Boss2_IO[21] };   // { 0.1f, 0.3f, 0.1f, 0.1f, 0.1f, 1.f }
+    BOSS2_RECOVER = { Boss2_IO[22], Boss2_IO[23], Boss2_IO[24], Boss2_IO[25], Boss2_IO[26], Boss2_IO[27] };   // { 2.f, 0.05f, 0.4f, 1.5f, 0.3f, 2.f }
+    BOSS2_STUN = { Boss2_IO[28], Boss2_IO[29], Boss2_IO[30], Boss2_IO[31], Boss2_IO[32], Boss2_IO[33] };      // { 0.f, 0.f, 3.f, 3.f, 3.f, 0.f }
+
+    // Attack information
+    Boss2_Attack boss_attack[ATTACK_TYPES];
+
+
+    // Attack hitbox settings
+    OFFSET_RANGE_X = Boss2_IO[34] / 2;  // Half of player width
+    OFFSET_RANGE_Y = Boss2_IO[35] / 2; // Half of player height
+
+    SLASHWIDTH = Boss2_IO[36];
+    SLASHHEIGHT = Boss2_IO[37];
+
+    DASH_OFFSET = Boss2_IO[38];
+
+    // Missiles settings
+    BOSS2_MISSILE_PREP_SPEED = Boss2_IO[39];
+    BOSS2_MISSILE_HOMING_SPEED = Boss2_IO[40];
+
+    // Slash setting
+    SLASH_DAMAGE = Boss2_IO[41];
+
+    // Lightning Wave settings
+    LIGHTNING_STAB_DAMAGE = Boss2_IO[42];
+    LIGHTNING_STAB_RADIUS = Boss2_IO[43];
+    LIGHTNING_WAVE_DAMAGE = Boss2_IO[44];
+    LIGHTNING_WAVE_SPEED = Boss2_IO[45];
+    LIGHTNING_WAVE_MAX_RADIUS = Boss2_IO[46];
+
     // Boss starting point, hitbox and size
     boss_2.pos = { BOSS2_SPAWN_X, BOSS2_SPAWN_Y };
     boss_2.width = BOSS2_WIDTH;
@@ -129,10 +188,10 @@ void Init_Boss2()
     boss_2.attackstate = BOSS2_ATTACK_WINDUP;
 
     // Timers
-    boss_2.idle_timer = Create_Timer(1.f);
-    boss_2.attack_timer = Create_Timer(3.f);
-    boss_2.stun_timer = Create_Timer(3.f);
-    boss_2.death_timer = Create_Timer(5.f);
+    boss_2.idle_timer = Create_Timer(Boss2_IO[47]);
+    boss_2.attack_timer = Create_Timer(Boss2_IO[48]);
+    boss_2.stun_timer = Create_Timer(Boss2_IO[49]);
+    boss_2.phasebreak_timer = Create_Timer(Boss2_IO[50]);
 
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -674,7 +733,7 @@ void Draw_Boss2()
         // ==============================================================================
 
     }   // switch boss_2.state
-    boss_2_sprite.Draw(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip_sprite);
+    boss_2_sprite.Draw(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_DRAW_WIDTH, BOSS2_DRAW_HEIGHT, flip_sprite);
     Draw_Spark();
 }
 
