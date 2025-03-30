@@ -733,3 +733,71 @@ int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 
 	}
 	return 0;
 }
+
+void ReadFromFile(const char* filename, std::vector<float>& vector)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+	else
+	{
+		std::cout << "Can read " << filename << "!!!\n";
+		std::string label, value;
+		while (std::getline(ifs, label))
+		{
+			int pos = label.find(":");
+			if (pos != std::string::npos)
+			{
+				value = label.substr(pos + 2);
+				vector.push_back(stof(value));
+			}
+		}
+	}
+	ifs.close();
+}
+
+void WriteToFile(const char* filename, const std::string& name, const std::string& value)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+
+	std::vector<std::string> lines;
+	std::string line;
+
+	while (std::getline(ifs, line))
+	{
+		int pos = line.find(name);
+		if (pos != std::string::npos)
+		{
+			int value_pos = line.find(":");
+			if (value_pos != std::string::npos)
+			{
+				line = line.substr(0, value_pos + 2) + value;
+				std::cout << "Modified line: " << line;
+			}
+		}
+		lines.push_back(line);
+	}
+	ifs.close();
+
+	std::ofstream ofs{ filename };
+	if (!ofs)
+	{
+		std::cerr << "Cannot open " << filename << " for writing!!!\n";
+		return;
+	}
+
+	for (const std::string& modified_line : lines)
+	{
+		ofs << modified_line << '\n';
+	}
+	ofs.flush();
+	ofs.close();
+}

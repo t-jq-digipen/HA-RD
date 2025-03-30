@@ -1,0 +1,52 @@
+0) Player Melee Attack Cooldown 1: 0.f
+1) Player Melee Attack Cooldown 2: 0.5f
+2) Player Melee Attack Cooldown 3: 0.7f
+3) Player Melee Attack Cooldown 4: 0.7f
+4) Player Attack Duration: 1.f
+5) Player Melee Attack Start 1: 0.f
+6) Player Melee Attack Start 2: 0.2f
+7) Player Melee Attack Start 3: 0.2f
+8) Player Melee Attack Start 4: 0.3f
+9) Player Melee Attack End 1: 0.f
+10) Player Melee Attack End 2: 0.4f
+11) Player Melee Attack End 3: 0.5f
+12) Player Melee Attack End 4: 0.7f
+13) Player Melee Attack Total 1: 1.f
+14) Player Melee Attack Total 2: 1.f
+15) Player Melee Attack Total 3: 1.f
+16) Player Melee Attack Total 4: 1.5f
+17) Player Melee Attack Combo Window: 1.f
+18) Player Melee Attack Offset 1: 0.f
+19) Player Melee Attack Offset 2: 30.f
+20) Player Melee Attack Offset 3: 40.f
+21) Player Melee Attack Offset 4: 0.f
+22) Player Melee Attack Width 1: 0.f
+23) Player Melee Attack Width 2: 200.f
+24) Player Melee Attack Width 3: 200.f
+25) Player Melee Attack Width 4: 280.f
+26) Player Melee Attack Height 1: 0.f
+27) Player Melee Attack Height 2: 150.f
+28) Player Melee Attack Height 3: 170.f
+29) Player Melee Attack Height 4: 180.f
+30) Player Melee Attack Angle 1 (Divided by PI): 4.f
+31) Player Melee Attack Angle 2 (Divided by PI): 3.f
+32) Player Melee Attack Radius: 150.f
+33) Player Melee Attack Damage 1: 0.f
+34) Player Melee Attack Damage 2: 5.f
+35) Player Melee Attack Damage 3: 5.f
+36) Player Melee Attack Damage 4: 15.f
+37) Player Parry Duration: 0.3f
+38) Player Block Duration: 1.f
+39) Player Block Cooldown: 3.f
+40) Player Block Reduction: 0.5f
+41) Player Ranged Attack Duration: 0.4f
+42) Player Ranged Attack Delay: 0.1f
+43) Player Heavy Attack Duration: 1.f
+44) Player Heavy Attack Delay: 0.5f
+45) Player Heavy Attack Vel X: 0.f
+46) Player Heavy Attack Vel Y: 0.f
+47) Player Heavy Attack Speed: 0.f
+48) Player Heavy Attack Angle: 0.f
+49) Player Heavy Attack Lifetime: 1.5f
+50) Player Ranged Attack Lifetime: 5.f
+51) Player Heavy Attack Tick Interval: 0.5f

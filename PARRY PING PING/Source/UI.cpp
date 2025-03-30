@@ -5,7 +5,7 @@
 //
 // brief:	UI elements
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "UI.h"
@@ -17,6 +17,8 @@
 #include <string>
 #include <direct.h>
 #include <thread>
+
+bool isFirstInit = false;
 
 // Level number
 int levelState = 0;
@@ -68,10 +70,13 @@ Color score_color;
 
 // Crosshair
 SpriteSheet crosshair;
+float crosshair_width, crosshair_height;
 
 // UI Menus
 SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
+float menubg_x, menubg_y, menubg_width, menubg_height;
+float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 
 // Loading Image
 AEGfxTexture* loadingImage;
@@ -91,9 +96,18 @@ float rotationSpeed = 90.f; // Rotation speed (degrees per second)
 Color isInputSubmitted;
 bool hasSubmitted;
 
+// File IO
+std::vector<float> UI_IO;
+std::vector<float> UI_IO_settings;
+int font_size;
+
 // Initialize the various screen UI elements
 void Init_UI()
 {
+	// Read File IO
+	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
+	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
+
 	// Colors
 	UI_red = SetColor(0xFFFF0000);
 	UI_green = SetColor(0xFF24FF8B);
@@ -105,8 +119,9 @@ void Init_UI()
 	UI_gold = SetColor(0xFFFFD218);
 
 	// Font
-	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
-	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", 72);
+	font_size = static_cast<int>(UI_IO[0]);
+	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", font_size);
+	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 
@@ -134,6 +149,19 @@ void Init_UI()
 	highestCombo = 0;
 	score_color = UI_green;
 	isPerfect = false;
+
+	// UI Menus
+	menubg_x = UI_IO[23];
+	menubg_y = UI_IO[24];
+	menubg_width = UI_IO[25];
+	menubg_height = UI_IO[26];
+
+	menu_x = UI_IO[27];
+	menu_y = UI_IO[28];
+	menu_width = UI_IO[29];
+	menu_height = UI_IO[30];
+	endmenu_height = UI_IO[31];
+	menu_rot = UI_IO[32];
 
 	// Menu Buttons
 	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
@@ -175,11 +203,31 @@ void Init_UI()
 	gameBGM = AEAudioCreateGroup();
 	gameSFX = AEAudioCreateGroup();
 
-	// BGM and SFX (Settings)
-	current_bgm_vol = prev_bgm_vol = current_sfx_vol = prev_sfx_vol = 2.f;			//sorry fauz this shi driving me crazy HAHAHHAHAHA
-	max_bgm_vol = max_sfx_vol = 100.f;
-
 	// Initialize volume settings when entering level
+	if (!isFirstInit)
+	{
+		current_bgm_vol = UI_IO_settings[0];
+		prev_bgm_vol = current_bgm_vol;
+	}
+	else
+	{
+		current_bgm_vol = prev_bgm_vol;
+	}
+	
+	if (!isFirstInit)
+	{
+		current_sfx_vol = UI_IO_settings[1];
+		prev_sfx_vol = current_sfx_vol;
+	}
+	else
+	{
+		current_sfx_vol = prev_sfx_vol;
+	}
+	
+	max_bgm_vol = UI_IO_settings[2];
+	max_sfx_vol = UI_IO_settings[3];
+
+
 	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
 	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
@@ -190,6 +238,8 @@ void Init_UI()
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
+
+	isFirstInit = true;
 }
 
 // Initialize the player UI elements
@@ -225,10 +275,10 @@ void Draw_Player_UI()
 {
 	Color parry = (UI_parryCD == 1.f) ? parry_ready : parry_charging;
 
-	DrawHPBar(-700.f, -300.f, -500.f, -290.f, UI_parryCD, 1.f, parry);
+	DrawHPBar(UI_IO[1], UI_IO[2], UI_IO[3], UI_IO[4], UI_parryCD, 1.f, parry);
 
 
-	DrawHPBar(-700.f, -350.f, -300.f, -335.f, UI_playerhp, UI_playermaxhp, health);
+	DrawHPBar(UI_IO[5], UI_IO[6], UI_IO[7], UI_IO[8], UI_playerhp, UI_playermaxhp, health);
 
 	for (int ammo_index = 0; ammo_index < UI_maxammo; ammo_index++)
 	{
@@ -236,13 +286,16 @@ void Draw_Player_UI()
 		float posy = -400.f;
 		if (ammo_index < UI_ammo)
 		{
-			DrawRect(posx, posy, 15.f, 50.f, full_ammo);
+			DrawRect(posx, posy, UI_IO[9], UI_IO[10], full_ammo);
 		}
-		DrawRect(posx, posy, 25.f, 60.f, empty_ammo);
+		DrawRect(posx, posy, UI_IO[11], UI_IO[12], empty_ammo);
 	}
 
+	crosshair_width = UI_IO[13];
+	crosshair_height = UI_IO[14];
+
 	crosshair.Set_Col(UI_ammo);
-	crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
+	crosshair.Draw(Mouse.x, Mouse.y, crosshair_width, crosshair_height, false);
 
 }
 
@@ -261,7 +314,7 @@ void Update_Boss_UI(float hp)
 // Draw Boss HP bar
 void Draw_Boss_HPbar()
 {
-	DrawRect(0.f, 400.f, 1200.f, 50.f, boss_hp_damage);
+	DrawRect(UI_IO[15], UI_IO[16], UI_IO[17], UI_IO[18], boss_hp_damage);
 	Color hpcolor = boss_hp_green;
 	if (UI_bosshp < 0.6f * UI_bossmaxhp)
 	{
@@ -271,7 +324,7 @@ void Draw_Boss_HPbar()
 	{
 		hpcolor = boss_hp_red;
 	}
-	DrawHPBar(-600.f, 425.f, 600.f, 375.f, UI_bosshp, UI_bossmaxhp, hpcolor);
+	DrawHPBar(UI_IO[19], UI_IO[20], UI_IO[21], UI_IO[22], UI_bosshp, UI_bossmaxhp, hpcolor);
 }
 
 // Draw the various UI elements
@@ -287,11 +340,10 @@ void Draw_PauseMenu()
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
-
+	DrawRect(menubg_x, menubg_y, menubg_width, menubg_height, pause_bg);
 
 	// Pause menu screen
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, menu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 0, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isOptionsClicked == 0 && uiscreen.isExitClicked == 0)
@@ -300,9 +352,9 @@ void Draw_PauseMenu()
 	}
 
 	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[33], UI_IO[34], UI_IO[35], UI_IO[36], UI_IO[37]);
 
-	if (IsAreaClicked(450.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[33], 450.f - UI_IO[34], UI_IO[35], UI_IO[36], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 
@@ -324,9 +376,9 @@ void Draw_PauseMenu()
 	}
 
 	// options button (click to go to options)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_optionsbutton, 0.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_optionsbutton, UI_IO[38], UI_IO[39], UI_IO[40], UI_IO[41], UI_IO[42]);
 
-	if (IsAreaClicked(800.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[38], 450.f - UI_IO[39], UI_IO[40], UI_IO[41], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isOptionsClicked = 1;
 
@@ -352,9 +404,9 @@ void Draw_PauseMenu()
 	}
 
 	// exit button (click to go to quit state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -50.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[43], UI_IO[44], UI_IO[45], UI_IO[46], UI_IO[47]);
 
-	if (IsAreaClicked(1150.f, 500.f, 300.f, 200.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[43], 450.f - UI_IO[44], UI_IO[45], UI_IO[46], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 
@@ -443,8 +495,8 @@ void Draw_ClearMenu()
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
 	// Draw translucent background
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);  // Change pause_bg to be a translucent color
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
+	DrawRect(menubg_x, menubg_y, menubg_width, menubg_height, pause_bg);  // Change pause_bg to be a translucent color
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, endmenu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 2, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
@@ -460,10 +512,10 @@ void Draw_ClearMenu()
 	}
 
 	// submit button (click to submit score to leaderboard)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -125.f, 125.f, 75.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[48], UI_IO[49], UI_IO[50], UI_IO[51], UI_IO[52]);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(1200.f, 575.f, 125.f, 75.f, UI_mouseX, UI_mouseY))
+	if (!hasSubmitted && IsAreaClicked(800.f + UI_IO[48], 450.f - UI_IO[49], UI_IO[50], UI_IO[51], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -502,9 +554,9 @@ void Draw_ClearMenu()
 	}
 
 	// Replay button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -300.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[53], UI_IO[54], UI_IO[55], UI_IO[56], UI_IO[57]);
 
-	if (IsAreaClicked(500.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[53], 450.f - UI_IO[54], UI_IO[55], UI_IO[56], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 
@@ -527,15 +579,15 @@ void Draw_ClearMenu()
 	}
 
 	// Display score above player input
-	DrawTextBox(-0.4f, 0.3f, 300.f, 50.f, 0.6f, pixel_font, UI_green, level_score);
+	DrawTextBox(UI_IO[63], UI_IO[64], UI_IO[65], UI_IO[66], UI_IO[67], pixel_font, UI_green, level_score);
 
-	DrawTextBox(-0.45f, 0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, level_timer);
+	DrawTextBox(UI_IO[68], UI_IO[69], UI_IO[70], UI_IO[71], UI_IO[72], pixel_font, UI_white, level_timer);
 
 	snprintf(combo, sizeof(combo), "BEST COMBO: %d", highestCombo);
 
 	std::cout << highestCombo << '\n';
 
-	DrawTextBox(-0.45f, -0.1f, 300.f, 50.f, 0.6f, pixel_font, UI_white, combo);
+	DrawTextBox(UI_IO[73], UI_IO[74], UI_IO[75], UI_IO[76], UI_IO[77], pixel_font, UI_white, combo);
 
 	static float cursorTimer = 0.0f;
 	static bool showCursor = true;
@@ -562,17 +614,17 @@ void Draw_ClearMenu()
 		displayName += '|'; // Use a vertical bar as the cursor
 	}
 
-	// Draw the textbox with the updated name
-	DrawTextBox(-0.4f, -0.3f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, displayName.c_str());
+	// Test with a position close to the center of the screen
+	DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, displayName.c_str());
 
 	// Handle text input
 	HandleTextInput();
 
 
 	// Exit button (click to go back to hubworld state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -300.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[58], UI_IO[59], UI_IO[60], UI_IO[61], UI_IO[62]);
 
-	if (IsAreaClicked(1100.f, 750.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[58], 450.f - UI_IO[59], UI_IO[60], UI_IO[61], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -602,9 +654,9 @@ void Draw_OptionsMenu()
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(menubg_x, menubg_y, menubg_width, menubg_height, pause_bg);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, menu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 3, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isButton1Clicked == 0 && uiscreen.isButton2Clicked == 0 && uiscreen.isButton3Clicked == 0 &&
@@ -615,17 +667,15 @@ void Draw_OptionsMenu()
 
 	// BGM bar and buttons
 	
-	DrawTextBox(-0.5f, 0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "BGM");
+	DrawTextBox(UI_IO[83], UI_IO[84], UI_IO[85], UI_IO[86], UI_IO[87], UI_font, UI_black, "BGM");
 
-	DrawHPBar(-50.f, 75.f, 350.f, 125.f, AEClamp(current_bgm_vol, 0.f, max_bgm_vol), max_bgm_vol, UI_hover_red);
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, 150.f, 100.f, 425.f, 50.f, 0.f);
+	DrawHPBar(UI_IO[88], UI_IO[89], UI_IO[90], UI_IO[91], AEClamp(current_bgm_vol, 0.f, max_bgm_vol), max_bgm_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, UI_IO[92], UI_IO[93], UI_IO[94], UI_IO[95], UI_IO[96]);
 	Set_SpriteSheet_current(&ssmenu_bar1, 1, 1, 1, Create_Timer(1.f), 1.f);
 
-	std::cout << current_bgm_vol << '\n';
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[97], UI_IO[98], UI_IO[99], UI_IO[100], UI_IO[101]);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, -150.f, 100.f, 70.f, 70.f, 0.f);
-
-	if (IsAreaClicked(650.f, 350.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[97], 450.f - UI_IO[98], UI_IO[99], UI_IO[100], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -651,9 +701,9 @@ void Draw_OptionsMenu()
 		Set_SpriteSheet_current(&ssmenu_1, 6, 5, 5, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button2, 450.f, 100.f, 70.f, 70.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button2, UI_IO[102], UI_IO[103], UI_IO[104], UI_IO[105], UI_IO[106]);
 
-	if (IsAreaClicked(1250.f, 350.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[102], 450.f - UI_IO[103], UI_IO[104], UI_IO[105], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton2Clicked = 1;
 
@@ -681,15 +731,15 @@ void Draw_OptionsMenu()
 
 	// SFX bar and buttons
 
-	DrawTextBox(-0.5f, -0.15f, 100.f, 100.f, 1.f, UI_font, UI_black, "SFX");
+	DrawTextBox(UI_IO[107], UI_IO[108], UI_IO[109], UI_IO[110], UI_IO[111], UI_font, UI_black, "SFX");
 
-	DrawHPBar(-50.f, -75.f, 350.f, -25.f, AEClamp(current_sfx_vol, 0.f, max_sfx_vol), max_sfx_vol, UI_hover_red);
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar2, 150.f, -50.f, 425.f, 50.f, 0.f);
+	DrawHPBar(UI_IO[112], UI_IO[113], UI_IO[114], UI_IO[115], AEClamp(current_sfx_vol, 0.f, max_sfx_vol), max_sfx_vol, UI_hover_red);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar2, UI_IO[116], UI_IO[117], UI_IO[118], UI_IO[119], UI_IO[120]);
 	Set_SpriteSheet_current(&ssmenu_bar2, 1, 1, 1, Create_Timer(1.f), 1.f);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button3, -150.f, -50.f, 70.f, 70.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button3, UI_IO[121], UI_IO[122], UI_IO[123], UI_IO[124], UI_IO[125]);
 
-	if (IsAreaClicked(650.f, 500.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[121], 450.f - UI_IO[122], UI_IO[123], UI_IO[124], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton3Clicked = 1;
 
@@ -715,9 +765,9 @@ void Draw_OptionsMenu()
 		Set_SpriteSheet_current(&ssmenu_3, 6, 5, 5, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button4, 450.f, -50.f, 70.f, 70.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button4, UI_IO[126], UI_IO[127], UI_IO[128], UI_IO[129], UI_IO[130]);
 
-	if (IsAreaClicked(1250.f, 500.f, 100.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[126], 450.f - UI_IO[127], UI_IO[128], UI_IO[129], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton4Clicked = 1;
 
@@ -744,9 +794,9 @@ void Draw_OptionsMenu()
 	}
 
 	// save button (click to save changes)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -200.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[131], UI_IO[132], UI_IO[133], UI_IO[134], UI_IO[135]);
 
-	if (IsAreaClicked(450.f, 650.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[131], 450.f - UI_IO[132], UI_IO[133], UI_IO[134], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 
@@ -760,6 +810,8 @@ void Draw_OptionsMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			prev_bgm_vol = current_bgm_vol;
 			prev_sfx_vol = current_sfx_vol;
+			WriteToFile("Assets/FileIO/Settings.txt", "Current BGM Volume", std::to_string(prev_bgm_vol));
+			WriteToFile("Assets/FileIO/Settings.txt", "Current SFX Volume", std::to_string(prev_sfx_vol));
 		}
 	}
 	else
@@ -769,9 +821,9 @@ void Draw_OptionsMenu()
 	}
 
 	// exit button (click to return to pause menu)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -200.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[136], UI_IO[137], UI_IO[138], UI_IO[139], UI_IO[140]);
 
-	if (IsAreaClicked(1150.f, 650.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[136], 450.f - UI_IO[137], UI_IO[138], UI_IO[139], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 
@@ -801,9 +853,9 @@ void Draw_QuitMenu()
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(menubg_x, menubg_y, menubg_width, menubg_height, pause_bg);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 600.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, menu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 4, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0)
@@ -815,19 +867,19 @@ void Draw_QuitMenu()
 	
 	if (currentState == GS_HUBWORLD)
 	{
-		DrawTextAdvanced(40.f, 250.f, pixel_font, UI_white, "Are you sure you want to quit?", false, 0.5f);
+		DrawTextAdvanced(UI_IO[141], UI_IO[143], pixel_font, UI_white, "Are you sure you want to quit?", false, UI_IO[145]);
 	}
 	else
 	{
-		DrawTextAdvanced(40.f, 400.f, pixel_font, UI_white, "Are you sure you want to quit?", false, 0.5f);
-		DrawTextAdvanced(40.f, 250.f, pixel_font, UI_white, "Your current progress will be", false, 0.5f);
-		DrawTextAdvanced(40.f, 100.f, pixel_font, UI_red, "LOST!!!", false, 0.8f);
+		DrawTextAdvanced(UI_IO[141], UI_IO[142], pixel_font, UI_white, "Are you sure you want to quit?", false, UI_IO[145]);
+		DrawTextAdvanced(UI_IO[141], UI_IO[143], pixel_font, UI_white, "Your current progress will be", false, UI_IO[145]);
+		DrawTextAdvanced(UI_IO[141], UI_IO[144], pixel_font, UI_red, "LOST!!!", false, UI_IO[146]);
 	}
 
 	// back button (click to go back to level state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -350.f, -50.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[147], UI_IO[148], UI_IO[149], UI_IO[150], UI_IO[151]);
 
-	if (IsAreaClicked(450.f, 500.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[147], 450.f - UI_IO[148], UI_IO[149], UI_IO[150], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 
@@ -848,9 +900,9 @@ void Draw_QuitMenu()
 	}
 
 	// exit button (click to go to quit state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 350.f, -50.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[152], UI_IO[153], UI_IO[154], UI_IO[155], UI_IO[156]);
 
-	if (IsAreaClicked(1150.f, 500.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[152], 450.f - UI_IO[153], UI_IO[154], UI_IO[155], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 
@@ -887,9 +939,9 @@ void Draw_GameOverMenu()
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
-	DrawRect(0.f, 0.f, 1600.f, 900.f, pause_bg);
+	DrawRect(menubg_x, menubg_y, menubg_width, menubg_height, pause_bg);
 
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, 0.f, 0.f, 1200.f, 800.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_screen, menu_x, menu_y, menu_width, endmenu_height, menu_rot);
 	Set_SpriteSheet_current(&ssmenu_screen, 1, 1, 1, Create_Timer(1.f), 1.f);
 
 	if (uiscreen.isPlayClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isButton1Clicked == 0)
@@ -905,10 +957,10 @@ void Draw_GameOverMenu()
 	}
 
 	// submit button (click to submit score to leaderboard)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, 400.f, -75.f, 125.f, 75.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[48], UI_IO[49], UI_IO[50], UI_IO[51], UI_IO[52]);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(1200.f, 525.f, 125.f, 75.f, UI_mouseX, UI_mouseY))
+	if (!hasSubmitted && IsAreaClicked(800.f + UI_IO[48], 450.f - UI_IO[49], UI_IO[50], UI_IO[51], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton1Clicked = 1;
 
@@ -946,9 +998,9 @@ void Draw_GameOverMenu()
 	}
 
 	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, -300.f, -250.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[53], UI_IO[54], UI_IO[55], UI_IO[56], UI_IO[57]);
 
-	if (IsAreaClicked(500.f, 700.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[53], 450.f - UI_IO[54], UI_IO[55], UI_IO[56], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isPlayClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -969,20 +1021,20 @@ void Draw_GameOverMenu()
 	}
 
 	// Display score above player input
-	DrawTextBox(-0.4f, 0.2f, 300.f, 50.f, 0.7f, pixel_font, UI_red, level_score);
+	DrawTextBox(UI_IO[63], UI_IO[64], UI_IO[65], UI_IO[66], UI_IO[67], pixel_font, UI_red, level_score);
 
-	DrawTextBox(-0.45f, 0.f, 300.f, 50.f, 0.7f, pixel_font, UI_white, level_timer);
+	DrawTextBox(UI_IO[68], UI_IO[69], UI_IO[70], UI_IO[71], UI_IO[72], pixel_font, UI_white, level_timer);
 
 	// exit button (click to go to quit state)
 	// Inside your menu or game loop
-	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, 300.f, -250.f, 200.f, 100.f, 0.f);
+	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[58], UI_IO[59], UI_IO[60], UI_IO[61], UI_IO[62]);
 	// Test with a position close to the center of the screen
-	DrawTextBox(-0.4f, -0.2f, 300.f, 50.f, 0.5f, pixel_font, isInputSubmitted, playerName.c_str());
+	DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, playerName.c_str());
 
 	// Handle text input
 	HandleTextInput();
 
-	if (IsAreaClicked(1100.f, 700.f, 200.f, 100.f, UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[58], 450.f - UI_IO[59], UI_IO[60], UI_IO[61], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
@@ -1018,7 +1070,7 @@ void Draw_LevelTimer(float time_elapsed)
 
 	snprintf(level_timer, sizeof(level_timer), "Time: %02d:%02d:%02d", minutes, seconds, milliseconds);
 
-	DrawTextBox(0.3f, -0.9f, 200.f, 100.f, 0.5f, pixel_font, UI_white, level_timer);
+	DrawTextBox(UI_IO[157], UI_IO[158], UI_IO[159], UI_IO[160], UI_IO[161], pixel_font, UI_white, level_timer);
 }
 
 
@@ -1027,7 +1079,7 @@ void Draw_LevelScore()
 {
 	snprintf(level_score, sizeof(level_score), "Score: %d", currentScore);
 
-	DrawTextBox(0.3f, -0.7f, 200.f, 100.f, 0.5f, pixel_font, UI_white, level_score);
+	DrawTextBox(UI_IO[162], UI_IO[163], UI_IO[164], UI_IO[165], UI_IO[166], pixel_font, UI_white, level_score);
 }
 
 // Accumulate points
@@ -1074,46 +1126,50 @@ void Collect_Points(int value, int score_index)
 void Draw_Points()
 {
 	std::cout << pointsAccumulated << '\n';
-	if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
+	if (levelState == PLAYING || levelState == CLEARED)
 	{
-		if (isPerfect)
+		if (Update_Timer(&displayPointsTimer) && pointsAccumulated != 0)
 		{
-			DrawTextAdvanced(player.pos.x, player.pos.y + 280.f, pixel_font, UI_gold, "PERFECT!!!", true, 1.f);
-		}
-		if (currentCombo > 1)
-		{
-			snprintf(combo, sizeof(combo), "COMBO %d", currentCombo);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, UI_green, combo, true, 0.5f);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 210.f, pixel_font, score_color, score_type, true, 0.5f);
+			if (isPerfect)
+			{
+				DrawTextAdvanced(player.pos.x, player.pos.y + 280.f, pixel_font, UI_gold, "PERFECT!!!", true, 1.f);
+			}
+			if (currentCombo > 1)
+			{
+				snprintf(combo, sizeof(combo), "COMBO %d", currentCombo);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, UI_green, combo, true, 0.5f);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 210.f, pixel_font, score_color, score_type, true, 0.5f);
+			}
+			else
+			{
+				DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, score_color, score_type, true, 0.5f);
+			}
+
+			// POINTS
+			if (pointsAccumulated > 0)
+			{
+				snprintf(points, sizeof(points), "+%d", pointsAccumulated);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_green, points, true, 0.5f);
+			}
+			else if (pointsAccumulated < 0)
+			{
+				snprintf(points, sizeof(points), "%d", pointsAccumulated);
+				DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_red, points, true, 0.5f);
+			}
 		}
 		else
 		{
-			DrawTextAdvanced(player.pos.x, player.pos.y + 140.f, pixel_font, score_color, score_type, true, 0.5f);
+			displayPointsAccumulated = false;
+			newScore = currentScore + pointsAccumulated;
+			pointsAccumulated = 0;
+			if (currentCombo > highestCombo)
+			{
+				highestCombo = currentCombo;
+			}
+			currentCombo = 0;
 		}
+	}
 
-		// POINTS
-		if (pointsAccumulated > 0)
-		{
-			snprintf(points, sizeof(points), "+%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_green, points, true, 0.5f);
-		}
-		else if (pointsAccumulated < 0)
-		{
-			snprintf(points, sizeof(points), "%d", pointsAccumulated);
-			DrawTextAdvanced(player.pos.x, player.pos.y + 70.f, pixel_font, UI_red, points, true, 0.5f);
-		}
-	}
-	else
-	{
-		displayPointsAccumulated = false;
-		newScore = currentScore + pointsAccumulated;
-		pointsAccumulated = 0;
-		if (currentCombo > highestCombo)
-		{
-			highestCombo = currentCombo;
-		}
-		currentCombo = 0;
-	}
 }
 
 void Update_LevelScore()

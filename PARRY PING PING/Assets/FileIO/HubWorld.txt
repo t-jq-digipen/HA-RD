@@ -1,0 +1,38 @@
+0) Env_Gate Pos X: 0.f
+1) Env_Gate Pos Y: 550.f
+2) Env_Gate Width: 500.f
+3) Env_Gate Height: 100.f
+4) Env_Campfire Pos X: -50.f
+5) Env_Campfire Pos Y: 0.f
+6) Env_Campfire Width: 100.f
+7) Env_Campfire Height: 100.f
+8) Env_Shrine Pos X: -600.f
+9) Env_Shrine Pos Y: -200.f
+10) Env_Shrine Width: 70.f
+11) Env_Shrine Height: 150.f
+12) Env_Modifiers Pos X: -600.f
+13) Env_Modifiers Pos Y: 300.f
+14) Env_Modifiers Width: 100.f
+15) Env_Modifiers Height: 200.f
+16) Txt_Controls Pos X: 0.f
+17) Txt_Controls Pos Y: 200.f
+18) Txt_Controls Width: 200.f
+19) Txt_Controls Height: 100.f
+20) Txt_Movement Pos X: 0.f
+21) Txt_Movement Pos Y: 150.f
+22) Txt_Movement Width: 200.f
+23) Txt_Movement Height: 100.f
+24) Txt_Attack Pos X: 0.f
+25) Txt_Attack Pos Y: -100.f
+26) Txt_Attack Width: 200.f
+27) Txt_Attack Height: 100.f
+28) Dummy Melee Pos X: 600.f
+29) Dummy Melee Pos Y: 200.f
+30) Dummy Melee Radius: 50.f
+31) Dummy Range Pos X: 800.f
+32) Dummy Range Pos Y: 200.f
+33) Fade In Speed: 0.03f
+34) Fade Alpha: 0.f
+35) Level Timer: 0.f
+36) Clear Transition Timer: 5.f
+37) Clear Transition Timer Current: 0.f

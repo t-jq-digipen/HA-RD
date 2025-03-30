@@ -11,11 +11,15 @@
 #pragma once
 #include "utils.h"
 
+extern bool isFirstInit;
+
 // Extern font for other files
 extern s8 pixel_font;
 
 extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj;
 extern AEAudioGroup gameBGM, gameSFX;
+extern float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
+extern float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
 // ----------------------------------------------------------------------------
 // Enumeration for level states
@@ -83,7 +87,6 @@ typedef struct UIScreen
 // Draw the various UI elements
 // ----------------------------------------------------------------------------
 void Draw_UI(int DrawBossHP = 1);
-
 
 // will neaten when more player parameters are finalized
 

@@ -5,15 +5,18 @@
 //
 // brief:	Declaration of utility structs and functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright ï¿½ 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once
 
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+#include <string>
 #include <AEEngine.h>
 #include "Input.h"
+#include <vector>
 
 extern f32 dt;
 
@@ -322,3 +325,18 @@ void DrawImageFading(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfx
 f32 Lerp(f32 start, f32 end, f32 t);
 
 void DrawBackgroundFade(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 fadeFactor);
+
+// ----------------------------------------------------------------------------
+// Reads from text file
+// param filename - name of text file
+// param vector - vector to store values from text file
+// ----------------------------------------------------------------------------
+void ReadFromFile(const char* filename, std::vector<float>& vector);
+
+// ----------------------------------------------------------------------------
+// Updates a value in text file
+// param filename - name of text file
+// param name - label of value to be changed
+// param value - new value
+// ----------------------------------------------------------------------------
+void WriteToFile(const char* filename, const std::string& name, const std::string& value);
