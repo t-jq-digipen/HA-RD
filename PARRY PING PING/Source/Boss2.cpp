@@ -38,12 +38,12 @@ const f32 BOSS2_WIDTH = 100.f;
 const f32 BOSS2_HEIGHT = 100.f;
 
 // Boss draw size
-const f32 BOSS_DRAW_WIDTH = 650.f;
-const f32 BOSS_DRAW_HEIGHT = 650.f;
+const f32 BOSS_DRAW_WIDTH = 600.f;
+const f32 BOSS_DRAW_HEIGHT = 600.f;
 
 // Boss hitbox size
-const f32 BOSS2_HITBOX_WIDTH = 200.f;
-const f32 BOSS2_HITBOX_HEIGHT = 150.f;
+const f32 BOSS2_HITBOX_WIDTH = 250.f;
+const f32 BOSS2_HITBOX_HEIGHT = 450.f;
 
 // Boss attributes
 const f32 BOSS2_MAXHP = 150.f;
@@ -101,7 +101,7 @@ bool dashleft = false;
 // Load boss assets
 void Load_Boss2() 
 {
-    boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 18);
+    boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 19);
     Load_Parry_Spark();
 }
 
@@ -132,7 +132,7 @@ void Init_Boss2()
     boss_2.idle_timer = Create_Timer(1.f);
     boss_2.attack_timer = Create_Timer(3.f);
     boss_2.stun_timer = Create_Timer(3.f);
-    boss_2.phasebreak_timer = Create_Timer(5.f);
+    boss_2.death_timer = Create_Timer(5.f);
 
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -302,13 +302,24 @@ void Update_Boss2()
         // Clamp HP to prevent over-reduction
         boss_2.hp = AEClamp(boss_2.hp, 0.f, BOSS2_MAXHP);
 
-        if (boss_2.hp <= 0.f && boss_2.phase == PHASE1)
+        if (boss_2.hp <= 0.f || AEInputCheckTriggered(AEVK_N))
         {
-            boss_2.phase = PHASE2;
+            boss_2.state = BOSS2_DEAD;
+            boss_2.death_timer.current = 0.f;
         }
 
         // Update Boss UI
         Update_Boss_UI(boss_2.hp);
+    }
+    else
+    {
+        Update_Timer(&boss_2.death_timer);
+    }
+
+    if (boss_2.attackstate == BOSS2_ATTACK_WINDUP && boss_attack[boss_2.attack_type].can_parry)
+    {
+        Start_Spark(boss_attack[boss_2.attack_type].attack_windup);
+        Set_Spark_Loc(boss_2.pos.x, boss_2.pos.y+50.f);
     }
 
     // Update Boss Hitbox
@@ -422,9 +433,9 @@ void Draw_Boss2()
 
     if (boss_2.state != BOSS2_PARRIED)
     {
-        DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, red2);
+        DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_HITBOX_WIDTH, BOSS2_HITBOX_HEIGHT, red2);
     }
-    else DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, black2);
+    else DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_HITBOX_WIDTH, BOSS2_HITBOX_HEIGHT, black2);
 
     f32 windup_time = BOSS2_WINDUP[boss_2.attack_type];
     f32 active_time = boss_attack[boss_2.attack_type].attack_active - boss_attack[boss_2.attack_type].attack_windup;
@@ -443,6 +454,33 @@ void Draw_Boss2()
     case BOSS2_MISSILE_BARRAGE:
     {
         flip_sprite = (!BossPlayerDirection(boss_2.pos, player.pos));
+        switch (boss_2.attackstate)
+        {
+        case BOSS2_ATTACK_WINDUP:
+        {
+            boss_2_sprite.Set_Row(2);
+            f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / boss_attack[boss_2.attack_type].attack_windup;
+
+            std::cout << "ANIMTIME " << anim_time << "\n";
+            boss_2_sprite.Set_Col(0, 2, anim_time);
+            break;
+        }   // WINDUP SLASH 1
+        case BOSS2_ATTACK_ACTIVE:
+        {
+            boss_2_sprite.Set_Row(3);
+            boss_2_sprite.Set_Col(0);
+            break;
+        }   // ACTIVE SLASH 1
+        case BOSS2_ATTACK_RECOVER:
+        {
+            boss_2_sprite.Set_Row(4);
+            f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
+            f32 anim_time = active_curr / recover_time;
+            std::cout << "ANIMTIME " << anim_time << "\n";
+            boss_2_sprite.Set_Col(0, 5, anim_time);
+            break;
+        }   // RECOVER SLASH 1
+        }   // switch attack state
         break;
     }   // BOSS2_MISSILE_BARRAGE
         // ==============================================================================
@@ -615,6 +653,15 @@ void Draw_Boss2()
         break;
     }   // BOSS2_LIGHTNING_WAVE
         // ==============================================================================
+
+    case BOSS2_DEAD:
+    {
+        boss_2_sprite.Set_Row(18);
+        boss_2_sprite.Set_Col(0, 14, boss_2.death_timer.current);
+        break;
+    }   // BOSS2_IDLE
+        // ==============================================================================
+
 
     case BOSS2_IDLE:
     default:
