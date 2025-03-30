@@ -334,6 +334,13 @@ void DrawBackgroundFade(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 fadeFac
 void ReadFromFile(const char* filename, std::vector<float>& vector);
 
 // ----------------------------------------------------------------------------
+// Reads all lines from text file
+// param filename - name of text file
+// param vector - vector to store lines from text file
+// ----------------------------------------------------------------------------
+void ReadWholeFile(const char* filename, std::vector<std::string>& vector);
+
+// ----------------------------------------------------------------------------
 // Updates a value in text file
 // param filename - name of text file
 // param name - label of value to be changed
