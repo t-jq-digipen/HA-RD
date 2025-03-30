@@ -1206,7 +1206,6 @@ void Init_Player()
 
 void Update_Player()
 {
-	std::cout << "player mod : " << player.Mod_DmgTakenIndex << '\n';
 	if (player.state != DEAD)
 	{
 		if (player.knockbackTimer > 0.0f)
