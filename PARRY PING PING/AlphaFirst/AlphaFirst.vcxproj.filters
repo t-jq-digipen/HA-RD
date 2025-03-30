@@ -60,6 +60,9 @@
     <ClCompile Include="..\Source\Tutorial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Credits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Headers\utils.h">
@@ -104,6 +107,9 @@
     <ClInclude Include="..\Source\Headers\Tutorial.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Headers\Credits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Source\leaderboard_helper.py">
@@ -122,6 +128,24 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="..\Assets\FileIO\Tutorial.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\Level1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\MainMenu.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\PlayerScore.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\ProtoBoss.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\UI.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\Credits.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

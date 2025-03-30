@@ -164,13 +164,13 @@ void Init_UI()
 	menu_rot = UI_IO[32];
 
 	// Menu Buttons
-	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
-	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
+	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
+	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 9, 8, 1.f);
 	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
 	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);

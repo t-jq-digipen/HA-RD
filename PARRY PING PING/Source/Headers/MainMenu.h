@@ -18,6 +18,7 @@ typedef struct MainMenu
 	Timer animationtimer;
 	int isPlayClicked;
 	int isExitClicked;
+	int isCreditsClicked;
 } MainMenu;
 
 void MainMenu_Load();
