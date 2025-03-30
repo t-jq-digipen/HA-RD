@@ -61,6 +61,7 @@ typedef enum Boss2_AttackType
     DASH_SLASH1,
     DASH_SLASH2,
 
+    LIGHTNING_STAB,
     LIGHTNING_WAVE,
 } Boss2_AttackType;
 
@@ -123,6 +124,15 @@ typedef struct Missile {
 } Missile;
 
 // ----------------------------------------------------------------------------
+// Structure representing lightning wave
+// ----------------------------------------------------------------------------
+typedef struct LightningWave {
+    AEVec2 pos;                 // Position of the wave
+    f32 radius;
+    f32 velocity;
+}LightningWave;
+
+// ----------------------------------------------------------------------------
 // Function prototypes
 // ----------------------------------------------------------------------------
 void Load_Boss2();               // Load Boss resources
@@ -132,7 +142,6 @@ void Update_Boss2();             // Update Boss logic
 void Draw_Boss2_Hitboxes();      // Draw boss attack hitboxes
 void Draw_Boss2();               // Draw Boss and its effects
 void Unload_Boss2();             // Unload Boss resources
-void Boss2_Attack_Test(bool canparry, f32 boss_damage); // Test for Boss attack collision
 AEVec2 GetRandomTargetPosAroundPlayer();
 void Dash_Slash_Logic();
 void Missile_Barrage_Logic();

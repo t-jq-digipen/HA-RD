@@ -50,11 +50,11 @@ const f32 BOSS2_MAXHP = 150.f;
 const f32 BOSS2_VEL = 10.f;
 
 // Attack timings
-const s32 ATTACK_TYPES = {5};
-const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 2.f , .2f, 0.5f, 0.5f ,2.f };
-const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,5.f };
-const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,1.f };
-const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f };
+const s32 ATTACK_TYPES = {6};
+const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 2.f , .2f, 0.5f, 0.5f ,0.5f ,0.8f};
+const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,0.1f  ,0.1f};
+const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,0.3f  ,2.f};
+const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f   ,0.f};
 
 // Attack information
 Boss2_Attack boss_attack[ATTACK_TYPES];
@@ -74,11 +74,16 @@ const f32 BOSS2_MISSILE_PREP_SPEED = 20.f;
 const f32 BOSS2_MISSILE_HOMING_SPEED = 40.f;
 
 // Lightning Wave settings
-const f32 SLAM_RADIUS = 150.f;
-f32 lightning_wave_radius = 0.f;       // Current radius of the expanding circle
-f32 lightning_wave_max_radius = 800.f; // Maximum radius of the expanding circle
-f32 lightning_wave_speed = 5.f;      // Speed at which the circle expands (units per second)
+const f32 LIGHTNING_STAB_DAMAGE = 30.f;
+const f32 LIGHTNING_STAB_RADIUS = 50.f;
+const f32 LIGHTNING_WAVE_DAMAGE = 30.f;
+const f32 LIGHTNING_WAVE_SPEED = 50.f;
+LightningWave lightningwave;
 bool lightning_wave_damaged = false;   // Whether the player has been damaged by the wave
+bool lightning_stab_damaged = false;
+#define LIGHTNING_WAVE_MAX_RADIUS 800.f
+
+
 
 // Miscellaneous boss settings
 bool will_hit2 = true;
@@ -166,7 +171,7 @@ void Update_Boss2()
                     // Set randomizer
                     f32 randomizer = AERandFloat();
 
-                    if (randomizer <= 0.4f) // 40% probability for Missile Barrage
+                    if (randomizer <= 0.f) // 40% probability for Missile Barrage
                     {
                         // Do Missile Barrage
                         boss_2.attack_timer.current = 0.f;
@@ -176,7 +181,7 @@ void Update_Boss2()
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                      
                     }
-                    else if (randomizer <= 0.4f) // 40% probability for Dash & Slash
+                    else if (randomizer <= 0.f) // 40% probability for Dash & Slash
                     {
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
@@ -189,9 +194,10 @@ void Update_Boss2()
                     else // 20% probability for Lightning Wave
                     {
                         // Do Lightning Wave
-                        boss_2.attack_timer.current = 0.2f;
+                        boss_2.attack_timer.current = 0.f;
+                        boss_attack[LIGHTNING_STAB].timer.current = 0.f; // Reset stab timer
                         boss_attack[LIGHTNING_WAVE].timer.current = 0.f;
-                        boss_2.attack_type = LIGHTNING_WAVE;
+                        boss_2.attack_type = LIGHTNING_STAB;
                         boss_2.state = BOSS2_LIGHTNING_WAVE;
                         
                     }
@@ -234,7 +240,7 @@ void Update_Boss2()
                 // Check for player collision
                 if (AETestCircleToCircle(&missile.pos, missile.radius, &player.pos, player.radius)) {
                     if (will_hit2) {
-                        Boss2_Attack_Test(boss_attack[MISSILE_BARRAGE].can_parry, 30.f);
+                        Boss_Attack_Test(boss_attack[MISSILE_BARRAGE].can_parry, 30.f);
                     }
                     missile.active = false;
                 }
@@ -300,6 +306,7 @@ void Draw_Boss2_Hitboxes()
     switch (boss_2.state) 
     {
     case (BOSS2_MISSILE_BARRAGE):
+    {
         if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
         {
             for (const auto& missile : missiles)
@@ -310,18 +317,20 @@ void Draw_Boss2_Hitboxes()
                 }
             }
         }
-        if(boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+        if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
         {
-            for (const auto& missile : missiles) 
+            for (const auto& missile : missiles)
             {
-                if (missile.active) 
+                if (missile.active)
                 {
                     DrawCircle(World_To_Screen_x(missile.targetpos.x), World_To_Screen_y(missile.targetpos.y), missile.radius, red2);
                 }
             }
         }
         break;
+    }
     case (BOSS2_DASH_SLASH):
+    {
         switch (boss_2.attack_type)
         {
         case (DASH_SLASH1):
@@ -355,21 +364,33 @@ void Draw_Boss2_Hitboxes()
             break;
         }
         break;
-    case BOSS2_LIGHTNING_WAVE:
-        if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+    }
+    case (BOSS2_LIGHTNING_WAVE):
+    {
+        if (boss_2.attack_type == LIGHTNING_STAB)
         {
-            // Draw windup animation for slam
-            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), SLAM_RADIUS, red2);
-            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y),
-                (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * SLAM_RADIUS, green2);
+            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+            {
+                // Draw windup animation for slam
+                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
+                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y),
+                    (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, green2);
+            }
+            else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+            {
+                // Draw active slam hitbox
+                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
+            }
         }
-        else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+        if (boss_2.attack_type == LIGHTNING_WAVE)
         {
-            // Draw active slam hitbox
-            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), SLAM_RADIUS, red2);
-            DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), lightning_wave_radius, blue2);
+            DrawCircle(World_To_Screen_x(lightningwave.pos.x),
+                World_To_Screen_y(lightningwave.pos.y),
+                lightningwave.radius,
+                blue2);
         }
         break;
+    }
     default:
         break;
     }
@@ -386,7 +407,7 @@ void Draw_Boss2()
                 missile.radius, green2);
         }
     }
-    std::cout << boss_2.state << '\n';
+
     if (boss_2.state != BOSS2_PARRIED)
     {
         DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, red2);
@@ -829,59 +850,103 @@ void Missile_Barrage_Logic() {
 
 void Lightning_Wave_Logic()
 {
-    if (Update_Timer(&boss_2.attack_timer)) {
-        f32 timer_progress = boss_2.attack_timer.current * boss_attack[boss_2.attack_type].timer.duration;
+    // Set the attack timer duration to match current attack type
+    boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
 
-        if (timer_progress < boss_attack[boss_2.attack_type].attack_windup) {
-            std::cout << "WINDUP \n";
-            will_hit2 = true;
-            // Attack is winding up
-            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
-
-        }
-        else if (timer_progress < boss_attack[boss_2.attack_type].attack_active && lightning_wave_radius != lightning_wave_max_radius)
+    switch (boss_2.attack_type)
+    {
+    case LIGHTNING_STAB:
+    {
+        if (Update_Timer(&boss_2.attack_timer))
         {
-            std::cout << "ACTIVE \n";
-            // Attack is active
-            boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
+            f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
 
-            // Deal damage to the player if they are within the initial circle
-            if (AETestCircleToCircle(&boss_2.pos, SLAM_RADIUS, &player.pos, player.radius))
+            // Windup Phase
+            if (timer_progress < boss_attack[LIGHTNING_STAB].attack_windup)
             {
-                // Player damage calculation
-                if (will_hit2)
+                boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+                will_hit2 = true;
+                lightning_stab_damaged = false;
+            }
+            // Active Phase
+            else if (timer_progress < boss_attack[LIGHTNING_STAB].attack_active)
+            {
+                boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
+
+                // Damage check
+                if (AETestCircleToCircle(&boss_2.pos, LIGHTNING_STAB_RADIUS, &player.pos, player.radius))
                 {
-                    Boss2_Attack_Test(boss_attack[LIGHTNING_WAVE].can_parry, 30.f);
+                    if (will_hit2 && !lightning_stab_damaged)
+                    {
+                        Boss2_Attack_Test(boss_attack[LIGHTNING_STAB].can_parry, LIGHTNING_STAB_DAMAGE);
+                        lightning_stab_damaged = true;
+                    }
                 }
             }
-
-            lightning_wave_radius += lightning_wave_speed;
-            if (AETestCircleToCircle(&boss_2.pos, lightning_wave_radius, &player.pos, player.radius) && lightning_wave_damaged == false)
+            // Recover Phase
+            else if (timer_progress < boss_attack[LIGHTNING_STAB].attack_recover)
             {
-                // Player damage calculation
-                if (will_hit2)
+                boss_2.attackstate = BOSS2_ATTACK_RECOVER;
+            }
+            else
+            {
+                // Transition to wave phase
+                boss_2.attack_type = LIGHTNING_WAVE;
+                boss_2.attack_timer.current = 0.f;
+                lightningwave.pos = boss_2.pos;
+                lightningwave.radius = 0.f;
+                lightning_wave_damaged = false;
+                return;
+            }
+        }
+        break;
+    }
+
+    case LIGHTNING_WAVE:
+    {
+
+        if (Update_Timer(&boss_2.attack_timer))
+        {
+            f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
+
+            // Windup Phase
+            if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_windup)
+            {
+                boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+            }
+            // Active Phase
+            else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_active)
+            {
+                boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
+
+                // Expand the wave
+                lightningwave.radius += LIGHTNING_WAVE_SPEED * dt;
+
+                // Damage check
+                if (AETestCircleToCircle(&lightningwave.pos, lightningwave.radius, &player.pos, player.radius) &&
+                    !lightning_wave_damaged)
                 {
-                    Boss2_Attack_Test(boss_attack[LIGHTNING_WAVE].can_parry, 30.f);
+                    Boss2_Attack_Test(false, LIGHTNING_WAVE_DAMAGE);
                     lightning_wave_damaged = true;
                 }
             }
-            
+            // Recover Phase
+            else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_recover)
+            {
+                boss_2.attackstate = BOSS2_ATTACK_RECOVER;
+            }
         }
-        else if (timer_progress < boss_attack[boss_2.attack_type].attack_recover) {
-            std::cout << "Recover \n";
-            // Attack is recovering
-            boss_2.attackstate = BOSS2_ATTACK_RECOVER;
-
-            // Reset the Lightning Wave attack
-            lightning_wave_radius = 0.f;
+        else
+        {
+            // Attack complete
+            boss_2.state = BOSS2_IDLE;
+            boss_2.idle_timer.current = 0.f;
+            lightningwave.radius = 0.f;
+            lightning_stab_damaged = false;
             lightning_wave_damaged = false;
         }
+        break;
     }
-    else
-    {
-        // If the attack timer is done, transition back to idle
-        boss_2.state = BOSS2_IDLE;
-        boss_2.idle_timer.current = 0.f;
     }
 }
 
