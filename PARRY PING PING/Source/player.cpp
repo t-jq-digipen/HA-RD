@@ -1287,6 +1287,21 @@ void Update_Player()
 			if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
 		}
 
+		else if (currentState == GS_LEVEL2) // Only apply boundaries in Level 2
+		{
+			f32 map_width = 2972.0f, map_height = 1136.0f;
+			f32 left_bound = -map_width / 2;
+			f32 right_bound = map_width / 2 - 80;
+			f32 top_bound = -map_height / 2;
+			f32 bottom_bound = 500.0f;
+
+			// Restrict movement within the map boundaries
+			if (player.pos.x < left_bound) player.pos.x = left_bound;
+			if (player.pos.x > right_bound) player.pos.x = right_bound;
+			if (player.pos.y < top_bound) player.pos.y = top_bound;
+			if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
+		}
+
 
 
 		
