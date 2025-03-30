@@ -50,10 +50,10 @@ const f32 BOSS2_VEL = 10.f;
 
 // Attack timings
 const s32 ATTACK_TYPES = {5};
-const f32 BOSS2_WINDUP[ATTACK_TYPES] = {2.f,2.f,0.5f,0.5f,2.f};
-const f32 BOSS2_ATTACK[ATTACK_TYPES] = {0.5f,0.5f,1.f,1.f,5.f};
-const f32 BOSS2_RECOVER[ATTACK_TYPES] = {2.f,1.f,1.f,1.f,1.f};
-const f32 BOSS2_STUN[ATTACK_TYPES] = {0.f,0.f,3.f,3.f,0.f};
+const f32 BOSS2_WINDUP[ATTACK_TYPES]    = { 2.f , .2f, 0.5f, 0.5f ,2.f };
+const f32 BOSS2_ATTACK[ATTACK_TYPES]    = { 0.5f,0.3f,  .1f,  .1f ,5.f };
+const f32 BOSS2_RECOVER[ATTACK_TYPES]   = { 2.f ,.05f,  .4f, 1.5f ,1.f };
+const f32 BOSS2_STUN[ATTACK_TYPES]      = { 0.f , 0.f, 3.f ,  3.f ,0.f };
 
 // Attack information
 Boss2_Attack boss_attack[ATTACK_TYPES];
@@ -149,6 +149,7 @@ void Update_Boss2()
         switch (boss_2.phase)
         {
         case(PHASE1):
+
             switch (boss_2.state)
             {
             case BOSS2_PARRIED:
@@ -391,8 +392,8 @@ void Draw_Boss2()
     else DrawRect(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS2_WIDTH, BOSS2_HEIGHT, black2);
 
     f32 windup_time = BOSS2_WINDUP[boss_2.attack_type];
-    f32 active_time = BOSS2_ATTACK[boss_2.attack_type] - BOSS2_WINDUP[boss_2.attack_type];
-    f32 recover_time = BOSS2_RECOVER[boss_2.attack_type] - BOSS2_ATTACK[boss_2.attack_type];
+    f32 active_time = boss_attack[boss_2.attack_type].attack_active - boss_attack[boss_2.attack_type].attack_windup;
+    f32 recover_time = boss_attack[boss_2.attack_type].attack_recover - boss_attack[boss_2.attack_type].attack_active;
 
     switch (boss_2.state)
     {
@@ -429,7 +430,9 @@ void Draw_Boss2()
         {
             flip_sprite = (boss_2.target_pos.x > boss_2.pos.x);
             boss_2_sprite.Set_Row(5);
-            boss_2_sprite.Set_Col(0, 7, boss_2.attack_timer.current);
+            f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_WINDUP[boss_2.attack_type];
+            f32 anim_time = active_curr / active_time;
+            boss_2_sprite.Set_Col(0, 7, anim_time);
             break;
         }   // DASH
             // -------------------------------------------------
@@ -440,7 +443,9 @@ void Draw_Boss2()
             case BOSS2_ATTACK_WINDUP:
             {
                 boss_2_sprite.Set_Row(6);
-                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / boss_attack[boss_2.attack_type].attack_windup;
+
+                std::cout << "ANIMTIME " << anim_time << "\n";
                 boss_2_sprite.Set_Col(0, 5, anim_time);
                 break;
             }   // WINDUP SLASH 1
@@ -453,8 +458,9 @@ void Draw_Boss2()
             case BOSS2_ATTACK_RECOVER:
             {
                 boss_2_sprite.Set_Row(8);
-                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
                 f32 anim_time = active_curr / recover_time;
+                std::cout << "ANIMTIME " << anim_time << "\n";
                 boss_2_sprite.Set_Col(0, 2, anim_time);
                 break;
             }   // RECOVER SLASH 1
@@ -471,6 +477,7 @@ void Draw_Boss2()
             {
                 boss_2_sprite.Set_Row(9);
                 f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
+                std::cout << "ANIMTIME " << anim_time << "\n";
                 boss_2_sprite.Set_Col(0, 6, anim_time);
                 break;
             }   // WINDUP SLASH 1
@@ -479,14 +486,16 @@ void Draw_Boss2()
                 boss_2_sprite.Set_Row(10);
                 f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
                 f32 anim_time = active_curr / active_time;
+                std::cout << "ANIMTIME " << anim_time << "\n";
                 boss_2_sprite.Set_Col(0,1,anim_time);
                 break;
             }   // ACTIVE SLASH 1
             case BOSS2_ATTACK_RECOVER:
             {
                 boss_2_sprite.Set_Row(11);
-                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - BOSS2_ATTACK[boss_2.attack_type];
+                f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
                 f32 anim_time = active_curr / recover_time;
+                std::cout << "ANIMTIME " << anim_time << "\n";
                 boss_2_sprite.Set_Col(0, 8, anim_time);
                 break;
             }   // RECOVER SLASH 1
@@ -581,6 +590,7 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 
 void Dash_Slash_Logic()
 {
+    boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
     // Dash Phase
     if (!dashed)
     {
@@ -648,6 +658,7 @@ void Dash_Slash_Logic()
 
                 // Transition to slash attack
                 boss_2.attack_type = DASH_SLASH1;
+                boss_2.attackstate = BOSS2_ATTACK_WINDUP;
                 boss_2.attack_timer.current = 0.f;
             }
         }
@@ -657,9 +668,22 @@ void Dash_Slash_Logic()
     {
         if (Update_Timer(&boss_2.attack_timer))
         {
-            f32 timer_progress = boss_2.attack_timer.current *
-                boss_attack[boss_2.attack_type].timer.duration;
-
+            f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
+                //boss_attack[boss_2.attack_type].timer.duration;
+            std::string state;
+            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
+            {
+                state = "WINDUP ";
+            }
+            if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
+            {
+                state = "ACTIVE ";
+            }
+            if (boss_2.attackstate == BOSS2_ATTACK_RECOVER)
+            {
+                state = "RECOVER ";
+            }
+            std::cout << state << "TIMERPROG " << timer_progress << "\n";
             // Slash Windup
             if (timer_progress < boss_attack[boss_2.attack_type].attack_windup)
             {
@@ -691,6 +715,7 @@ void Dash_Slash_Logic()
             // Transition to second slash or back to idle
             if (boss_2.attack_type == DASH_SLASH1) {
                 boss_2.attack_type = DASH_SLASH2;
+                boss_2.attackstate = BOSS2_ATTACK_WINDUP;
                 boss_2.attack_timer.current = 0.f;
                 will_hit2 = true;
 
