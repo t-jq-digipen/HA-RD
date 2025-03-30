@@ -1055,7 +1055,20 @@ void Blocked_Hit(f32 damage)
 	player.ragemeter = 0;
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
-	player.hp -= damage * BLOCK_REDUCTION;
+
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		player.hp -= damage * BLOCK_REDUCTION * 0.5f;
+		break;
+	default:
+		player.hp -= damage * BLOCK_REDUCTION;
+		break;
+	case 2:
+		player.hp -= damage * BLOCK_REDUCTION * 2.f;
+		break;
+	}
+
 	if (currentCombo > highestCombo)
 	{
 		highestCombo = currentCombo;
@@ -1070,7 +1083,20 @@ void Eat_Hit(f32 damage)
 	player.ragemeter = 0;
 	player.state = HIT;
 	player.hittimer.current = 0.f;
-	player.hp -= damage;
+
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		player.hp -= damage * 0.5f;
+		break;
+	default:
+		player.hp -= damage;
+		break;
+	case 2:
+		player.hp -= damage * 2.f;
+		break;
+	}
+
 	if (currentCombo > highestCombo)
 	{
 		highestCombo = currentCombo;
@@ -1112,6 +1138,7 @@ void Init_Player()
 	player.vel = { 0.f,0.f };
 	player.speed = 500.f;
 	player.hp = 100.f;
+	//player.Mod_DmgTakenIndex = 1;
 	player.radius = 25.f;
 	player.canAttack = true;
 	player.ragemeter = 0;
@@ -1179,6 +1206,7 @@ void Init_Player()
 
 void Update_Player()
 {
+	std::cout << "player mod : " << player.Mod_DmgTakenIndex << '\n';
 	if (player.state != DEAD)
 	{
 		if (player.knockbackTimer > 0.0f)

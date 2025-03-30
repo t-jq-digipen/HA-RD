@@ -301,6 +301,7 @@ void Init_Tutorial()
 	clear_delay = Create_Timer(1.f);
 
 	toofar = false;
+	active = false;
 
 	tutgreen	= SetColor(0xFF08A045);
 	tutblack	= SetColor(0xFF101010);
@@ -383,7 +384,7 @@ void Update_Tutorial()
 	}
 	else
 	{
-		Update_Arrow(0.f, 550.f);
+		Update_Arrow(-400.f, 550.f);
 		if (AEInputCheckTriggered(AEVK_T))
 		{
 			Reset_Tutorial();
@@ -571,5 +572,5 @@ void Draw_Tutorial()
 
 
 	}				// if active
-	DrawArrow(0.f, 750.f);	// Point to gate
+	DrawArrow(-400.f, 650.f);	// Point to gate
 }
