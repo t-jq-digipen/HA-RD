@@ -974,7 +974,7 @@ void Blocked_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT, BLOCKED_SCORE);
+	Collect_Points(static_cast<int>(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT), BLOCKED_SCORE);
 }
 
 void Eat_Hit(f32 damage)
@@ -988,7 +988,7 @@ void Eat_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(damage * SCORE_PLAYER_EAT_HIT, OUCH_SCORE);
+	Collect_Points(static_cast<int>(damage * SCORE_PLAYER_EAT_HIT), OUCH_SCORE);
 }
 
 

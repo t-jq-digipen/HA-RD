@@ -749,7 +749,7 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 		std::string label, value;
 		while (std::getline(ifs, label))
 		{
-			int pos = label.find(":");
+			size_t pos = label.find(":");
 			if (pos != std::string::npos)
 			{
 				value = label.substr(pos + 2);
@@ -796,10 +796,10 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 
 	while (std::getline(ifs, line))
 	{
-		int pos = line.find(name);
+		size_t pos = line.find(name);
 		if (pos != std::string::npos)
 		{
-			int value_pos = line.find(":");
+			size_t value_pos = line.find(":");
 			if (value_pos != std::string::npos)
 			{
 				line = line.substr(0, value_pos + 2) + value;

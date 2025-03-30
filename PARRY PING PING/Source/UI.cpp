@@ -449,7 +449,7 @@ void HandleTextInput()
 	{
 		// Loop through the possible printable characters (A-Z)
 		for (int i = AEVK_A; i <= AEVK_Z; ++i) {
-			if (AEInputCheckTriggered(i)) {
+			if (AEInputCheckTriggered(static_cast<u8>(i))) {
 				// Append the character to the player's name
 				playerName.push_back(static_cast<char>('A' + (i - AEVK_A)));
 			}
@@ -457,7 +457,7 @@ void HandleTextInput()
 
 		// Allow digits (0-9)
 		for (int i = AEVK_0; i <= AEVK_9; ++i) {
-			if (AEInputCheckTriggered(i)) {
+			if (AEInputCheckTriggered(static_cast<u8>(i))) {
 				// Append the number to the player's name
 				playerName.push_back(static_cast<char>('0' + (i - AEVK_0)));
 			}
@@ -598,7 +598,7 @@ void Draw_ClearMenu()
 
 	if (playerName.length() < 3)
 	{
-		cursorTimer += AEFrameRateControllerGetFrameTime();
+		cursorTimer += static_cast<float>(AEFrameRateControllerGetFrameTime());
 		if (cursorTimer >= 0.5f)
 		{
 			showCursor = !showCursor;
@@ -1179,11 +1179,11 @@ void Update_LevelScore()
 {
 	if (currentScore + 10000 < newScore)
 	{
-		currentScore += 1000.f;
+		currentScore += 1000;
 	}
 	else if (currentScore < newScore)
 	{
-		currentScore += 200.f;
+		currentScore += 200;
 	}
 	else
 	{

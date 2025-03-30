@@ -485,10 +485,10 @@ std::string sanitizeString(const std::string& input) {
 }
 
 void Draw_ShrineBoard() {
-	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		Draw_Top3 = false;
 	}
-	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, Mouse.x, Mouse.y) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		Draw_Top3 = true;
 	}
 
@@ -500,19 +500,19 @@ void Draw_ShrineBoard() {
 		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
 
 		// Top 1
-		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 2
-		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 3
-		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Show More
 		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
@@ -522,9 +522,9 @@ void Draw_ShrineBoard() {
 
 		for (int i = 0; i < 20; i++) {
 			// Reuse the X and Y positions for each row from the existing code
-			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2);  // Convert std::string to const char*
-			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2);  // Convert std::string to const char*
-			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2);  // Convert std::string to const char*
+			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		}
 
