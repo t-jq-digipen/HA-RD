@@ -1252,11 +1252,11 @@ void Update_Player()
 
 
 
-		f32 map_width = 2972.0f, map_height = 1536.0f;
+		f32 map_width = 2972.0f, map_height = 1136.0f;
 		f32 left_bound = -map_width / 2;
-		f32 right_bound = map_width / 2;
+		f32 right_bound = map_width / 2 - 80;
 		f32 top_bound = -map_height / 2;
-		f32 bottom_bound = 700.0f;
+		f32 bottom_bound = 600.0f;
 
 
 

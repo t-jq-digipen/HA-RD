@@ -9,4 +9,4 @@
 8) Level Player Base Offset: 50.f
 9) Level Boss Base Offset: 70.f
 10) Level Map Width: 3272.f
-11) Level Map Height: 1936.f
+11) Level Map Height: 1536.f
