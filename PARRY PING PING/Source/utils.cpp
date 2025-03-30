@@ -734,6 +734,7 @@ int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 
 	return 0;
 }
 
+// Reads from text file
 void ReadFromFile(const char* filename, std::vector<float>& vector)
 {
 	std::ifstream ifs{ filename };
@@ -759,6 +760,28 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 	ifs.close();
 }
 
+// Reads all lines from text file
+void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
+{
+	std::ifstream ifs{ filename };
+	if (!ifs)
+	{
+		std::cout << "Cannot read " << filename << "!!!\n";
+		return;
+	}
+	else
+	{
+		std::string line;
+		while (std::getline(ifs, line))
+		{
+			vector.push_back(line);
+			std::cout << line << '\n';
+		}
+	}
+	ifs.close();
+}
+
+// Updates a value in text file
 void WriteToFile(const char* filename, const std::string& name, const std::string& value)
 {
 	std::ifstream ifs{ filename };

@@ -1,0 +1,55 @@
+0) Credits Delay Timer: 2.f
+1) Credits Reset Delay Timer: 3.f
+2) Credits Max Offset: 5500.f
+3) Credits Normal Scroll Speed: 5.f
+4) Credits Fast Scroll Speed: 50.f
+5) Credits Button Animation Timer: 0.5f
+6) Credits Content Pos X: 0.f
+7) Credits Content 0 Pos Y: 700.f
+8) Credits Content 1 Pos Y: 400.f
+9) Credits Content 2 Pos Y: 200.f
+10) Credits Content 3 Pos Y: 0.f
+11) Credits Content 4 Pos Y: -200.f
+12) Credits Content 5 Pos Y: -400.f
+13) Credits Content 6 Pos Y: -600.f
+14) Credits Content 7 Pos Y: -800.f
+15) Credits Content 8 Pos Y: -1000.f
+16) Credits Content 9 Pos Y: -1200.f
+17) Credits Content 10 Pos Y: -1400.f
+18) Credits Content 11 Pos Y: -1600.f
+19) Credits Content 12 Pos Y: -1800.f
+20) Credits Content 13 Pos Y: -2000.f
+21) Credits Content 14 Pos Y: -2200.f
+22) Credits Content 15 Pos Y: -2400.f
+23) Credits Content 16 Pos Y: -2600.f
+24) Credits Content 17 Pos Y: -2800.f
+25) Credits Content 18 Pos Y: -3000.f
+26) Credits Content 19 Pos Y: -3200.f
+27) Credits Content 20 Pos Y: -3400.f
+28) Credits Content 21 Pos Y: -3600.f
+29) Credits Content 22 Pos Y: -3800.f
+30) Credits Content 23 Pos Y: -4000.f
+31) Credits Content 24 Pos Y: -4200.f
+32) Credits Content 25 Pos Y: -5800.f
+33) Credits Main Header Size: 0.75f
+34) Credits Header Size: 0.6f
+35) Credits Content Size: 0.4f
+36) Credits Footer Size: 0.3f
+37) Credits Logo Pos Y: -5400.f
+38) Credits Logo Width: 600.f
+39) Credits Logo Height: 200.f
+40) Credits Logo Rotation: 0.f
+41) Credits Background Box Pos Y: -400.f
+42) Credits Background Box Width: 1600.f
+43) Credits Background Box Height: 300.f
+44) Credits Scroll Bar Pos X: 700.f
+45) Credits Scroll Bar Pos Y: 25.f
+46) Credits Scroll Bar Width: 30.f
+47) Credits Scroll Bar Height: 650.f
+48) Credits Scroll Bar Indicator Pos Y: 300.f
+49) Credits Scroll Bar Indicator Height: 100.f
+50) Credits Back Button Pos X: 0.f
+51) Credits Back Button Pos Y: -350.f
+52) Credits Back Button Width: 200.f
+53) Credits Back Button Height: 100.f
+54) Credits Back Button Rotation: 0.f
