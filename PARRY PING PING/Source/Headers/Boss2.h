@@ -30,6 +30,7 @@ typedef enum Boss2_State
 {
     BOSS2_IDLE,
     BOSS2_PARRIED,
+    BOSS2_PHASEBREAK,
     BOSS2_DEAD,
 
 
@@ -84,7 +85,8 @@ typedef struct Boss2
     Timer idle_timer;           // Timer for idle state
     Timer attack_timer;         // Timer for attack states
     Timer stun_timer;           // Timer for stun states
-    Timer missile_prep;
+    Timer missile_prep;         // Timer to prep missiles
+    Timer phasebreak_timer;     // Timer for phase breaks
 
     Boss2_AttackType attack_type;            // Current attack type
 

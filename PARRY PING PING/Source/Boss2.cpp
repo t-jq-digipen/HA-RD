@@ -116,6 +116,7 @@ void Init_Boss2()
     boss_2.attack_timer = Create_Timer(3.f);
     boss_2.stun_timer = Create_Timer(3.f);
     boss_2.missile_prep = Create_Timer(1.f);
+    boss_2.phasebreak_timer = Create_Timer(5.f);
 
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
@@ -244,9 +245,9 @@ void Update_Boss2()
         // Clamp HP to prevent over-reduction
         boss_2.hp = AEClamp(boss_2.hp, 0.f, BOSS2_MAXHP);
 
-        if (boss_2.hp <= 0.f)
+        if (boss_2.hp <= 0.f && boss_2.phase == PHASE1)
         {
-            boss_2.state = BOSS2_DEAD;
+            boss_2.phase = PHASE2;
         }
 
         // Update Boss UI
