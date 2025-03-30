@@ -26,18 +26,23 @@
 #include <thread>
 #include <atomic>
 #include <future>
+#include "SpriteSheet.h"
 
 
 
 // Variables for parry bot init
 AEVec2 DummyMelee_pos{}, DummyRange_pos{};
-EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 70.f, 150.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
+EnvStruct Env_Gate{ 0.f, 550.f, 500.f, 100.f }, Env_Campfire{ -50.f, 0.f, 100.f, 100.f }, Env_Shrine{ -600.f, -200.f, 300.f, 300.f }, Env_Modifiers{ -600.f, 300.f, 100.f, 200.f };
 EnvStruct Txt_Controls{ 0.f, 200.f, 200.f, 100.f }, Txt_Movement{ 0.f, 150.f, 200.f, 100.f }, Txt_Attack{ 0.f, -100.f, 200.f, 100.f };
 f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{ 50.f };
 
 // TEMPORARY - Placeholder for sprites to be added
 Color hubworld_white;
 s8  hubworld_font;
+
+// Spritesheets
+SpriteSheet campfire_sprite;
+SpriteSheet shrine_sprite;
 
 // Fade from black transition when level starts
 Color FadeIn, FadeGate, FadeShrine;
@@ -67,6 +72,9 @@ void HubWorld_Load()
 	Load_Tutorial();
 
 	FetchLeaderboardAsync();
+
+	shrine_sprite = SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
+	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
 
 	// Meshes
 	Load_Mesh(20);
@@ -178,7 +186,7 @@ void HubWorld_Update()
 			levelState = PLAYING;
 		}
 	}
-		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f)) ||
+		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height)) ||
 			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
 		{
 			LockCamera = true;
@@ -205,8 +213,11 @@ void HubWorld_Draw()
 	Draw_DummyBotRange();
 
 	//Draw Environment
-	DrawRect(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height, SetColor(0xFFFF6961));		// Campfire - Center of level, where player spawns when Hub World loads
-	DrawTextAdvanced(Env_Campfire.Pos.x, Env_Campfire.Pos.y, hubworld_font, hubworld_white, "CAMPFIRE", true);
+
+	// Campfire
+	campfire_sprite.Set_Row(0);
+	campfire_sprite.Loop(0, 11, 1.f);
+	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
 
 	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
 	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
@@ -235,7 +246,7 @@ void HubWorld_Draw()
 
 
 	//Highlight effect when approaching leaderboard shrine
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width * 3.f, Env_Shrine.Height * 1.5f))
+	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height))
 	{
 		Draw_FadeOut(FadeShrine);
 		hubworld_white.A = FadeShrine.A;
@@ -259,8 +270,10 @@ void HubWorld_Draw()
 		DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y + Env_Shrine.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 		hubworld_white.A = 1.f;
 	}
-	DrawRect(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height, SetColor(0xFFFF6961));		// Leaderboard Shrine (TO BE IMPLEMENTED!) - Top 3 recorded runs shown here
-	DrawTextAdvanced(Env_Shrine.Pos.x, Env_Shrine.Pos.y, hubworld_font, hubworld_white, "SHRINE [WIP]", true);
+
+	shrine_sprite.Set_Row(0);
+	shrine_sprite.Loop(0, 12, 1.f);
+	shrine_sprite.Draw(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height);
 
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -338,6 +351,9 @@ void HubWorld_Unload()
 	Unload_Player();
 	Unload_DummyBot();
 	std::cout << "HubWorld_unload";
+
+	campfire_sprite.Unload();
+	shrine_sprite.Unload();
 }
 
 void Draw_FadeIn(Color& Fade) {
