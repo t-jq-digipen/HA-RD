@@ -246,7 +246,7 @@ void Draw_DummyBotMelee()
 		// JQWERTY - this is for the parry warning spark
 	}
 
-	meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y+50.f), 450.f, 450.f, false);
+	meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y+50.f), 250.f, 250.f, false);
 
 }
 

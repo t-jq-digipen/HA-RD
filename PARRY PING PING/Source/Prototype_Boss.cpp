@@ -79,6 +79,15 @@ const f32 SWEEP_HEIGHT = 600.f;
 f32 x_offset = 0.f;
 bool will_hit = true;
 
+// Level score update values
+const int SCORE_MELEE_HIT = 100; // + 100 points (multiplied by damage value) per frame
+const int SCORE_BOSS_PROJECTILES_PARRIED = 5000; // + 5000 points if boss rocket successfully parried
+const int SCORE_BOSS_MELEE_PARRIED = 10000; // + 10000 points if boss successfully stunned via parry
+const f32 SCORE_TIME_BONUS_CAP = 60.f; // + bonus points if player manages to beat boss within 1 minute or less
+const int SCORE_TIME_BONUS = 2000; // + 2000 points for every second of time left less than the 1 minute cap
+const int SCORE_DODGE = 2000; // + 2000 points if boss attack successfully dodged
+const int SCORE_PERFECT = 10000; // + 10000 points if player beats boss without taking damage
+
 // Load boss assets
 void Load_Boss()
 {
@@ -89,11 +98,11 @@ void Load_Boss()
 // Initialize boss attack indicators
 void Init_Boss_Indicator()
 {
-    boss_idle = SetColor(0xFFFF6961);
-    boss_windup = SetColor(0xFFFFCF61);
-    boss_swing = SetColor(0xFFAFFF61);
-    boss_stunned = SetColor(0xFF000000);
-    boss_parried = SetColor(0xFFFF00FF);
+    boss_idle       = SetColor(0xFFFF6961);
+    boss_windup     = SetColor(0x508B0000);
+    boss_swing      = SetColor(0x808B0000);
+    boss_stunned     = SetColor(0xFF000000);
+    boss_parried    = SetColor(0xFFFF00FF);
     boss_projectile_indicator = SetColor(0xFFFF0000);
     boss_projectile_color = SetColor(0xFFFF13F0);
     boss_death_explosion_color = SetColor(0xFFED6240);
@@ -109,6 +118,7 @@ void Init_Boss()
     boss_1.width = BOSS_WIDTH;
     boss_1.height = BOSS_HEIGHT;
     boss_1.hitbox = Init_AABB(boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
+    boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
     boss_1.hp = boss_1.max_hp = BOSS_MAXHP;
 
     // Starting state
@@ -244,6 +254,8 @@ void Update_Boss()
                 }
                 boss_1.hp -= damage;
                 last_hit = new_hit;
+                Collect_Points(SCORE_MELEE_HIT * static_cast<int>(damage), HIT_SCORE);
+                currentCombo += 1;
             }
         }
 
@@ -275,6 +287,8 @@ void Update_Boss()
                         switch (player.state) {
                         case PARRY:
                             Parried_Hit();
+                            Collect_Points(SCORE_BOSS_PROJECTILES_PARRIED, PARRY_SCORE);
+                            currentCombo += 1;
                             break;
                         case BLOCK:
                             Blocked_Hit(BOSS_PROJECTILE_DAMAGE);
@@ -282,6 +296,8 @@ void Update_Boss()
                         case PARRIED:
                         case BLOCKED:
                         case DODGE:
+                            Collect_Points(SCORE_DODGE, DODGE_SCORE);
+                            break;
                         case HIT:
                             break;
                         default:
@@ -302,6 +318,18 @@ void Update_Boss()
         {
             boss_1.state = BOSS_DEAD;
             boss_1.death_explosion_duration.current = boss_1.explosion_timer.current = 0.f;
+
+            // Adds time bonus (checks if time left is under _lthe 1 minute cap)
+            f32 timeLeft = SCORE_TIME_BONUS_CAP - levelTimer;
+            if (timeLeft <= 0.f)
+            {
+                timeLeft = 0.f;
+            }
+            Collect_Points(static_cast<int>(timeLeft) * SCORE_TIME_BONUS, TIME_BONUS_SCORE);
+            if (player.hp == 100.f)
+            {
+                Collect_Points(SCORE_PERFECT, PERFECT_SCORE);
+            }
         }
 
         // Update Boss UI
@@ -517,14 +545,6 @@ void Draw_Boss_Hitboxes()
     }
 
 
-    // Rocket fists
-    for (const auto& fist : rocket_fists)
-    {
-        if (fist.active)
-        {
-            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
-        }
-    }
 
 }
 
@@ -757,6 +777,14 @@ void Draw_Boss()
         break;
     }
 
+    // Rocket fists
+    for (const auto& fist : rocket_fists)
+    {
+        if (fist.active)
+        {
+            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
+        }
+    }
 
 
     // Death explosion
@@ -1088,6 +1116,8 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
             boss_1.state = BOSS_PARRIED;
             boss_1.attack_type = 0;
             bullet_time.current = 0.f;
+            Collect_Points(SCORE_BOSS_MELEE_PARRIED, PARRY_SCORE);
+            currentCombo += 1;
             std::cout << "Boss parried\n";
         }
         else
@@ -1102,7 +1132,7 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
     case BLOCKED:
     case HIT:
     case DODGE:
-        // Do nothing, immune
+        Collect_Points(SCORE_DODGE, DODGE_SCORE);
         break;
     default:
         Eat_Hit(boss_damage);

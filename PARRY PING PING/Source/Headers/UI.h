@@ -11,6 +11,12 @@
 #pragma once
 #include "utils.h"
 
+// Extern font for other files
+extern s8 pixel_font;
+
+extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj;
+extern AEAudioGroup gameBGM, gameSFX;
+
 // ----------------------------------------------------------------------------
 // Enumeration for level states
 // ----------------------------------------------------------------------------
@@ -20,15 +26,38 @@ enum LEVEL_STATE
 	PAUSED,
 	GAMEOVER,
 	OPTIONS,
+	INQUIT,
 	CLEARED
 };
 
 extern int levelState;
+extern float levelTimer;
+extern int currentScore;
+extern bool displayPointsAccumulated, isInputDisabled;
+extern int pointsAccumulated;
+extern Timer displayPointsTimer;
+extern int currentCombo, highestCombo;
+
+// ----------------------------------------------------------------------------
+// Enumeration for score types
+// ----------------------------------------------------------------------------
+enum SCORE_TYPE
+{
+	HIT_SCORE = 0,
+	BIG_HIT_SCORE,
+	DODGE_SCORE,
+	PARRY_SCORE,
+	OUCH_SCORE,
+	BLOCKED_SCORE,
+	RIP_SCORE,
+	TIME_BONUS_SCORE,
+	PERFECT_SCORE
+};
 
 // ----------------------------------------------------------------------------
 // Structure for UI screen sprites
 // ----------------------------------------------------------------------------
-typedef struct UIScreen 
+typedef struct UIScreen
 {
 	SpriteSheet_Old* spritesheet_screen;
 	SpriteSheet_Old* spritesheet_playbutton;
@@ -44,7 +73,7 @@ typedef struct UIScreen
 	SpriteSheet_Old* spritesheet_bar2;
 
 	Timer animationtimer;
-	int isPlayClicked;
+	int isPlayClicked, isSubmitClicked;
 	int isOptionsClicked;
 	int isExitClicked;
 	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;
@@ -98,8 +127,6 @@ void Free_UI();
 // ----------------------------------------------------------------------------
 void Unload_UI();
 
-//void Draw_Boss1HP(float time_elapsed);
-
 // ----------------------------------------------------------------------------
 // Open the pause menu when player pauses the game
 // ----------------------------------------------------------------------------
@@ -116,6 +143,11 @@ void Draw_GameOverMenu();
 void Draw_OptionsMenu();
 
 // ----------------------------------------------------------------------------
+// Open the quit menu to make player think twice about their life choices
+// ----------------------------------------------------------------------------
+void Draw_QuitMenu();
+
+// ----------------------------------------------------------------------------
 // Open the level complete screen when player beats the boss
 // ----------------------------------------------------------------------------
 void Draw_ClearMenu();
@@ -124,3 +156,28 @@ void Draw_ClearMenu();
 // Draw the level timer
 // ----------------------------------------------------------------------------
 void Draw_LevelTimer(float time_elapsed);
+
+// ----------------------------------------------------------------------------
+// Draw the level score
+// ----------------------------------------------------------------------------
+void Draw_LevelScore();
+
+// ----------------------------------------------------------------------------
+// Accumulate points
+// ----------------------------------------------------------------------------
+void Collect_Points(int value, int score_index);
+
+// ----------------------------------------------------------------------------
+// Draw points accumulated
+// ----------------------------------------------------------------------------
+void Draw_Points();
+
+// ----------------------------------------------------------------------------
+// Update the level score
+// ----------------------------------------------------------------------------
+void Update_LevelScore();
+
+
+void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
+
+void DrawLoadingImage();

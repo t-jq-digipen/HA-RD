@@ -316,3 +316,5 @@ float CalculateDistance(float x1, float y1, float x2, float y2);
  * \return True if the rectangles are intersecting, false otherwise.
  */
 bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height, f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height);
+
+void DrawTextBoxGame(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);

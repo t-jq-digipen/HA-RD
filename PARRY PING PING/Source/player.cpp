@@ -26,12 +26,11 @@ const float MAP_RIGHT = 500.f;
 const float MAP_TOP = 300.f;
 const float MAP_BOTTOM = -300.f;
 
-typedef struct Attack
-{
-	Timer timer;
-	Timer active_time;
-	int combo;
-} Attack;
+// Define level score update values
+const int SCORE_LIGHT_PROJECTILE_HIT = 500; // + 500 points per projectile
+const int SCORE_HEAVY_LASER_HIT = 750; // + 750 points per tick
+const int SCORE_PLAYER_EAT_HIT = -100; // - 100 points (multiplied by damage) per hit
+const int SCORE_PLAYER_LOSE = -10000; // -10000 points for game over
 
 typedef struct Projectile
 {
@@ -61,6 +60,7 @@ const float PLAYER_DRAW_HEIGHT = 250.f;
 const float PLAYER_HITBOX_WIDTH = 80.f;
 const float PLAYER_HITBOX_HEIGHT = 120.f;
 
+
 Player player;
 Attack melee_attack;
 Timer ranged_attack;
@@ -78,7 +78,7 @@ f32 atk_pos_x, atk_pos_y, atk_rot;
 AEVec2 atk_dir;
 
 static float rightClickTimer = 0.f;
-const float rightClickHoldDuration = 0.2f; // 1 second hold to trigger heavy attack
+const float rightClickHoldDuration = 0.25f; // 1 second hold to trigger heavy attack
 
 // MELEE ATTACK
 // =======================================================================
@@ -114,6 +114,9 @@ const float ATTACK_DAMAGE[4] = { 0.f, 5.f, 5.f, 15.f };
 aabb melee_hitbox;
 
 bool hitbox_active = false;
+
+// Heavy laser tick timer (for combo calcs, +1 combo ever tick)
+Timer laserTickTimer;
 
 enum ATTACK_PATTERN
 {
@@ -421,6 +424,13 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			if (LineSegmentCircleCollision(heavyAttackPos, heavyAttackPosEnd, target, width / 2)) {
 				*damage = 10.f * dt;  // Heavy attack damage
 				hit = true;
+				Loop_Timer(&laserTickTimer);
+				if (laserTickTimer.current >= laserTickTimer.duration)
+				{
+					currentCombo += 1;
+					Collect_Points(SCORE_HEAVY_LASER_HIT, BIG_HIT_SCORE);
+					laserTickTimer.current = 0.f;
+				}
 				std::cout << "Heavy Attack Hit!\n";
 			}
 			else {
@@ -432,6 +442,8 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			*damage = 5.f;  // Light attack damage
 			hit = true;
 			proj.isActive = false; // Deactivate light projectile after hit
+			currentCombo += 1;
+			Collect_Points(SCORE_LIGHT_PROJECTILE_HIT, HIT_SCORE); // Update score when light projectile hits
 			std::cout << "Light Attack Hit!\n";
 		}
 	}
@@ -463,10 +475,11 @@ const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
-	if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
-	{
-		player.ammo += 1;
-	}
+	// Only for debugging!
+	//if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
+	//{
+	//	player.ammo += 1;
+	//}
 
 
 	if (player.ammo > 0)
@@ -486,6 +499,13 @@ void Attacking_Ranged()
 
 			melee_attack.active_time.current = 1.f;
 			melee_attack.timer.current = 1.f;
+
+			// Initialize laser tick timer for combo
+			laserTickTimer.current = 0.f;
+
+			// **Play the light projectile sound effect**
+			std::cout << "Laser sound triggered!\n";  // Debugging
+			AEAudioPlay(heavyProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
 		if (AEInputCheckReleased(AEVK_RBUTTON) && rightClickTimer && player.lightAttackCooldown<=0.f)
@@ -500,6 +520,10 @@ void Attacking_Ranged()
 
 			melee_attack.active_time.current = 1.f;
 			melee_attack.timer.current = 1.f;
+
+			// **Play the light projectile sound effect**
+			std::cout << "Light projectile sound triggered!\n";  // Debugging
+			AEAudioPlay(lightProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
 
@@ -886,27 +910,27 @@ void Movement() {
 
 		if (!dodge_cd)
 		{
-			if (AEInputCheckTriggered(AEVK_SPACE))
+			AEVec2 input = { 0,0 };
+			if (AEInputCheckCurr(AEVK_W))
 			{
-				AEVec2 input = { 0,0 };
-				if (AEInputCheckCurr(AEVK_W))
-				{
-					input.y += 1.f;
-				}
-				if (AEInputCheckCurr(AEVK_A))
-				{
-					input.x -= 1.f;
-					player.direction_h = LEFT;
-				}
-				if (AEInputCheckCurr(AEVK_S))
-				{
-					input.y -= 1.f;
-				}
-				if (AEInputCheckCurr(AEVK_D))
-				{
-					input.x += 1.f;
-					player.direction_h = RIGHT;
-				}
+				input.y += 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_A))
+			{
+				input.x -= 1.f;
+				player.direction_h = LEFT;
+			}
+			if (AEInputCheckCurr(AEVK_S))
+			{
+				input.y -= 1.f;
+			}
+			if (AEInputCheckCurr(AEVK_D))
+			{
+				input.x += 1.f;
+				player.direction_h = RIGHT;
+			}
+			if (AEInputCheckTriggered(AEVK_SPACE) && (input.x || input.y))
+			{
 				AEVec2Set(&player.dodge_vel, input.x, input.y);
 				AEVec2Normalize(&player.dodge_vel, &player.dodge_vel);
 				player.state = DODGE;
@@ -960,6 +984,7 @@ void Parrying()
 		{
 			player.state = PARRY;
 			std::cout << "parrying";
+
 		}
 		else if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
@@ -1003,6 +1028,9 @@ void Parried_Hit()
 
 	// reset block cooldown
 	player.blocktimer.current = 1.f;
+
+	std::cout << "Parry sound triggered!\n";
+	AEAudioPlay(parryFX, gameSFX, 1.0f, 1.0f, 0);
 }
 
 const f32 BLOCK_REDUCTION = 0.5f;
@@ -1012,6 +1040,12 @@ void Blocked_Hit(f32 damage)
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
 	player.hp -= damage * BLOCK_REDUCTION;
+	if (currentCombo > highestCombo)
+	{
+		highestCombo = currentCombo;
+	}
+	currentCombo = 0;
+	Collect_Points(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT, BLOCKED_SCORE);
 }
 
 void Eat_Hit(f32 damage)
@@ -1020,6 +1054,12 @@ void Eat_Hit(f32 damage)
 	player.state = HIT;
 	player.hittimer.current = 0.f;
 	player.hp -= damage;
+	if (currentCombo > highestCombo)
+	{
+		highestCombo = currentCombo;
+	}
+	currentCombo = 0;
+	Collect_Points(damage * SCORE_PLAYER_EAT_HIT, OUCH_SCORE);
 }
 
 
@@ -1113,6 +1153,8 @@ void Init_Player()
 	player.blocktimer = Create_Timer(BLOCK_COOLDOWN);
 
 	Init_Player_UI(player.ammo, 3, player.hp, 100.f);
+
+	laserTickTimer = Create_Timer(0.5f);
 }
 
 void Update_Player()
@@ -1224,11 +1266,11 @@ void Update_Player()
 
 
 
-		f32 map_width = 2900.0f, map_height = 2300.0f;
+		f32 map_width = 2972.0f, map_height = 1536.0f;
 		f32 left_bound = -map_width / 2;
 		f32 right_bound = map_width / 2;
 		f32 top_bound = -map_height / 2;
-		f32 bottom_bound = 1100.0f;
+		f32 bottom_bound = 700.0f;
 
 
 
@@ -1244,6 +1286,10 @@ void Update_Player()
 	else
 	{
 		levelState = GAMEOVER;
+
+		// -10000 points if player is dead
+		Collect_Points(SCORE_PLAYER_LOSE, RIP_SCORE);
+
 		std::cout << "bro is dead\n";
 	}
 	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current);
@@ -1432,31 +1478,15 @@ void Draw_Player()
 			// Use different size depending on whether the projectile is heavy or not
 			if (proj.isHeavy) 
 			{
-				if (heavy_atk.isActive)
+				if (!heavy_atk.isActive)
 				{
-
-					float offsetDistance = 400.0f;
-					float offsetX = cosf(proj.angle) * offsetDistance;
-					float offsetY = sinf(proj.angle) * offsetDistance;
-
-					// Apply the offset to the projectile's position
-					float screenX = World_To_Screen_x(proj.pos.x + offsetX);
-					float screenY = World_To_Screen_y(proj.pos.y + offsetY);
-
-					// Draw the heavy projectile slightly in front of the player based on angle
-					//DrawImage(screenX, screenY, 100.f, 1000.f, proj.angle, heavy_texture);
-				}
-				else {
 					projectiles.pop_back();
 				}
 			}
 			else
 			{
-				if (new_proj.isActive)
+				if (!new_proj.isActive)
 				{
-					//DrawImage(World_To_Screen_x(proj.pos.x), World_To_Screen_y(proj.pos.y), 100.f, 100.f, proj.angle, projectile_texture); // Light projectile
-				}
-				else {
 					projectiles.pop_back();
 				}
 			}
