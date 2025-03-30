@@ -16,6 +16,8 @@ float levelTimer2;
 
 bool showBossHitboxes2 = true;
 
+int dummy_check2; //for sword SFX
+AEVec2 dummy_pos2; //for sword SFX
 
 
 void Level2_Load()
@@ -59,6 +61,9 @@ void Level2_Initialize()
 
 	// UI
 	Init_UI();
+
+	dummy_check2 = 0;
+	dummy_pos2 = { 0,0};
 
 	// Incrementing Level Timer
 	levelTimer2 = 0.f;
@@ -106,6 +111,8 @@ void Level2_Update()
 
 		// Player WASD Movement
 		Update_Player();
+
+		dummy_check2 = Attacked_Melee(dummy_pos2);
 
 		// Incrementing level timer
 		if (levelState != CLEARED)
