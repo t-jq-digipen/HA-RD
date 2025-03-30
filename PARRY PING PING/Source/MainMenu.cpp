@@ -131,7 +131,7 @@ void MainMenu_Update()
         // game title
         DrawTextBox(MainMenu_IO[1], MainMenu_IO[2], width, MainMenu_IO[3], MainMenu_IO[4], pFont, red, "HARD");
 
-        if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0)
+        if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0 && mainmenu.isCreditsClicked == 0)
         {
             mainmenu.animationtimer.current = 0.f;
         }
@@ -144,15 +144,10 @@ void MainMenu_Update()
             
             mainmenu.isPlayClicked = 1;
 
-            // Increment animation timer by dt manually
-            mainmenu.animationtimer.current += dt;
-
-            if (mainmenu.animationtimer.current >= mainmenu.animationtimer.duration)
+            if (Update_Timer(&mainmenu.animationtimer))
             {
-                mainmenu.animationtimer.current = mainmenu.animationtimer.duration; // Clamp to max duration
+                Set_SpriteSheet_current(&playbutton, 0, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
             }
-
-            Set_SpriteSheet_current(&playbutton, 0, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
 
             if (AEInputCheckTriggered(AEVK_LBUTTON))
             {
@@ -162,7 +157,6 @@ void MainMenu_Update()
         else
         {
             mainmenu.isPlayClicked = 0;
-            mainmenu.animationtimer.current = 0.f; // Reset timer when not clicked
             Set_SpriteSheet_current(&playbutton, 0, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
         }
 
@@ -172,15 +166,11 @@ void MainMenu_Update()
         if (IsAreaClicked(width / 2 + MainMenu_IO[10], height / 2 - MainMenu_IO[11], MainMenu_IO[12], MainMenu_IO[13], mouseX, mouseY))
         {
             mainmenu.isExitClicked = 1;
-            // Increment animation timer by dt manually
-            mainmenu.animationtimer.current += dt;
 
-            if (mainmenu.animationtimer.current >= mainmenu.animationtimer.duration)
+            if (Update_Timer(&mainmenu.animationtimer))
             {
-                mainmenu.animationtimer.current = mainmenu.animationtimer.duration; // Clamp to max duration
+                Set_SpriteSheet_current(&exitbutton, 2, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
             }
-
-            Set_SpriteSheet_current(&exitbutton, 2, 1, 8, mainmenu.animationtimer, mainmenu.animationtimer.duration);
 
             if (AEInputCheckTriggered(AEVK_LBUTTON))
             {
@@ -190,7 +180,6 @@ void MainMenu_Update()
         else
         {
             mainmenu.isExitClicked = 0;
-            mainmenu.animationtimer.current = 0.f; // Reset timer when not clicked
             Set_SpriteSheet_current(&exitbutton, 2, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
         }
     }
