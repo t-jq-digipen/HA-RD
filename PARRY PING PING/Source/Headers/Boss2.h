@@ -113,15 +113,19 @@ typedef struct Boss2_Attack
 // ----------------------------------------------------------------------------
 // Structure representing missiles
 // ----------------------------------------------------------------------------
-typedef struct Missile {
-    AEVec2 pos;                 // Position of the missile
-    AEVec2 targetpos;           // Targets for the missiles
-    AEVec2 velocity;            // Velocity of the missile
-    f32 radius;                 // Radius of the missile
-    bool active;                // Whether the missile is active
+struct Missile {
+    AEVec2 pos = { 0,0 };
+    AEVec2 velocity = { 0,0 };
+    AEVec2 targetpos = { 0,0 };
+    f32 width = 50.f;  // Default size
+    f32 height = 50.f; // Default size
+    f32 targetradius = 50.f;
     Timer timer;
+    bool active = false;
 
-} Missile;
+    // Constructor
+    Missile() = default;
+};
 
 // ----------------------------------------------------------------------------
 // Structure representing lightning wave
