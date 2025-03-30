@@ -93,6 +93,7 @@ void Load_Boss()
 {
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
     boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
+    Load_Parry_Spark();
 }
 
 // Initialize boss attack indicators
@@ -106,6 +107,8 @@ void Init_Boss_Indicator()
     boss_projectile_indicator = SetColor(0xFFFF0000);
     boss_projectile_color = SetColor(0xFFFF13F0);
     boss_death_explosion_color = SetColor(0xFFED6240);
+
+    Init_Parry_Spark();
 }
 
 // Initialize boss attributes
@@ -332,6 +335,13 @@ void Update_Boss()
             }
         }
 
+        // Update parry spark
+        if (boss_1.attackstate == BOSS_ATTACK_WINDUP && boss_melee[boss_1.attack_type].can_parry)
+        {
+            Start_Spark(boss_melee[boss_1.attack_type].attack_windup);
+            Set_Spark_Loc(boss_1.pos.x, boss_1.pos.y);
+        }
+
         // Update Boss UI
         Update_Boss_UI(boss_1.hp);
     }
@@ -364,6 +374,7 @@ void Update_Boss()
         // Remove inactive explosion effects
         boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& e) { return !e.active; }), boss_death_explosion.end());
     }
+
 
     // Update Boss Hitbox
     Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
@@ -800,12 +811,14 @@ void Draw_Boss()
 
     // Draw boss sprite
     boss_1_sprite.Draw(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip);
+    Draw_Spark();
 }
 
 void Unload_Boss()
 {
     Unload_SpriteSheet(&boss_sprite_sheet);
     boss_1_sprite.Unload();
+    Unload_Parry_Spark();
 }
 
 void Smash_Sweep_Logic()
@@ -952,6 +965,7 @@ void Three_Hit_Logic()
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
+
         }
         else
         {

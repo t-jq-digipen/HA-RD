@@ -20,6 +20,64 @@ DummyBotRange RParryBot;		//Ranged Attack
 
 SpriteSheet meleebot_sprite;
 
+
+typedef struct ParrySpark {
+	SpriteSheet sprite;
+	AEVec2 pos;
+	Timer timer;
+	bool active;
+} ParrySpark;
+
+ParrySpark spark;
+
+void Init_Parry_Spark()
+{
+	spark.pos = { 0.f,0.f };
+	spark.timer = Create_Timer(.5f);
+	spark.active = false;
+}
+
+void Load_Parry_Spark()
+{
+	spark.sprite = SpriteSheet("Assets/UI/Spark.png", 9, 1);
+}
+
+void Unload_Parry_Spark()
+{
+	spark.sprite.Unload();
+}
+
+void Set_Spark_Loc(f32 pos_x, f32 pos_y) 
+{
+	spark.pos = { pos_x, pos_y };
+}
+
+void Start_Spark(f32 duration)
+{
+	if (!spark.active)
+	{
+		spark.timer.current = 0.f;
+		spark.timer.duration = duration;
+		spark.active = true;
+	}
+}
+
+void Draw_Spark()
+{
+	if (Update_Timer(&spark.timer))
+	{
+		std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
+		spark.sprite.Set_Row(0);
+		spark.sprite.Set_Col(0, 8, spark.timer.current);
+		spark.sprite.Draw(World_To_Screen_x(spark.pos.x), World_To_Screen_y(spark.pos.y), 1500.f, 1000.f);
+	}
+	else
+	{
+		spark.active = false;
+	}
+}
+
+
 //MELEE PARRY BOT FUNCTIONS:
 // Init            - Inits values such as timers etc
 // Active (Update) - Call in Update(), handles checking of states

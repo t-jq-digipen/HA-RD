@@ -116,3 +116,19 @@ void Unload_DummyBot();
 // Inits colours!
 // ----------------------------------------------------------------------------
 void Init_Enemy_Indicator();
+
+// ----------------------------------------------------------------------------
+// For parry spark!
+// ----------------------------------------------------------------------------
+// Initializes spark
+void Init_Parry_Spark();
+// Loads spark sprite
+void Load_Parry_Spark();
+// Unloads spark sprite
+void Unload_Parry_Spark();
+// Sets spark location
+void Set_Spark_Loc(f32 pos_x, f32 pos_y);
+// Start spark drawing, makes it active
+void Start_Spark(f32 duration);
+// Draws the spark
+void Draw_Spark();

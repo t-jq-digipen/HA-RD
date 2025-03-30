@@ -10,6 +10,7 @@
 
 #include "Boss2.h"
 #include "SpriteSheet.h"
+#include "Enemies.h"
 
 // Boss projectile settings
 #define MAX_PROJECTILES 3
@@ -93,6 +94,7 @@ bool dashleft = false;
 void Load_Boss2() 
 {
     boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 18);
+    Load_Parry_Spark();
 }
 
 // Init boss2 indicators
@@ -548,11 +550,15 @@ void Draw_Boss2()
 
     }   // switch boss_2.state
     boss_2_sprite.Draw(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), BOSS_DRAW_WIDTH, BOSS_DRAW_HEIGHT, flip_sprite);
+    Draw_Spark();
 }
+
 void Unload_Boss2()
 {
     boss_2_sprite.Unload();
+    Unload_Parry_Spark();
 }
+
 void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 {
     will_hit2 = false;
