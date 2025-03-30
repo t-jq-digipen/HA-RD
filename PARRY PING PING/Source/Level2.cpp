@@ -27,7 +27,7 @@ void Level2_Load()
 	// Meshes
 	Load_Mesh(20);
 
-	mapTexture2 = AEGfxTextureLoad("Assets/testMapBoundary3.png");
+	mapTexture2 = AEGfxTextureLoad("Assets/map2.png");
 	if (!mapTexture2)
 	{
 		printf("Failed to load map texture!\n");
@@ -135,7 +135,7 @@ void Level2_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 3000.0f, map_height = 2500.0f;
+	f32 map_width = 3272.0f, map_height = 1536.0f;
 	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
 
 	// Offset map drawing so (0,0) is centered in the camera view
