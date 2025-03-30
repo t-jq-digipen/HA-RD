@@ -322,4 +322,17 @@ bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 re
 
 void DrawTextBoxGame(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 size, s8 font, Color color, const char* string);
 
+// ----------------------------------------------------------------------------
+// Reads from text file
+// param filename - name of text file
+// param vector - vector to store values from text file
+// ----------------------------------------------------------------------------
 void ReadFromFile(const char* filename, std::vector<float>& vector);
+
+// ----------------------------------------------------------------------------
+// Updates a value in text file
+// param filename - name of text file
+// param name - label of value to be changed
+// param value - new value
+// ----------------------------------------------------------------------------
+void WriteToFile(const char* filename, const std::string& name, const std::string& value);

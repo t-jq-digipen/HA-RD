@@ -9,7 +9,6 @@
 //---------------------------------------------------------
 
 #include "utils.h"
-#include "UI.h"
 #include "MainMenu.h"
 #include "GameStateManager.h"
 
@@ -21,11 +20,11 @@ s32 mouseX, mouseY;
 SpriteSheet_Old playbutton, exitbutton;
 MainMenu mainmenu;
 
+// File IO
+std::vector<float> MainMenu_IO;
+
 void MainMenu_Load()
 {
-	// UI
-	Load_UI();
-
 	// Meshes
 	Load_Mesh(20);
 
@@ -35,6 +34,9 @@ void MainMenu_Load()
 	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 8, 8, 1.f);
 
 	std::cout << "Main Menu Loaded\n";
+
+	// Read File IO
+	ReadFromFile("Assets/FileIO/MainMenu.txt", MainMenu_IO);
 }
 
 void MainMenu_Initialize()
@@ -55,7 +57,7 @@ void MainMenu_Initialize()
 
 	mainmenu.spritesheet_button1 = &playbutton;
 	mainmenu.spritesheet_button2 = &exitbutton;
-	mainmenu.animationtimer = Create_Timer(0.5f);
+	mainmenu.animationtimer = Create_Timer(MainMenu_IO[0]);
 	mainmenu.isPlayClicked = mainmenu.isExitClicked = 0;
 }
 
@@ -74,7 +76,7 @@ void MainMenu_Update()
 	}
 
 	// game title
-	DrawTextBox(-0.3f, 0.5f, width, 200.f, 3.f, pFont, red, "HARD");
+	DrawTextBox(MainMenu_IO[1], MainMenu_IO[2], width, MainMenu_IO[3], MainMenu_IO[4], pFont, red, "HARD");
 
 	if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0)
 	{
@@ -82,9 +84,9 @@ void MainMenu_Update()
 	}
 
 	// play button (click to go to Level1 state)
-	Draw_SpriteSheet_test(*mainmenu.spritesheet_button1, -300.f, 0.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*mainmenu.spritesheet_button1, MainMenu_IO[5], MainMenu_IO[6], MainMenu_IO[7], MainMenu_IO[8], MainMenu_IO[9]);
 
-	if (IsAreaClicked(width / 2 - 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
+	if (IsAreaClicked(width / 2 + MainMenu_IO[5], height / 2 - MainMenu_IO[6], MainMenu_IO[7], MainMenu_IO[8], mouseX, mouseY))
 	{
 		
 		mainmenu.isPlayClicked = 1;
@@ -106,9 +108,9 @@ void MainMenu_Update()
 	}
 
 	// exit button (click to go to quit state)
-	Draw_SpriteSheet_test(*mainmenu.spritesheet_button2, 300.f, 0.f, 300.f, 200.f, 0.f);
+	Draw_SpriteSheet_test(*mainmenu.spritesheet_button2, MainMenu_IO[10], MainMenu_IO[11], MainMenu_IO[12], MainMenu_IO[13], MainMenu_IO[14]);
 
-	if (IsAreaClicked(width / 2 + 300.f, height / 2, 300.f, 200.f, mouseX, mouseY))
+	if (IsAreaClicked(width / 2 + MainMenu_IO[10], height / 2 - MainMenu_IO[11], MainMenu_IO[12], MainMenu_IO[13], mouseX, mouseY))
 	{
 		mainmenu.isExitClicked = 1;
 

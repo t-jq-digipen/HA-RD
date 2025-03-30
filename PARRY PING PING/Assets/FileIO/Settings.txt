@@ -1,4 +1,4 @@
-BGM Volume: 10.f
-SFX Volume: 10.f
+Current BGM Volume: 10.f
+Current SFX Volume: 10.f
 Max BGM Volume: 100.f
 Max SFX Volume: 100.f

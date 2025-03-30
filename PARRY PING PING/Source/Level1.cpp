@@ -45,14 +45,9 @@ f32 map_width, map_height;
 
 // File IO
 std::vector<float> L1_IO;
-std::vector<float> L1_IO_settings;
-
 
 void Level1_Load()
 {
-	// UI
-	Load_UI();
-
 	// Player
 	Load_Player();
 
@@ -72,7 +67,6 @@ void Level1_Load()
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/Level1.txt", L1_IO);
-	ReadFromFile("Assets/FileIO/Settings.txt", L1_IO_settings);
 }
 
 void Level1_Initialize()
@@ -112,15 +106,6 @@ void Level1_Initialize()
 
 	// Mobs
 	Init_Mobs();
-
-	// Volume
-	current_bgm_vol = L1_IO_settings[0];									// Init BGM Volume
-	current_sfx_vol = L1_IO_settings[1];									// Init SFX Volume
-	max_bgm_vol = L1_IO_settings[2];
-	max_sfx_vol = L1_IO_settings[3];
-	prev_bgm_vol = current_bgm_vol;
-	prev_sfx_vol = current_sfx_vol;
-	std::cout << current_bgm_vol << " " << current_sfx_vol << "\n";
 
 	// UI
 	Init_UI();
@@ -184,6 +169,9 @@ void Level1_Update()
 		{
 			Update_LevelTimer(&levelTimer);
 		}
+
+		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
+		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)

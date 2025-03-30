@@ -18,6 +18,8 @@
 #include <direct.h>
 #include <thread>
 
+bool isFirstInit = false;
+
 // Level number
 int levelState = 0;
 float levelTimer = 0.f;
@@ -96,18 +98,16 @@ bool hasSubmitted;
 
 // File IO
 std::vector<float> UI_IO;
+std::vector<float> UI_IO_settings;
 int font_size;
-
-// Load the UI elements
-void Load_UI()
-{
-	// Read File IO
-	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
-}
 
 // Initialize the various screen UI elements
 void Init_UI()
 {
+	// Read File IO
+	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
+	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
+
 	// Colors
 	UI_red = SetColor(0xFFFF0000);
 	UI_green = SetColor(0xFF24FF8B);
@@ -204,6 +204,30 @@ void Init_UI()
 	gameSFX = AEAudioCreateGroup();
 
 	// Initialize volume settings when entering level
+	if (!isFirstInit)
+	{
+		current_bgm_vol = UI_IO_settings[0];
+		prev_bgm_vol = current_bgm_vol;
+	}
+	else
+	{
+		current_bgm_vol = prev_bgm_vol;
+	}
+	
+	if (!isFirstInit)
+	{
+		current_sfx_vol = UI_IO_settings[1];
+		prev_sfx_vol = current_sfx_vol;
+	}
+	else
+	{
+		current_sfx_vol = prev_sfx_vol;
+	}
+	
+	max_bgm_vol = UI_IO_settings[2];
+	max_sfx_vol = UI_IO_settings[3];
+
+
 	AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1);
 	AEAudioSetGroupVolume(gameBGM, current_bgm_vol / max_bgm_vol);
 	AEAudioSetGroupVolume(gameSFX, current_sfx_vol / max_sfx_vol);
@@ -214,6 +238,8 @@ void Init_UI()
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
+
+	isFirstInit = true;
 }
 
 // Initialize the player UI elements
@@ -610,8 +636,6 @@ void Draw_OptionsMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_bar1, UI_IO[92], UI_IO[93], UI_IO[94], UI_IO[95], UI_IO[96]);
 	Set_SpriteSheet_current(&ssmenu_bar1, 1, 1, 1, Create_Timer(1.f), 1.f);
 
-	std::cout << current_bgm_vol << '\n';
-
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[97], UI_IO[98], UI_IO[99], UI_IO[100], UI_IO[101]);
 
 	if (IsAreaClicked(800.f + UI_IO[97], 450.f - UI_IO[98], UI_IO[99], UI_IO[100], UI_mouseX, UI_mouseY))
@@ -706,7 +730,7 @@ void Draw_OptionsMenu()
 
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button4, UI_IO[126], UI_IO[127], UI_IO[128], UI_IO[129], UI_IO[130]);
 
-	if (IsAreaClicked(800.f + UI_IO[121], 450.f - UI_IO[122], UI_IO[123], UI_IO[124], UI_mouseX, UI_mouseY))
+	if (IsAreaClicked(800.f + UI_IO[126], 450.f - UI_IO[127], UI_IO[128], UI_IO[129], UI_mouseX, UI_mouseY))
 	{
 		uiscreen.isButton4Clicked = 1;
 
@@ -749,6 +773,8 @@ void Draw_OptionsMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			prev_bgm_vol = current_bgm_vol;
 			prev_sfx_vol = current_sfx_vol;
+			WriteToFile("Assets/FileIO/Settings.txt", "Current BGM Volume", std::to_string(prev_bgm_vol));
+			WriteToFile("Assets/FileIO/Settings.txt", "Current SFX Volume", std::to_string(prev_sfx_vol));
 		}
 	}
 	else

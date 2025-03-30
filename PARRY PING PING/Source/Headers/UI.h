@@ -11,6 +11,8 @@
 #pragma once
 #include "utils.h"
 
+extern bool isFirstInit;
+
 // Extern font for other files
 extern s8 pixel_font;
 
@@ -85,11 +87,6 @@ typedef struct UIScreen
 // Draw the various UI elements
 // ----------------------------------------------------------------------------
 void Draw_UI(int DrawBossHP = 1);
-
-// ----------------------------------------------------------------------------
-// Load the UI elements
-// ----------------------------------------------------------------------------
-void Load_UI();
 
 // will neaten when more player parameters are finalized
 

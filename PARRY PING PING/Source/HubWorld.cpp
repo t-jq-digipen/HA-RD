@@ -58,14 +58,10 @@ std::vector<std::string> HS_time(20);
 std::atomic<bool> isFetchingLeaderboard = false;
 
 // File IO
-std::vector<float> HubWorld_IO_settings;
 std::vector<float> HubWorld_IO_elements;
 
 void HubWorld_Load()
 {
-	// UI
-	Load_UI();
-
 	// Player
 	Load_Player();
 
@@ -83,7 +79,6 @@ void HubWorld_Load()
 	std::cout << "Hub World Loaded\n";
 
 	// Read File IO
-	ReadFromFile("Assets/FileIO/Settings.txt", HubWorld_IO_settings);
 	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
 }
 
@@ -132,14 +127,6 @@ void HubWorld_Initialize()
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);			// Init the dummies with specified stats!
 	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
 
-	// Volume
-	current_bgm_vol = HubWorld_IO_settings[0];								// Init BGM Volume
-	current_sfx_vol = HubWorld_IO_settings[1];								// Init SFX Volume
-	max_bgm_vol = HubWorld_IO_settings[2];
-	max_sfx_vol = HubWorld_IO_settings[3];
-	prev_bgm_vol = current_bgm_vol;
-	prev_sfx_vol = current_sfx_vol;
-	std::cout << current_bgm_vol << " " << current_sfx_vol << "\n";
 
 	// UI
 	Init_UI();																// Init UI
@@ -176,6 +163,8 @@ void HubWorld_Update()
 
 	if (levelState != PAUSED && levelState != GAMEOVER)
 	{
+		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
+		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
 		// Player WASD Movement
 		Update_Player();
 		player.hp = 100.f;
