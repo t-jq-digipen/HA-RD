@@ -223,3 +223,5 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
  * \return True if the attack hits the target, false otherwise.
  */
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage);
+
+void PlayAttackSound(int combo);

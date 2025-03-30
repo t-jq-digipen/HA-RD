@@ -113,19 +113,31 @@ enum ATTACK_PATTERN
 };
 
 
+// Flag to track if the sound for each combo has already been played
+bool sound_played[3] = { false, false, false }; // Three phases: 1, 2, 3
+
+void ResetSound()
+{
+	// Reset all sound flags after a combo
+	for (int i = 0; i < 3; i++)
+	{
+		sound_played[i] = false; // Reset all phases to not played
+	}
+	std::cout << "Sound reset" << std::endl; // Debug print to check if it's resetting
+}
+
 bool Attacking_Melee()
 {
-	
 	// if timer is fully done updating and not idling
 	if (!Update_Timer(&melee_attack.timer) && melee_attack.combo == 3 || !Update_Timer(&combo_window))
 	{
 		// reset the combo to idle
 		melee_attack.combo = ATTACK_IDLE;
-
+		ResetSound(); // Reset sounds after combo ends
 	}
+
 	Update_Timer(&melee_attack.active_time);
 	// check left click input
-	// check if melee_attack cooldown over + combo not finished
 	if (AEInputCheckTriggered(AEVK_LBUTTON) && (melee_attack.timer.current > ATTACK_COOLDOWN[melee_attack.combo]) && (melee_attack.combo < 3))
 	{
 		AEVec2Set(&atk_dir, Screen_To_World_x(Mouse.x) - atk_pos_x, Screen_To_World_y(Mouse.y) - atk_pos_y);
@@ -143,147 +155,78 @@ bool Attacking_Melee()
 		ranged_attack.current = 1.f;
 		heavy_attack.current = 1.f;
 		player.lightAttackCooldown = 0.f;
-		
 	}
 
-
 	hitbox_active = false;
-	//if (melee_attack.timer.current >= ATTACK_START[melee_attack.combo] && melee_attack.timer.current <= ATTACK_END[melee_attack.combo] && player.state == MELEE)
+	// Check if the combo is active and within the active time
 	if (Update_Timer(&melee_attack.active_time) && melee_attack.active_time.current * ATTACK_END_ACTIVE[melee_attack.combo] >= ATTACK_START_ACTIVE[melee_attack.combo])
 	{
-		//std::cout << "ATTACKRADIUS: " << ATTACK_RADIUS[melee_attack.combo] << '\n';
-		//DrawCircle(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), ATTACK_RADIUS[melee_attack.combo], player.color);
-		//DrawImage(World_To_Screen_x(atk_pos_x), World_To_Screen_y(atk_pos_y), player.radius * 10.f, player.radius * 10.f, atk_rot, AtkHB);
 		hitbox_active = true;
 		melee_hitbox = Init_AABB(World_To_Screen_x(player.pos.x - 50.f), World_To_Screen_y(player.pos.y), ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]);
-		float drawspot = (player.direction_h == RIGHT) ? ATTACK_OFFSET[melee_attack.combo] : -ATTACK_OFFSET[melee_attack.combo];
-		//Draw_AABB(World_To_Screen_x(player.pos.x + drawspot), World_To_Screen_y(player.pos.y), melee_hitbox, player.color);
 	}
 	else if (melee_attack.timer.current >= ATTACK_END[melee_attack.combo] && player.state == MELEE)
 	{
 		player.state = IDLE;
+		ResetSound(); // Reset sounds if the attack phase ends
 	}
 
-
-	// not idling :> not sure if return will be useful
+	// not idling
 	if (melee_attack.timer.current < ATTACK_DURATION)
 	{
 		return true;
 	}
-	return false;
 
+	return false;
 }
 
-//int Attacked_Melee(AEVec2 target)
-//{
-//	// Check if:
-//	// - Hitbox is active
-//	// - Player is attacking
-//	// - Target is within range of current attack
-//	if (hitbox_active && melee_attack.combo && (AreCirclesIntersecting(player.pos.x, player.pos.y, ATTACK_RADIUS[melee_attack.combo], target.x, target.y, 25.f)))
-//	{
-//		switch (melee_attack.combo)
-//		{
-//		case 1:
-//
-//		case 2:
-//		{
-//			// Check direction for first two swings
-//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-//			{
-//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//				return melee_attack.combo;
-//			}
-//			break;
-//		}
-//		case 3:
-//		{
-//			// No need to check direction for third swing as it is 360 circle
-//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//			return melee_attack.combo;
-//			break;
-//		}
-//		default:
-//		{
-//			break;
-//		}
-//		}
-//	}
-//	return 0;
-//}
-//
-//bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
-//{
-//	// Check if:
-//	// - Hitbox is active
-//	// - Player is attacking
-//	// - Target is within range of current attack
-//	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
-//	{
-//		switch (melee_attack.combo)
-//		{
-//		case 1:
-//		case 2:
-//		{
-//			// Check direction for first two swings
-//			f32 target_rot = atan2f(target.y - player.pos.y, target.x - player.pos.x) - PI / 2.f;
-//			if (target_rot >= atk_rot - ATTACK_ANGLE[melee_attack.combo - 1] && target_rot <= atk_rot + ATTACK_ANGLE[melee_attack.combo - 1])
-//			{
-//				//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//				*check_hit = melee_attack.combo;
-//				*damage = ATTACK_DAMAGE[melee_attack.combo];
-//				return true;
-//			}
-//			break;
-//		}
-//		case 3:
-//		{
-//			// No need to check direction for third swing as it is 360 circle
-//			//std::cout << "HIT ATTACK " << melee_attack.combo << '\n';
-//			*check_hit = melee_attack.combo;
-//			*damage = ATTACK_DAMAGE[melee_attack.combo];
-//			return true;
-//			break;
-//		}
-//		default:
-//		{
-//			break;
-//		}
-//		}
-//	}
-//	else if (!melee_attack.combo)
-//	{
-//		*check_hit = 0;
-//	}
-//	return false;
-//}
+void PlayAttackSound(int combo)
+{
+	// Play sound only if it hasn't been played already for this combo
+	if (!sound_played[combo - 1]) // Combo is 1, 2, or 3
+	{
+		switch (combo)
+		{
+		case 1:
+			AEAudioPlay(sword1, gameSFX, 1.0f, 1.0f, 0); // First slash
+			break;
+		case 2:
+			AEAudioPlay(sword2, gameSFX, 1.0f, 1.0f, 0); // Second slash
+			break;
+		case 3:
+			AEAudioPlay(sword3, gameSFX, 1.0f, 1.0f, 0); // Third slash
+			break;
+		default:
+			break;
+		}
+
+		sound_played[combo - 1] = true; // Mark sound as played for this combo
+	}
+}
 
 int Attacked_Melee(AEVec2 target)
 {
-	// Check if:
-	// - Hitbox is active
-	// - Player is attacking
-	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo)
 	{
+		// Play sound only when a valid hit occurs and the combo phase hasn't been reset
+		if (!sound_played[melee_attack.combo - 1])
+		{
+			PlayAttackSound(melee_attack.combo); // Trigger sound only once per combo phase
+			sound_played[melee_attack.combo - 1] = true; // Mark this combo phase as played
+		}
+
 		if (AETestCircleToRect(&target, 250.f, &player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo]))
 		{
 			return melee_attack.combo;
 		}
-			
 	}
 	return 0;
 }
 
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage)
 {
-	// Check if:
-	// - Hitbox is active
-	// - Player is attacking
-	// - Target is within range of current attack
 	if (hitbox_active && melee_attack.combo && (AETestCircleToRect(&player.pos, ATTACK_RADIUS[melee_attack.combo], &target, width, height)))
 	{
+
 		if (AETestRectToRect(&player.pos, ATTACK_WIDTH[melee_attack.combo], ATTACK_HEIGHT[melee_attack.combo], &target, width, height))
 		{
 			*check_hit = melee_attack.combo;
@@ -298,6 +241,9 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 	}
 	return false;
 }
+
+
+
 #pragma endregion
 // =======================================================================
 
