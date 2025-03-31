@@ -96,3 +96,20 @@ void Pan_Camera(f32 dir_hor, f32 dir_vert, f32 speed) {
 	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 	AEVec2Add(&cam_shift, &cam_shift, &temp_campos);
 }
+
+void ResetCamera() {
+	currVert = currHor = 0.f;
+	deccel = 4.f;
+
+	cam_pos.x = player.pos.x;
+	cam_pos.y = player.pos.y;
+
+	// Update shift amount
+
+	cam_shift.x = cam_pos.x - cam_origin.x;
+	cam_shift.y = cam_pos.y - cam_origin.y;
+
+	// Update mouse shift
+	AEVec2Set(&mouse_shift, Mouse.x / 3.5f, Mouse.y / 3.f);
+	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
+}

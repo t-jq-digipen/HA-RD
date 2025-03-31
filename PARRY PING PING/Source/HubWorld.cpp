@@ -226,6 +226,7 @@ void HubWorld_Draw()
 			else if (AEInputCheckTriggered(AEVK_F) && InModifiers == true)
 			{
 				InModifiers = false;
+				ResetCamera();
 			}
 		}
 		else {
@@ -270,6 +271,7 @@ void HubWorld_Draw()
 		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)
 		{
 			InTop20 = false;
+			ResetCamera();
 		}
 	}
 	else
