@@ -197,6 +197,8 @@ void HubWorld_Update()
 			}
 		}
 		if (AEInputCheckTriggered(AEVK_L)) {
+			LockCamera = false;
+			player.canAttack = true;
 			nextState = GS_LEVEL2;
 		}
 

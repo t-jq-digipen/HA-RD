@@ -134,6 +134,7 @@ typedef struct LightningWave {
     AEVec2 pos;                 // Position of the wave
     f32 radius;
     f32 velocity;
+    Timer timer;
 }LightningWave;
 
 // ----------------------------------------------------------------------------
@@ -149,4 +150,5 @@ void Unload_Boss2();             // Unload Boss resources
 AEVec2 GetRandomTargetPosAroundPlayer();
 void Dash_Slash_Logic();
 void Missile_Barrage_Logic();
-void Lightning_Wave_Logic();
+void Lightning_Wave_Logic(); 
+void Update_Lightning_Wave();

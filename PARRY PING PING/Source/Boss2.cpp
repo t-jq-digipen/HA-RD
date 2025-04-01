@@ -50,7 +50,7 @@ f32 BOSS2_MAXHP;
 f32 BOSS2_VEL;
 
 // Attack timings
-const s32 ATTACK_TYPES = {6};
+const s32 ATTACK_TYPES = 6;
 std::vector<f32> BOSS2_WINDUP;
 std::vector<f32> BOSS2_ATTACK;
 std::vector<f32> BOSS2_RECOVER;
@@ -81,6 +81,7 @@ f32 LIGHTNING_STAB_DAMAGE;
 f32 LIGHTNING_STAB_RADIUS;
 f32 LIGHTNING_WAVE_DAMAGE;
 f32 LIGHTNING_WAVE_SPEED;
+f32 LIGHTNING_WAVE_DURATION;
 LightningWave lightningwave;
 bool lightning_wave_damaged = false;   // Whether the player has been damaged by the wave
 bool lightning_stab_damaged = false;
@@ -107,6 +108,11 @@ void Load_Boss2()
     // Read File IO
     ReadFromFile("Assets/FileIO/Boss2.txt", Boss2_IO);
 
+    for (int i = 0; i < Boss2_IO.size(); i++)
+    {
+        std::cout << "BOSS2IO[" << i << "] : " << Boss2_IO[i] << '\n';
+    }
+
     boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 19);
     Load_Parry_Spark();
 }
@@ -114,11 +120,12 @@ void Load_Boss2()
 // Init boss2 indicators
 void Init_Boss2_Indicator() 
 {
-
+    Init_Parry_Spark();
 }
 
 void Init_Boss2() 
 {
+    std::cout << "INIT BOSS2\n---------------\n";
     missiles.clear();  // Clear any existing
     missiles.reserve(4); // Reserve space (but doesn't construct)
 
@@ -143,13 +150,13 @@ void Init_Boss2()
     BOSS2_VEL = Boss2_IO[9];
 
     // Attack timings
-    BOSS2_WINDUP = { Boss2_IO[10], Boss2_IO[11], Boss2_IO[12], Boss2_IO[13], Boss2_IO[14], Boss2_IO[15] };   // { 1.f, 0.2f, 0.5f, 0.5f, 0.5f, 0.8f }
-    BOSS2_ATTACK = { Boss2_IO[16], Boss2_IO[17], Boss2_IO[18], Boss2_IO[19], Boss2_IO[20], Boss2_IO[21] };   // { 0.1f, 0.3f, 0.1f, 0.1f, 0.1f, 1.f }
-    BOSS2_RECOVER = { Boss2_IO[22], Boss2_IO[23], Boss2_IO[24], Boss2_IO[25], Boss2_IO[26], Boss2_IO[27] };   // { 2.f, 0.05f, 0.4f, 1.5f, 0.3f, 2.f }
-    BOSS2_STUN = { Boss2_IO[28], Boss2_IO[29], Boss2_IO[30], Boss2_IO[31], Boss2_IO[32], Boss2_IO[33] };      // { 0.f, 0.f, 3.f, 3.f, 3.f, 0.f }
+    BOSS2_WINDUP    = { Boss2_IO[10], Boss2_IO[11], Boss2_IO[12], Boss2_IO[13], Boss2_IO[14], Boss2_IO[15] };   // { 1.f, 0.2f, 0.5f, 0.5f, 0.5f, 0.8f }
+    BOSS2_ATTACK    = { Boss2_IO[16], Boss2_IO[17], Boss2_IO[18], Boss2_IO[19], Boss2_IO[20], Boss2_IO[21] };   // { 0.1f, 0.3f, 0.1f, 0.1f, 0.1f, 1.f }
+    BOSS2_RECOVER   = { Boss2_IO[22], Boss2_IO[23], Boss2_IO[24], Boss2_IO[25], Boss2_IO[26], Boss2_IO[27] };   // { 2.f, 0.05f, 0.4f, 1.5f, 0.3f, 2.f }
+    BOSS2_STUN      = { Boss2_IO[28], Boss2_IO[29], Boss2_IO[30], Boss2_IO[31], Boss2_IO[32], Boss2_IO[33] };   // { 0.f, 0.f, 3.f, 3.f, 3.f, 0.f }
 
     // Attack information
-    Boss2_Attack boss_attack[ATTACK_TYPES];
+    //Boss2_Attack boss_attack[ATTACK_TYPES];
 
 
     // Attack hitbox settings
@@ -174,6 +181,8 @@ void Init_Boss2()
     LIGHTNING_WAVE_DAMAGE = Boss2_IO[44];
     LIGHTNING_WAVE_SPEED = Boss2_IO[45];
     LIGHTNING_WAVE_MAX_RADIUS = Boss2_IO[46];
+    LIGHTNING_WAVE_DURATION = Boss2_IO[47];
+    lightningwave.timer = Create_Timer(LIGHTNING_WAVE_DURATION);
 
     // Boss starting point, hitbox and size
     boss_2.pos = { BOSS2_SPAWN_X, BOSS2_SPAWN_Y };
@@ -188,11 +197,14 @@ void Init_Boss2()
     boss_2.attackstate = BOSS2_ATTACK_WINDUP;
 
     // Timers
-    boss_2.idle_timer = Create_Timer(Boss2_IO[47]);
-    boss_2.attack_timer = Create_Timer(Boss2_IO[48]);
-    boss_2.stun_timer = Create_Timer(Boss2_IO[49]);
-    boss_2.death_timer = Create_Timer(Boss2_IO[50]);
+    boss_2.idle_timer   = Create_Timer(Boss2_IO[48]);
+    boss_2.attack_timer = Create_Timer(Boss2_IO[49]);
+    boss_2.stun_timer   = Create_Timer(Boss2_IO[50]);
+    boss_2.death_timer  = Create_Timer(Boss2_IO[51]);
 
+    std::cout << "Boss2_IO[51]: " << Boss2_IO[51] << '\n';
+
+    std::cout << "\n\n ATTACKTYPES: \n----------------------\n";
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
     {
@@ -202,6 +214,14 @@ void Init_Boss2()
         boss_attack[i].timer = Create_Timer(boss_attack[i].attack_recover);
         boss_attack[i].stun_duration = BOSS2_STUN[i]; 
         boss_attack[i].can_parry = boss_attack[i].stun_duration > 0;
+
+        std::cout << "\n\nATTACK [" << i << "]\n";
+        std::cout << "WINDUP:  " << boss_attack[i].attack_windup << "\n";
+        std::cout << "ACTIVE:  " << boss_attack[i].attack_active << "\n";
+        std::cout << "RECOVER: " << boss_attack[i].attack_recover << "\n";
+        
+        std::cout << "DURATION:" << boss_attack[i].timer.duration << "\n";
+
     }
 
     Init_Boss_UI(boss_2.hp);
@@ -214,6 +234,7 @@ f32 damage2 = 0.f;
 
 void Update_Boss2()
 {
+
     if (boss_2.state != BOSS2_DEAD)
     {
         switch (boss_2.phase)
@@ -247,6 +268,7 @@ void Update_Boss2()
                     }
                     else if (randomizer <= .6f) // 40% probability for Dash & Slash
                     {
+                        std::cout << "DASHNOWDECIDED\n";
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
                         boss_attack[DASH_SLASH1].timer.current = 0.f;
@@ -361,7 +383,7 @@ void Update_Boss2()
         // Clamp HP to prevent over-reduction
         boss_2.hp = AEClamp(boss_2.hp, 0.f, BOSS2_MAXHP);
 
-        if (boss_2.hp <= 0.f || AEInputCheckTriggered(AEVK_N))
+        if (boss_2.hp <= 0.f || AEInputCheckTriggered(AEVK_N) && boss_2.state != BOSS2_DEAD)
         {
             boss_2.state = BOSS2_DEAD;
             boss_2.death_timer.current = 0.f;
@@ -372,8 +394,11 @@ void Update_Boss2()
     }
     else
     {
+        std::cout << "DEDTIME: " << boss_2.death_timer.current << " | DURATION: " << boss_2.death_timer.duration << '\n';
         Update_Timer(&boss_2.death_timer);
     }
+
+    Update_Lightning_Wave();
 
     if (boss_2.attackstate == BOSS2_ATTACK_WINDUP && boss_attack[boss_2.attack_type].can_parry)
     {
@@ -461,7 +486,7 @@ void Draw_Boss2_Hitboxes()
             break;
         case (LIGHTNING_WAVE):
             {
-                DrawCircle(World_To_Screen_x(lightningwave.pos.x),World_To_Screen_y(lightningwave.pos.y),lightningwave.radius,blue2);
+                //DrawCircle(World_To_Screen_x(lightningwave.pos.x),World_To_Screen_y(lightningwave.pos.y),lightningwave.radius,blue2);
             }
             break;
         }
@@ -469,6 +494,13 @@ void Draw_Boss2_Hitboxes()
     }
     default:
         break;
+    }
+
+    if (lightningwave.radius)
+    {
+        DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), lightningwave.radius, blue2);
+
+
     }
 }
 
@@ -714,9 +746,8 @@ void Draw_Boss2()
         boss_2_sprite.Set_Row(18);
         boss_2_sprite.Set_Col(0, 14, boss_2.death_timer.current);
         break;
-    }   // BOSS2_IDLE
+    }   // BOSS2_DEAD
         // ==============================================================================
-
 
     case BOSS2_IDLE:
     default:
@@ -776,11 +807,14 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
 
 void Dash_Slash_Logic()
 {
-    std::cout << "DASHSLASH\n";
+    std::cout << "\n\nDASHSLASH\n";
     boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
+    std::cout << "ATTACKTYPE: " << boss_2.attack_type << '\n';
+    std::cout << "DURATION: " << boss_attack[DASH].timer.duration << '\n';
     // Dash Phase
     if (!dashed)
     {
+        std::cout << "DASHATTACKTIMER:" << boss_2.attack_timer.current << '\n';
         if (Update_Timer(&boss_2.attack_timer))
         {
             f32 timer_progress = boss_2.attack_timer.current * boss_attack[DASH].timer.duration;
@@ -1062,6 +1096,7 @@ void Lightning_Wave_Logic()
             boss_2.attack_timer.current = 0.f;
             boss_2.attack_timer.duration = boss_attack[LIGHTNING_WAVE].timer.duration;
             lightningwave.pos = boss_2.pos;
+            lightningwave.pos.y -= 50.f;
             lightningwave.radius = 0.f;
             lightning_wave_damaged = false;
         }
@@ -1084,17 +1119,12 @@ void Lightning_Wave_Logic()
             else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_active)
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
-
                 // Expand the wave
-                lightningwave.radius += LIGHTNING_WAVE_SPEED;
+                //lightningwave.radius += LIGHTNING_WAVE_SPEED;
 
-                // Damage check
-                if (AETestCircleToCircle(&lightningwave.pos, lightningwave.radius, &player.pos, player.radius) &&
-                    !lightning_wave_damaged)
-                {
-                    Boss2_Attack_Test(false, LIGHTNING_WAVE_DAMAGE);
-                    lightning_wave_damaged = true;
-                }
+                // Start the wave
+                lightningwave.timer.current = 0.f;
+
             }
             // Recover Phase
             else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_recover)
@@ -1107,12 +1137,40 @@ void Lightning_Wave_Logic()
             // Attack complete
             boss_2.state = BOSS2_IDLE;
             boss_2.idle_timer.current = 0.f;
-            lightningwave.radius = 0.f;
-            lightning_stab_damaged = false;
-            lightning_wave_damaged = false;
         }
         break;
     }
+    }
+}
+
+void Update_Lightning_Wave()
+{
+    if (Update_Timer(&lightningwave.timer))
+    {
+        lightningwave.radius += LIGHTNING_WAVE_SPEED;
+
+        if (AETestCircleToCircle(&lightningwave.pos, lightningwave.radius, &player.pos, player.radius) &&
+            !lightning_wave_damaged)
+        {
+            Boss2_Attack_Test(false, LIGHTNING_WAVE_DAMAGE);
+            lightning_wave_damaged = true;
+        }
+    }
+    else
+    {
+        lightningwave.radius = 0.f;
+        lightning_stab_damaged = false;
+        lightning_wave_damaged = false;
+        lightningwave.radius = 0.f;
+    }
+
+}
+
+void Draw_Wave()
+{
+    if (lightningwave.radius)
+    {
+
     }
 }
 
