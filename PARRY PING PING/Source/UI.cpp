@@ -1350,6 +1350,14 @@ void Unload_UI()
 
 	// Game audio
 	AEAudioUnloadAudio(levelBGM);
+	AEAudioUnloadAudio(levelSFX);
+	AEAudioUnloadAudio(lightProj);
+	AEAudioUnloadAudio(parryFX);
+	AEAudioUnloadAudio(heavyProj);
+	AEAudioUnloadAudio(sword1);
+	AEAudioUnloadAudio(sword2);
+	AEAudioUnloadAudio(sword3);
+	AEAudioUnloadAudio(bossLevel2);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
