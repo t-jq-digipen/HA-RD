@@ -1241,11 +1241,12 @@ void Update_LevelScore()
 
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
 	char buffer[MAX_PATH];
-	_getcwd(buffer, MAX_PATH);
-	std::string currentDir(buffer);
+	if (_getcwd(buffer, MAX_PATH) == nullptr) {
+		std::cerr << "Error: Failed to get current directory!" << std::endl;
+		return;
+	}
 
-	// Construct command with levelTimer
-	std::string command = "\"\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\" \""
+	std::string command = "\"\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \""
 		+ name + "\" \""
 		+ std::to_string(score) + "\" \""
 		+ timing + "\"\"";
@@ -1347,4 +1348,5 @@ void Unload_UI()
 	AEAudioUnloadAudio(bossLevel2);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
+	AEGfxTextureUnload(loadingImage);
 }
