@@ -61,9 +61,29 @@ std::vector<std::string> HS_name(20);
 std::vector<std::string> HS_score(20);
 std::vector<std::string> HS_time(20);
 std::atomic<bool> isFetchingLeaderboard = false;
+// Global future to track the async fetch
+std::future<void> leaderboardFetchFuture;
 
 // File IO
 std::vector<float> HubWorld_IO_elements;
+
+void FetchLeaderboardAsync() {
+	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+	isFetchingLeaderboard = true;
+
+	// Launch async operation and store future
+	leaderboardFetchFuture = std::async(std::launch::async, []() {
+		fetchLeaderboard();
+		isFetchingLeaderboard = false;
+		});
+}
+
+// Call this function when the game is closing
+void WaitForLeaderboardFetch() {
+	if (leaderboardFetchFuture.valid()) {
+		leaderboardFetchFuture.get(); // Wait for completion
+	}
+}
 
 void HubWorld_Load()
 {
@@ -380,6 +400,7 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
+	WaitForLeaderboardFetch();
 }
 
 void Draw_FadeIn(Color& Fade) {
@@ -413,13 +434,8 @@ void Draw_FadeOut(Color& Fade) {
 //I might implement a cool little swipe to left/right transition but ngl idk if we got time so can just implement the google doc names teehee tyvm
 
 void fetchLeaderboard() {
-	// Get current directory
-	char buffer[MAX_PATH];
-	_getcwd(buffer, MAX_PATH);
-	std::string currentDir(buffer);
-
 	// Run Python script to generate leaderboard.txt
-	std::string command = "\"" + currentDir + "\\Assets\\dist\\leaderboard_helper.exe\"";
+	std::string command = "\"Assets\\dist\\leaderboard_helper.exe\"";
 	int result = system(command.c_str());
 	if (result != 0) {
 		std::cerr << "Failed to run leaderboard_helper.exe" << std::endl;
@@ -465,25 +481,19 @@ void fetchLeaderboard() {
 	}
 
 	std::cout << "Leaderboard fetched and stored successfully!" << std::endl;
-	//// After populating the arrays
-	//std::cout << "Leaderboard Entries:" << std::endl;
-	//for (int i = 0; i < 20; i++) {
-	//	std::cout << "Name: " << HS_name[i] << " | Score: " << HS_score[i] << " | Time: " << HS_time[i] << std::endl;
-	//}
-	std::cout << "Current directory: " << currentDir << std::endl;
-
 
 }
 
-void FetchLeaderboardAsync() {
-	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
-	isFetchingLeaderboard = true;
+//void FetchLeaderboardAsync() {
+//	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+//	isFetchingLeaderboard = true;
+//
+//	std::thread([]() {
+//		fetchLeaderboard(); // Fetch leaderboard data
+//		isFetchingLeaderboard = false;
+//		}).detach();
+//}
 
-	std::thread([]() {
-		fetchLeaderboard(); // Fetch leaderboard data
-		isFetchingLeaderboard = false;
-		}).detach();
-}
 
 std::string sanitizeString(const std::string& input) {
 	std::string result;
