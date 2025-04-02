@@ -147,7 +147,7 @@ void Level2_Update()
 }
 
 const float PLAYER_BASE_OFFSET{ 50.f };
-const float BOSS_BASE_OFFSET{ 70.f };
+const float BOSS_BASE_OFFSET{ 150.f };
 
 void Level2_Draw()
 {

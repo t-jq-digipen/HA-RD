@@ -41,6 +41,10 @@ f32 BOSS2_HEIGHT;
 f32 BOSS2_DRAW_WIDTH;
 f32 BOSS2_DRAW_HEIGHT;
 
+// Boss shadow
+f32 BOSS2_SHADOW_WIDTH;
+f32 BOSS2_SHADOW_HEIGHT;
+
 // Boss hitbox size
 f32 BOSS2_HITBOX_WIDTH;
 f32 BOSS2_HITBOX_HEIGHT;
@@ -214,9 +218,10 @@ void Init_Boss2()
     boss_2.stun_timer   = Create_Timer(Boss2_IO[50]);   // BOSS 2 STUN TIMER = 3.f
     boss_2.death_timer  = Create_Timer(Boss2_IO[51]);   // BOSS 2 DEATH TIMER = 5.f
 
-    std::cout << "Boss2_IO[51]: " << Boss2_IO[51] << '\n';
+    // Shadow
+    BOSS2_SHADOW_WIDTH = Boss2_IO[52];
+    BOSS2_SHADOW_HEIGHT = Boss2_IO[53];
 
-    std::cout << "\n\n ATTACKTYPES: \n----------------------\n";
     // Initialize melee attack properties
     for (s32 i = 0; i < ATTACK_TYPES; i++)
     {
@@ -226,14 +231,6 @@ void Init_Boss2()
         boss_attack[i].timer = Create_Timer(boss_attack[i].attack_recover);
         boss_attack[i].stun_duration = BOSS2_STUN[i]; 
         boss_attack[i].can_parry = boss_attack[i].stun_duration > 0;
-
-        std::cout << "\n\nATTACK [" << i << "]\n";
-        std::cout << "WINDUP:  " << boss_attack[i].attack_windup << "\n";
-        std::cout << "ACTIVE:  " << boss_attack[i].attack_active << "\n";
-        std::cout << "RECOVER: " << boss_attack[i].attack_recover << "\n";
-        
-        std::cout << "DURATION:" << boss_attack[i].timer.duration << "\n";
-
     }
 
     Init_Boss_UI(boss_2.hp);
@@ -547,6 +544,8 @@ bool flip_sprite = false;
 
 void Draw_Boss2()
 {
+    DrawCircleAdvanced(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y - 150.f), BOSS2_SHADOW_WIDTH, BOSS2_SHADOW_HEIGHT, SetColor(0x92000000));			// Draw shadow under
+
     // Draw missiles first (so they appear behind the boss)
     for (const auto& missile : missiles)
     {
@@ -1093,6 +1092,8 @@ void Lightning_Wave_Logic()
 {
     // Set the attack timer duration to match current attack type
     boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
+    AEVec2 stab_pos = boss_2.pos;
+    stab_pos.y -= 100.f;
 
     switch (boss_2.attack_type)
     {
@@ -1113,7 +1114,7 @@ void Lightning_Wave_Logic()
             else if (timer_progress < boss_attack[LIGHTNING_STAB].attack_active)
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
-
+                
                 // Damage check
                 if (AETestCircleToCircle(&boss_2.pos, LIGHTNING_STAB_RADIUS, &player.pos, player.radius))
                 {
