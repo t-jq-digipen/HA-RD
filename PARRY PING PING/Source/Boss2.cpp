@@ -99,14 +99,26 @@ bool dashed = false;
 bool dashright = false;
 bool dashleft = false;
 
+// Level score update values
+int BOSS2_SCORE_PLAYER_MELEE_HIT; // + 100 points (multiplied by damage value) per frame
+int BOSS2_SCORE_BOSS_PROJECTILES_PARRIED; // + 5000 points if boss rocket successfully parried
+int BOSS2_SCORE_BOSS_MELEE_PARRIED; // + 10000 points if boss successfully stunned via parry
+f32 BOSS2_SCORE_TIME_BONUS_CAP; // + bonus points if player manages to beat boss within 1 minute or less
+int BOSS2_SCORE_TIME_BONUS; // + 2000 points for every second of time left less than the 1 minute cap
+int BOSS2_SCORE_DODGE; // + 2000 points if boss attack successfully dodged
+int BOSS2_SCORE_PERFECT; // + 10000 points if player beats boss without taking damage
+int BOSS2_SCORE_MULTIPLIER; // x2 points in Level 2
+
 // File IO
 std::vector<float> Boss2_IO;
+std::vector<float> Boss2Score_IO;
 
 // Load boss assets
 void Load_Boss2() 
 {
     // Read File IO
     ReadFromFile("Assets/FileIO/Boss2.txt", Boss2_IO);
+    ReadFromFile("Assets/FileIO/PlayerScore.txt", Boss2Score_IO);
 
     for (int i = 0; i < Boss2_IO.size(); i++)
     {
@@ -130,24 +142,24 @@ void Init_Boss2()
     missiles.reserve(4); // Reserve space (but doesn't construct)
 
     // Boss spawn position
-    BOSS2_SPAWN_X = Boss2_IO[0];
-    BOSS2_SPAWN_Y = Boss2_IO[1];
+    BOSS2_SPAWN_X = Boss2_IO[0];                // BOSS 2 SPAWN X = 0.f
+    BOSS2_SPAWN_Y = Boss2_IO[1];                // BOSS 2 SPAWN Y = 200.f
 
     // Boss size
-    BOSS2_WIDTH = Boss2_IO[2];
-    BOSS2_HEIGHT = Boss2_IO[3];
+    BOSS2_WIDTH = Boss2_IO[2];                  // BOSS 2 WIDTH = 100.f
+    BOSS2_HEIGHT = Boss2_IO[3];                 // BOSS 2 HEIGHT = 100.f
 
     // Boss draw size
-    BOSS2_DRAW_WIDTH = Boss2_IO[4];
-    BOSS2_DRAW_HEIGHT = Boss2_IO[5];
+    BOSS2_DRAW_WIDTH = Boss2_IO[4];             // BOSS 2 DRAW WIDTH = 650.f
+    BOSS2_DRAW_HEIGHT = Boss2_IO[5];            // BOSS 2 DRAW HEIGHT = 650.f
 
     // Boss hitbox size
-    BOSS2_HITBOX_WIDTH = Boss2_IO[6];
-    BOSS2_HITBOX_HEIGHT = Boss2_IO[7];
+    BOSS2_HITBOX_WIDTH = Boss2_IO[6];           // BOSS 2 HITBOX WIDTH = 200.f
+    BOSS2_HITBOX_HEIGHT = Boss2_IO[7];          // BOSS 2 HITBOX HEIGHT = 380.f
 
     // Boss attributes
-    BOSS2_MAXHP = Boss2_IO[8];
-    BOSS2_VEL = Boss2_IO[9];
+    BOSS2_MAXHP = Boss2_IO[8];                  // BOSS 2 MAX HP = 150.f
+    BOSS2_VEL = Boss2_IO[9];                    // BOSS 2 VELOCITY = 10.f
 
     // Attack timings
     BOSS2_WINDUP    = { Boss2_IO[10], Boss2_IO[11], Boss2_IO[12], Boss2_IO[13], Boss2_IO[14], Boss2_IO[15] };   // { 1.f, 0.2f, 0.5f, 0.5f, 0.5f, 0.8f }
@@ -160,28 +172,28 @@ void Init_Boss2()
 
 
     // Attack hitbox settings
-    OFFSET_RANGE_X = Boss2_IO[34] / 2;  // Half of player width
-    OFFSET_RANGE_Y = Boss2_IO[35] / 2; // Half of player height
+    OFFSET_RANGE_X = Boss2_IO[34] / 2;          // Half of player width (125.f)
+    OFFSET_RANGE_Y = Boss2_IO[35] / 2;          // Half of player height (125.f)
 
-    SLASHWIDTH = Boss2_IO[36];
-    SLASHHEIGHT = Boss2_IO[37];
+    SLASHWIDTH = Boss2_IO[36];                  // BOSS 2 SLASH WIDTH = 250.f
+    SLASHHEIGHT = Boss2_IO[37];                 // BOSS 2 SLASH HEIGHT = 250.f
 
-    DASH_OFFSET = Boss2_IO[38];
+    DASH_OFFSET = Boss2_IO[38];                 // BOSS 2 DASH OFFSET = 100.f
 
     // Missiles settings
-    BOSS2_MISSILE_PREP_SPEED = Boss2_IO[39];
-    BOSS2_MISSILE_HOMING_SPEED = Boss2_IO[40];
+    BOSS2_MISSILE_PREP_SPEED = Boss2_IO[39];        // BOSS 2 MISSILE PREP SPEED = 500.f
+    BOSS2_MISSILE_HOMING_SPEED = Boss2_IO[40];      // BOSS 2 MISSILE HOMING SPEED = 800.f
 
     // Slash setting
-    SLASH_DAMAGE = Boss2_IO[41];
+    SLASH_DAMAGE = Boss2_IO[41];                    // BOSS 2 SLASH DAMAGE = 30.f
 
     // Lightning Wave settings
-    LIGHTNING_STAB_DAMAGE = Boss2_IO[42];
-    LIGHTNING_STAB_RADIUS = Boss2_IO[43];
-    LIGHTNING_WAVE_DAMAGE = Boss2_IO[44];
-    LIGHTNING_WAVE_SPEED = Boss2_IO[45];
-    LIGHTNING_WAVE_MAX_RADIUS = Boss2_IO[46];
-    LIGHTNING_WAVE_DURATION = Boss2_IO[47];
+    LIGHTNING_STAB_DAMAGE = Boss2_IO[42];           // BOSS 2 LIGHTNING STAB DAMAGE = 30.f
+    LIGHTNING_STAB_RADIUS = Boss2_IO[43];           // BOSS 2 LIGHTNING STAB RADIUS = 100.f
+    LIGHTNING_WAVE_DAMAGE = Boss2_IO[44];           // BOSS 2 LIGHTNING WAVE DAMAGE = 30.f
+    LIGHTNING_WAVE_SPEED = Boss2_IO[45];            // BOSS 2 LIGHTNING WAVE SPEED = 10.f
+    LIGHTNING_WAVE_MAX_RADIUS = Boss2_IO[46];       // BOSS 2 LIGHTNING WAVE MAX RADIUS = 800.f
+    LIGHTNING_WAVE_DURATION = Boss2_IO[47];         // BOSS 2 LIGHTNING WAVE DURATION = 4.f
     lightningwave.timer = Create_Timer(LIGHTNING_WAVE_DURATION);
 
     // Boss starting point, hitbox and size
@@ -197,10 +209,10 @@ void Init_Boss2()
     boss_2.attackstate = BOSS2_ATTACK_WINDUP;
 
     // Timers
-    boss_2.idle_timer   = Create_Timer(Boss2_IO[48]);
-    boss_2.attack_timer = Create_Timer(Boss2_IO[49]);
-    boss_2.stun_timer   = Create_Timer(Boss2_IO[50]);
-    boss_2.death_timer  = Create_Timer(Boss2_IO[51]);
+    boss_2.idle_timer   = Create_Timer(Boss2_IO[48]);   // BOSS 2 IDLE TIMER = 1.f
+    boss_2.attack_timer = Create_Timer(Boss2_IO[49]);   // BOSS 2 ATTACK TIMER = 3.f
+    boss_2.stun_timer   = Create_Timer(Boss2_IO[50]);   // BOSS 2 STUN TIMER = 3.f
+    boss_2.death_timer  = Create_Timer(Boss2_IO[51]);   // BOSS 2 DEATH TIMER = 5.f
 
     std::cout << "Boss2_IO[51]: " << Boss2_IO[51] << '\n';
 
@@ -225,6 +237,18 @@ void Init_Boss2()
     }
 
     Init_Boss_UI(boss_2.hp);
+
+    // Score system
+    BOSS2_SCORE_MULTIPLIER = static_cast<int>(Boss2Score_IO[11]);
+
+    // Scores are doubled in Level 2
+    BOSS2_SCORE_PLAYER_MELEE_HIT = static_cast<int>(Boss2Score_IO[4]) * BOSS2_SCORE_MULTIPLIER;             // + 200 points (multiplied by damage value) per frame
+    BOSS2_SCORE_BOSS_PROJECTILES_PARRIED = static_cast<int>(Boss2Score_IO[5]) * BOSS2_SCORE_MULTIPLIER;     // + 10000 points if boss rocket successfully parried
+    BOSS2_SCORE_BOSS_MELEE_PARRIED = static_cast<int>(Boss2Score_IO[6]) * BOSS2_SCORE_MULTIPLIER;           // + 20000 points if boss successfully stunned via parry
+    BOSS2_SCORE_TIME_BONUS_CAP = static_cast<f32>(Boss2Score_IO[7]);                                        // + bonus points if player manages to beat boss within 1 minute or less
+    BOSS2_SCORE_TIME_BONUS = static_cast<int>(Boss2Score_IO[8]);                                            // + 2000 points for every second of time left less than the 1 minute cap
+    BOSS2_SCORE_DODGE = static_cast<int>(Boss2Score_IO[9]) * BOSS2_SCORE_MULTIPLIER;                        // + 4000 points if boss attack successfully dodged
+    BOSS2_SCORE_PERFECT = static_cast<int>(Boss2Score_IO[10]) * BOSS2_SCORE_MULTIPLIER;                     // + 20000 points if player beats boss without taking damage
 }
 
 // For damagecheck for player attacks to boss
@@ -369,6 +393,8 @@ void Update_Boss2()
                 }
                 boss_2.hp -= damage2;
                 last_hit2 = new_hit2;
+                Collect_Points(BOSS2_SCORE_PLAYER_MELEE_HIT * static_cast<int>(damage2), HIT_SCORE);
+                currentCombo += 1;
             }
         }
 
@@ -387,6 +413,18 @@ void Update_Boss2()
         {
             boss_2.state = BOSS2_DEAD;
             boss_2.death_timer.current = 0.f;
+
+            // Adds time bonus (checks if time left is under the 1 minute cap)
+            f32 timeLeft = BOSS2_SCORE_TIME_BONUS_CAP - levelTimer;
+            if (timeLeft <= 0.f)
+            {
+                timeLeft = 0.f;
+            }
+            Collect_Points(static_cast<int>(timeLeft)* BOSS2_SCORE_TIME_BONUS, TIME_BONUS_SCORE);
+            if (player.hp == 100.f)
+            {
+                Collect_Points(BOSS2_SCORE_PERFECT, PERFECT_SCORE);
+            }
         }
 
         // Update Boss UI
@@ -394,6 +432,7 @@ void Update_Boss2()
     }
     else
     {
+        levelState = CLEARED;
         std::cout << "DEDTIME: " << boss_2.death_timer.current << " | DURATION: " << boss_2.death_timer.duration << '\n';
         Update_Timer(&boss_2.death_timer);
     }
@@ -790,6 +829,8 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
         }
         
         Parried_Hit();
+        Collect_Points(BOSS2_SCORE_BOSS_PROJECTILES_PARRIED, PARRY_SCORE);
+        currentCombo += 1;
         break;
     case BLOCK:
         Blocked_Hit(boss_damage);
@@ -799,6 +840,7 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
     case HIT:
     case DODGE:
         // Do nothing, immune
+        Collect_Points(BOSS2_SCORE_DODGE, DODGE_SCORE);
         break;
     default:
         Eat_Hit(boss_damage);

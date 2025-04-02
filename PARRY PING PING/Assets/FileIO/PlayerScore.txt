@@ -9,3 +9,4 @@
 8) Player Time Bonus Score: 2000.f
 9) Player Dodge Score: 2000.f
 10) Player Perfect Score: 10000.f
+11) Player Level 2 Score Multiplier: 2.f

@@ -25,9 +25,10 @@ int levelState = 0;
 float levelTimer = 0.f;
 
 // Level score
-int currentScore = 0;
-int newScore = 0;
-int pointsAccumulated = 0;
+int currentScore;
+int newScore;
+int totalAccumulatedScore;
+int pointsAccumulated;
 bool displayPointsAccumulated = false;
 Timer displayPointsTimer;
 int currentCombo = 0;
@@ -144,8 +145,16 @@ void Init_UI()
 	levelState = PLAYING;
 
 	// Level score
-	currentScore = 0;
-	newScore = 0;
+	if (previousState == GS_HUBWORLD)
+	{
+		currentScore = 0;
+		newScore = 0;
+		totalAccumulatedScore = 0;
+	}
+	else
+	{
+		newScore = totalAccumulatedScore;
+	}
 	pointsAccumulated = 0;
 	displayPointsAccumulated = false;
 	displayPointsTimer = Create_Timer(1.5f);
@@ -511,6 +520,7 @@ void Draw_ClearMenu()
 {
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	isInputDisabled = true;
+	totalAccumulatedScore = currentScore;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -685,6 +695,7 @@ void Draw_ClearMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
 			isInputDisabled = false;
+			currentScore = 0;
 		}
 	}
 	else
@@ -963,6 +974,7 @@ void Draw_QuitMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			currentScore = 0;
 			if (currentState == GS_HUBWORLD)
 			{
 				nextState = GS_MAIN_MENU;
@@ -1096,6 +1108,7 @@ void Draw_GameOverMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
 			isInputDisabled = false;
+			currentScore = 0;
 		}
 	}
 	else
@@ -1226,11 +1239,11 @@ void Update_LevelScore()
 {
 	if (currentScore + 10000 < newScore)
 	{
-		currentScore += 1000;
+		currentScore += 5000;
 	}
 	else if (currentScore < newScore)
 	{
-		currentScore += 200;
+		currentScore += 500;
 	}
 	else
 	{

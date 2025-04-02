@@ -134,6 +134,7 @@ void Level1_Initialize()
 	currentScore = 0;
 	displayPointsAccumulated = false;
 
+	// Set Camera to Player
 	LockCamera = false;
 	player.canAttack = true;
 

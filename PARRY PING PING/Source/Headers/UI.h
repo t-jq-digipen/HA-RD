@@ -180,7 +180,6 @@ void Draw_Points();
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
 
-
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
 void DrawLoadingImage();
