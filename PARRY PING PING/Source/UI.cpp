@@ -1377,38 +1377,3 @@ void Free_UI()
 	AEAudioStopGroup(gameSFX);
 }
 
-// Unload the UI elements
-void Unload_UI()
-{
-	// Spritesheets
-	Unload_SpriteSheet(&ssmenu_play);
-	Unload_SpriteSheet(&ssmenu_options);
-	Unload_SpriteSheet(&ssmenu_exit);
-	Unload_SpriteSheet(&ssmenu_1);
-	Unload_SpriteSheet(&ssmenu_2);
-	Unload_SpriteSheet(&ssmenu_3);
-	Unload_SpriteSheet(&ssmenu_4);
-	Unload_SpriteSheet(&ssmenu_screen);
-	Unload_SpriteSheet(&ssmenu_bar1);
-	Unload_SpriteSheet(&ssmenu_bar2);
-
-	// Crosshair
-	crosshair.Unload();
-
-	// Player HUD
-	playerHUD.Unload();
-
-	// Game audio
-	AEAudioUnloadAudio(levelBGM);
-	AEAudioUnloadAudio(levelSFX);
-	AEAudioUnloadAudio(lightProj);
-	AEAudioUnloadAudio(parryFX);
-	AEAudioUnloadAudio(heavyProj);
-	AEAudioUnloadAudio(sword1);
-	AEAudioUnloadAudio(sword2);
-	AEAudioUnloadAudio(sword3);
-	AEAudioUnloadAudio(bossLevel2);
-	AEAudioUnloadAudioGroup(gameBGM);
-	AEAudioUnloadAudioGroup(gameSFX);
-	AEGfxTextureUnload(loadingImage);
-}
