@@ -23,6 +23,11 @@ AEVec2 dummy_pos2; //for sword SFX
 
 void Level2_Load()
 {
+
+	// UI elements
+	Load_UI();
+	Load_Player_UI();
+
 	Load_Player();
 	Load_Boss2();
 
@@ -265,6 +270,7 @@ void Level2_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();
+	Unload_Player_UI();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_Boss2();

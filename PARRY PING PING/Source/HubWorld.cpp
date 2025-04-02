@@ -67,6 +67,10 @@ std::vector<float> HubWorld_IO_elements;
 
 void HubWorld_Load()
 {
+	// UI elements
+	Load_UI();
+	Load_Player_UI();
+
 	// Player
 	Load_Player();
 
@@ -375,6 +379,7 @@ void HubWorld_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
+	Unload_Player_UI();
 	Unload_Tutorial();
 	Unload_Mesh();
 	Unload_Player();

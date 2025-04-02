@@ -48,6 +48,11 @@ std::vector<float> L1_IO;
 
 void Level1_Load()
 {
+
+	// UI elements
+	Load_UI();
+	Load_Player_UI();
+
 	// Player
 	Load_Player();
 
@@ -343,6 +348,7 @@ void Level1_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();
+	Unload_Player_UI();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_Boss();

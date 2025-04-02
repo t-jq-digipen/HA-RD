@@ -109,10 +109,6 @@ int font_size;
 // Initialize the various screen UI elements
 void Init_UI()
 {
-	// Read File IO
-	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
-	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
-
 	// Colors
 	UI_red = SetColor(0xFFFF0000);
 	UI_green = SetColor(0xFF24FF8B);
@@ -122,13 +118,6 @@ void Init_UI()
 	UI_hover_red = SetColor(0xFFFF6961);
 	UI_purple = SetColor(0xFFFF00FF);
 	UI_gold = SetColor(0xFFFFD218);
-
-	// Font
-	font_size = static_cast<int>(UI_IO[0]);
-	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", font_size);
-	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
-
-	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 
 	// Level state UI
 	play_bg = SetColor(0xFF666666);
@@ -205,17 +194,6 @@ void Init_UI()
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
-	// BGM and SFX
-	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
-	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
-	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
-	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
-	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
-	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
-	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
-	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
-	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
-
 	// BGM and SFX (Audio Groups)
 	gameBGM = AEAudioCreateGroup();
 	gameSFX = AEAudioCreateGroup();
@@ -267,6 +245,64 @@ void Init_UI()
 	isFirstInit = true;
 }
 
+void Load_UI()
+{
+	// Read File IO
+	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
+	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
+
+	// Font
+	font_size = static_cast<int>(UI_IO[0]);
+	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", font_size);
+	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
+
+	// BGM and SFX
+	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
+	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
+	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
+	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
+	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
+	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
+	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
+	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
+	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
+
+	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
+}
+
+// Unload the UI elements
+void Unload_UI()
+{
+	// Spritesheets
+	Unload_SpriteSheet(&ssmenu_play);
+	Unload_SpriteSheet(&ssmenu_options);
+	Unload_SpriteSheet(&ssmenu_exit);
+	Unload_SpriteSheet(&ssmenu_1);
+	Unload_SpriteSheet(&ssmenu_2);
+	Unload_SpriteSheet(&ssmenu_3);
+	Unload_SpriteSheet(&ssmenu_4);
+	Unload_SpriteSheet(&ssmenu_screen);
+	Unload_SpriteSheet(&ssmenu_bar1);
+	Unload_SpriteSheet(&ssmenu_bar2);
+
+
+	// Loading image
+	AEGfxTextureUnload(loadingImage);
+
+	// Game audio
+	AEAudioUnloadAudio(levelBGM);
+	AEAudioUnloadAudio(levelSFX);
+	AEAudioUnloadAudio(lightProj);
+	AEAudioUnloadAudio(parryFX);
+	AEAudioUnloadAudio(heavyProj);
+	AEAudioUnloadAudio(sword1);
+	AEAudioUnloadAudio(sword2);
+	AEAudioUnloadAudio(sword3);
+	AEAudioUnloadAudio(bossLevel2);
+	AEAudioUnloadAudioGroup(gameBGM);
+	AEAudioUnloadAudioGroup(gameSFX);
+}
+
 // Initialize the player UI elements
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 {
@@ -281,13 +317,26 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	parry_charging = SetColor(0xFF00255F);
 	parry_ready = SetColor(0xFF004EFF);
 
+}
+
+void Load_Player_UI()
+{
 	// Crosshair
 	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
 	crosshair.Set_Row(0);
-	
+
 	// HUD
 	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 7);
 	playerHUD.Set_Row(0);
+}
+
+void Unload_Player_UI()
+{
+	// Crosshair
+	crosshair.Unload();
+
+	// Player HUD
+	playerHUD.Unload();
 }
 
 // Update the values for player UI
@@ -1327,37 +1376,3 @@ void Free_UI()
 	AEAudioStopGroup(gameSFX);
 }
 
-// Unload the UI elements
-void Unload_UI()
-{
-	// Spritesheets
-	Unload_SpriteSheet(&ssmenu_play);
-	Unload_SpriteSheet(&ssmenu_options);
-	Unload_SpriteSheet(&ssmenu_exit);
-	Unload_SpriteSheet(&ssmenu_1);
-	Unload_SpriteSheet(&ssmenu_2);
-	Unload_SpriteSheet(&ssmenu_3);
-	Unload_SpriteSheet(&ssmenu_4);
-	Unload_SpriteSheet(&ssmenu_screen);
-	Unload_SpriteSheet(&ssmenu_bar1);
-	Unload_SpriteSheet(&ssmenu_bar2);
-
-	// Crosshair
-	crosshair.Unload();
-
-	// Player HUD
-	playerHUD.Unload();
-
-	// Game audio
-	AEAudioUnloadAudio(levelBGM);
-	AEAudioUnloadAudio(levelSFX);
-	AEAudioUnloadAudio(lightProj);
-	AEAudioUnloadAudio(parryFX);
-	AEAudioUnloadAudio(heavyProj);
-	AEAudioUnloadAudio(sword1);
-	AEAudioUnloadAudio(sword2);
-	AEAudioUnloadAudio(sword3);
-	AEAudioUnloadAudio(bossLevel2);
-	AEAudioUnloadAudioGroup(gameBGM);
-	AEAudioUnloadAudioGroup(gameSFX);
-}
