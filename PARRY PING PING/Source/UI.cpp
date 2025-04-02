@@ -25,9 +25,10 @@ int levelState = 0;
 float levelTimer = 0.f;
 
 // Level score
-int currentScore = 0;
-int newScore = 0;
-int pointsAccumulated = 0;
+int currentScore;
+int newScore;
+int totalAccumulatedScore;
+int pointsAccumulated;
 bool displayPointsAccumulated = false;
 Timer displayPointsTimer;
 int currentCombo = 0;
@@ -108,10 +109,6 @@ int font_size;
 // Initialize the various screen UI elements
 void Init_UI()
 {
-	// Read File IO
-	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
-	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
-
 	// Colors
 	UI_red = SetColor(0xFFFF0000);
 	UI_green = SetColor(0xFF24FF8B);
@@ -121,13 +118,6 @@ void Init_UI()
 	UI_hover_red = SetColor(0xFFFF6961);
 	UI_purple = SetColor(0xFFFF00FF);
 	UI_gold = SetColor(0xFFFFD218);
-
-	// Font
-	font_size = static_cast<int>(UI_IO[0]);
-	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", font_size);
-	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
-
-	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 
 	// Level state UI
 	play_bg = SetColor(0xFF666666);
@@ -144,8 +134,16 @@ void Init_UI()
 	levelState = PLAYING;
 
 	// Level score
-	currentScore = 0;
-	newScore = 0;
+	if (previousState == GS_HUBWORLD)
+	{
+		currentScore = 0;
+		newScore = 0;
+		totalAccumulatedScore = 0;
+	}
+	else
+	{
+		newScore = totalAccumulatedScore;
+	}
 	pointsAccumulated = 0;
 	displayPointsAccumulated = false;
 	displayPointsTimer = Create_Timer(1.5f);
@@ -195,17 +193,6 @@ void Init_UI()
 	// Checks for button clicks in UI screens
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
-
-	// BGM and SFX
-	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
-	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
-	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
-	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
-	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
-	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
-	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
-	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
-	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
 
 	// BGM and SFX (Audio Groups)
 	gameBGM = AEAudioCreateGroup();
@@ -258,6 +245,64 @@ void Init_UI()
 	isFirstInit = true;
 }
 
+void Load_UI()
+{
+	// Read File IO
+	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
+	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
+
+	// Font
+	font_size = static_cast<int>(UI_IO[0]);
+	UI_font = AEGfxCreateFont("Assets/liberation-mono.ttf", font_size);
+	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
+
+	// BGM and SFX
+	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
+	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
+	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
+	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
+	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
+	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
+	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
+	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
+	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
+
+	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
+}
+
+// Unload the UI elements
+void Unload_UI()
+{
+	// Spritesheets
+	Unload_SpriteSheet(&ssmenu_play);
+	Unload_SpriteSheet(&ssmenu_options);
+	Unload_SpriteSheet(&ssmenu_exit);
+	Unload_SpriteSheet(&ssmenu_1);
+	Unload_SpriteSheet(&ssmenu_2);
+	Unload_SpriteSheet(&ssmenu_3);
+	Unload_SpriteSheet(&ssmenu_4);
+	Unload_SpriteSheet(&ssmenu_screen);
+	Unload_SpriteSheet(&ssmenu_bar1);
+	Unload_SpriteSheet(&ssmenu_bar2);
+
+
+	// Loading image
+	AEGfxTextureUnload(loadingImage);
+
+	// Game audio
+	AEAudioUnloadAudio(levelBGM);
+	AEAudioUnloadAudio(levelSFX);
+	AEAudioUnloadAudio(lightProj);
+	AEAudioUnloadAudio(parryFX);
+	AEAudioUnloadAudio(heavyProj);
+	AEAudioUnloadAudio(sword1);
+	AEAudioUnloadAudio(sword2);
+	AEAudioUnloadAudio(sword3);
+	AEAudioUnloadAudio(bossLevel2);
+	AEAudioUnloadAudioGroup(gameBGM);
+	AEAudioUnloadAudioGroup(gameSFX);
+}
+
 // Initialize the player UI elements
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 {
@@ -272,13 +317,26 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	parry_charging = SetColor(0xFF00255F);
 	parry_ready = SetColor(0xFF004EFF);
 
+}
+
+void Load_Player_UI()
+{
 	// Crosshair
 	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
 	crosshair.Set_Row(0);
-	
+
 	// HUD
 	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 7);
 	playerHUD.Set_Row(0);
+}
+
+void Unload_Player_UI()
+{
+	// Crosshair
+	crosshair.Unload();
+
+	// Player HUD
+	playerHUD.Unload();
 }
 
 // Update the values for player UI
@@ -511,6 +569,7 @@ void Draw_ClearMenu()
 {
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	isInputDisabled = true;
+	totalAccumulatedScore = currentScore;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -685,6 +744,7 @@ void Draw_ClearMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
 			isInputDisabled = false;
+			currentScore = 0;
 		}
 	}
 	else
@@ -963,6 +1023,7 @@ void Draw_QuitMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+			currentScore = 0;
 			if (currentState == GS_HUBWORLD)
 			{
 				nextState = GS_MAIN_MENU;
@@ -1096,6 +1157,7 @@ void Draw_GameOverMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_HUBWORLD;
 			isInputDisabled = false;
+			currentScore = 0;
 		}
 	}
 	else
@@ -1226,11 +1288,11 @@ void Update_LevelScore()
 {
 	if (currentScore + 10000 < newScore)
 	{
-		currentScore += 1000;
+		currentScore += 5000;
 	}
 	else if (currentScore < newScore)
 	{
-		currentScore += 200;
+		currentScore += 500;
 	}
 	else
 	{

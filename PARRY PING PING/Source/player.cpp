@@ -34,6 +34,7 @@ int SCORE_LIGHT_PROJECTILE_HIT;
 int SCORE_HEAVY_LASER_HIT;
 int SCORE_PLAYER_EAT_HIT;
 int SCORE_PLAYER_LOSE;
+int SCORE_LEVEL2_MULTIPLIER;
 
 typedef struct Projectile
 {
@@ -993,7 +994,15 @@ void Blocked_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(static_cast<int>(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT), BLOCKED_SCORE);
+	if (!player.hp)
+	{
+		// -10000 points if player is dead
+		Collect_Points(SCORE_PLAYER_LOSE, RIP_SCORE);
+	}
+	else
+	{
+		Collect_Points(static_cast<int>(damage * BLOCK_REDUCTION * SCORE_PLAYER_EAT_HIT), BLOCKED_SCORE);
+	}
 }
 
 void Eat_Hit(f32 damage)
@@ -1008,7 +1017,15 @@ void Eat_Hit(f32 damage)
 		highestCombo = currentCombo;
 	}
 	currentCombo = 0;
-	Collect_Points(static_cast<int>(damage * SCORE_PLAYER_EAT_HIT), OUCH_SCORE);
+	if (!player.hp)
+	{
+		// -10000 points if player is dead
+		Collect_Points(SCORE_PLAYER_LOSE, RIP_SCORE);
+	}
+	else
+	{
+		Collect_Points(static_cast<int>(damage * SCORE_PLAYER_EAT_HIT), OUCH_SCORE);
+	}
 }
 
 
@@ -1159,8 +1176,17 @@ void Init_Player()
 
 	SCORE_LIGHT_PROJECTILE_HIT = static_cast<int>(PlayerScore_IO[0]);			// + 500 points per projectile
 	SCORE_HEAVY_LASER_HIT = static_cast<int>(PlayerScore_IO[1]);				// + 750 points per tick
-	SCORE_PLAYER_EAT_HIT = static_cast<int>(PlayerScore_IO[2]);				// - 100 points (multiplied by damage) per hit
+	SCORE_PLAYER_EAT_HIT = static_cast<int>(PlayerScore_IO[2]);					// - 100 points (multiplied by damage) per hit
 	SCORE_PLAYER_LOSE = static_cast<int>(PlayerScore_IO[3]);					// - 10000 points for game over
+	SCORE_LEVEL2_MULTIPLIER = static_cast<int>(PlayerScore_IO[11]);				// x2 points in Level 2
+
+	if (currentState == GS_LEVEL2)
+	{
+		SCORE_LIGHT_PROJECTILE_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_HEAVY_LASER_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_PLAYER_EAT_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_PLAYER_LOSE *= SCORE_LEVEL2_MULTIPLIER;
+	}
 }
 
 void Update_Player()
@@ -1309,9 +1335,6 @@ void Update_Player()
 	else
 	{
 		levelState = GAMEOVER;
-
-		// -10000 points if player is dead
-		Collect_Points(SCORE_PLAYER_LOSE, RIP_SCORE);
 
 		std::cout << "bro is dead\n";
 	}

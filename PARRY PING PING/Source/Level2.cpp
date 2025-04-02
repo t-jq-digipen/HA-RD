@@ -12,6 +12,7 @@
 AEGfxTexture* mapTexture2 = nullptr;
 
 Timer cleartransitiontimer2;
+Timer gameovertransitiontimer2;
 float levelTimer2;
 
 bool showBossHitboxes2 = true;
@@ -22,6 +23,11 @@ AEVec2 dummy_pos2; //for sword SFX
 
 void Level2_Load()
 {
+
+	// UI elements
+	Load_UI();
+	Load_Player_UI();
+
 	Load_Player();
 	Load_Boss2();
 
@@ -68,9 +74,17 @@ void Level2_Initialize()
 	// Incrementing Level Timer
 	levelTimer2 = 0.f;
 
+	// Set Camera to Player
+	LockCamera = false;
+	player.canAttack = true;
+
 	// Level Clear Transition Timer
 	cleartransitiontimer2 = Create_Timer(5.f);
-	cleartransitiontimer2.current = 0;
+	cleartransitiontimer2.current = 0.f;
+
+	// Game Over Transition Timer
+	gameovertransitiontimer2 = Create_Timer(2.f);
+	gameovertransitiontimer2.current = 0.f;
 }
 
 void ToggleBossHitboxes2()
@@ -98,7 +112,7 @@ void Level2_Update()
 	}
 
 
-	if (levelState != PAUSED && levelState != OPTIONS && levelState != GAMEOVER)
+	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
 		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
@@ -188,7 +202,10 @@ void Level2_Draw()
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Boss2();
-		Draw_Player();
+		if (player.hp > 0.f)
+		{
+			Draw_Player();
+		}
 	}
 
 	// UI
@@ -196,6 +213,18 @@ void Level2_Draw()
 
 	// Level Timer
 	Draw_LevelTimer(levelTimer2);
+
+	// Level Score
+	Draw_LevelScore();
+
+	if (displayPointsAccumulated)
+	{
+		Draw_Points();
+	}
+	else
+	{
+		Update_LevelScore();
+	}
 
 	AEInputShowCursor(0);
 	if (levelState == PAUSED)
@@ -205,8 +234,11 @@ void Level2_Draw()
 	}
 	else if (levelState == GAMEOVER)
 	{
-		Draw_GameOverMenu();
-		AEInputShowCursor(1);
+		if (!Update_Timer(&gameovertransitiontimer2))
+		{
+			Draw_GameOverMenu();
+			AEInputShowCursor(1);
+		}
 	}
 	else if (levelState == OPTIONS)
 	{
@@ -238,6 +270,7 @@ void Level2_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();
+	Unload_Player_UI();
 	Unload_Mesh();
 	Unload_Player();
 	Unload_Boss2();

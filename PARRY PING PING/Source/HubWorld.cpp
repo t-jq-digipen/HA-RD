@@ -87,6 +87,10 @@ void WaitForLeaderboardFetch() {
 
 void HubWorld_Load()
 {
+	// UI elements
+	Load_UI();
+	Load_Player_UI();
+
 	// Player
 	Load_Player();
 
@@ -189,7 +193,7 @@ void HubWorld_Update()
 		CamPanning = false;
 	}
 
-	if (levelState != PAUSED && levelState != GAMEOVER)
+	if (levelState == PLAYING)
 	{
 		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
 		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
@@ -222,27 +226,30 @@ void HubWorld_Update()
 			nextState = GS_LEVEL2;
 		}
 
-		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)				// Pause menu when escape key is pressed!
+		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)	// Pause menu when escape key is pressed!
 		{
 			levelState = PAUSED;
 			InTop20 = false;
 		}
-		else if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)			// Unpause!
+	}
+	else
+	{
+		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PAUSED)		// Unpause!
 		{
 			levelState = PLAYING;
 		}
 	}
-		if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height)) ||
+	if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height)) ||
 			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
-		{
-			LockCamera = true;
-			player.canAttack = false;
-		}
-		else {
-			LockCamera = false;
-			player.canAttack = true;
-		}
+	{
+		LockCamera = true;
+		player.canAttack = false;
 	}
+	else {
+		LockCamera = false;
+		player.canAttack = true;
+	}
+}
 
 
 
@@ -392,6 +399,7 @@ void HubWorld_Unload()
 {
 	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
+	Unload_Player_UI();
 	Unload_Tutorial();
 	Unload_Mesh();
 	Unload_Player();

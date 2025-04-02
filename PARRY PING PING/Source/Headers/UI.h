@@ -96,9 +96,24 @@ void Draw_UI(int DrawBossHP = 1);
 void Init_UI();
 
 // ----------------------------------------------------------------------------
+// Load the various screen UI elements
+// ----------------------------------------------------------------------------
+void Load_UI();
+
+// ----------------------------------------------------------------------------
 // Initialize the player UI elements
 // ----------------------------------------------------------------------------
 void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp);
+
+// ----------------------------------------------------------------------------
+// Load player UI elements
+// ----------------------------------------------------------------------------
+void Load_Player_UI();
+
+// ----------------------------------------------------------------------------
+// Unload player UI elements
+// ----------------------------------------------------------------------------
+void Unload_Player_UI();
 
 // ----------------------------------------------------------------------------
 // Update the values for player UI
@@ -179,7 +194,6 @@ void Draw_Points();
 // Update the level score
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
-
 
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
