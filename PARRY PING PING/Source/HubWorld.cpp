@@ -224,7 +224,7 @@ void HubWorld_Update()
 			{
 				LockCamera = false;
 				player.canAttack = true;
-				nextState = GS_LEVEL1;
+				nextState = GS_LEVEL2;
 			}
 		}
 
@@ -232,11 +232,6 @@ void HubWorld_Update()
 		{
 			LockCamera = true;
 			player.canAttack = false;
-		}
-		if (AEInputCheckTriggered(AEVK_L)) {
-			LockCamera = false;
-			player.canAttack = true;
-			nextState = GS_LEVEL2;
 		}
 
 		if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)	// Pause menu when escape key is pressed!
@@ -333,7 +328,7 @@ void HubWorld_Draw()
 
 
 	//Highlight effect when approaching leaderboard shrine
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height))
+	if (AETestPointToRect(&player.pos, &Env_Shrine.Pos, Env_Shrine.Width, Env_Shrine.Height))
 	{
 		Draw_FadeOut(FadeShrine);
 		hubworld_white.A = FadeShrine.A;

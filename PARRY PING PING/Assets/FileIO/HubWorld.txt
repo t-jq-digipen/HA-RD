@@ -14,8 +14,8 @@
 13) Env_Shrine Pos Y: -200.f
 14) Env_Shrine Width: 300.f
 15) Env_Shrine Height: 300.f
-16) Env_Modifiers Pos X: -600.f
-17) Env_Modifiers Pos Y: 300.f
+16) Env_Modifiers Pos X: -400.f
+17) Env_Modifiers Pos Y: 550.f
 18) Env_Modifiers Width: 100.f
 19) Env_Modifiers Height: 200.f
 20) Txt_Controls Pos X: 0.f
