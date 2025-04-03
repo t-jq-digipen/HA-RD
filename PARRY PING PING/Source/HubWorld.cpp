@@ -68,23 +68,23 @@ std::future<void> leaderboardFetchFuture;
 // File IO
 std::vector<float> HubWorld_IO_elements;
 
-void FetchLeaderboardAsync() {
-	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
-	isFetchingLeaderboard = true;
-
-	// Launch async operation and store future
-	leaderboardFetchFuture = std::async(std::launch::async, []() {
-		fetchLeaderboard();
-		isFetchingLeaderboard = false;
-		});
-}
-
-// Call this function when the game is closing
-void WaitForLeaderboardFetch() {
-	if (leaderboardFetchFuture.valid()) {
-		leaderboardFetchFuture.get(); // Wait for completion
-	}
-}
+//void FetchLeaderboardAsync() {
+//	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+//	isFetchingLeaderboard = true;
+//
+//	// Launch async operation and store future
+//	leaderboardFetchFuture = std::async(std::launch::async, []() {
+//		fetchLeaderboard();
+//		isFetchingLeaderboard = false;
+//		});
+//}
+//
+//// Call this function when the game is closing
+//void WaitForLeaderboardFetch() {
+//	if (leaderboardFetchFuture.valid()) {
+//		leaderboardFetchFuture.get(); // Wait for completion
+//	}
+//}
 
 void HubWorld_Load()
 {
@@ -101,8 +101,8 @@ void HubWorld_Load()
 	// Tutorial
 	Load_Tutorial();
 
-	// Leaderboard
-	FetchLeaderboardAsync();
+	//// Leaderboard
+	//FetchLeaderboardAsync();
 
 	shrine_sprite = SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
 	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
@@ -449,7 +449,7 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
-	WaitForLeaderboardFetch();
+	//WaitForLeaderboardFetch();
 }
 
 void Draw_FadeIn(Color& Fade) {

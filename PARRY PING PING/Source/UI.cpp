@@ -1313,21 +1313,37 @@ void addLeaderboardEntry(const std::string& name, int score, const std::string& 
 		return;
 	}
 
+	// Determine leaderboard based on game state
+	std::string leaderboardCategory;
+	switch (currentState) {
+	case GS_LEVEL1:
+		leaderboardCategory = "Boss1";
+		break;
+	case GS_LEVEL2:
+		leaderboardCategory = "Boss2";
+		break;
+	default:
+		std::cerr << "Error: Leaderboard is only available for boss levels!" << std::endl;
+		return;
+	}
+
 	std::string command = "\"\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \""
+		+ leaderboardCategory + "\" \""  // Use game state to determine leaderboard
 		+ name + "\" \""
 		+ std::to_string(score) + "\" \""
 		+ timing + "\"\"";
 
-	std::cout << "Adding leaderboard entry..." << std::endl;
+	std::cout << "Adding leaderboard entry for " << leaderboardCategory << "..." << std::endl;
 	int result = system(command.c_str());
 
 	if (result != 0) {
-		std::cout << "Error adding leaderboard entry!" << std::endl;
+		std::cout << "Error adding leaderboard entry for " << leaderboardCategory << "!" << std::endl;
 	}
 	else {
-		std::cout << "Leaderboard entry added successfully!" << std::endl;
+		std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
 	}
 }
+
 
 
 // Draw full hp bar
