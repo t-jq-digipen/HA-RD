@@ -113,6 +113,8 @@ void HubWorld_Load()
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
+
+
 }
 
 void HubWorld_Initialize()
@@ -122,8 +124,8 @@ void HubWorld_Initialize()
 	// Hub World Environments
 	Env_Gate = { HubWorld_IO_elements[0], HubWorld_IO_elements[1], HubWorld_IO_elements[2], HubWorld_IO_elements[3] };				// ENV GATE			{ 0.f, 550.f, 500.f, 100.f } 
 	Env_Gate2 = { HubWorld_IO_elements[4], HubWorld_IO_elements[5], HubWorld_IO_elements[6], HubWorld_IO_elements[7] };				// ENV GATE2		{ 0.f, 550.f, 500.f, 100.f } 
-	Env_Campfire = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };			// ENV CAMPFIRE		{ -50.f, 0.f, 100.f, 100.f }
-	Env_Shrine = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };			// ENV SHRINE		{ -600.f, -200.f, 70.f, 150.f }
+	Env_Campfire = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };		// ENV CAMPFIRE		{ -50.f, 0.f, 100.f, 100.f }
+	Env_Shrine = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };		// ENV SHRINE		{ -600.f, -200.f, 70.f, 150.f }
 	Env_Modifiers = { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };		// ENV MODIFIERS	{ -600.f, 300.f, 100.f, 200.f }
 
 	// Hub World Text
@@ -268,7 +270,6 @@ void HubWorld_Draw()
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
-
 
 	//Draw Parry Bots	
 	Draw_DummyBotMelee();														// Draw (placeholder) sprites for dummies!

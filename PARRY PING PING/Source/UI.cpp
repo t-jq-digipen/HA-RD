@@ -168,30 +168,6 @@ void Init_UI()
 	endmenu_height = UI_IO[31];
 	menu_rot = UI_IO[32];
 
-	// Menu Buttons
-	ssmenu_play = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_options = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_exit = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_1 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_2 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_3 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_4 = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_screen = Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
-	ssmenu_bar1 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
-	ssmenu_bar2 = Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
-
-	// UI Screen Spritesheets
-	uiscreen.spritesheet_playbutton = &ssmenu_play;
-	uiscreen.spritesheet_optionsbutton = &ssmenu_options;
-	uiscreen.spritesheet_exitbutton = &ssmenu_exit;
-	uiscreen.spritesheet_button1 = &ssmenu_1;
-	uiscreen.spritesheet_button2 = &ssmenu_2;
-	uiscreen.spritesheet_button3 = &ssmenu_3;
-	uiscreen.spritesheet_button4 = &ssmenu_4;
-	uiscreen.spritesheet_screen = &ssmenu_screen;
-	uiscreen.spritesheet_bar1 = &ssmenu_bar1;
-	uiscreen.spritesheet_bar2 = &ssmenu_bar2;
-	uiscreen.animationtimer = Create_Timer(0.5f);
 
 	// Checks for button clicks in UI screens
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
@@ -253,6 +229,32 @@ void Load_UI()
 	// Read File IO
 	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
 	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
+
+
+	// Menu Buttons
+	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_options	= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_exit		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_1		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_2		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_3		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_4		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_screen	= Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
+	ssmenu_bar1		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
+	ssmenu_bar2		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
+
+	// UI Screen Spritesheets
+	uiscreen.spritesheet_playbutton		= &ssmenu_play;
+	uiscreen.spritesheet_optionsbutton	= &ssmenu_options;
+	uiscreen.spritesheet_exitbutton		= &ssmenu_exit;
+	uiscreen.spritesheet_button1		= &ssmenu_1;
+	uiscreen.spritesheet_button2		= &ssmenu_2;
+	uiscreen.spritesheet_button3		= &ssmenu_3;
+	uiscreen.spritesheet_button4		= &ssmenu_4;
+	uiscreen.spritesheet_screen			= &ssmenu_screen;
+	uiscreen.spritesheet_bar1			= &ssmenu_bar1;
+	uiscreen.spritesheet_bar2			= &ssmenu_bar2;
+	uiscreen.animationtimer = Create_Timer(0.5f);
 
 	// Font
 	font_size = static_cast<int>(UI_IO[0]);
