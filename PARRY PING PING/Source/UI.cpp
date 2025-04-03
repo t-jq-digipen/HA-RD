@@ -27,6 +27,9 @@ float levelTimer = 0.f;
 // Level score
 int currentScore;
 int newScore;
+
+f32 Modifier_ScoreScale[3]{ 0.5f, 1.f, 1.5f };
+
 int totalAccumulatedScore;
 int pointsAccumulated;
 bool displayPointsAccumulated = false;
@@ -1229,7 +1232,7 @@ void Collect_Points(int value, int score_index)
 			}
 		}
 	}
-	pointsAccumulated += value;
+	pointsAccumulated += int(value * Modifier_ScoreScale[player.Mod_DmgTakenIndex]);
 	displayPointsAccumulated = true;
 	displayPointsTimer.current = 0.f;
 }

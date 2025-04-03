@@ -988,7 +988,20 @@ void Blocked_Hit(f32 damage)
 	player.ragemeter = 0;
 	player.state = BLOCKED;
 	player.blocked.current = 0.f;
-	player.hp -= damage * BLOCK_REDUCTION;
+
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		player.hp -= damage * BLOCK_REDUCTION * 0.5f;
+		break;
+	default:
+		player.hp -= damage * BLOCK_REDUCTION;
+		break;
+	case 2:
+		player.hp -= damage * BLOCK_REDUCTION * 2.f;
+		break;
+	}
+
 	if (currentCombo > highestCombo)
 	{
 		highestCombo = currentCombo;
@@ -1011,7 +1024,20 @@ void Eat_Hit(f32 damage)
 	player.ragemeter = 0;
 	player.state = HIT;
 	player.hittimer.current = 0.f;
-	player.hp -= damage;
+
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		player.hp -= damage * 0.5f;
+		break;
+	default:
+		player.hp -= damage;
+		break;
+	case 2:
+		player.hp -= damage * 2.f;
+		break;
+	}
+
 	if (currentCombo > highestCombo)
 	{
 		highestCombo = currentCombo;
@@ -1070,6 +1096,11 @@ void Init_Player()
 	player.hp = Player_IO[5];						// PLAYER HP				100.f
 	player.max_hp = Player_IO[5];					// PLAYER MAX HP			100.f
 	player.radius = Player_IO[6];					// PLAYER RADIUS			25.f
+
+
+	player.canAttack = true;
+	player.ragemeter = 0;
+	player.ragemeter_max = 5;
 
 	player.dodge_vel = { Player_IO[7], Player_IO[8] };	// PLAYER DODGE VEL	{ X = 0.f, Y = 0.f }
 

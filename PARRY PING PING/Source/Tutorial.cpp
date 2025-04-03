@@ -315,6 +315,7 @@ void Init_Tutorial()
 	clear_delay = Create_Timer(Tutorial_IO[1]);				// TUTORIAL CLEAR DELAY			1.0s
 
 	toofar = false;
+	active = false;
 
 	tutgreen	= SetColor(0xFF08A045);
 	tutblack	= SetColor(0xFF101010);

@@ -19,12 +19,19 @@ void HubWorld_Draw();			// Draws assets for props, player, UI etc.
 void HubWorld_Free();			// Free memory allocated for Hub World elements
 void HubWorld_Unload();			// Unload Hub World resources
 
+
+// ----------------------------------------------------------------------------
+// Controls fade to/from dark transitions for Hub World interactables
+// ----------------------------------------------------------------------------
 void Draw_FadeIn(Color& Fade);	// Draws a Fade from Black transition
 void Draw_FadeOut(Color& Fade);	// Draws a Fade to Black transition
+
 // ----------------------------------------------------------------------------
 // Draws top 3 recorded scores
 // ----------------------------------------------------------------------------
 void Draw_ShrineBoard();
+
+void Draw_ModifiersBoard();
 
 void fetchLeaderboard();
 

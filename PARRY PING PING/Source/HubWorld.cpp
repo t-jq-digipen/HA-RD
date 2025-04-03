@@ -45,7 +45,7 @@ SpriteSheet campfire_sprite;
 SpriteSheet shrine_sprite;
 
 // Fade from black transition when level starts
-Color FadeIn, FadeGate, FadeShrine;
+Color FadeIn, FadeGate, FadeShrine, FadeModifiers;
 f32 FadeInSpeed;
 
 int DummyMelee_Check;										// Check for dummy logic
@@ -54,7 +54,8 @@ Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
 bool InTop20;												// For Top 20 highscores
-bool Draw_Top3;
+bool Draw_Top3;												// For Top 3 screen
+bool InModifiers;											// For modifier selection screen
 
 //Leaderboard fetching
 std::vector<std::string> HS_name(20);
@@ -146,6 +147,8 @@ void HubWorld_Initialize()
 
 	InTop20 = false;
 	Draw_Top3 = true;
+	InModifiers = false;
+	player.Mod_DmgTakenIndex = 1;
 
 
 	// Player
@@ -207,18 +210,27 @@ void HubWorld_Update()
 
 		Update_Tutorial();
 
-		// Incrementing level timer
-		//if (levelState != CLEARED)
-		//{
-		//	Update_LevelTimer(&HubWorld_LevelTimer);						// Update level timer when level is ongoing
-		//}
-		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) {
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
 				LockCamera = false;
 				player.canAttack = true;
 				nextState = GS_LEVEL1;
 			}
+		}
+		else if (AETestPointToRect(&player.pos, &Env_Gate2.Pos, Env_Gate2.Width / 2.f, Env_Gate2.Height)) {
+			if (AEInputCheckTriggered(AEVK_F))
+			{
+				LockCamera = false;
+				player.canAttack = true;
+				nextState = GS_LEVEL1;
+			}
+		}
+
+		if ((AETestPointToRect(&player.pos, &Env_Shrine.Pos, Env_Shrine.Width * 5.f, Env_Shrine.Height * 2.5f)) || AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 4.f, Env_Gate.Height * 2.f))
+		{
+			LockCamera = true;
+			player.canAttack = false;
 		}
 		if (AEInputCheckTriggered(AEVK_L)) {
 			LockCamera = false;
@@ -230,6 +242,7 @@ void HubWorld_Update()
 		{
 			levelState = PAUSED;
 			InTop20 = false;
+			InModifiers = false;
 		}
 	}
 	else
@@ -272,30 +285,50 @@ void HubWorld_Draw()
 	campfire_sprite.Loop(0, 11, 1.f);
 	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
 
-	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
-
 	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
 	//Highlight effect when approaching gate
-	if (AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
+	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 4.f, Env_Gate.Height * 2.f))
 	{
 		Draw_FadeOut(FadeGate);
-
-		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width, Env_Gate.Height)) {
-			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width * 3.f, Env_Modifiers.Height * 1.5f)) {
+			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
+			if (AEInputCheckTriggered(AEVK_F) && InModifiers == false)
+			{
+				InModifiers = true;
+			}
+			else if (AEInputCheckTriggered(AEVK_F) && InModifiers == true)
+			{
+				InModifiers = false;
+				ResetCamera();
+			}
 		}
 		else {
-			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "JUST DO IT!", true);
-		}	
+			InModifiers = false;
+			Draw_FadeIn(FadeShrine);
+		}
+
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) {
+			DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y + 100.f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		}
+		else if (AETestPointToRect(&player.pos, &Env_Gate2.Pos, Env_Gate2.Width / 2.f, Env_Gate2.Height)) {
+			DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y + 100.f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		}
 	}
 	else 
 	{
 		Draw_FadeIn(FadeGate);
+		InModifiers = false;
 	}
+
+	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
+	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
+
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE", true);
+	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));			// Gate 2 - player starts boss fight level here!
+	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE 1", true);
+	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, hubworld_font, hubworld_white, "GATE 2", true);
 
 
 	//Highlight effect when approaching leaderboard shrine
@@ -313,6 +346,7 @@ void HubWorld_Draw()
 		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)
 		{
 			InTop20 = false;
+			ResetCamera();
 		}
 	}
 	else
@@ -335,11 +369,7 @@ void HubWorld_Draw()
 	Draw_Tutorial();
 
 	// UI
-	// !!!TO DO!!! can try add system with like HUD that only shows when u are attacking or doing actions, and disappears when not doing anyth so it looks more cinematic and cool 
 	Draw_UI(0);					// Draw UI - (0) added to not draw boss healthbar
-
-	// Level Timer
-	// Draw_LevelTimer(HubWorld_LevelTimer);		// Draw timer on bottom right
 
 	AEInputShowCursor(0);						// Hides cursor
 	if (levelState == PAUSED)
@@ -357,7 +387,6 @@ void HubWorld_Draw()
 	else if (levelState == INQUIT)
 	{
 		Draw_QuitMenu();
-		AEInputShowCursor(1);
 	}
 	else if (levelState == CLEARED)
 	{
@@ -367,7 +396,7 @@ void HubWorld_Draw()
 		}
 	}
 
-	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || InTop20) {
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || levelState == INQUIT || InTop20 || InModifiers) {
 		AEInputShowCursor(1);													// Show cursor in these screens
 	}
 
@@ -379,6 +408,16 @@ void HubWorld_Draw()
 	else {
 		CamPanning = false;
 		Draw_Top3 = true;
+	}
+
+	if (InModifiers) {
+		Pan_Camera(0.f, 500.f, 10.f);
+		CamPanning = true;
+		Draw_ModifiersBoard();
+	}
+	else {
+		CamPanning = false;
+		InModifiers = false;
 	}
 
 	//cool little fade in effect
@@ -546,6 +585,7 @@ void Draw_ShrineBoard() {
 
 		// Show More
 		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
+		DrawTextAdvanced(1200.f, 0.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
 	}
 	else {
 		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 20!", false);
@@ -560,6 +600,40 @@ void Draw_ShrineBoard() {
 
 		// Show Less
 		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
+		DrawTextAdvanced(-1200.f, 0.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+	}
+}
+
+void Draw_ModifiersBoard() {
+	DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "MODIFIERS", false);
+	DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "NOTE: This will affect your score", false, 0.3f);
+
+	DrawTextAdvanced(0.f, 400.f, pixel_font, SetColor(0xFFFFFFFF), "Damage Taken:", false, 0.3f);
+	const char* Mod_DmgTaken[3] {"Vadim Surov", "Default", "We ball"};
+	DrawTextAdvanced(0.f, 300.f, pixel_font, SetColor(0xFFFFFFFF), Mod_DmgTaken[player.Mod_DmgTakenIndex], false, 0.3f);
+	DrawRect(150.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
+	DrawRect(-150.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
+	DrawTextAdvanced(-300.f, 300.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+	DrawTextAdvanced(300.f, 300.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+
+	if ((IsAreaClicked(150.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		player.Mod_DmgTakenIndex++;
+		if (player.Mod_DmgTakenIndex > 2) player.Mod_DmgTakenIndex = 2;
+	}
+	else if ((IsAreaClicked(-150.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		player.Mod_DmgTakenIndex--;
+		if (player.Mod_DmgTakenIndex < 0) player.Mod_DmgTakenIndex = 0;
+	}
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		DrawTextAdvanced(0.f, 200.f, pixel_font, SetColor(0xFFFF0000), "Reduced score!", false, 0.3f);
+		break;
+	default:
+		break;
+	case 2:
+		DrawTextAdvanced(0.f, 200.f, pixel_font, SetColor(0xFF00FF00), "Bonus score!", false, 0.3f);
+		break;
 	}
 }
 #pragma endregion

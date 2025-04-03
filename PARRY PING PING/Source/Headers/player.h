@@ -71,6 +71,7 @@ typedef struct Player
     float speed;           ///< Speed of the player
     AEVec2 dodge_vel;      ///< Velocity during a dodge
     float hp, max_hp;              ///< Health of the player
+    int Mod_DmgTakenIndex; ///< Damage taken multiplier
     float radius;          ///< Radius for collision checks
     float width, height;   ///< Dimensions of the player
     aabb hitbox;           ///< Axis-aligned bounding box for collision detection

@@ -35,6 +35,11 @@ f32 Screen_To_World_x(f32 pos_x);
 f32 Screen_To_World_y(f32 pos_y);
 
 // ----------------------------------------------------------------------------
+// Resets camera to player pos + mouse offsets (for smooth exit from panning)
+// ----------------------------------------------------------------------------
+void ResetCamera();
+
+// ----------------------------------------------------------------------------
 // Just true or false to stop camera panning with mouse (default to true!)
 // ----------------------------------------------------------------------------
 extern bool LockCamera;
