@@ -36,7 +36,7 @@
 35) Boss 2 Offset Range Y: 250.f
 36) Boss 2 Slash Width: 250.f
 37) Boss 2 Slash Height: 250.f
-38) Boss 2 Dash Offset: 100.f
+38) Boss 2 Dash Offset: 200.f
 39) Boss 2 Missile Prep Speed: 500.f
 40) Boss 2 Missile Homing Speed: 800.f
 41) Boss 2 Slash Damage: 30.f
@@ -45,7 +45,7 @@
 44) Boss 2 Lightning Wave Damage: 30.f
 45) Boss 2 Lightning Wave Speed: 10.f
 46) Boss 2 Lightning Wave Max Radius: 800.f
-47) Boss 2 Lightning Wave Duration: 4.f
+47) Boss 2 Lightning Wave Duration: 2.5f
 48) Boss 2 Idle Timer: 1.f
 49) Boss 2 Attack Timer: 3.f
 50) Boss 2 Stun Timer: 3.f

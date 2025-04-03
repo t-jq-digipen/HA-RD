@@ -124,10 +124,6 @@ void Load_Boss2()
     ReadFromFile("Assets/FileIO/Boss2.txt", Boss2_IO);
     ReadFromFile("Assets/FileIO/PlayerScore.txt", Boss2Score_IO);
 
-    for (int i = 0; i < Boss2_IO.size(); i++)
-    {
-        std::cout << "BOSS2IO[" << i << "] : " << Boss2_IO[i] << '\n';
-    }
 
     boss_2_sprite = SpriteSheet("Assets/Bosses/Boss_2.png", 15, 19);
     Load_Parry_Spark();
@@ -481,7 +477,6 @@ void Draw_Boss2_Hitboxes()
             {
                 // Draw active slash hitbox
                 DrawRect(World_To_Screen_x(boss_2.target_dir.x), World_To_Screen_y(boss_2.target_dir.y), SLASHWIDTH, SLASHHEIGHT, blue2);
-
             }
             break;
         case (DASH_SLASH2):
@@ -509,14 +504,14 @@ void Draw_Boss2_Hitboxes()
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
                 // Draw windup animation for slam
-                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
-                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y),
+                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red2);
+                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y),
                     (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, red3);
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
                 // Draw active slam hitbox
-                DrawCircle(World_To_Screen_x(boss_2.pos.x), World_To_Screen_y(boss_2.pos.y), LIGHTNING_STAB_RADIUS, red2);
+                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red2);
 
             }
             break;
@@ -1092,8 +1087,8 @@ void Lightning_Wave_Logic()
 {
     // Set the attack timer duration to match current attack type
     boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
-    AEVec2 stab_pos = boss_2.pos;
-    stab_pos.y -= 100.f;
+    lightningwave.pos = boss_2.pos;
+    lightningwave.pos.y -= 150.f;
 
     switch (boss_2.attack_type)
     {
@@ -1116,7 +1111,7 @@ void Lightning_Wave_Logic()
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
                 
                 // Damage check
-                if (AETestCircleToCircle(&boss_2.pos, LIGHTNING_STAB_RADIUS, &player.pos, player.radius))
+                if (AETestCircleToCircle(&lightningwave.pos, LIGHTNING_STAB_RADIUS, &player.pos, player.radius))
                 {
                     if (will_hit2 && !lightning_stab_damaged)
                     {
@@ -1138,8 +1133,6 @@ void Lightning_Wave_Logic()
             boss_2.attack_type = LIGHTNING_WAVE;
             boss_2.attack_timer.current = 0.f;
             boss_2.attack_timer.duration = boss_attack[LIGHTNING_WAVE].timer.duration;
-            lightningwave.pos = boss_2.pos;
-            lightningwave.pos.y -= 50.f;
             lightningwave.radius = 0.f;
             lightning_wave_damaged = false;
         }
@@ -1162,11 +1155,11 @@ void Lightning_Wave_Logic()
             else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_active)
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
-                // Expand the wave
-                //lightningwave.radius += LIGHTNING_WAVE_SPEED;
 
                 // Start the wave
                 lightningwave.timer.current = 0.f;
+
+                boss_2.attack_timer.current = boss_attack[LIGHTNING_WAVE].attack_active / boss_attack[LIGHTNING_WAVE].timer.duration;
 
             }
             // Recover Phase

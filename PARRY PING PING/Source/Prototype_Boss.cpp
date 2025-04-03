@@ -26,6 +26,7 @@ Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_proje
 // Sprite sheets
 SpriteSheet_Old boss_sprite_sheet;
 SpriteSheet boss_1_sprite;
+SpriteSheet fist_sprite;
 
 // Boss spawn position
 f32 BOSS_SPAWN_X;
@@ -105,6 +106,7 @@ void Load_Boss()
 
     boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
     boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
+    fist_sprite = SpriteSheet("Assets/Bosses/fist.png", 2, 2);
     Load_Parry_Spark();
 }
 
@@ -448,7 +450,6 @@ void Update_Boss()
         // Remove inactive explosion effects
         boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& e) { return !e.active; }), boss_death_explosion.end());
     }
-
 
     // Update Boss Hitbox
     Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
@@ -867,7 +868,19 @@ void Draw_Boss()
     {
         if (fist.active)
         {
-            DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
+            //DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
+            //DrawRotatedRect(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), 180.f, 60.f, boss_projectile_color, boss_1.target_rot);
+            if ((boss_1.target_rot > PI / 2.f && boss_1.target_rot < PI) || (boss_1.target_rot > -PI && boss_1.target_rot < -(PI / 2.f)))
+            {
+                fist_sprite.Set_Row(1);
+            }
+            else
+            {
+                fist_sprite.Set_Row(0);
+            }
+            fist_sprite.Loop(0, 1, 0.2f);
+            fist_sprite.Draw(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), 360.f, 120.f, false, boss_1.target_rot);
+            //DrawRotatedRect(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_WIDTH, BOSS_HEIGHT, boss_idle, boss_1.target_rot);
         }
     }
 
@@ -892,6 +905,7 @@ void Unload_Boss()
 {
     Unload_SpriteSheet(&boss_sprite_sheet);
     boss_1_sprite.Unload();
+    fist_sprite.Unload();
     Unload_Parry_Spark();
 }
 
