@@ -114,39 +114,46 @@ void HubWorld_Load()
 	// Read File IO
 	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
 
+	// Hub World Environments
+	Env_Gate		= { HubWorld_IO_elements[0],  HubWorld_IO_elements[1],  HubWorld_IO_elements[2],  HubWorld_IO_elements[3] };	// ENV GATE 
+	Env_Gate2		= { HubWorld_IO_elements[4],  HubWorld_IO_elements[5],  HubWorld_IO_elements[6],  HubWorld_IO_elements[7] };	// ENV GATE2
+	Env_Campfire	= { HubWorld_IO_elements[8],  HubWorld_IO_elements[9],  HubWorld_IO_elements[10], HubWorld_IO_elements[11] };	// ENV CAMPFIRE
+	Env_Shrine		= { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };	// ENV SHRINE
+	Env_Modifiers	= { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };	// ENV MODIFIERS
 
+	// Hub World Text
+	Txt_Controls	= { HubWorld_IO_elements[20], HubWorld_IO_elements[21], HubWorld_IO_elements[22], HubWorld_IO_elements[23] };	// TXT CONTROLS
+	Txt_Movement	= { HubWorld_IO_elements[24], HubWorld_IO_elements[25], HubWorld_IO_elements[26], HubWorld_IO_elements[27] };	// TXT MOVEMENT
+	Txt_Attack		= { HubWorld_IO_elements[28], HubWorld_IO_elements[29], HubWorld_IO_elements[30], HubWorld_IO_elements[31] };	// TXT ATTACK
+
+	// Dummy enemy
+	DummyMelee_pos  = { HubWorld_IO_elements[32], HubWorld_IO_elements[33] };														// MELEE DUMMY POS	{ 600.f, 200.f }									
+	DummyRange_pos  = { HubWorld_IO_elements[35], HubWorld_IO_elements[36] };														// RANGE DUMMY POS	{ 800.f, 200.f }
+	DummyMelee_rad  = (HubWorld_IO_elements[34]);																					// MELEE DUMMY RAD	50.f
+
+	// Font
+	hubworld_font   = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);															// Font and text colour
+	hubworld_white  = SetColor(0xFFFFFFFF);
+
+	// Fade transitions
+	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);
+	FadeInSpeed = HubWorld_IO_elements[37];																							// FADE IN SPEED	0.03f
+	FadeShrine.A = HubWorld_IO_elements[38];																						// FADE ALPHA		0.f
+	FadeGate.A = HubWorld_IO_elements[38]; 																							// FADE ALPHA		0.f
+
+	// Clear transition timer
+	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
+
+	HubWorld_IO_elements.clear();
 }
 
 void HubWorld_Initialize()
 {
 	std::cout << "Hub World Initialized\n";
 
-	// Hub World Environments
-	Env_Gate = { HubWorld_IO_elements[0], HubWorld_IO_elements[1], HubWorld_IO_elements[2], HubWorld_IO_elements[3] };				// ENV GATE			{ 0.f, 550.f, 500.f, 100.f } 
-	Env_Gate2 = { HubWorld_IO_elements[4], HubWorld_IO_elements[5], HubWorld_IO_elements[6], HubWorld_IO_elements[7] };				// ENV GATE2		{ 0.f, 550.f, 500.f, 100.f } 
-	Env_Campfire = { HubWorld_IO_elements[8], HubWorld_IO_elements[9], HubWorld_IO_elements[10], HubWorld_IO_elements[11] };		// ENV CAMPFIRE		{ -50.f, 0.f, 100.f, 100.f }
-	Env_Shrine = { HubWorld_IO_elements[12], HubWorld_IO_elements[13], HubWorld_IO_elements[14], HubWorld_IO_elements[15] };		// ENV SHRINE		{ -600.f, -200.f, 70.f, 150.f }
-	Env_Modifiers = { HubWorld_IO_elements[16], HubWorld_IO_elements[17], HubWorld_IO_elements[18], HubWorld_IO_elements[19] };		// ENV MODIFIERS	{ -600.f, 300.f, 100.f, 200.f }
-
-	// Hub World Text
-	Txt_Controls = { HubWorld_IO_elements[20], HubWorld_IO_elements[21], HubWorld_IO_elements[22], HubWorld_IO_elements[23] };		// TXT CONTROLS		{ 0.f, 200.f, 200.f, 100.f }
-	Txt_Movement = { HubWorld_IO_elements[24], HubWorld_IO_elements[25], HubWorld_IO_elements[26], HubWorld_IO_elements[27] };		// TXT MOVEMENT		{ 0.f, 150.f, 200.f, 100.f }
-	Txt_Attack = { HubWorld_IO_elements[28], HubWorld_IO_elements[29], HubWorld_IO_elements[30], HubWorld_IO_elements[31] };		// TXT ATTACK		{ 0.f, -100.f, 200.f, 100.f }
-
 	// Dummy enemy
-	// Init positions, and variables of Melee and Ranged Projectile Practice Range Dummy
-	DummyMelee_pos = { HubWorld_IO_elements[32], HubWorld_IO_elements[33] };														// MELEE DUMMY POS	{ 600.f, 200.f }									
-	DummyRange_pos = { HubWorld_IO_elements[35], HubWorld_IO_elements[36] };														// RANGE DUMMY POS	{ 800.f, 200.f }
-	DummyMelee_rad = static_cast<float>( HubWorld_IO_elements[34] );																// MELEE DUMMY RAD	50.f
+	// Reset melee check
 	DummyMelee_Check = 0;
-
-	hubworld_font = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);		// Font and text colour
-	hubworld_white = SetColor(0xFFFFFFFF);
-
-	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);											// For Fade-From_Black transition as level starts
-	FadeInSpeed = HubWorld_IO_elements[37];																							// FADE IN SPEED	0.03f
-	FadeShrine.A = HubWorld_IO_elements[38];																						// FADE ALPHA		0.f
-	FadeGate.A = HubWorld_IO_elements[38]; 																							// FADE ALPHA		0.f
 
 	InTop20 = false;
 	Draw_Top3 = true;
@@ -172,13 +179,11 @@ void HubWorld_Initialize()
 	// Tutorial
 	Init_Tutorial();														// Init Tutorial elements
 
-	// Incrementing Level Timer
-	HubWorld_LevelTimer = HubWorld_IO_elements[39];																					// LEVEL TIMER		0.f
+	// Reset Level Timer
+	HubWorld_LevelTimer = 0.f;												// LEVEL TIMER		0.f
 
-	// Level Clear Transition Timer
-	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[40]);															// CLEAR TRANSITION TIMER	5.f
-	HubWorld_ClearTransitionTimer.current = HubWorld_IO_elements[41];																// START CLEAR TRANSITION	0.f
-
+	// Reset Level Clear Transition Timer
+	HubWorld_ClearTransitionTimer.current = 0.f;							// START CLEAR TRANSITION	0.f
 }
 
 void HubWorld_Update()

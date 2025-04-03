@@ -37,6 +37,5 @@
 36) Dummy Range Pos Y: 200.f
 37) Fade In Speed: 0.03f
 38) Fade Alpha: 0.f
-39) Level Timer: 0.f
-40) Clear Transition Timer: 5.f
-41) Clear Transition Timer Current: 0.f
+39) Clear Transition Timer: 5.f
+
