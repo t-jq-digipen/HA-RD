@@ -106,10 +106,6 @@ void Level2_Update()
 		AEInputShowCursor(0);
 	}
 
-	if (AEInputCheckTriggered(AEVK_H)) // Press 'H' to toggle
-	{
-		ToggleBossHitboxes2();
-	}
 
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)

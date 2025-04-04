@@ -18,9 +18,8 @@
 // ----------------------------------------------------------------------------
 typedef enum Boss2_Phase
 {
-    PHASE1,
-    PHASE2,
-    PHASE3,
+    PHASE1 = 0,
+    PHASE2 = 1,
 } Boss2_Phase;
 
 // ----------------------------------------------------------------------------
@@ -87,7 +86,7 @@ typedef struct Boss2
     Timer attack_timer;         // Timer for attack states
     Timer stun_timer;           // Timer for stun states
     Timer missile_prep;         // Timer to prep missiles
-    Timer death_timer;          // Timer for death
+    Timer death_timer;          // Timer for death or phasebreak
 
     Boss2_AttackType attack_type;            // Current attack type
 
@@ -122,6 +121,7 @@ struct Missile {
     f32 targetradius = 50.f;
     Timer timer;
     bool active = false;
+    bool locked = false;
 
     // Constructor
     Missile() = default;
@@ -150,5 +150,6 @@ void Unload_Boss2();             // Unload Boss resources
 AEVec2 GetRandomTargetPosAroundPlayer();
 void Dash_Slash_Logic();
 void Missile_Barrage_Logic();
+void Update_Missiles();
 void Lightning_Wave_Logic(); 
 void Update_Lightning_Wave();

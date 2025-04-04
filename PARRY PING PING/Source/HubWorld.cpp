@@ -104,7 +104,7 @@ void HubWorld_Load()
 	//// Leaderboard
 	//FetchLeaderboardAsync();
 
-	shrine_sprite = SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
+	shrine_sprite	= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
 	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
 
 	// Meshes

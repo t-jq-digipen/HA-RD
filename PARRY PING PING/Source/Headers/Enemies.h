@@ -130,5 +130,7 @@ void Unload_Parry_Spark();
 void Set_Spark_Loc(f32 pos_x, f32 pos_y);
 // Start spark drawing, makes it active
 void Start_Spark(f32 duration);
+// End spark, e.g when boss is dead
+void End_Spark();
 // Draws the spark
 void Draw_Spark();
