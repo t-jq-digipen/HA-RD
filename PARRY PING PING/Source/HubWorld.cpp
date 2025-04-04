@@ -53,14 +53,20 @@ int DummyMelee_Check;										// Check for dummy logic
 Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
+int ShowBoss;												// Show boss 1/ 2  (0 & 1 respectively)
 bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;												// For Top 3 screen
 bool InModifiers;											// For modifier selection screen
 
 //Leaderboard fetching
-std::vector<std::string> HS_name(20);
-std::vector<std::string> HS_score(20);
-std::vector<std::string> HS_time(20);
+using ArrOfVecs = std::vector<std::string>[2];
+ArrOfVecs HS_name;
+ArrOfVecs HS_score;
+ArrOfVecs HS_time;
+
+//std::vector<std::string> HS_name(20);
+//std::vector<std::string> HS_score(20);
+//std::vector<std::string> HS_time(20);
 std::atomic<bool> isFetchingLeaderboard = false;
 // Global future to track the async fetch
 std::future<void> leaderboardFetchFuture;
@@ -155,10 +161,17 @@ void HubWorld_Initialize()
 	// Reset melee check
 	DummyMelee_Check = 0;
 
+	ShowBoss = 0;
 	InTop20 = false;
 	Draw_Top3 = true;
 	InModifiers = false;
 	player.Mod_DmgTakenIndex = 1;
+
+	for (int i = 0; i < 2; i++) {
+		HS_name[i].resize(20);
+		HS_score[i].resize(20);
+		HS_time[i].resize(20);
+	}
 
 
 	// Player
@@ -196,6 +209,8 @@ void HubWorld_Update()
 		nextState = GS_RESTART;												// Press B to restart level
 	}
 
+
+	//REMOVE AFTER CLEANUP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (AEInputCheckCurr(AEVK_1)) {
 		CamPanning = true;
 		Pan_Camera(0.f, 500.f, 10.f);
@@ -524,9 +539,12 @@ void fetchLeaderboard() {
 
 	// Store in game leaderboard variables
 	for (size_t i = 0; i < names.size() && i < 20; i++) {
-		HS_name[i] = names[i];
-		HS_score[i] = scores[i];
-		HS_time[i] = times[i];
+		//@@@FAUZ@@@   can check here for assigning scores to vectors
+		for (int j = 0; j < 2; j++) {
+			HS_name[j][i] = names[i];
+			HS_score[j][i] = scores[i];
+			HS_time[j][i] = times[i];
+		}
 	}
 
 	std::cout << "Leaderboard fetched and stored successfully!" << std::endl;
@@ -564,26 +582,50 @@ void Draw_ShrineBoard() {
 	}
 
 	if (Draw_Top3) {
+		if ((IsAreaClicked(200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+			ShowBoss = 1;
+		}
+		else if ((IsAreaClicked(-200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+			ShowBoss = 0;
+		}
+
 		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
+
+		switch (ShowBoss)
+		{
+		case 0:
+			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 1", false, 0.5f);
+			DrawRect(200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
+			DrawTextAdvanced(400.f, 550.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+			break;
+		case 1:
+			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 2", false, 0.5f);
+			DrawRect(-200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
+			DrawTextAdvanced(-400.f, 550.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+			break;
+		default:
+			ShowBoss = 0;
+			break;
+		}
 
 		DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
 		DrawRect(-200.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
 		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
 
 		// Top 1
-		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[0]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[0]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][0]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][0]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][0]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 2
-		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[1]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[1]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][1]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][1]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][1]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Top 3
-		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[2]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[2]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][2]).c_str(), false, 0.15f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][2]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][2]).c_str(), false, 0.125f);  // Convert std::string to const char*
 
 		// Show More
 		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
@@ -594,9 +636,9 @@ void Draw_ShrineBoard() {
 
 		for (int i = 0; i < 20; i++) {
 			// Reuse the X and Y positions for each row from the existing code
-			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		}
 
@@ -617,6 +659,8 @@ void Draw_ModifiersBoard() {
 	DrawRect(-150.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
 	DrawTextAdvanced(-300.f, 300.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
 	DrawTextAdvanced(300.f, 300.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+
+	//DRAW HERE AND GET INPUT TO CHOOSE INPUT
 
 	if ((IsAreaClicked(150.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		player.Mod_DmgTakenIndex++;
