@@ -990,6 +990,9 @@ void Draw_QuitMenu()
 		DrawTextAdvanced(UI_IO[141], UI_IO[143], pixel_font, UI_white, "Your current progress will be", false, UI_IO[145]);
 		DrawTextAdvanced(UI_IO[141], UI_IO[144], pixel_font, UI_red, "LOST!!!", false, UI_IO[146]);
 	}
+	if (AEInputCheckTriggered(AEVK_ESCAPE)) {
+		levelState = PLAYING;
+	}
 
 	// back button (click to go back to level state)
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_playbutton, UI_IO[147], UI_IO[148], UI_IO[149], UI_IO[150], UI_IO[151]);

@@ -53,7 +53,7 @@ int DummyMelee_Check;										// Check for dummy logic
 Timer HubWorld_ClearTransitionTimer;						// For Level states
 float HubWorld_LevelTimer;
 
-int ShowBoss;												// Show boss 1/ 2
+int ShowBoss;												// Show boss 1/ 2  (0 & 1 respectively)
 bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;												// For Top 3 screen
 bool InModifiers;											// For modifier selection screen
@@ -161,7 +161,7 @@ void HubWorld_Initialize()
 	// Reset melee check
 	DummyMelee_Check = 0;
 
-	ShowBoss = 1;
+	ShowBoss = 0;
 	InTop20 = false;
 	Draw_Top3 = true;
 	InModifiers = false;
@@ -582,7 +582,31 @@ void Draw_ShrineBoard() {
 	}
 
 	if (Draw_Top3) {
+		if ((IsAreaClicked(200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+			ShowBoss = 1;
+		}
+		else if ((IsAreaClicked(-200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+			ShowBoss = 0;
+		}
+
 		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
+
+		switch (ShowBoss)
+		{
+		case 0:
+			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 1", false, 0.5f);
+			DrawRect(200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
+			DrawTextAdvanced(400.f, 550.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+			break;
+		case 1:
+			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 2", false, 0.5f);
+			DrawRect(-200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
+			DrawTextAdvanced(-400.f, 550.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+			break;
+		default:
+			ShowBoss = 0;
+			break;
+		}
 
 		DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
 		DrawRect(-200.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
