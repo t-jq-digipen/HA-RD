@@ -25,14 +25,9 @@ Timer gameovertransitiontimer;
 
 AEVec2 dummy_pos;
 f32 dummy_rad;
-// int JQCounter{};
 
 Timer enemyattacktimer;
 Timer stunnedtimer;
-
-//to be moved into enemy struct btw!
-//int counter{};
-//f32 StunCounter{ 0.f };
 
 int dummy_check;
 

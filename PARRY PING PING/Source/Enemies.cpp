@@ -64,6 +64,7 @@ void Start_Spark(f32 duration)
 
 void Draw_Spark()
 {
+
 	if (Update_Timer(&spark.timer))
 	{
 		std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
@@ -75,6 +76,12 @@ void Draw_Spark()
 	{
 		spark.active = false;
 	}
+}
+
+void End_Spark()
+{
+	spark.timer.current = 1.f;
+	spark.active = false;
 }
 
 
