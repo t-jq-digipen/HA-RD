@@ -637,31 +637,50 @@ void Draw_ClearMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[48], UI_IO[49], UI_IO[50], UI_IO[51], UI_IO[52]);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(800.f + UI_IO[48], 450.f - UI_IO[49], UI_IO[50], UI_IO[51], UI_mouseX, UI_mouseY))
+// Check if mouse is over the button area
+	bool isHoveringButton = IsAreaClicked(
+		800.f + UI_IO[48], 450.f - UI_IO[49],
+		UI_IO[50], UI_IO[51],
+		UI_mouseX, UI_mouseY
+	);
+
+	// Visual feedback (hover effect)
+	if (isHoveringButton)
 	{
 		uiscreen.isButton1Clicked = 1;
 
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-		}
-
-		if (AEInputCheckTriggered(AEVK_LBUTTON))
-		{
-			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-
-			isLoading = true; // Activate loading state
-			hasSubmitted = true; // Set the flag to true to prevent further submissions
-
-			// Start the async thread for leaderboard submission
-			std::thread submitThread([&]()
-				{
-					addLeaderboardEntry(playerName.c_str(), newScore, level_timer); // Submit to leaderboard
-					isLoading = false; // Disable loading state after submission
-				});
-			submitThread.detach(); // Detach to allow independent execution
+			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8,
+				uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 	}
+
+	// Do NOT allow clicking the button if the name is invalid
+	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Input Name" || playerName == "Error!");
+
+	// Block submission if already submitted, name is invalid, or mouse not over button
+	if (!hasSubmitted && isHoveringButton && isNameValid && AEInputCheckTriggered(AEVK_LBUTTON))
+	{
+		AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		isLoading = true;
+		hasSubmitted = true;
+
+		std::thread submitThread([&]()
+			{
+				addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
+				isLoading = false;
+				isInputSubmitted = UI_green;
+			});
+		submitThread.detach();
+	}
+	else if (!isNameValid && isHoveringButton && AEInputCheckTriggered(AEVK_LBUTTON))
+	{
+		// Optional feedback if user tries to click with invalid name
+		std::cerr << "Submission blocked: Invalid name '" << playerName << "'\n";
+		playerName = "Error!"; // Update name to show error visually
+	}
+
 	else if (hasSubmitted)
 	{
 		uiscreen.isButton1Clicked = 0;
@@ -1124,31 +1143,52 @@ void Draw_GameOverMenu()
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_button1, UI_IO[48], UI_IO[49], UI_IO[50], UI_IO[51], UI_IO[52]);
 
 	// Prevent submission if already submitted
-	if (!hasSubmitted && IsAreaClicked(800.f + UI_IO[48], 450.f - UI_IO[49], UI_IO[50], UI_IO[51], UI_mouseX, UI_mouseY))
+// Prevent submission if already submitted OR if the name is invalid
+	// Prevent submission if already submitted
+// Check if mouse is over the button area
+	bool isHoveringButton = IsAreaClicked(
+		800.f + UI_IO[48], 450.f - UI_IO[49],
+		UI_IO[50], UI_IO[51],
+		UI_mouseX, UI_mouseY
+	);
+
+	// Visual feedback (hover effect)
+	if (isHoveringButton)
 	{
 		uiscreen.isButton1Clicked = 1;
 
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
-		}
-
-		if (AEInputCheckTriggered(AEVK_LBUTTON))
-		{
-			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			isLoading = true; // Activate loading state
-			hasSubmitted = true; // Set the flag to true to prevent further submissions
-
-			// Start the async thread for leaderboard submission
-			std::thread submitThread([&]()
-				{
-					addLeaderboardEntry(playerName.c_str(), newScore, level_timer); // Submit to leaderboard
-					isLoading = false; // Disable loading state after submission
-					isInputSubmitted = UI_green;
-				});
-			submitThread.detach(); // Detach to allow independent execution
+			Set_SpriteSheet_current(&ssmenu_1, 7, 1, 8,
+				uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 	}
+
+	// Do NOT allow clicking the button if the name is invalid
+	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Input Name" || playerName == "Error!");
+
+	// Block submission if already submitted, name is invalid, or mouse not over button
+	if (!hasSubmitted && isHoveringButton && isNameValid && AEInputCheckTriggered(AEVK_LBUTTON))
+	{
+		AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		isLoading = true;
+		hasSubmitted = true;
+
+		std::thread submitThread([&]()
+			{
+				addLeaderboardEntry(playerName.c_str(), newScore, level_timer);
+				isLoading = false;
+				isInputSubmitted = UI_green;
+			});
+		submitThread.detach();
+	}
+	else if (!isNameValid && isHoveringButton && AEInputCheckTriggered(AEVK_LBUTTON))
+	{
+		// Optional feedback if user tries to click with invalid name
+		std::cerr << "Submission blocked: Invalid name '" << playerName << "'\n";
+		playerName = "Error!"; // Update name to show error visually
+	}
+
 	else if (hasSubmitted)
 	{
 		uiscreen.isButton1Clicked = 0;
