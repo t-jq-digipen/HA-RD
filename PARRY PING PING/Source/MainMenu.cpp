@@ -28,6 +28,9 @@ s32 mouseX, mouseY;
 // Button spritesheets
 SpriteSheet_Old playbutton, creditsbutton, exitbutton;
 
+// Logo spritesheet
+SpriteSheet_Old menulogo;
+
 // Main menu object
 MainMenu mainmenu;
 
@@ -52,11 +55,14 @@ void MainMenu_Load()
 	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
     // Button Spritesheets
-	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
 
-    // Logo
+    // Game Logo
+    menulogo = Init_SpriteSheet("Assets/UI/HardLogo.png", 1, 16, 1.f);
+
+    // DigiPen Logo
 	digipenLogo = AEGfxTextureLoad("Assets/Digipen_Logo.png");
 
 	// Read File IO
@@ -71,7 +77,7 @@ void MainMenu_Initialize()
 	std::cout << "Main Menu Initialized\n";
 
 	// Colors
-	red = SetColor(0xFFFF6961);
+	// red = SetColor(0xFFFF6961);
 	// green = SetColor(0xFF88B984);  // If needed, uncomment this
 	// blue = SetColor(0xFF00008B);  // If needed, uncomment this
 	// black = SetColor(0xFF000000);  // If needed, uncomment this
@@ -91,11 +97,21 @@ void MainMenu_Initialize()
 	mainmenu.spritesheet_button2 = &creditsbutton;
     mainmenu.spritesheet_button3 = &exitbutton;
 
+    // Initialize spritesheet logo
+    mainmenu.spritesheet_logo = &menulogo;
+
     // Button animation timer
 	mainmenu.animationtimer = Create_Timer(MainMenu_IO[0]);
 
+    // Logo animation timer
+    mainmenu.animationlogotimer = Create_Timer(MainMenu_IO[0]);
+
     // Button hover flags
 	mainmenu.isPlayClicked = mainmenu.isExitClicked = mainmenu.isCreditsClicked = 0;
+
+    // Logo reset animation timer
+    mainmenu.logoresettimer = Create_Timer(MainMenu_IO[20]);
+    mainmenu.logoresettimer.current = 0.f;
 }
 
 // ----------------------------------------------------------------------------
@@ -163,8 +179,23 @@ void MainMenu_Update()
             nextState = GS_QUIT;
         }
 
-        // game title
-        DrawTextBox(MainMenu_IO[1], MainMenu_IO[2], width, MainMenu_IO[3], MainMenu_IO[4], pFont, red, "HARD");
+        // Game Logo
+        Draw_SpriteSheet_test(*mainmenu.spritesheet_logo, MainMenu_IO[1], MainMenu_IO[2], MainMenu_IO[3], MainMenu_IO[4], 0.f);
+        Loop_Timer(&mainmenu.logoresettimer);
+        std::cout << mainmenu.animationlogotimer.current << '\n';
+        if (mainmenu.logoresettimer.current == 0.f)
+        {       
+            mainmenu.animationlogotimer.current = 0.f;
+        }
+        if (Update_Timer(&mainmenu.animationlogotimer))
+        {
+            Set_SpriteSheet_current(&menulogo, 0, 1, 16, mainmenu.animationlogotimer, mainmenu.animationlogotimer.duration);
+        }
+        else
+        {
+            Set_SpriteSheet_current(&menulogo, 0, 16, 16, mainmenu.animationtimer, mainmenu.animationtimer.duration);
+        }
+        
 
         if (mainmenu.isPlayClicked == 0 && mainmenu.isExitClicked == 0 && mainmenu.isCreditsClicked == 0)
         {
@@ -270,6 +301,7 @@ void MainMenu_Unload()
 	Unload_SpriteSheet(&playbutton);
     Unload_SpriteSheet(&creditsbutton);
 	Unload_SpriteSheet(&exitbutton);
+    Unload_SpriteSheet(&menulogo);
     AEGfxTextureUnload(digipenLogo);
 
 }
