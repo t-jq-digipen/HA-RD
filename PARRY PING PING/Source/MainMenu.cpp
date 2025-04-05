@@ -54,9 +54,9 @@ void MainMenu_Load()
 	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
     // Button Spritesheets
-	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+    creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
 
     // Game Logo
     menulogo = Init_SpriteSheet("Assets/UI/HardLogo.png", 1, 16, 1.f);

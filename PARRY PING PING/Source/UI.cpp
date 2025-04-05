@@ -89,7 +89,7 @@ SpriteSheet racecar;
 SpriteSheet playerHUD;
 
 // UI Menus
-SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
+SpriteSheet_Old ssmenu_play, ssmenu_options, ssmenu_exit, ssmenu_restart, ssmenu_1, ssmenu_2, ssmenu_3, ssmenu_4, ssmenu_screen, ssmenu_bar1, ssmenu_bar2;
 UIScreen uiscreen;
 float menubg_x, menubg_y, menubg_width, menubg_height;
 float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
@@ -178,7 +178,7 @@ void Init_UI()
 
 
 	// Checks for button clicks in UI screens
-	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = 0;
+	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = uiscreen.isRestartClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
 	// BGM and SFX (Audio Groups)
@@ -247,13 +247,14 @@ void Load_UI()
 	ReadFromFile("Assets/FileIO/PlayerBestScores.txt", UI_IO_score);
 
 	// Menu Buttons
-	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_options	= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_exit		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_1		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_2		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_3		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
-	ssmenu_4		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
+	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_options	= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_exit		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_restart	= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_1		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_2		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_3		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_4		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
 	ssmenu_screen	= Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
 	ssmenu_bar1		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
@@ -262,6 +263,7 @@ void Load_UI()
 	uiscreen.spritesheet_playbutton		= &ssmenu_play;
 	uiscreen.spritesheet_optionsbutton	= &ssmenu_options;
 	uiscreen.spritesheet_exitbutton		= &ssmenu_exit;
+	uiscreen.spritesheet_restartbutton  = &ssmenu_restart;
 	uiscreen.spritesheet_button1		= &ssmenu_1;
 	uiscreen.spritesheet_button2		= &ssmenu_2;
 	uiscreen.spritesheet_button3		= &ssmenu_3;
@@ -301,6 +303,7 @@ void Unload_UI()
 	Unload_SpriteSheet(&ssmenu_play);
 	Unload_SpriteSheet(&ssmenu_options);
 	Unload_SpriteSheet(&ssmenu_exit);
+	Unload_SpriteSheet(&ssmenu_restart);
 	Unload_SpriteSheet(&ssmenu_1);
 	Unload_SpriteSheet(&ssmenu_2);
 	Unload_SpriteSheet(&ssmenu_3);
@@ -460,7 +463,7 @@ void Draw_UI(int DrawBossHP)
 }
 
 // Open the pause menu when player pauses the game
-void Draw_PauseMenu() 
+void Draw_PauseMenu()
 {
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
@@ -474,7 +477,7 @@ void Draw_PauseMenu()
 	Set_SpriteSheet_current(&ssmenu_screen, 0, 1, 1, Create_Timer(1.f), 1.f);
 
 	// Reset animations if no button is being hovered over
-	if (uiscreen.isPlayClicked == 0 && uiscreen.isOptionsClicked == 0 && uiscreen.isExitClicked == 0)
+	if (uiscreen.isPlayClicked == 0 && uiscreen.isOptionsClicked == 0 && uiscreen.isExitClicked == 0 && uiscreen.isRestartClicked == 0)
 	{
 		uiscreen.animationtimer.current = 0.f;
 	}
@@ -490,7 +493,7 @@ void Draw_PauseMenu()
 		{
 			Set_SpriteSheet_current(&ssmenu_play, 0, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
-		
+
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
@@ -555,6 +558,34 @@ void Draw_PauseMenu()
 		uiscreen.isExitClicked = 0;
 		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
+
+	// Restart Button (click to restart level)
+	if (currentState == GS_LEVEL1 || currentState == GS_LEVEL2)
+	{
+		Draw_SpriteSheet_test(*uiscreen.spritesheet_restartbutton, UI_IO[168], UI_IO[169], UI_IO[170], UI_IO[171], UI_IO[172]);
+
+		if (IsAreaClicked(800.f + UI_IO[168], 450.f - UI_IO[169], UI_IO[170], UI_IO[171], UI_mouseX, UI_mouseY))
+		{
+			uiscreen.isRestartClicked = 1;
+
+			if (Update_Timer(&uiscreen.animationtimer))
+			{
+				Set_SpriteSheet_current(&ssmenu_restart, 10, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			}
+
+			if (AEInputCheckTriggered(AEVK_LBUTTON))
+			{
+				AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+				nextState = GS_RESTART;
+			}
+		}
+		else
+		{
+			uiscreen.isRestartClicked = 0;
+			Set_SpriteSheet_current(&ssmenu_restart, 10, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		}
+	}
+
 }
 
 // Handle text input for player name

@@ -84,6 +84,7 @@ typedef struct UIScreen
 	SpriteSheet_Old* spritesheet_playbutton;
 	SpriteSheet_Old* spritesheet_optionsbutton;
 	SpriteSheet_Old* spritesheet_exitbutton;
+	SpriteSheet_Old* spritesheet_restartbutton;
 
 	SpriteSheet_Old* spritesheet_button1;
 	SpriteSheet_Old* spritesheet_button2;
@@ -94,7 +95,7 @@ typedef struct UIScreen
 	SpriteSheet_Old* spritesheet_bar2;
 
 	Timer animationtimer;
-	int isPlayClicked, isSubmitClicked;
+	int isPlayClicked, isRestartClicked, isSubmitClicked;
 	int isOptionsClicked;
 	int isExitClicked;
 	int isButton1Clicked, isButton2Clicked, isButton3Clicked, isButton4Clicked;

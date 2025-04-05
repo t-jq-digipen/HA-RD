@@ -32,19 +32,19 @@
 31) UI End Menu Screen Height: 800.f
 32) UI Menu Screen Rotation: 0.f
 33) UI Pause Menu Play Button Pos X: -350.f
-34) UI Pause Menu Play Button Pos Y: -50.f
-35) UI Pause Menu Play Button Width: 300.f
-36) UI Pause Menu Play Button Height: 200.f
+34) UI Pause Menu Play Button Pos Y: 0.f
+35) UI Pause Menu Play Button Width: 250.f
+36) UI Pause Menu Play Button Height: 150.f
 37) UI Pause Menu Play Button Rotation: 0.f
 38) UI Pause Menu Options Button Pos X: 0.f
-39) UI Pause Menu Options Button Pos Y: -50.f
-40) UI Pause Menu Options Button Width: 300.f
-41) UI Pause Menu Options Button Height: 200.f
+39) UI Pause Menu Options Button Pos Y: 0.f
+40) UI Pause Menu Options Button Width: 250.f
+41) UI Pause Menu Options Button Height: 150.f
 42) UI Pause Menu Options Button Rotation: 0.f
 43) UI Pause Menu Quit Button Pos X: 350.f
-44) UI Pause Menu Quit Button Pos Y: -50.f
-45) UI Pause Menu Quit Button Width: 300.f
-46) UI Pause Menu Quit Button Height: 200.f
+44) UI Pause Menu Quit Button Pos Y: 0.f
+45) UI Pause Menu Quit Button Width: 250.f
+46) UI Pause Menu Quit Button Height: 150.f
 47) UI Pause Menu Quit Button Rotation: 0.f
 48) UI Submit Score Button Pos X: 400.f
 49) UI Submit Score Button Pos Y: -125.f
@@ -166,3 +166,8 @@
 165) UI Level Score Height: 100.f
 166) UI Level Score Size: 0.5f
 167) UI Display Username New Pos X: -0.1f
+168) UI Pause Menu Restart Button Pos X: 0.f
+169) UI Pause Menu Restart Button Pos Y: -200.f
+170) UI Pause Menu Restart Button Width: 250.f
+171) UI Pause Menu Restart Button Height: 150.f
+172) UI Pause Menu Quit Button Rotation: 0.f
