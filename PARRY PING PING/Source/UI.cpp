@@ -103,6 +103,7 @@ float rotationAngle = 0.f; // Angle for rotation of the loading image
 float rotationSpeed = 90.f; // Rotation speed (degrees per second)
 Color isInputSubmitted;
 bool hasSubmitted;
+bool isNameEntered;
 
 // File IO
 std::vector<float> UI_IO;
@@ -218,6 +219,7 @@ void Init_UI()
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
+	isNameEntered = false;
 
 	isFirstInit = true;
 }
@@ -525,6 +527,7 @@ void HandleTextInput()
 	{
 		// Clear the entire string
 		playerName.clear();
+		isNameEntered = true;
 	}
 
 	// Only allow input if the name is less than 3 characters
@@ -753,7 +756,14 @@ void Draw_ClearMenu()
 	}
 
 	// Test with a position close to the center of the screen
-	DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, displayName.c_str());
+	if (!isNameEntered)
+	{
+		DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, displayName.c_str());
+	}
+	else
+	{
+		DrawTextBox(UI_IO[167], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, displayName.c_str());
+	}
 
 	// Handle text input
 	HandleTextInput();
@@ -1175,7 +1185,14 @@ void Draw_GameOverMenu()
 	// Inside your menu or game loop
 	Draw_SpriteSheet_test(*uiscreen.spritesheet_exitbutton, UI_IO[58], UI_IO[59], UI_IO[60], UI_IO[61], UI_IO[62]);
 	// Test with a position close to the center of the screen
-	DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, playerName.c_str());
+	if (!isNameEntered)
+	{
+		DrawTextBox(UI_IO[78], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, playerName.c_str());
+	}
+	else
+	{
+		DrawTextBox(UI_IO[167], UI_IO[79], UI_IO[80], UI_IO[81], UI_IO[82], pixel_font, isInputSubmitted, playerName.c_str());
+	}
 
 	// Handle text input
 	HandleTextInput();

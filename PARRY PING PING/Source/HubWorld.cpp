@@ -278,9 +278,15 @@ void HubWorld_Update()
 
 		Update_Tutorial();
 
+		if (InTop20 == true || InModifiers == true)
+		{
+			tutorialActive = false;
+		}
+
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) {
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
+				tutorialActive = false;
 				LockCamera = false;
 				player.canAttack = true;
 				nextState = GS_LEVEL1;
@@ -289,6 +295,7 @@ void HubWorld_Update()
 		else if (AETestPointToRect(&player.pos, &Env_Gate2.Pos, Env_Gate2.Width / 2.f, Env_Gate2.Height)) {
 			if (AEInputCheckTriggered(AEVK_F))
 			{
+				tutorialActive = false;
 				LockCamera = false;
 				player.canAttack = true;
 				nextState = GS_LEVEL2;
@@ -358,6 +365,7 @@ void HubWorld_Draw()
 			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
 			if (AEInputCheckTriggered(AEVK_F) && InModifiers == false)
 			{
+				tutorialActive = false;
 				InModifiers = true;
 			}
 			else if (AEInputCheckTriggered(AEVK_F) && InModifiers == true)
@@ -403,6 +411,7 @@ void HubWorld_Draw()
 		
 		if (AEInputCheckTriggered(AEVK_F) && InTop20 == false)
 		{
+			tutorialActive = false;
 			InTop20 = true;
 		}
 		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)

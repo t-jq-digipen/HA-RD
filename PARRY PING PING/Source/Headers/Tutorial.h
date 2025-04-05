@@ -3,6 +3,7 @@
 #include "SpriteSheet.h"
 
 extern SpriteSheet WASD_sprite;
+extern bool tutorialActive;
 
 void Init_Tutorial();
 

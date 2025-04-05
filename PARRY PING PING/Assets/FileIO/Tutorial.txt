@@ -16,8 +16,8 @@
 15) Tutorial Text Size H2: 0.35f
 16) Tutorial Text Size H3: 0.3f
 17) Tutorial Text Size Content: 0.2f
-18) Tutorial Skip Text X: 0.f
-19) Tutorial Skip Text Y: 700.f
+18) Tutorial Skip Text X: 850.f
+19) Tutorial Skip Text Y: -720.f
 20) Tutorial Movement Background Rectangle X: -400.f
 21) Tutorial Movement Background Rectangle Y: 150.f
 22) Tutorial Movement Background Rectangle Width: 350.f
@@ -68,3 +68,5 @@
 67) Tutorial Arrow Y: 400.f
 68) Tutorial Arrow To Gate X: 0.f
 69) Tutorial Arrow To Gate Y: 750.f
+70) Tutorial Header Text X: 0.f
+71) Tutorial Header Text Y: 700.f

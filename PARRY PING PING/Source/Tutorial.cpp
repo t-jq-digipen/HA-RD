@@ -1,6 +1,7 @@
 #include "Tutorial.h"
 #include "player.h"
 #include "UI.h"
+#include "HubWorld.h"
 
 SpriteSheet WASD_sprite;
 SpriteSheet space_sprite;
@@ -12,7 +13,7 @@ SpriteSheet parry_sprite;
 
 AEGfxTexture* checkmark;
 
-bool active;
+bool tutorialActive;
 Timer transition_timer;
 Timer clear_delay;
 Color tutgreen, tutblack, tutgray, tutbg, tutwhite;
@@ -57,7 +58,7 @@ Tutorial_State tutstate, clearedstate, nextstate;
 
 void Reset_Tutorial()
 {
-	active = true;						// Set tutorial to be active
+	tutorialActive = true;						// Set tutorial to be active
 	tutstate = TUTORIAL_MOVEMENT;		// Set tutorial state to movement
 	clearedstate = TUTORIAL_TRANSITION;	// Set to transition, as long as != MOVEMENT
 	nextstate = TUTORIAL_MOVEMENT;		// Set next state to movement, will be overwritten by movement state anyway
@@ -315,7 +316,7 @@ void Init_Tutorial()
 	clear_delay = Create_Timer(Tutorial_IO[1]);				// TUTORIAL CLEAR DELAY			1.0s
 
 	toofar = false;
-	active = false;
+	tutorialActive = false;
 
 	tutgreen	= SetColor(0xFF08A045);
 	tutblack	= SetColor(0xFF101010);
@@ -376,11 +377,11 @@ void Unload_Tutorial()
 
 void Update_Tutorial()
 {
-	if (active)
+	if (tutorialActive)
 	{
 		if (AEInputCheckTriggered(AEVK_T))
 		{
-			active = false;
+			tutorialActive = false;
 		}
 		Update_Arrow(Tutorial_IO[2], Tutorial_IO[3]);
 		switch (tutstate)
@@ -411,7 +412,7 @@ void Update_Tutorial()
 
 		case TUTORIAL_CLEAR:
 		{
-			active = false;
+			tutorialActive = false;
 		}
 		break;
 
@@ -455,9 +456,10 @@ void DrawArrow(f32 target_x, f32 target_y)
 
 void Draw_Tutorial()
 {
-	if (active)
+	if (tutorialActive)
 	{
-		DrawTextAdvanced(Tutorial_IO[18], Tutorial_IO[19], pixel_font, tutblack, "PRESS T TO SKIP TUTORIAL", false, txtsize_h1);
+		DrawTextAdvanced(Tutorial_IO[70], Tutorial_IO[71], pixel_font, tutblack, "TUTORIAL", false, txtsize_h1);
+		DrawTextAdvanced(Tutorial_IO[18], Tutorial_IO[19], pixel_font, tutwhite, "PRESS T TO SKIP TUTORIAL", false, txtsize_h2);
 		switch (tutstate)
 		{
 		case TUTORIAL_MOVEMENT:
@@ -600,5 +602,9 @@ void Draw_Tutorial()
 
 
 	}				// if active
+	else if (InTop20 == false && InModifiers == false)
+	{
+		DrawTextAdvanced(Tutorial_IO[18], Tutorial_IO[19], pixel_font, tutwhite, "PRESS T TO OPEN TUTORIAL", false, txtsize_h2);
+	}
 	DrawArrow(arrow_gate_x, arrow_gate_y);	// Point to gate
 }
