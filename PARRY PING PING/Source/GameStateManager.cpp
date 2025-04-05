@@ -1,12 +1,12 @@
 //---------------------------------------------------------
 // file:	GameStateManager.cpp
-// author:	MANFRED SIM
-// email:	manfred.sim@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
 //
 // brief:	Implementation of game state manager functions and
 //			enum game states
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "GameStateManager.h"

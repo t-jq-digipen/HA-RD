@@ -1,9 +1,12 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// file:	Boss1.cpp
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Raziq bin Mohd Rafig
+//          - The boss (lol ownself put ltr)
+//          Manfred Sim
+//          - Death Explosion
 //
-// brief:	Spritesheet class declaration
+// brief:	Boss 1 declaration
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

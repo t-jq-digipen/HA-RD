@@ -1,12 +1,12 @@
 //---------------------------------------------------------
 // file:	Credits.cpp
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
 //
 // brief:	Credits function implementation for rendering
 //			text on screen
 //
-// Copyright ? 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "Credits.h"

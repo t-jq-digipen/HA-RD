@@ -165,3 +165,4 @@
 164) UI Level Score Width: 200.f
 165) UI Level Score Height: 100.f
 166) UI Level Score Size: 0.5f
+167) UI Display Username New Pos X: -0.1f

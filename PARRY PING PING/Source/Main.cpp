@@ -1,7 +1,8 @@
 //---------------------------------------------------------
 // file:	Main.cpp
-// author:	TAN JUN QUAN
-// email:	t.junquan@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			Manfred Sim
 //
 // brief:	main!
 //

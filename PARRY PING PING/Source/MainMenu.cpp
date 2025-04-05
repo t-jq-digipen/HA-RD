@@ -1,23 +1,34 @@
 //---------------------------------------------------------
 // file:	MainMenu.cpp
-// author:	MANFRED SIM
-// email:	manfred.sim@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
+//          Muhammad Fauzan bin Mohamed Fauzy
 //
 // brief:	Implementation of main menu functions
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"
 #include "MainMenu.h"
 #include "GameStateManager.h"
 
+// Font
 s8 pFont;
+
+// Colors
 Color red, green, blue, black, white, hover_red;
+
+// Window width, height
 f32 width, height;
+
+// Mouse coordinates
 s32 mouseX, mouseY;
 
+// Button spritesheets
 SpriteSheet_Old playbutton, creditsbutton, exitbutton;
+
+// Main menu object
 MainMenu mainmenu;
 
 // Global variables
@@ -27,25 +38,34 @@ AEGfxTexture* digipenLogo;  // Texture for the logo
 // File IO
 std::vector<float> MainMenu_IO;
 
+// ----------------------------------------------------------------------------
+// Loads the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Load()
 {
+    std::cout << "Main Menu Loaded\n";
+
 	// Meshes
 	Load_Mesh(20);
 
+    // Font
 	pFont = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
+    // Button Spritesheets
 	playbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
     creditsbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
 	exitbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
 
+    // Logo
 	digipenLogo = AEGfxTextureLoad("Assets/Digipen_Logo.png");
-
-	std::cout << "Main Menu Loaded\n";
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/MainMenu.txt", MainMenu_IO);
 }
 
+// ----------------------------------------------------------------------------
+// Initializes the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Initialize()
 {
 	std::cout << "Main Menu Initialized\n";
@@ -66,13 +86,21 @@ void MainMenu_Initialize()
     fadeTimer.current = 0.0f;  // Start the timer at 0
     fadeTimer.duration = 2.0f; // 2 seconds fade-in time
 
+    // Initialize spritesheet buttons
 	mainmenu.spritesheet_button1 = &playbutton;
 	mainmenu.spritesheet_button2 = &creditsbutton;
     mainmenu.spritesheet_button3 = &exitbutton;
+
+    // Button animation timer
 	mainmenu.animationtimer = Create_Timer(MainMenu_IO[0]);
+
+    // Button hover flags
 	mainmenu.isPlayClicked = mainmenu.isExitClicked = mainmenu.isCreditsClicked = 0;
 }
 
+// ----------------------------------------------------------------------------
+// Updates the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Update()
 {
     // Get the delta time for the current frame
@@ -82,7 +110,7 @@ void MainMenu_Update()
     f32 totalTime = fadeTimer.duration + 1.0f + fadeTimer.duration; // 2s fade-in + 1s hold + 2s fade-out
     fadeTimer.current += dt;
 
-    //Skips Logo when Right Shift is Pressed
+    // Skips Logo when Right Shift is Pressed
     if (AEInputCheckTriggered(AEVK_RSHIFT))
     {
         isFading = false;
@@ -124,7 +152,6 @@ void MainMenu_Update()
         }
     }
 
-
     else
     {
         // Get mouse position coordinates
@@ -144,7 +171,7 @@ void MainMenu_Update()
             mainmenu.animationtimer.current = 0.f;
         }
 
-        // play button (click to go to Level1 state)
+        // Play Button (Click to go to Hubworld)
         Draw_SpriteSheet_test(*mainmenu.spritesheet_button1, MainMenu_IO[5], MainMenu_IO[6], MainMenu_IO[7], MainMenu_IO[8], MainMenu_IO[9]);
 
         if (IsAreaClicked(width / 2 + MainMenu_IO[5], height / 2 - MainMenu_IO[6], MainMenu_IO[7], MainMenu_IO[8], mouseX, mouseY))
@@ -168,7 +195,7 @@ void MainMenu_Update()
             Set_SpriteSheet_current(&playbutton, 0, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
         }
 
-        // credits button (click to go to credits state)
+        // Credits Button (Click to go to credits)
         Draw_SpriteSheet_test(*mainmenu.spritesheet_button2, MainMenu_IO[10], MainMenu_IO[11], MainMenu_IO[12], MainMenu_IO[13], MainMenu_IO[14]);
 
         if (IsAreaClicked(width / 2 + MainMenu_IO[10], height / 2 - MainMenu_IO[11], MainMenu_IO[12], MainMenu_IO[13], mouseX, mouseY))
@@ -192,7 +219,7 @@ void MainMenu_Update()
             Set_SpriteSheet_current(&creditsbutton, 8, 1, 1, mainmenu.animationtimer, mainmenu.animationtimer.duration);
         }
 
-        // exit button (click to go to quit state)
+        // Exit Button (Click to exit application)
         Draw_SpriteSheet_test(*mainmenu.spritesheet_button3, MainMenu_IO[15], MainMenu_IO[16], MainMenu_IO[17], MainMenu_IO[18], MainMenu_IO[19]);
 
         if (IsAreaClicked(width / 2 + MainMenu_IO[15], height / 2 - MainMenu_IO[16], MainMenu_IO[17], MainMenu_IO[18], mouseX, mouseY))
@@ -217,17 +244,25 @@ void MainMenu_Update()
     }
 }
 
-
+// ----------------------------------------------------------------------------
+// Draws the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Draw()
 {
 
 }
 
+// ----------------------------------------------------------------------------
+// Frees the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Free()
 {
 
 }
 
+// ----------------------------------------------------------------------------
+// Unloads the main menu elements
+// ----------------------------------------------------------------------------
 void MainMenu_Unload()
 {
 	AEGfxDestroyFont(pFont);

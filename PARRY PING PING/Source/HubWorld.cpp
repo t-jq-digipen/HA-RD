@@ -1,7 +1,10 @@
 //---------------------------------------------------------
 // file:	HubWorld.cpp
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Tan Jun Quan
+//			Manfred Sim
+//			Muhammad Fauzan bin Mohamed Fauzy
 //
 // brief:	Definition of Hub World functions
 //
@@ -41,6 +44,7 @@ s8  hubworld_font;
 // Spritesheets
 SpriteSheet campfire_sprite;
 SpriteSheet shrine_sprite;
+SpriteSheet modifiers_sprite;
 
 // Fade from black transition when level starts
 Color FadeIn, FadeGate, FadeShrine, FadeModifiers;
@@ -142,6 +146,7 @@ void HubWorld_Load()
 
 	shrine_sprite	= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
 	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
+	modifiers_sprite = SpriteSheet("Assets/HubWorld/Compuser.png", 4, 1);
 
 	// Meshes
 	Load_Mesh(20);
@@ -205,7 +210,6 @@ void HubWorld_Initialize()
 		HS_time[i].resize(20);
 	}
 
-
 	// Player
 	Init_Player();															// Init Player
 
@@ -218,7 +222,6 @@ void HubWorld_Initialize()
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);			// Init the dummies with specified stats!
 	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
 	DummyMelee_Check = 0;													// Reset checks of melee attacks
-
 
 	// UI
 	Init_UI();																// Init UI
@@ -258,6 +261,7 @@ void HubWorld_Update()
 	// Delta time
 	Get_DT();
 
+
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;												// Press B to restart level
@@ -284,13 +288,18 @@ void HubWorld_Update()
 
 		Update_Tutorial();													// Logic for tutorial progression
 
-		// Detection for entering gates to different boss fights
+		if (InTop20 == true || InModifiers == true)
+		{
+			tutorialActive = false;
+		}
+
+				// Detection for entering gates to different boss fights
 		// BOSS 1
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) 
 		{
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
-				// Reset flags and switch levels
+				tutorialActive = false;
 				LockCamera = false;
 				player.canAttack = true;
 				Transition_Flag_Gate1 = true;
@@ -301,7 +310,7 @@ void HubWorld_Update()
 		{
 			if (AEInputCheckTriggered(AEVK_F))
 			{
-				// Reset flags and switch levels
+				tutorialActive = false;
 				LockCamera = false;
 				player.canAttack = true;
 				Transition_Flag_Gate2 = true;
@@ -343,9 +352,6 @@ void HubWorld_Draw()
 {
 	Update_Camera();															// Camera drawing logic
 
-	// UI
-	Draw_UI(0);																	// Draw UI - (0) added to not draw boss healthbar
-
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
@@ -370,11 +376,12 @@ void HubWorld_Draw()
 	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 3.f, Env_Gate.Height * 2.f))
 	{
 		Draw_FadeOut(FadeGate);													// Fade to dark effect
-		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width * 3.f, Env_Modifiers.Height * 1.5f)) {			// Test col with modifier 
-			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width, Env_Modifiers.Height)) {			// Test col with modifier 
+			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 2.f, hubworld_font, hubworld_white, "PRESS [F]", true);
 			// F key controls both enter and exit states
 			if (AEInputCheckTriggered(AEVK_F) && InModifiers == false)
 			{
+				tutorialActive = false;
 				InModifiers = true;
 			}
 			else if (AEInputCheckTriggered(AEVK_F) && InModifiers == true)
@@ -403,12 +410,12 @@ void HubWorld_Draw()
 		InModifiers = false;
 	}
 
-	// Draw after for 'glowing' effect
-	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
+	modifiers_sprite.Set_Row(0);
+	modifiers_sprite.Loop(0, 3, 1.f);
+	modifiers_sprite.Draw(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height);
 
-	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));			// Gate 2 - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));		// Gate   - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));	// Gate 2 - player starts boss fight level here!
 	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE 1", true);
 	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, hubworld_font, hubworld_white, "GATE 2", true);
 
@@ -424,6 +431,7 @@ void HubWorld_Draw()
 		// F key controls both enter and exit states
 		if (AEInputCheckTriggered(AEVK_F) && InTop20 == false)
 		{
+			tutorialActive = false;
 			InTop20 = true;
 		}
 		else if (AEInputCheckTriggered(AEVK_F) && InTop20 == true)
@@ -446,6 +454,7 @@ void HubWorld_Draw()
 	shrine_sprite.Draw(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height);
 #pragma endregion
 
+
 	// Everyting after can be drawn above the fade effect
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -454,6 +463,9 @@ void HubWorld_Draw()
 	Draw_Tutorial();
 
 	AEInputShowCursor(0);						// Default, Hides cursor unless specified
+
+	// UI
+	Draw_UI(0);																	// Draw UI - (0) added to not draw boss healthbar
 
 	// State depending drawing!
 	if (levelState == PAUSED)
@@ -480,8 +492,10 @@ void HubWorld_Draw()
 		}
 	}
 
-	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || levelState == INQUIT || InTop20 || InModifiers) {
-		AEInputShowCursor(1);													// Show cursor in these screens specifically
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || levelState == INQUIT || InTop20 || InModifiers) 
+	{
+		LockCamera = true;
+		AEInputShowCursor(1);					// Show cursor in these screens specifically
 	}
 
 	// Bool flags for drawing shrine & modifiers screens
@@ -516,8 +530,7 @@ void HubWorld_Draw()
 		FadeIn.A -= FadeInSpeed;
 	}
 	else FadeIn.A = 0.f;																				// Clamp to 0
-
-	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);										// Set render modes for drawing of colours
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);																// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	if (Transition_Flag_Gate1) 
@@ -554,8 +567,11 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
-	WaitForLeaderboardFetch();
+	modifiers_sprite.Unload();
+
 	AEGfxTextureUnload(loadingImage1);
+	WaitForLeaderboardFetch();
+
 }
 
 #pragma region Fade Effects
@@ -622,11 +638,17 @@ void fetchLeaderboard(int bossID) {
 			score = line.substr(firstDash + 3, secondDash - (firstDash + 3));
 			time = line.substr(secondDash + 3);
 
+			// Remove "Time: " prefix if it exists
+			if (time.rfind("Time: ", 0) == 0) {
+				time = time.substr(6);
+			}
+
 			names.push_back(name);
 			scores.push_back(score);
 			times.push_back(time);
 		}
 	}
+
 	file.close();
 
 	// Assuming you have global arrays to store leaderboard data

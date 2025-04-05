@@ -1,13 +1,14 @@
 //---------------------------------------------------------
 // file:	Camera.cpp
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan                                
+//			- 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Camera panning
 //
-// brief:	Camera function implementation for rendering
-//			Recalculates position coordinates for conversion
-//			between world and screen
+// brief:	Camera function declarations for rendering
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "Camera.h"
@@ -36,7 +37,7 @@ void Init_Camera()
 
 void Update_Camera() 
 {
-	if (isInputDisabled) return;  // If input is disabled, do nothing
+	if (isInputEnabled) return;  // If input is disabled, do nothing
 	if (LockCamera || CamPanning) return;
 
 	currVert = currHor = 0.f;
