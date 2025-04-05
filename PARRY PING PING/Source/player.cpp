@@ -851,6 +851,9 @@ void Blocked_Hit(f32 damage)
 		switch (player.Mod_DmgTakenIndex)
 		{
 		case 0:
+			// Player takes no damage
+			break;
+		case 1:
 			player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
 			break;
 		default:
@@ -891,7 +894,7 @@ void Eat_Hit(f32 damage)
 		switch (player.Mod_DmgTakenIndex)
 		{
 		case 0:
-			//Player takes no damage
+			// Player takes no damage
 			break;
 		case 1:
 			player.hp -= damage * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
