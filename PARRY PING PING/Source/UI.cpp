@@ -90,7 +90,7 @@ float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 AEGfxTexture* loadingImage;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -200,7 +200,12 @@ void Init_UI()
 	max_sfx_vol = UI_IO_settings[3];
 
 	// Determine which BGM to play based on the current level
-	if (currentState == GS_LEVEL1)
+
+	if (currentState == GS_HUBWORLD)
+	{
+		AEAudioPlay(hubWorldMusic, gameBGM, 1.f, 1.f, -1);
+	}
+	else if (currentState == GS_LEVEL1)
 	{
 		AEAudioPlay(levelBGM, gameBGM, 1.f, 1.f, -1); // Looping BGM
 	}
@@ -260,6 +265,7 @@ void Load_UI()
 	pixel_font = AEGfxCreateFont("Assets/buggy-font.ttf", font_size);
 
 	// BGM and SFX
+
 	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
 	levelSFX = AEAudioLoadSound("Assets/menuClick.mp3");
 	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
@@ -271,6 +277,7 @@ void Load_UI()
 	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
 	dashAudio = AEAudioLoadSound("Assets/dash.mp3");
 	ammoFullSFX = AEAudioLoadSound("Assets/chargedCan.mp3");
+	hubWorldMusic = AEAudioLoadMusic("Assets/hubWorldSong.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
@@ -306,6 +313,7 @@ void Unload_UI()
 	AEAudioUnloadAudio(bossLevel2);
 	AEAudioUnloadAudio(dashAudio);
 	AEAudioUnloadAudio(ammoFullSFX);
+	AEAudioUnloadAudio(hubWorldMusic);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }

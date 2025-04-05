@@ -181,6 +181,7 @@ void HubWorld_Load()
 void HubWorld_Initialize()
 {
 	std::cout << "Hub World Initialized\n";
+	AEAudioInit();
 
 	// Dummy enemy
 	// Reset melee check
@@ -248,6 +249,8 @@ void HubWorld_Update()
 {
 	// Delta time
 	Get_DT();
+
+	AEAudioUpdate();
 
 	if (AEInputCheckTriggered(AEVK_B))
 	{
