@@ -39,4 +39,6 @@ void Draw_ModifiersBoard();
 void fetchLeaderboard(int bossID);
 
 void FetchLeaderboardAsync();
+
+void WaitForLeaderboardFetch();
 		
