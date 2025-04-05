@@ -1,7 +1,7 @@
 //---------------------------------------------------------
 // file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
 //
 // brief:	Spritesheet class declaration
 //

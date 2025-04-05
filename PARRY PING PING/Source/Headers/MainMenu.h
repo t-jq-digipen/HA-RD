@@ -1,11 +1,11 @@
 //---------------------------------------------------------
 // file:	MainMenu.h
-// author:	MANFRED SIM
-// email:	manfred.sim@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
 //
 // brief:	Declaration of main menu functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once

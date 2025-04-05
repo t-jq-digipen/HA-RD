@@ -1,11 +1,15 @@
 //---------------------------------------------------------
 // file:	Level1.cpp
-// author:	MANFRED SIM, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
-// email:	manfred.sim@digipen.edu, muhammadfauzan.b@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Muhammad Raziq bin Mohd Rafig
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			Tan Jun Quan
 //
 // brief:	Implementation of Level 1 functions
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"
@@ -165,6 +169,7 @@ void Level1_Update()
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
+		LockCamera = false;
 		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
 
@@ -187,6 +192,10 @@ void Level1_Update()
 
 		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
 		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
+	}
+	else
+	{
+		LockCamera = true;
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)
@@ -233,18 +242,6 @@ void Level1_Draw()
 
 	Update_Camera();
 
-
-	// Parryable dummy!
-	//EnemyAttackPattern(&enemyattacktimer,&stunnedtimer, &counter, dummy_pos, dummy_rad, &player);
-	//Loop_Timer(&enemyattacktimer);
-	//EnemyAttackPattern(&parryTimer, &counter, &StunCounter, dummy_pos, dummy_rad, player.pos, player.radius);
-	//Loop_Timer(&parryTimer);
-
-	//JQ Monke
-	//JQMonkeAttackDemo(&parryTimer, &JQCounter, &StunCounter, JQMonke_pos, JQMonke_rad, player.pos, player.radius);
-
-	// manfred Boss
-	//Draw_Boss1();
 
 	// Mobs
 	Draw_Mobs();

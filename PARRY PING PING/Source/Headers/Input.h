@@ -1,11 +1,11 @@
 //---------------------------------------------------------
 // file:	Input.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
 //
 // brief:	Declaration of input handler
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once

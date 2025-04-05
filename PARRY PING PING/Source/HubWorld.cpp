@@ -1,7 +1,10 @@
 //---------------------------------------------------------
 // file:	HubWorld.cpp
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Tan Jun Quan
+//			Manfred Sim
+//			Muhammad Fauzan bin Mohamed Fauzy
 //
 // brief:	Definition of Hub World functions
 //

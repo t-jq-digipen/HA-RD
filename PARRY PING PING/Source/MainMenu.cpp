@@ -1,11 +1,12 @@
 //---------------------------------------------------------
 // file:	MainMenu.cpp
-// author:	MANFRED SIM
-// email:	manfred.sim@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
+//          Muhammad Fauzan bin Mohamed Fauzy
 //
 // brief:	Implementation of main menu functions
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"

@@ -1,9 +1,18 @@
+//---------------------------------------------------------
+// file:	Tutorial.h
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			Manfred Sim
+//
+// brief:	Tutorial overlay declaration
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
+
 #pragma once
 #include "utils.h"
 #include "SpriteSheet.h"
 
-// Tutorial WASD Buttons Spritesheet
-extern SpriteSheet WASD_sprite;
 
 // Tutorial Active Flag
 extern bool tutorialActive;

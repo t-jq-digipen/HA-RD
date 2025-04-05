@@ -1,9 +1,14 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// file:	Boss2.cpp
+// project: Heavy Assault : Rust & Dust
+// author:  Muhammad Raziq bin Mohd Rafig               45%
+//          - 
+//          Tan Jun Quan                                45%
+//          - 
+//          Manfred Sim                                 10%
+//          - FILE IO
 //
-// brief:	Spritesheet class declaration
+// brief:	Boss 2 header things (WIP)
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

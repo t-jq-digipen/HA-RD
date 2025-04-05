@@ -1,12 +1,20 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// file:	Boss1.cpp
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Raziq bin Mohd Rafig
+//          - The boss lol
+//          Tan Jun Quan
+//          - Sprites
+//          Manfred Sim
+//          - File IO
+//          - Death Explosion
+//          - Score system
 //
-// brief:	Spritesheet class declaration
+// brief:	Boss 1 implementation
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
+
 #include "Prototype_Boss.h"
 #include "player.h"
 #include "UI.h"
@@ -194,6 +202,7 @@ void Init_Boss()
 
     // Timers
     boss_1.idle_timer = Create_Timer(ProtoBoss_IO[47]);                 // BOSS IDLE TIMER = 1.f
+    boss_1.idle_timer.current = 0.f;
     boss_1.attack_timer = Create_Timer(ProtoBoss_IO[48]);               // BOSS ATTACK TIMER = 1.f
     boss_1.stun_timer = Create_Timer(ProtoBoss_IO[49]);                 // BOSS STUN TIMER = 3.f
     boss_1.explosion_timer = Create_Timer(ProtoBoss_IO[50]);            // BOSS EXPLOSION TIMER = 0.5f

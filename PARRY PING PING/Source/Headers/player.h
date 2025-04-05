@@ -1,14 +1,15 @@
-/*!
- * \file    player.h
- * \author  TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
- * \par     t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
- * \brief   Declaration of player struct and movement functions.
- *
- * This file contains declarations for the `Player` struct, various player states,
- * and functions related to player movement, attacks, and other mechanics.
- *
- * Copyright © 2020 DigiPen, All rights reserved.
- */
+//---------------------------------------------------------
+// file:	player.cpp
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			-
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			-
+//
+// brief:	Declaration of player functions
+// 
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 
 #pragma once
 #include "utils.h"

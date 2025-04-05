@@ -1,3 +1,19 @@
+//---------------------------------------------------------
+// file:	Level2.cpp
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Raziq bin Mohd Rafig
+//			-
+//			Tan Jun Quan
+//			-
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			- Map
+//			Manfred Sim
+//			- File IO
+//
+// brief:	Implementation of Level 1 functions
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
 
 #include "utils.h"
 #include "UI.h"
@@ -122,6 +138,7 @@ void Level2_Update()
 
 	if (levelState != PAUSED && levelState != OPTIONS && levelState != INQUIT && levelState != GAMEOVER)
 	{
+		LockCamera = false;
 		AEInputShowCursor(0);
 		//std::cout << "Playing\n";
 
@@ -141,6 +158,10 @@ void Level2_Update()
 		{
 			Update_LevelTimer(&levelTimer2);
 		}
+	}
+	else
+	{
+		LockCamera = true;
 	}
 
 	if (AEInputCheckTriggered(AEVK_ESCAPE) && levelState == PLAYING)

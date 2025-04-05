@@ -1,11 +1,15 @@
 //---------------------------------------------------------
 // file:	utils.cpp
-// author:	TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
-// email:	t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
-//
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Muhammad Raziq bin Mohd Rafig
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			Manfred Sim
+// 
 // brief:	Collection of utility functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "utils.h"

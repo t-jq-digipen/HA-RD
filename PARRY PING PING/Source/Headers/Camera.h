@@ -1,11 +1,14 @@
 //---------------------------------------------------------
 // file:	Camera.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan                                
+//			- 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Camera panning
 //
 // brief:	Camera function declarations for rendering
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once

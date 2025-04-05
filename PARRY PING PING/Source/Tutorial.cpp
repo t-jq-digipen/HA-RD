@@ -1,3 +1,17 @@
+//---------------------------------------------------------
+// file:	Tutorial.cpp
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			- 
+//			Manfred Sim
+//			- File IO
+//			- Tutorial state
+//
+// brief:	Tutorial overlay implementation
+//
+// Copyright © 2025 DigiPen, All rights reserved.
+//---------------------------------------------------------
+
 #include "Tutorial.h"
 #include "player.h"
 #include "UI.h"

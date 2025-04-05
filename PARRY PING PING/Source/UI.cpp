@@ -1,11 +1,20 @@
 //---------------------------------------------------------
 // file:	UI.cpp
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
+//			- 
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			- Leaderboard entry
+//			- Audio
+//			Tan Jun Quan
+//			-
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Modifiers
+//			
 //
 // brief:	UI elements
 //
-// Copyright � 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "UI.h"

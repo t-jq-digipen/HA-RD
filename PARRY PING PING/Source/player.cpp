@@ -1,14 +1,18 @@
 //---------------------------------------------------------
 // file:	player.cpp
-// author:	TAN JUN QUAN, MUHAMMAD FAUZAN BIN MOHAMED FAUZY
-// email:	t.junquan@digipen.edu, muhammadfauzan.b@digipen.edu
+// project: Heavy Assault : Rust & Dust
+// author:	Tan Jun Quan
+//			-
+//			Muhammad Fauzan bin Mohamed Fauzy
+//			-
+//			Manfred Sim
+//			- File IO
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Damage based on difficulty modifier
 //
 // brief:	Player functions  |	Line number
-//			- Movement			24
-//			- Atack				72
-//			- Attacking_Ranged
-//			- Attacking_Ranged_Impact
-// Copyright � 2020 DigiPen, All rights reserved.
+// 
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #include "player.h"

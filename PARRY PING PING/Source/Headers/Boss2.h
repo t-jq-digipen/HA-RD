@@ -1,9 +1,12 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// file:	Boss2.h
+// project: Heavy Assault : Rust & Dust
+// author:  Muhammad Raziq bin Mohd Rafig (Primary)     70%
+//          - 
+//          Tan Jun Quan                  (Secondary)   30%
+//          - 
 //
-// brief:	Spritesheet class declaration
+// brief:	Boss 2 header things (WIP)
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -31,7 +34,6 @@ typedef enum Boss2_State
     BOSS2_PARRIED,
     BOSS2_PHASEBREAK,
     BOSS2_DEAD,
-
 
     BOSS2_MISSILE_BARRAGE,
     BOSS2_DASH_SLASH,

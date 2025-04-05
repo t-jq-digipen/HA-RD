@@ -1,7 +1,8 @@
 //---------------------------------------------------------
 // file:	Enemies.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Tan Jun Quan
 //
 // brief:	Declaration of General Enemy related functions
 //

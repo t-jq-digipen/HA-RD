@@ -1,3 +1,13 @@
+#---------------------------------------------------------
+# file:	leaderboard_helper.py
+# project: Heavy Assault : Rust & Dust
+# author:	Muhammad Fauzan bin Mohamed Fauzy
+#
+# brief:	Leaderboard (fauz add more ltr)
+#
+# Copyright © 2025 DigiPen, All rights reserved.
+#---------------------------------------------------------
+
 import sys
 import requests
 

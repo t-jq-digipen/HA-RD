@@ -1,11 +1,11 @@
 //---------------------------------------------------------
 // file:	Level1.h
-// author:	AVID PARRY ENJOYERS
-// email:	-
+// project: Heavy Assault : Rust & Dust
+// author:	Manfred Sim
 //
 // brief:	Declaration of Level 1 functions
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 #pragma once
