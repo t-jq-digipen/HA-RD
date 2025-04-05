@@ -45,6 +45,7 @@ s8  hubworld_font;
 SpriteSheet campfire_sprite;
 SpriteSheet shrine_sprite;
 SpriteSheet modifiers_sprite;
+SpriteSheet spirit_sprite;
 
 // Fade from black transition when level starts
 Color FadeIn, FadeGate, FadeShrine, FadeModifiers;
@@ -137,9 +138,10 @@ void HubWorld_Load()
 
 	FetchLeaderboardAsync();
 
-	shrine_sprite	= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
-	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
-	modifiers_sprite = SpriteSheet("Assets/HubWorld/Compuser.png", 4, 1);
+	shrine_sprite		= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
+	campfire_sprite		= SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
+	modifiers_sprite	= SpriteSheet("Assets/HubWorld/Compuser.png", 4, 1);
+	spirit_sprite		= SpriteSheet("Assets/HubWorld/Spirit.png", 12, 1);
 
 	// Meshes
 	Load_Mesh(20);
@@ -532,6 +534,7 @@ void HubWorld_Unload()
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
 	modifiers_sprite.Unload();
+	spirit_sprite.Unload();
 
 	AEGfxTextureUnload(loadingImage1);
 	WaitForLeaderboardFetch();
@@ -675,9 +678,13 @@ void Draw_ShrineBoard() {
 		}
 
 		// TOP 3 SOULS/ SPIRITS
-		DrawRect(0.f, 100.f, 100.f, 100.f, SetColor(0xFF88B984));
-		DrawRect(-200.f, 75.f, 100.f, 100.f, SetColor(0xFF00008B));
-		DrawRect(200.f, 50.f, 100.f, 100.f, SetColor(0xFFFF6961));
+		spirit_sprite.Set_Row(0);
+		spirit_sprite.Loop(0, 11, 1.f);
+
+		spirit_sprite.Draw(0.f, 100.f, 100.f, 100.f);
+		spirit_sprite.Draw(-200.f, 75.f, 100.f, 100.f);
+		spirit_sprite.Draw(200.f, 50.f, 100.f, 100.f);
+
 
 		// HS_name/score/time -> arr of 2 vectors, each vector holds 20 strings containing specified data: [BOSS_NUMBER][POSITION_IN_LEADERBOARD]
 		// To access eg name of 5th place name for boss 1: HS_name[0][4]
