@@ -380,8 +380,8 @@ void Update_Player_UI(int ammo, float hp, float parry_cd, int rage, float dodge_
 	// Update player hp/ammo
 	UI_playerhp = hp;
 	UI_ammo = ammo;
-	UI_parryCD = (parry_cd != 1.f);
-	UI_dodgeCD = (dodge_cd != 1.f);
+	UI_parryCD = (parry_cd != 1.f) ? 1 : 0;
+	UI_dodgeCD = (dodge_cd != 1.f) ? 1 : 0;
 	UI_rage = rage;
 }
 
@@ -419,6 +419,8 @@ void Draw_Player_UI()
 	racecar.Draw(Mouse.x + 50.f, Mouse.y - 50.f, 30.f, 30.f);
 
 	// COOLDOWN
+	crosshair.Set_Row(0);
+	std::cout << UI_ammo;
     crosshair.Set_Col(UI_ammo);
     crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f);
 }
