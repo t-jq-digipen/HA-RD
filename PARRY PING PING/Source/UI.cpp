@@ -220,7 +220,7 @@ void Init_UI()
 
 	// For leaderboard input
 	isInputDisabled = false;
-	playerName = "BACKSPACE to Input Name";
+	playerName = "BACKSPACE to Type";
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
@@ -658,7 +658,7 @@ void Draw_ClearMenu()
 	}
 
 	// Do NOT allow clicking the button if the name is invalid
-	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Input Name" || playerName == "Error!");
+	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Type" || playerName == "Error!");
 
 	// Block submission if already submitted, name is invalid, or mouse not over button
 	if (!hasSubmitted && isHoveringButton && isNameValid && AEInputCheckTriggered(AEVK_LBUTTON))
@@ -1168,7 +1168,7 @@ void Draw_GameOverMenu()
 	}
 
 	// Do NOT allow clicking the button if the name is invalid
-	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Input Name" || playerName == "Error!");
+	bool isNameValid = !(playerName.empty() || playerName == "BACKSPACE to Type" || playerName == "Error!");
 
 	// Block submission if already submitted, name is invalid, or mouse not over button
 	if (!hasSubmitted && isHoveringButton && isNameValid && AEInputCheckTriggered(AEVK_LBUTTON))
@@ -1406,7 +1406,7 @@ void Update_LevelScore()
 
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
 
-	if (name == "BACKSPACE to Input Name" || name.empty()) {
+	if (name == "BACKSPACE to Type" || name.empty()) {
 
 		std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
 		return;  // Exit early if the name is invalid
