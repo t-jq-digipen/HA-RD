@@ -210,7 +210,7 @@ void Load_Boss2()
     BOSS2_SCORE_PLAYER_MELEE_HIT         = static_cast<int>(Boss2Score_IO[4]) * BOSS2_SCORE_MULTIPLIER;     // + 200 points (multiplied by damage value) per frame
     BOSS2_SCORE_BOSS_PROJECTILES_PARRIED = static_cast<int>(Boss2Score_IO[5]) * BOSS2_SCORE_MULTIPLIER;     // + 10000 points if boss rocket successfully parried
     BOSS2_SCORE_BOSS_MELEE_PARRIED       = static_cast<int>(Boss2Score_IO[6]) * BOSS2_SCORE_MULTIPLIER;     // + 20000 points if boss successfully stunned via parry
-    BOSS2_SCORE_TIME_BONUS_CAP           = static_cast<f32>(Boss2Score_IO[7]);                              // + bonus points if player manages to beat boss within 1 minute or less
+    BOSS2_SCORE_TIME_BONUS_CAP           = static_cast<f32>(Boss2Score_IO[12]);                             // + bonus points if player manages to beat boss within 1 minute or less
     BOSS2_SCORE_TIME_BONUS               = static_cast<int>(Boss2Score_IO[8]);                              // + 2000 points for every second of time left less than the 1 minute cap
     BOSS2_SCORE_DODGE                    = static_cast<int>(Boss2Score_IO[9]) * BOSS2_SCORE_MULTIPLIER;     // + 4000 points if boss attack successfully dodged
     BOSS2_SCORE_PERFECT                  = static_cast<int>(Boss2Score_IO[10]) * BOSS2_SCORE_MULTIPLIER;    // + 20000 points if player beats boss without taking damage
@@ -941,7 +941,7 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
         }
         
         Parried_Hit();
-        Collect_Points(BOSS2_SCORE_BOSS_PROJECTILES_PARRIED, PARRY_SCORE);
+        Collect_Points(BOSS2_SCORE_BOSS_MELEE_PARRIED, PARRY_SCORE);
         currentCombo += 1;
         break;
     case BLOCK:

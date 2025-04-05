@@ -66,6 +66,9 @@
     <ClCompile Include="..\Source\Boss2.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Source\Credits.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Source\Headers\utils.h">
@@ -116,10 +119,32 @@
     <ClInclude Include="..\Source\Headers\Boss2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Source\Headers\Credits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Source\leaderboard_helper.py">
       <Filter>Source Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\Boss2.txt" />
+    <Text Include="..\Assets\FileIO\Credits.txt" />
+    <Text Include="..\Assets\FileIO\CreditsInit.txt" />
+    <Text Include="..\Assets\FileIO\Level1.txt" />
+    <Text Include="..\Assets\FileIO\MainMenu.txt" />
+    <Text Include="..\Assets\FileIO\Player.txt" />
+    <Text Include="..\Assets\FileIO\HubWorld.txt" />
+    <Text Include="..\Assets\FileIO\PlayerAttack.txt" />
+    <Text Include="..\Assets\FileIO\PlayerScore.txt" />
+    <Text Include="..\Assets\FileIO\ProtoBoss.txt" />
+    <Text Include="..\Assets\FileIO\Settings.txt" />
+    <Text Include="..\Assets\FileIO\Tutorial.txt" />
+    <Text Include="..\Assets\FileIO\UI.txt" />
+    <Text Include="..\Assets\FileIO\PlayerBestScores.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="..\Assets\FileIO\Level2.txt">
+      <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
 </Project>

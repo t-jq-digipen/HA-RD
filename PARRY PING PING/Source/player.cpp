@@ -127,7 +127,7 @@ void ResetSound()
 	{
 		sound_played[i] = false; // Reset all phases to not played
 	}
-	std::cout << "Sound reset" << std::endl; // Debug print to check if it's resetting
+	// std::cout << "Sound reset" << std::endl; // Debug print to check if it's resetting
 }
 
 bool Attacking_Melee()

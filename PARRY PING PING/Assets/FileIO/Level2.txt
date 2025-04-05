@@ -1,0 +1,12 @@
+0) Level Timer: 0.f
+1) Level Clear Transition Timer: 5.f
+2) Level Game Over Timer: 2.f
+3) Level Enemy Attack Timer: 1.f
+4) Level Enemy Stunned Timer: 2.f
+5) Level Dummy Pos X: 0.f
+6) Level Dummy Pos Y: 0.f
+7) Level Dummy Radius: 25.f
+8) Level Player Base Offset: 50.f
+9) Level Boss Base Offset: 150.f
+10) Level Map Width: 3272.f
+11) Level Map Height: 1536.f

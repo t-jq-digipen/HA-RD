@@ -67,7 +67,7 @@ void Draw_Spark()
 
 	if (Update_Timer(&spark.timer))
 	{
-		std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
+		// std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
 		spark.sprite.Set_Row(0);
 		spark.sprite.Set_Col(0, 8, spark.timer.current);
 		spark.sprite.Draw(World_To_Screen_x(spark.pos.x), World_To_Screen_y(spark.pos.y), 1500.f, 1000.f);

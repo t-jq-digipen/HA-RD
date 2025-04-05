@@ -57,6 +57,12 @@ bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;												// For Top 3 screen
 bool InModifiers;											// For modifier selection screen
 
+// For displaying level best times
+int minutes1, seconds1, milliseconds1;
+int minutes2, seconds2, milliseconds2;
+char bestTime1[16];
+char bestTime2[16];
+
 //Leaderboard fetching
 std::vector<std::string> HS_name(20);
 std::vector<std::string> HS_score(20);
@@ -67,6 +73,7 @@ std::future<void> leaderboardFetchFuture;
 
 // File IO
 std::vector<float> HubWorld_IO_elements;
+std::vector<float> HubWorld_IO_scores;
 
 void FetchLeaderboardAsync() {
 	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
@@ -113,6 +120,7 @@ void HubWorld_Load()
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
+	ReadFromFile("Assets/FileIO/PlayerBestScores.txt", HubWorld_IO_scores);
 
 	// Hub World Environments
 	Env_Gate		= { HubWorld_IO_elements[0],  HubWorld_IO_elements[1],  HubWorld_IO_elements[2],  HubWorld_IO_elements[3] };	// ENV GATE 
@@ -184,6 +192,26 @@ void HubWorld_Initialize()
 
 	// Reset Level Clear Transition Timer
 	HubWorld_ClearTransitionTimer.current = 0.f;							// START CLEAR TRANSITION	0.f
+
+	// Level 1 Highest Score
+	std::cout << "Player Level 1 Highest Score: " << static_cast<int>(HubWorld_IO_scores[0]) << '\n';
+	
+	// Level 1 Best Time
+	minutes1 = static_cast<int>(HubWorld_IO_scores[1]) / 60;
+	seconds1 = static_cast<int>(HubWorld_IO_scores[1]) % 60;
+	milliseconds1 = static_cast<int>((HubWorld_IO_scores[1] - static_cast<int>(HubWorld_IO_scores[1])) * 100);
+	snprintf(bestTime1, sizeof(bestTime1), "Time: %02d:%02d:%02d", minutes1, seconds1, milliseconds1);
+	std::cout << "Player Level 1 Best Time: " << bestTime1 << '\n';
+
+	// Level 2 Highest Score
+	std::cout << "Player Level 2 Highest Score: " << static_cast<int>(HubWorld_IO_scores[2]) << '\n';
+
+	// Level 2 Best Time
+	minutes2 = static_cast<int>(HubWorld_IO_scores[3]) / 60;
+	seconds2 = static_cast<int>(HubWorld_IO_scores[3]) % 60;
+	milliseconds2 = static_cast<int>((HubWorld_IO_scores[3] - static_cast<int>(HubWorld_IO_scores[3])) * 100);
+	snprintf(bestTime2, sizeof(bestTime2), "Time: %02d:%02d:%02d", minutes2, seconds2, milliseconds2);
+	std::cout << "Player Level 2 Best Time: " << bestTime2 << '\n';
 }
 
 void HubWorld_Update()
@@ -206,8 +234,8 @@ void HubWorld_Update()
 
 	if (levelState == PLAYING)
 	{
-		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
-		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
+		//std::cout << "BGM Volume: " << current_bgm_vol << '\n';
+		//std::cout << "SFX Volume: " << current_sfx_vol << '\n';
 		// Player WASD Movement
 		Update_Player();
 		player.hp = 100.f;

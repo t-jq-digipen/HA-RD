@@ -144,10 +144,12 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <Text Include="..\Assets\FileIO\Credits.txt" />
     <Text Include="..\Assets\FileIO\CreditsInit.txt" />
     <Text Include="..\Assets\FileIO\Level1.txt" />
+    <Text Include="..\Assets\FileIO\Level2.txt" />
     <Text Include="..\Assets\FileIO\MainMenu.txt" />
     <Text Include="..\Assets\FileIO\Player.txt" />
     <Text Include="..\Assets\FileIO\HubWorld.txt" />
     <Text Include="..\Assets\FileIO\PlayerAttack.txt" />
+    <Text Include="..\Assets\FileIO\PlayerBestScores.txt" />
     <Text Include="..\Assets\FileIO\PlayerScore.txt" />
     <Text Include="..\Assets\FileIO\ProtoBoss.txt" />
     <Text Include="..\Assets\FileIO\Settings.txt" />
