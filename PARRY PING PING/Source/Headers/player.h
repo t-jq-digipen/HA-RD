@@ -77,7 +77,7 @@ typedef struct Player
     aabb hitbox;           ///< Axis-aligned bounding box for collision detection
     float draw_width, draw_height;  ///< Draw dimensions of the player
     float hitbox_width, hitbox_height;  ///< Hitbox dimensions of the player
-    int ammo, max_ammo;              ///< Ammo count for ranged attacks
+    int ammo, prevAmmo, max_ammo;              ///< Ammo count for ranged attacks
     float knockbackTimer;  ///< Timer for knockback effect
     float lightAttackCooldown;
     Timer dodgetimer;      ///< Timer for dodge action

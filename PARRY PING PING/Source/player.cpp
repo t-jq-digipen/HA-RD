@@ -431,6 +431,15 @@ void Attacking_Ranged()
 	//	player.ammo += 1;
 	//}
 
+	if (player.ammo == 3 && player.prevAmmo != 3)
+	{
+		// Play a sound effect when ammo reaches 3
+		std::cout << "Ammo reached 3 - audio cue!\n";
+		AEAudioPlay(ammoFullSFX, gameSFX, 1.0f, 1.0f, 0); // Replace 'ammoFullSFX' with your actual sound ID
+	}
+
+	// Update previous ammo for next frame
+	player.prevAmmo = player.ammo;
 
 	if (player.ammo > 0)
 	{
@@ -1187,6 +1196,7 @@ void Init_Player()
 	AEVec2Zero(&atk_dir);
 
 	player.ammo = static_cast<int>(Player_IO[18]);			// PLAYER STARTING AMMO = 3
+	player.prevAmmo = -1;
 	player.max_ammo = static_cast<int>(Player_IO[18]);		// PLAYER MAX AMMO = 3
 
 	heavy_atk;
