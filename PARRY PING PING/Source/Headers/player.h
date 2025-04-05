@@ -68,46 +68,26 @@ typedef struct Player
     bool canAttack;        ///< Flag to disable attacks
     AEVec2 pos;            ///< Position of the player
     AEVec2 vel;            ///< Velocity of the player
-    float speed;           ///< Speed of the player
     AEVec2 dodge_vel;      ///< Velocity during a dodge
-    float hp, max_hp;              ///< Health of the player
+    float hp;              ///< Health of the player
     int Mod_DmgTakenIndex; ///< Damage taken multiplier
     float radius;          ///< Radius for collision checks
-    float width, height;   ///< Dimensions of the player
     aabb hitbox;           ///< Axis-aligned bounding box for collision detection
-    float draw_width, draw_height;  ///< Draw dimensions of the player
-    float hitbox_width, hitbox_height;  ///< Hitbox dimensions of the player
-    int ammo, prevAmmo, max_ammo;              ///< Ammo count for ranged attacks
+    int ammo, prevAmmo;    ///< Ammo count for ranged attacks
     float knockbackTimer;  ///< Timer for knockback effect
     float lightAttackCooldown;
     Timer dodgetimer;      ///< Timer for dodge action
     Timer hittimer;        ///< Timer for hit action
     Timer blocktimer;      ///< Timer for block action
     Timer blocked;         ///< Timer for when the player is blocked
+    Timer deathtimer;
     PlayerState state;     ///< Current state of the player
     int ragemeter;         ///< Counter for successful parries
-    int ragemeter_max;     ////< max counter for rage meter
     int direction_v;       ///< Vertical direction (up/down)
     int direction_h;       ///< Horizontal direction (left/right)
-    Color color;           ///< Color of the player (for rendering)
-    SpriteSheet_Old* spritesheet; ///< Pointer to the sprite sheet for animation
 } Player;
 
-// ----------------------------------------------------------------------------
-// Player timers struct
-// ----------------------------------------------------------------------------
-/*!
- * \brief Struct holding various timers for player actions.
- *
- * This struct includes timers for actions such as dodging, hitting, and blocking.
- */
-typedef struct PlayerTimers
-{
-    Timer dodge;           ///< Timer for dodge action
-    Timer hit;             ///< Timer for hit action
-    Timer blockparry;      ///< Timer for block or parry action
-    Timer blocked;         ///< Timer for when the player is blocked
-} PlayerTimers;
+
 
 // ----------------------------------------------------------------------------
 // Direction enums

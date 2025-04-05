@@ -33,9 +33,9 @@ ParrySpark spark;
 // Init parry spark position and timer
 void Init_Parry_Spark()
 {
-	spark.pos = { 0.f,0.f };
-	spark.timer = Create_Timer(.5f);
-	spark.active = false;
+	spark.pos		= { 0.f,0.f };
+	spark.timer		= Create_Timer(.5f);	// Temp value, will get reassigned for each attack
+	spark.active	= false;
 }
 
 // Load animation
