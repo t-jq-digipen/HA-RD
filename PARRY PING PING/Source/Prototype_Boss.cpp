@@ -244,48 +244,56 @@ void Update_Boss()
         case BOSS_IDLE:
             if (!Update_Timer(&boss_1.idle_timer))
             {
-                // Calculate distance between player to check if you wanna do ranged attack
-                boss_1.target_dist = AEVec2Distance(&boss_1.pos, &player.pos);
+                if (player.state != DEAD)
+                {
+                    // Calculate distance between player to check if you wanna do ranged attack
+                    boss_1.target_dist = AEVec2Distance(&boss_1.pos, &player.pos);
 
-                if (boss_1.target_dist > BOSS_DASH_DISTANCE) // Player is out of melee range
-                {
-                    f32 randomizer_ranged = AERandFloat();
-                    if (randomizer_ranged > 0.5f)
+                    if (boss_1.target_dist > BOSS_DASH_DISTANCE) // Player is out of melee range
                     {
-                        // Do a charge
-                        boss_1.attack_timer.current = 0.f;
-                        boss_melee[BOSS_CHARGE].timer.current = 0.f;
-                        boss_1.attack_type = BOSS_CHARGE;
-                        boss_1.state = BOSS_RANGED_CHARGE;
+                        f32 randomizer_ranged = AERandFloat();
+                        if (randomizer_ranged > 0.5f)
+                        {
+                            // Do a charge
+                            boss_1.attack_timer.current = 0.f;
+                            boss_melee[BOSS_CHARGE].timer.current = 0.f;
+                            boss_1.attack_type = BOSS_CHARGE;
+                            boss_1.state = BOSS_RANGED_CHARGE;
+                        }
+                        else
+                        {
+                            // Do a rocketpunch
+                            boss_1.attack_timer.current = 0.f;
+                            boss_melee[BOSS_ROCKETFIST].timer.current = 0.f;
+                            boss_1.attack_type = BOSS_ROCKETFIST;
+                            boss_1.attackstate = BOSS_ATTACK_WINDUP;
+                            boss_1.state = BOSS_RANGED_ROCKETFIST;
+                        }
                     }
-                    else
+                    else // Player is in melee range
                     {
-                        // Do a rocketpunch
-                        boss_1.attack_timer.current = 0.f;
-                        boss_melee[BOSS_ROCKETFIST].timer.current = 0.f;
-                        boss_1.attack_type = BOSS_ROCKETFIST;
-                        boss_1.attackstate = BOSS_ATTACK_WINDUP;
-                        boss_1.state = BOSS_RANGED_ROCKETFIST;
+                        f32 randomizer_melee = AERandFloat();
+                        if (randomizer_melee > 0.5f)
+                        {
+                            // Do smash sweep combo
+                            boss_1.attack_timer.current = 0.f;
+                            boss_1.attack_type = BOSS_SMASH;
+                            boss_1.state = BOSS_SMASH_SWEEP;
+                        }
+                        else
+                        {
+                            // Do three hit combo
+                            boss_1.attack_timer.current = 0.f;
+                            boss_1.attack_type = BOSS_LEFT_HIT;
+                            boss_1.state = BOSS_THREE_HIT;
+                        }
                     }
                 }
-                else // Player is in melee range
+                else    // if player DEAD
                 {
-                    f32 randomizer_melee = AERandFloat();
-                    if (randomizer_melee > 0.5f)
-                    {
-                        // Do smash sweep combo
-                        boss_1.attack_timer.current = 0.f;
-                        boss_1.attack_type = BOSS_SMASH;
-                        boss_1.state = BOSS_SMASH_SWEEP;
-                    }
-                    else
-                    {
-                        // Do three hit combo
-                        boss_1.attack_timer.current = 0.f;
-                        boss_1.attack_type = BOSS_LEFT_HIT;
-                        boss_1.state = BOSS_THREE_HIT;
-                    }
+                    boss_1.idle_timer.current = 0.f;
                 }
+                
             }
             break;
         case BOSS_SMASH_SWEEP:
