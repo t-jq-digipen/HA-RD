@@ -35,7 +35,7 @@ enum LEVEL_STATE
 };
 
 extern int levelState;
-extern float levelTimer;
+extern float levelTimer, levelTimer2;
 extern int currentScore;
 extern bool displayPointsAccumulated, isInputDisabled;
 extern int pointsAccumulated;

@@ -713,33 +713,48 @@ int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 
 // Reads from text file
 void ReadFromFile(const char* filename, std::vector<float>& vector)
 {
+	// Clear any old data before reading
+	vector.clear();
+
+	// Open file with ifstream
 	std::ifstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
-	else
+
+	std::cout << "Reading from " << filename << "...\n";
+
+	std::string line;
+	while (std::getline(ifs, line))
 	{
-		std::cout << "Can read " << filename << "!!!\n";
-		std::string label, value;
-		while (std::getline(ifs, label))
+		size_t pos = line.find(":");
+		if (pos != std::string::npos)
 		{
-			size_t pos = label.find(":");
-			if (pos != std::string::npos)
+			std::string value = line.substr(pos + 2);
+			try
 			{
-				value = label.substr(pos + 2);
-				vector.push_back(stof(value));
+				float number = std::stof(value);
+				vector.push_back(number);
+			}
+			catch (const std::exception& e)
+			{
+				std::cerr << "Invalid float value in line: " << line << '\n';
 			}
 		}
 	}
-	ifs.close();
+
+	ifs.close();  // Ensure file is properly closed after reading
 }
 
 // Reads all lines from text file
 void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
 {
-	std::ifstream ifs{ filename };
+	// Clear any old data before reading
+	vector.clear();
+
+	std::fstream ifs{ filename };
 	if (!ifs)
 	{
 		std::cout << "Cannot read " << filename << "!!!\n";
@@ -763,13 +778,15 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	std::ifstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 
 	std::vector<std::string> lines;
 	std::string line;
+	bool found = false;
 
+	// Read and modify the line in memory
 	while (std::getline(ifs, line))
 	{
 		size_t pos = line.find(name);
@@ -779,14 +796,22 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 			if (value_pos != std::string::npos)
 			{
 				line = line.substr(0, value_pos + 2) + value;
-				std::cout << "Modified line: " << line;
+				std::cout << "Modified line: " << line << '\n';
+				found = true;
 			}
 		}
 		lines.push_back(line);
 	}
 	ifs.close();
 
-	std::ofstream ofs{ filename };
+	if (!found)
+	{
+		std::cerr << "Variable name '" << name << "' not found in " << filename << '\n';
+		return;
+	}
+
+	// Open file for writing and write all modified lines immediately
+	std::ofstream ofs{ filename, std::ios::trunc };
 	if (!ofs)
 	{
 		std::cerr << "Cannot open " << filename << " for writing!!!\n";
@@ -797,6 +822,7 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	{
 		ofs << modified_line << '\n';
 	}
-	ofs.flush();
-	ofs.close();
+
+	ofs.flush();  // Ensure data is flushed to disk
+	ofs.close();  // Ensure file is properly closed
 }

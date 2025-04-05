@@ -22,7 +22,6 @@ bool isFirstInit = false;
 
 // Level number
 int levelState = 0;
-float levelTimer = 0.f;
 
 // Level score
 int currentScore;
@@ -30,7 +29,6 @@ int newScore;
 
 f32 Modifier_ScoreScale[3]{ 0.5f, 1.f, 1.5f };
 
-int totalAccumulatedScore;
 int pointsAccumulated;
 bool displayPointsAccumulated = false;
 Timer displayPointsTimer;
@@ -61,6 +59,8 @@ Color play_bg, pause_bg, pause_screen;
 Color boss_hp_red, boss_hp_yellow, boss_hp_green, boss_hp_damage;
 
 // Level Timer
+float levelTimer = 0.f;
+float levelTimer2 = 0.f;
 char level_timer[16];
 std::string levelTimeStr;
 
@@ -107,6 +107,8 @@ bool hasSubmitted;
 // File IO
 std::vector<float> UI_IO;
 std::vector<float> UI_IO_settings;
+std::vector<float> UI_IO_score;
+
 int font_size;
 
 // Initialize the various screen UI elements
@@ -136,17 +138,13 @@ void Init_UI()
 	// Starting level state
 	levelState = PLAYING;
 
+	// Level timer
+	levelTimer = 0;
+	levelTimer2 = 0;
+
 	// Level score
-	if (previousState == GS_HUBWORLD)
-	{
-		currentScore = 0;
-		newScore = 0;
-		totalAccumulatedScore = 0;
-	}
-	else
-	{
-		newScore = totalAccumulatedScore;
-	}
+	currentScore = 0;
+	newScore = 0;
 	pointsAccumulated = 0;
 	displayPointsAccumulated = false;
 	displayPointsTimer = Create_Timer(1.5f);
@@ -229,7 +227,7 @@ void Load_UI()
 	// Read File IO
 	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
 	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
-
+	ReadFromFile("Assets/FileIO/PlayerBestScores.txt", UI_IO_score);
 
 	// Menu Buttons
 	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 10, 8, 1.f);
@@ -578,9 +576,32 @@ void DrawLoadingImage()
 
 void Draw_ClearMenu()
 {
+	// Update highest score
+	if (currentState == GS_LEVEL1)
+	{
+		if (UI_IO_score[0] == 0.f || currentScore > UI_IO_score[0])
+		{
+			WriteToFile("Assets/FileIO/PlayerBestScores.txt", "Player Level 1 Highest Score", std::to_string(currentScore));
+		}
+		if (UI_IO_score[1] == 0.f || levelTimer < static_cast<float>(UI_IO_score[1]))
+		{
+			WriteToFile("Assets/FileIO/PlayerBestScores.txt", "Player Level 1 Best Time", std::to_string(levelTimer));
+		}
+	}
+	else if (currentState == GS_LEVEL2)
+	{
+		if (UI_IO_score[2] == 0.f || currentScore > UI_IO_score[2])
+		{
+			WriteToFile("Assets/FileIO/PlayerBestScores.txt", "Player Level 2 Highest Score", std::to_string(currentScore));
+		}
+		if (UI_IO_score[3] == 0.f || levelTimer2 < static_cast<float>(UI_IO_score[3]))
+		{
+			WriteToFile("Assets/FileIO/PlayerBestScores.txt", "Player Level 2 Best Time", std::to_string(levelTimer2));
+		}
+	}
+
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), SetColor(0x99000000));
 	isInputDisabled = true;
-	totalAccumulatedScore = currentScore;
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 

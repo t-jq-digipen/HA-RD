@@ -13,12 +13,19 @@ AEGfxTexture* mapTexture2 = nullptr;
 
 Timer cleartransitiontimer2;
 Timer gameovertransitiontimer2;
-float levelTimer2;
 
 bool showBossHitboxes2 = true;
 
+float PLAYER_BASE_OFFSET2{};
+float BOSS_BASE_OFFSET2{};
+
+f32 map_width2, map_height2;
+
 int dummy_check2; //for sword SFX
 AEVec2 dummy_pos2; //for sword SFX
+
+// File IO
+std::vector<float> L2_IO;
 
 
 void Level2_Load()
@@ -42,7 +49,8 @@ void Level2_Load()
 	}
 	std::cout << "Level 2 Loaded\n";
 
-
+	// Read File IO
+	ReadFromFile("Assets/FileIO/Level2.txt", L2_IO);
 }
 
 void Level2_Initialize()
@@ -69,21 +77,29 @@ void Level2_Initialize()
 	Init_UI();
 
 	dummy_check2 = 0;
-	dummy_pos2 = { 0,0};
+	dummy_pos2 = { L2_IO[5], L2_IO[6] };
+
+	// Offset
+	PLAYER_BASE_OFFSET2 = { L2_IO[8] };
+	BOSS_BASE_OFFSET2 = { L2_IO[9] };
+
+	// Level map
+	map_width2 = L2_IO[10];
+	map_height2 = L2_IO[11];
 
 	// Incrementing Level Timer
-	levelTimer2 = 0.f;
+	levelTimer2 = L2_IO[0];
 
 	// Set Camera to Player
 	LockCamera = false;
 	player.canAttack = true;
 
 	// Level Clear Transition Timer
-	cleartransitiontimer2 = Create_Timer(5.f);
+	cleartransitiontimer2 = Create_Timer(L2_IO[1]);
 	cleartransitiontimer2.current = 0.f;
 
 	// Game Over Transition Timer
-	gameovertransitiontimer2 = Create_Timer(2.f);
+	gameovertransitiontimer2 = Create_Timer(L2_IO[2]);
 	gameovertransitiontimer2.current = 0.f;
 }
 
@@ -142,9 +158,6 @@ void Level2_Update()
 	}
 }
 
-const float PLAYER_BASE_OFFSET{ 50.f };
-const float BOSS_BASE_OFFSET{ 150.f };
-
 void Level2_Draw()
 {
 	AEGfxSetBackgroundColor(0, 0, 0);
@@ -152,26 +165,25 @@ void Level2_Draw()
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
 	// Define map size
-	f32 map_width = 3272.0f, map_height = 1536.0f;
 	Color borderColor = { 0.0f, 0.0f, 0.0f, 0.0f }; // Blue
 
 	// Offset map drawing so (0,0) is centered in the camera view
-	f32 map_x = -map_width / 2;
-	f32 map_y = -map_height / 2;
+	f32 map_x = -map_width2 / 2;
+	f32 map_y = -map_height2 / 2;
 
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
 
 	// Draw map borders
-	DrawRect(screen_x + map_width / 2, screen_y, map_width, 10, borderColor); // Bottom
-	DrawRect(screen_x + map_width / 2, screen_y + map_height, map_width, 10, borderColor); // Top
-	DrawRect(screen_x, screen_y + map_height / 2, 10, map_height, borderColor); // Left
-	DrawRect(screen_x + map_width, screen_y + map_height / 2, 10, map_height, borderColor); // Right
+	DrawRect(screen_x + map_width2 / 2, screen_y, map_width2, 10, borderColor); // Bottom
+	DrawRect(screen_x + map_width2 / 2, screen_y + map_height2, map_width2, 10, borderColor); // Top
+	DrawRect(screen_x, screen_y + map_height2 / 2, 10, map_height2, borderColor); // Left
+	DrawRect(screen_x + map_width2, screen_y + map_height2 / 2, 10, map_height2, borderColor); // Right
 
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
-	DrawImageAttachedToRect(screen_x, screen_y, map_width, map_height, mapTexture2);
+	DrawImageAttachedToRect(screen_x, screen_y, map_width2, map_height2, mapTexture2);
 
 	Update_Camera();
 
@@ -188,7 +200,7 @@ void Level2_Draw()
 		/*std::cout << "Hitboxes not drawn\n";*/
 	}
 
-	if (player.pos.y - PLAYER_BASE_OFFSET > boss_2.pos.y - BOSS_BASE_OFFSET)
+	if (player.pos.y - PLAYER_BASE_OFFSET2 > boss_2.pos.y - BOSS_BASE_OFFSET2)
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Player();
