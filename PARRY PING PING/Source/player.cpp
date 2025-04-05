@@ -28,6 +28,8 @@
 // const float MAP_BOTTOM = -300.f;
 
 const float ATTACK_RAGEMULTIPLER = 0.75f;
+const float MODIFIER_DAMAGEMULTIPLIER_DECREASED = 0.5f;
+const float MODIFIER_DAMAGEMULTIPLIER_INCREASED = 2.f;
 
 // Define level score update values
 int SCORE_LIGHT_PROJECTILE_HIT;
@@ -1002,13 +1004,13 @@ void Blocked_Hit(f32 damage)
 	switch (player.Mod_DmgTakenIndex)
 	{
 	case 0:
-		player.hp -= damage * BLOCK_REDUCTION * 0.5f;
+		player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
 		break;
 	default:
 		player.hp -= damage * BLOCK_REDUCTION;
 		break;
 	case 2:
-		player.hp -= damage * BLOCK_REDUCTION * 2.f;
+		player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_INCREASED;
 		break;
 	}
 
@@ -1038,13 +1040,16 @@ void Eat_Hit(f32 damage)
 	switch (player.Mod_DmgTakenIndex)
 	{
 	case 0:
-		player.hp -= damage * 0.5f;
+		//Player takes no damage
+		break;
+	case 1:
+		player.hp -= damage * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
 		break;
 	default:
 		player.hp -= damage;
 		break;
-	case 2:
-		player.hp -= damage * 2.f;
+	case 3:
+		player.hp -= damage * MODIFIER_DAMAGEMULTIPLIER_INCREASED;
 		break;
 	}
 
