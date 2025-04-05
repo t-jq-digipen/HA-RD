@@ -75,7 +75,6 @@ std::future<void> leaderboardFetchFuture;
 std::vector<float> HubWorld_IO_elements;
 
 AEGfxTexture* loadingImage1;
-bool isLoading1;
 float rotationAngle1 = 0.f; // Angle for rotation of the loading image
 float rotationSpeed1 = 90.f; // Rotation speed (degrees per second)
 

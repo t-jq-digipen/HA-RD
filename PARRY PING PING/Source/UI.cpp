@@ -265,7 +265,7 @@ void Load_UI()
 	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
 	levelSFX = AEAudioLoadSound("Assets/menuClick.mp3");
 	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
-	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
+	heavyProj = AEAudioLoadSound("Assets/newCharged.mp3");
 	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
 	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
 	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
