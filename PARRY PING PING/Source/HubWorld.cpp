@@ -271,6 +271,9 @@ void HubWorld_Update()
 			tutorialActive = false;
 		}
 
+				// Detection for entering gates to different boss fights
+		// BOSS 1
+
 		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) {
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
