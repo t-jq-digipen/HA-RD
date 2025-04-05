@@ -15,6 +15,7 @@ Timer cleartransitiontimer2;
 Timer gameovertransitiontimer2;
 
 bool showBossHitboxes2 = true;
+bool TransitionL2_Start;
 
 float PLAYER_BASE_OFFSET2{};
 float BOSS_BASE_OFFSET2{};
@@ -65,6 +66,10 @@ void Level2_Initialize()
 
 	// Camera
 	Init_Camera();
+
+	// Transition
+	transition_xpos = AEGfxGetWindowWidth();
+	TransitionL2_Start = false;
 
 	// Mobs
 	Init_Mobs();
@@ -265,6 +270,12 @@ void Level2_Draw()
 			Draw_ClearMenu();
 			AEInputShowCursor(1);
 		}
+	}
+
+	// If flag has not been set, continue transition effect
+	if (!TransitionL2_Start)
+	{
+		TransitionExit(TransitionL2_Start);
 	}
 }
 

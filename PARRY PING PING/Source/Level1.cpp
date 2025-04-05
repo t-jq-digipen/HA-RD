@@ -33,6 +33,9 @@ int dummy_check;
 
 bool showBossHitboxes = true;
 
+// Flags for transitions
+bool TransitionL1_Start;
+
 float PLAYER_BASE_OFFSET{};
 float BOSS_BASE_OFFSET{};
 
@@ -83,6 +86,10 @@ void Level1_Initialize()
 	Init_Camera();
 
 	Init_Enemy_Indicator();
+
+	// Level Transition
+	transition_xpos = AEGfxGetWindowWidth();
+	TransitionL1_Start = false;
 
 	// Incrementing Level Timer
 	levelTimer = L1_IO[0];
@@ -330,6 +337,12 @@ void Level1_Draw()
 			Draw_ClearMenu();
 			AEInputShowCursor(1);
 		}
+	}
+
+	// If flag has not been set, continue transition effect
+	if (!TransitionL1_Start)
+	{
+		TransitionExit(TransitionL1_Start);
 	}
 }
 

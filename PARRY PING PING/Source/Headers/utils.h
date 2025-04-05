@@ -347,3 +347,20 @@ void ReadWholeFile(const char* filename, std::vector<std::string>& vector);
 // param value - new value
 // ----------------------------------------------------------------------------
 void WriteToFile(const char* filename, const std::string& name, const std::string& value);
+
+// ----------------------------------------------------------------------------
+// Draws cool swipe transition (From clear -> blocked out)
+// param flag - flag to alter once transition finishes playing
+// ----------------------------------------------------------------------------
+void TransitionEnter(bool& flag);
+
+// ----------------------------------------------------------------------------
+// Draws cool swipe transition (From blocked out -> clear)
+// param flag - flag to alter once transition finishes playing
+// ----------------------------------------------------------------------------
+void TransitionExit(bool& flag);
+
+// ----------------------------------------------------------------------------
+// Extern so can be modified in other source files.
+// ----------------------------------------------------------------------------
+extern f32 transition_xpos;

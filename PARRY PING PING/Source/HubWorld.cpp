@@ -56,6 +56,8 @@ int ShowBoss;												// Show boss 1/ 2  (0 & 1 respectively)
 bool InTop20;												// For Top 20 highscores
 bool Draw_Top3;												// For Top 3 screen
 bool InModifiers;											// For modifier selection screen
+bool Transition_Flag_Gate1, Transition_Flag_Gate2;
+bool Transition_Start;
 const char* Mod_DmgTaken[4]{ "Invulnerable", "Reduced", "Default", "We ball" };			// Difficulty names
 
 // For displaying level best times
@@ -84,16 +86,19 @@ float rotationAngle1 = 0.f; // Angle for rotation of the loading image
 float rotationSpeed1 = 90.f; // Rotation speed (degrees per second)
 
 #pragma region Leaderboard Loading
-void DrawLoadingImage1() {
+void DrawLoadingImage1() 
+{
 	Color grey = { 0.5f, 0.5f, 0.5f, 1.f };
-	if (isFetchingLeaderboard.load()) {  // Only draw loading image while fetching
+	if (isFetchingLeaderboard.load()) 
+	{   // Only draw loading image while fetching
 		// Draw the image with a rotation angle
 		DrawRect(0.f, 0.f, 1600.f, 900.f, grey); // RGBA for grey color with transparency (0.5f opacity)
 		DrawImage(0.f, 0.f, 1280.f, 720.f, 0.f, loadingImage1);  // Full screen translucent background
 	}
 }
 
-void FetchLeaderboardAsync() {
+void FetchLeaderboardAsync() 
+{
 	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
 	isFetchingLeaderboard = true;
 
@@ -106,8 +111,10 @@ void FetchLeaderboardAsync() {
 }
 
 // Call this function when the game is closing
-void WaitForLeaderboardFetch() {
-	if (leaderboardFetchFuture.valid()) {
+void WaitForLeaderboardFetch() 
+{
+	if (leaderboardFetchFuture.valid()) 
+	{
 		leaderboardFetchFuture.get(); // Wait for completion
 	}
 }
@@ -187,6 +194,9 @@ void HubWorld_Initialize()
 	Draw_Top3 = true;
 	InModifiers = false;
 	player.Mod_DmgTakenIndex = 2;
+	Transition_Flag_Gate1 = Transition_Flag_Gate2 = false;
+	Transition_Start = false;
+	transition_xpos = 0.f;
 
 	// Resize Vectors for highscores to hold 20 values
 	for (int i = 0; i < 2; i++) {
@@ -242,7 +252,7 @@ void HubWorld_Initialize()
 	snprintf(bestTime2, sizeof(bestTime2), "Time: %02d:%02d:%02d", minutes2, seconds2, milliseconds2);
 	std::cout << "Player Level 2 Best Time: " << bestTime2 << '\n';
 }
-
+bool fuck;
 void HubWorld_Update()
 {
 	// Delta time
@@ -251,6 +261,15 @@ void HubWorld_Update()
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;												// Press B to restart level
+	}
+
+	if (AEInputCheckCurr(AEVK_9))
+	{
+		TransitionEnter(fuck);
+	}
+	if (AEInputCheckCurr(AEVK_0))
+	{
+		TransitionExit(fuck);
 	}
 
 	if (levelState == PLAYING)
@@ -267,23 +286,25 @@ void HubWorld_Update()
 
 		// Detection for entering gates to different boss fights
 		// BOSS 1
-		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) {
+		if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width/2.f, Env_Gate.Height)) 
+		{
 			if (AEInputCheckTriggered(AEVK_F)) 
 			{
 				// Reset flags and switch levels
 				LockCamera = false;
 				player.canAttack = true;
-				nextState = GS_LEVEL1;
+				Transition_Flag_Gate1 = true;
 			}
 		}
 		// BOSS 2
-		else if (AETestPointToRect(&player.pos, &Env_Gate2.Pos, Env_Gate2.Width / 2.f, Env_Gate2.Height)) {
+		else if (AETestPointToRect(&player.pos, &Env_Gate2.Pos, Env_Gate2.Width / 2.f, Env_Gate2.Height)) 
+		{
 			if (AEInputCheckTriggered(AEVK_F))
 			{
 				// Reset flags and switch levels
 				LockCamera = false;
 				player.canAttack = true;
-				nextState = GS_LEVEL2;
+				Transition_Flag_Gate2 = true;
 			}
 		}
 
@@ -464,28 +485,33 @@ void HubWorld_Draw()
 	}
 
 	// Bool flags for drawing shrine & modifiers screens
-	if (InTop20) {
+	if (InTop20) 
+	{
 		Pan_Camera(0.f, 500.f, 10.f);			// Camera pan effect
 		CamPanning = true;
 		Draw_ShrineBoard();						// Draw Shrine board
 	}
-	else {
+	else 
+	{
 		CamPanning = false;						// If flag false, reset values
 		Draw_Top3 = true;
 	}
 
-	if (InModifiers) {
+	if (InModifiers) 
+	{
 		Pan_Camera(0.f, 500.f, 10.f);			// Camera pan effect
 		CamPanning = true;
 		Draw_ModifiersBoard();					// Draw Modifiers board
 	}
-	else {
+	else 
+	{
 		CamPanning = false;						// If flag false, reset values
 		InModifiers = false;
 	}
 
 	//cool little fade in effect on start up
-	if (FadeIn.A > 0) {
+	if (FadeIn.A > 0) 
+	{
 		DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), FadeIn);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 		FadeIn.A -= FadeInSpeed;
 	}
@@ -493,6 +519,18 @@ void HubWorld_Draw()
 
 	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+	if (Transition_Flag_Gate1) 
+	{
+		TransitionEnter(Transition_Start);
+		if (Transition_Start) nextState = GS_LEVEL1;
+	}
+	else if (Transition_Flag_Gate2) 
+	{
+		TransitionEnter(Transition_Start);
+		if (Transition_Start) nextState = GS_LEVEL2;
+	}
+
 	DrawLoadingImage1();
 }
 
@@ -523,9 +561,11 @@ void HubWorld_Unload()
 #pragma region Fade Effects
 // Fade from dark
 // Simply decreases alpha of black screen drawn ontop of everything (except highlighted elements)
-void Draw_FadeIn(Color& Fade) {
+void Draw_FadeIn(Color& Fade) 
+{
 	FadeInSpeed = 0.03f;																// Uses Accel/ Deccel so reset to starting value!
-	if (Fade.A < 0.f) {
+	if (Fade.A < 0.f) 
+	{
 		Fade.A = 0.f;																					// Clamp!
 		return;
 	}
@@ -537,11 +577,13 @@ void Draw_FadeIn(Color& Fade) {
 
 // Fade to dark
 // Simply increases alpha of black screen drawn ontop of everything (except highlighted elements)
-void Draw_FadeOut(Color& Fade) {
+void Draw_FadeOut(Color& Fade) 
+{
 	DrawRect(0.f, 0.f, f32(AEGfxGetWindowWidth()), f32(AEGfxGetWindowHeight()), Fade);			// Just adjusts alpha of a black screen drawn over the level when the level starts
 	Fade.A += FadeInSpeed;
 	FadeInSpeed *= 1.05f;
-	if (InTop20) {
+	if (InTop20) 
+	{
 		if (Fade.A > .9f) Fade.A = .9f;															// Clamp value specifically for top 20 screen (cool effect)
 		return;
 	}
@@ -613,20 +655,24 @@ std::string sanitizeString(const std::string& input) {
 // Draw leaderboard UI screen! (Handles both top 3 + top 20)
 void Draw_ShrineBoard() {
 	// If click on show more: (top 20)
-	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	if ((IsAreaClicked(600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+	{
 		Draw_Top3 = false;
 	}
 	// Show less (top 3)
-	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	else if ((IsAreaClicked(-600.f, 0.f, 100.f, 100.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+	{
 		Draw_Top3 = true;
 	}
 
 	//Draw top 3 
 	if (Draw_Top3) {
-		if ((IsAreaClicked(200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		if ((IsAreaClicked(200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+		{
 			ShowBoss = 1;
 		}
-		else if ((IsAreaClicked(-200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+		else if ((IsAreaClicked(-200.f, 275.f, 75.f, 75.f, static_cast<s32>(Mouse.x), static_cast<s32>(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+		{
 			ShowBoss = 0;
 		}
 
@@ -684,7 +730,8 @@ void Draw_ShrineBoard() {
 		DrawTextAdvanced(300.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-TIME-", false, 0.2f);
 
 		// Draws out neat list of 20 names, score, timing for each specific boss!
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 20; i++) 
+		{
 			DrawTextAdvanced(-400.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 			DrawTextAdvanced(-100.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 			DrawTextAdvanced(300.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
@@ -698,18 +745,21 @@ void Draw_ShrineBoard() {
 }
 
 // Draw Modifiers UI screen!
-void Draw_ModifiersBoard() {
+void Draw_ModifiersBoard() 
+{
 	// UI Screens for factors that adjust gameplay
 	DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "MODIFIERS", false);
 	DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "NOTE: This will affect your score", false, 0.3f);
 
 	// DAMAGE TAKEN MODIFIER
 	// Input for selecting 'difficulty'
-	if ((IsAreaClicked(175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	if ((IsAreaClicked(175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+	{
 		player.Mod_DmgTakenIndex++;
 		if (player.Mod_DmgTakenIndex > 3) player.Mod_DmgTakenIndex = 3;
 	}
-	else if ((IsAreaClicked(-175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	else if ((IsAreaClicked(-175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) 
+	{
 		player.Mod_DmgTakenIndex--;
 		if (player.Mod_DmgTakenIndex < 0) player.Mod_DmgTakenIndex = 0;
 	}

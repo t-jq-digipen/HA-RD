@@ -450,6 +450,10 @@ void Update_Boss()
         // Remove inactive explosion effects
         boss_death_explosion.erase(std::remove_if(boss_death_explosion.begin(), boss_death_explosion.end(), [](const Boss_Explosion& e) { return !e.active; }), boss_death_explosion.end());
     }
+    if (AEInputCheckTriggered(AEVK_N))
+    {
+        boss_1.hp = 0.f;
+    }
 
     // Update Boss Hitbox
     Update_AABB(&boss_1.hitbox, boss_1.pos.x, boss_1.pos.y, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT);
