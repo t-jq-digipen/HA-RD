@@ -473,6 +473,7 @@ void HubWorld_Free()
 
 void HubWorld_Unload()
 {
+
 	AEInputShowCursor(1);
 	Unload_UI();																						// Free memory! Unloads UI, Meshes and Player!
 	Unload_Player_UI();
@@ -485,6 +486,8 @@ void HubWorld_Unload()
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
 	WaitForLeaderboardFetch();
+	AEGfxTextureUnload(loadingImage1);
+
 }
 
 void Draw_FadeIn(Color& Fade) {
