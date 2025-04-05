@@ -420,7 +420,6 @@ void Draw_Player_UI()
 
 	// COOLDOWN
 	crosshair.Set_Row(0);
-	std::cout << UI_ammo;
     crosshair.Set_Col(UI_ammo);
     crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f);
 }

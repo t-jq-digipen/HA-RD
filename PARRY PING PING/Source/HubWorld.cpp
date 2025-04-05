@@ -329,9 +329,6 @@ void HubWorld_Draw()
 {
 	Update_Camera();															// Camera drawing logic
 
-	// UI
-	Draw_UI(0);																	// Draw UI - (0) added to not draw boss healthbar
-
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
@@ -434,6 +431,7 @@ void HubWorld_Draw()
 	shrine_sprite.Draw(World_To_Screen_x(Env_Shrine.Pos.x), World_To_Screen_y(Env_Shrine.Pos.y), Env_Shrine.Width, Env_Shrine.Height);
 #pragma endregion
 
+
 	// Everyting after can be drawn above the fade effect
 	// Player
 	Draw_Player();				// Draw player sprites 
@@ -442,6 +440,9 @@ void HubWorld_Draw()
 	Draw_Tutorial();
 
 	AEInputShowCursor(0);						// Default, Hides cursor unless specified
+
+	// UI
+	Draw_UI(0);																	// Draw UI - (0) added to not draw boss healthbar
 
 	// State depending drawing!
 	if (levelState == PAUSED)
