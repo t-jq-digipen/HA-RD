@@ -776,7 +776,7 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			Transition_L1Flag = true;
-			isInputDisabled = false;
+			isInputEnabled = false;
 			player.canAttack = true;
 		}
 	}
@@ -879,7 +879,7 @@ void Draw_ClearMenu()
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			Transition_HWFlag = true;
-			isInputDisabled = false;
+			isInputEnabled = false;
 			currentScore = 0;
 		}
 	}
