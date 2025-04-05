@@ -41,21 +41,23 @@ enum LEVEL_STATE
 };
 
 // Level Number
-extern int levelState;
+extern int levelState;						// level number
 
 // Level Timers
-extern float levelTimer, levelTimer2;
+extern float levelTimer, levelTimer2;		// level timers
 
 // Level Current Score
-extern int currentScore;
+extern int currentScore;					// current score in level
 
 // Level Flags
-extern bool displayPointsAccumulated, isInputEnabled;
+extern bool displayPointsAccumulated;		// checks if points are being accumulated
+extern bool isInputEnabled;					// checks if player input is enabled
 
 // Level Score System
-extern int pointsAccumulated;
-extern Timer displayPointsTimer;
-extern int currentCombo, highestCombo;
+extern int pointsAccumulated;				// points accumulated to be added to current score
+extern Timer displayPointsTimer;			// timer for displaying points accumlated
+extern int currentCombo;					// current combo
+extern int highestCombo;					// highest combo in one run
 
 // ----------------------------------------------------------------------------
 // Enumeration for score types

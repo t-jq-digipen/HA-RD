@@ -362,8 +362,6 @@ void Init_Tutorial()
 	arrow_y = Tutorial_IO[67];								// TUTORIAL ARROW Y				400.f
 	arrow_gate_x = Tutorial_IO[68];							// TUTORIAL ARROW TO GATE X		0.f
 	arrow_gate_y = Tutorial_IO[69];							// TUTORIAL ARROW TO GATE Y		750.f
-
-	Reset_Tutorial();
 }
 
 // Load the tutorial elements

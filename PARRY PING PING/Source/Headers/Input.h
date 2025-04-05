@@ -1,3 +1,13 @@
+//---------------------------------------------------------
+// file:	Input.h
+// author:	AVID PARRY ENJOYERS
+// email:	-
+//
+// brief:	Declaration of input handler
+//
+// Copyright © 2020 DigiPen, All rights reserved.
+//---------------------------------------------------------
+
 #pragma once
 #include <AEEngine.h>
 

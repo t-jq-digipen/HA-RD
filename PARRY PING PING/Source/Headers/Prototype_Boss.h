@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
+// file:	Prototype_Boss.h
 // author:	AVID PARRY ENJOYERS
 // email:	-
 //
-// brief:	Spritesheet class declaration
+// brief:	Prototype boss class declaration
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
