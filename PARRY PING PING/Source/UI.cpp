@@ -214,7 +214,7 @@ void Init_UI()
 
 	// For leaderboard input
 	isInputDisabled = false;
-	playerName = "(Type Name Here)";
+	playerName = "BACKSPACE to Input Name";
 	isLoading = false;
 	hasSubmitted = false;
 	isInputSubmitted = UI_white;
@@ -647,7 +647,6 @@ void Draw_ClearMenu()
 				{
 					addLeaderboardEntry(playerName.c_str(), newScore, level_timer); // Submit to leaderboard
 					isLoading = false; // Disable loading state after submission
-					isInputSubmitted = UI_green;
 				});
 			submitThread.detach(); // Detach to allow independent execution
 		}
@@ -1338,6 +1337,13 @@ void Update_LevelScore()
 
 
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
+
+	if (name == "BACKSPACE to Input Name" || name.empty()) {
+
+		std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
+		return;  // Exit early if the name is invalid
+	}
+
 	char buffer[MAX_PATH];
 	if (_getcwd(buffer, MAX_PATH) == nullptr) {
 		std::cerr << "Error: Failed to get current directory!" << std::endl;
@@ -1372,6 +1378,7 @@ void addLeaderboardEntry(const std::string& name, int score, const std::string& 
 	}
 	else {
 		std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
+		isInputSubmitted = UI_green;
 	}
 }
 

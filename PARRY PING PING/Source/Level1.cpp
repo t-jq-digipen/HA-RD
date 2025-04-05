@@ -58,7 +58,7 @@ void Level1_Load()
 	Load_Mesh(20);
 
 	// Map Texture
-	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary3.png");
+	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary5.png");
 	if (!mapTexture)
 	{
 		printf("Failed to load map texture!\n");
@@ -208,7 +208,7 @@ void Level1_Update()
 
 void Level1_Draw()
 {
-	AEGfxSetBackgroundColor(0.902f, 0.725f, 0.451f); // Beige color
+	AEGfxSetBackgroundColor(0.8667f, 0.6667f, 0.4863f); // Beige color
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
