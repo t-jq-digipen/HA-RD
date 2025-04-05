@@ -29,7 +29,7 @@ int currentScore;
 int newScore;
 
 // Score Modifier
-f32 Modifier_ScoreScale[3]{ 0.5f, 1.f, 1.5f };
+f32 Modifier_ScoreScale[4]{ 0.f, 0.5f, 1.f, 1.5f };
 
 // Level Points Logic
 int pointsAccumulated;

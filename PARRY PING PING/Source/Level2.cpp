@@ -206,10 +206,8 @@ void Level2_Draw()
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Boss2();
-		if (player.hp > 0.f)
-		{
-			Draw_Player();
-		}
+		Draw_Player();
+		
 	}
 
 	// UI

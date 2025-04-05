@@ -353,8 +353,8 @@ void HubWorld_Draw()
 	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 3.f, Env_Gate.Height * 2.f))
 	{
 		Draw_FadeOut(FadeGate);													// Fade to dark effect
-		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width * 3.f, Env_Modifiers.Height * 1.5f)) {			// Test col with modifier 
-			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 1.25f, hubworld_font, hubworld_white, "PRESS [F]", true);
+		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width, Env_Modifiers.Height)) {			// Test col with modifier 
+			DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y + Env_Modifiers.Height / 2.f, hubworld_font, hubworld_white, "PRESS [F]", true);
 			// F key controls both enter and exit states
 			if (AEInputCheckTriggered(AEVK_F) && InModifiers == false)
 			{
@@ -469,12 +469,15 @@ void HubWorld_Draw()
 		}
 	}
 
-	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || levelState == INQUIT || InTop20 || InModifiers) {
-		AEInputShowCursor(1);													// Show cursor in these screens specifically
+	if (levelState == OPTIONS || levelState == CLEARED || levelState == GAMEOVER || levelState == PAUSED || levelState == INQUIT || InTop20 || InModifiers) 
+	{
+		LockCamera = true;
+		AEInputShowCursor(1);					// Show cursor in these screens specifically
 	}
 
 	// Bool flags for drawing shrine & modifiers screens
-	if (InTop20) {
+	if (InTop20) 
+	{
 		Pan_Camera(0.f, 500.f, 10.f);			// Camera pan effect
 		CamPanning = true;
 		Draw_ShrineBoard();						// Draw Shrine board
