@@ -98,14 +98,13 @@ void Pan_Camera(f32 dir_hor, f32 dir_vert, f32 speed) {
 }
 
 void ResetCamera() {
-	currVert = currHor = 0.f;
+	currVert = currHor = 0.f;					// Reset values and deccel
 	deccel = 4.f;
 
 	cam_pos.x = player.pos.x;
 	cam_pos.y = player.pos.y;
 
 	// Update shift amount
-
 	cam_shift.x = cam_pos.x - cam_origin.x;
 	cam_shift.y = cam_pos.y - cam_origin.y;
 

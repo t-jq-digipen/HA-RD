@@ -576,6 +576,7 @@ void DrawLoadingImage()
 
 void Draw_ClearMenu()
 {
+	player.canAttack = false;
 	// Update highest score
 	if (currentState == GS_LEVEL1)
 	{
@@ -680,6 +681,7 @@ void Draw_ClearMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
 			isInputDisabled = false;
+			player.canAttack = true;
 		}
 	}
 	else
@@ -706,6 +708,7 @@ void Draw_ClearMenu()
 			{
 				AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 				nextState = GS_LEVEL2;
+				player.canAttack = true;
 				isInputDisabled = false;
 			}
 		}

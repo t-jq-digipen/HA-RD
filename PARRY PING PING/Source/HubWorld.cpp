@@ -190,7 +190,7 @@ void HubWorld_Initialize()
 	InTop20 = false;
 	Draw_Top3 = true;
 	InModifiers = false;
-	player.Mod_DmgTakenIndex = 1;
+	player.Mod_DmgTakenIndex = 2;
 
 	for (int i = 0; i < 2; i++) {
 		HS_name[i].resize(20);
@@ -315,8 +315,9 @@ void HubWorld_Update()
 			levelState = PLAYING;
 		}
 	}
-	if ((AreRectanglesIntersecting(player.pos.x, player.pos.y, player.height, player.height, Env_Shrine.Pos.x, Env_Shrine.Pos.y, Env_Shrine.Width, Env_Shrine.Height)) ||
-			AreRectanglesIntersecting(player.pos.x, player.pos.y, 50.f, player.height, Env_Gate.Pos.x - (Env_Gate.Width / 2.f), Env_Gate.Pos.y, Env_Gate.Width, Env_Gate.Height))
+
+	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 3.f, Env_Gate.Height * 2.f) || 
+		AETestPointToRect(&player.pos, &Env_Shrine.Pos, Env_Shrine.Width, Env_Shrine.Height))
 	{
 		LockCamera = true;
 		player.canAttack = false;
@@ -351,7 +352,7 @@ void HubWorld_Draw()
 	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
 	//Highlight effect when approaching gate
-	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 4.f, Env_Gate.Height * 2.f))
+	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 3.f, Env_Gate.Height * 2.f))
 	{
 		Draw_FadeOut(FadeGate);
 		if (AETestPointToRect(&player.pos, &Env_Modifiers.Pos, Env_Modifiers.Width * 3.f, Env_Modifiers.Height * 1.5f)) {
@@ -668,12 +669,15 @@ void Draw_ShrineBoard() {
 	}
 	else {
 		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 20!", false);
+		DrawTextAdvanced(-400.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-NAME-", false, 0.2f);
+		DrawTextAdvanced(-100.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-SCORE-", false, 0.2f);
+		DrawTextAdvanced(300.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-TIME-", false, 0.2f);
 
 		for (int i = 0; i < 20; i++) {
 			// Reuse the X and Y positions for each row from the existing code
-			DrawTextAdvanced(-300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(0.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(300.f, 550.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(-400.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(-100.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		}
 
@@ -688,31 +692,35 @@ void Draw_ModifiersBoard() {
 	DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "NOTE: This will affect your score", false, 0.3f);
 
 	DrawTextAdvanced(0.f, 400.f, pixel_font, SetColor(0xFFFFFFFF), "Damage Taken:", false, 0.3f);
-	const char* Mod_DmgTaken[3] {"Vadim Surov", "Default", "We ball"};
+	const char* Mod_DmgTaken[4] {"Invulnerable", "Reduced", "Default", "We ball"};
 	DrawTextAdvanced(0.f, 300.f, pixel_font, SetColor(0xFFFFFFFF), Mod_DmgTaken[player.Mod_DmgTakenIndex], false, 0.3f);
-	DrawRect(150.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
-	DrawRect(-150.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
-	DrawTextAdvanced(-300.f, 300.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
-	DrawTextAdvanced(300.f, 300.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+	DrawRect(175.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
+	DrawRect(-175.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
+	DrawTextAdvanced(-350.f, 300.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+	DrawTextAdvanced(350.f, 300.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
 
 	//DRAW HERE AND GET INPUT TO CHOOSE INPUT
 
-	if ((IsAreaClicked(150.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	if ((IsAreaClicked(175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		player.Mod_DmgTakenIndex++;
-		if (player.Mod_DmgTakenIndex > 2) player.Mod_DmgTakenIndex = 2;
+		if (player.Mod_DmgTakenIndex > 3) player.Mod_DmgTakenIndex = 3;
 	}
-	else if ((IsAreaClicked(-150.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
+	else if ((IsAreaClicked(-175.f, 150.f, 50.f, 50.f, s32(Mouse.x), s32(Mouse.y)) && AEInputCheckTriggered(AEVK_LBUTTON))) {
 		player.Mod_DmgTakenIndex--;
 		if (player.Mod_DmgTakenIndex < 0) player.Mod_DmgTakenIndex = 0;
 	}
 	switch (player.Mod_DmgTakenIndex)
 	{
 	case 0:
+		DrawTextAdvanced(0.f, 200.f, pixel_font, SetColor(0xFFFF0000), "NO SCORE!", false, 0.3f);
+		DrawTextAdvanced(0.f, 150.f, pixel_font, SetColor(0x50000000), "...we won't judge...", false, 0.2f);
+		break;
+	case 1:
 		DrawTextAdvanced(0.f, 200.f, pixel_font, SetColor(0xFFFF0000), "Reduced score!", false, 0.3f);
 		break;
 	default:
 		break;
-	case 2:
+	case 3:
 		DrawTextAdvanced(0.f, 200.f, pixel_font, SetColor(0xFF00FF00), "Bonus score!", false, 0.3f);
 		break;
 	}
