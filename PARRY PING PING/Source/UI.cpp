@@ -1389,7 +1389,15 @@ void Draw_Points()
 
 void Update_LevelScore()
 {
-	if (currentScore + 10000 < newScore)
+	if (currentScore + 1000000 < newScore)
+	{
+		currentScore += 500000;
+	}
+	else if (currentScore + 100000 < newScore)
+	{
+		currentScore += 50000;
+	}
+	else if (currentScore + 10000 < newScore)
 	{
 		currentScore += 5000;
 	}

@@ -1,5 +1,5 @@
-0) Boss 2 Spawn X: 0.f
-1) Boss 2 Spawn Y: 200.f
+0) Boss 2 Spawn X: -300.f
+1) Boss 2 Spawn Y: 400.f
 2) Boss 2 Width: 100.f
 3) Boss 2 Height: 100.f
 4) Boss 2 Draw Width: 650.f

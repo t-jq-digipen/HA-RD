@@ -43,6 +43,7 @@ s8  hubworld_font;
 // Spritesheets
 SpriteSheet campfire_sprite;
 SpriteSheet shrine_sprite;
+SpriteSheet modifiers_sprite;
 
 // Fade from black transition when level starts
 Color FadeIn, FadeGate, FadeShrine, FadeModifiers;
@@ -136,6 +137,7 @@ void HubWorld_Load()
 
 	shrine_sprite	= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
 	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
+	modifiers_sprite = SpriteSheet("Assets/HubWorld/Compuser.png", 4, 1);
 
 	// Meshes
 	Load_Mesh(20);
@@ -199,7 +201,6 @@ void HubWorld_Initialize()
 		HS_time[i].resize(20);
 	}
 
-
 	// Player
 	Init_Player();															// Init Player
 
@@ -210,7 +211,6 @@ void HubWorld_Initialize()
 
 	Init_DummyBotMelee(DummyMelee_pos, DummyMelee_rad, MaxHealth);			// Init the dummies with specified stats!
 	Init_DummyBotRange(DummyRange_pos, DummyMelee_rad, MaxHealth);
-
 
 	// UI
 	Init_UI();																// Init UI
@@ -256,7 +256,6 @@ void HubWorld_Update()
 	{
 		nextState = GS_RESTART;												// Press B to restart level
 	}
-
 
 	//REMOVE AFTER CLEANUP!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	if (AEInputCheckCurr(AEVK_1)) {
@@ -396,11 +395,12 @@ void HubWorld_Draw()
 		InModifiers = false;
 	}
 
-	DrawRect(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height, SetColor(0xFFFF6961));		// Modifier Station (TO BE IMPLEMENTED!) - Modify settings for the upcoming level
-	DrawTextAdvanced(Env_Modifiers.Pos.x, Env_Modifiers.Pos.y, hubworld_font, hubworld_white, "MODIFIERS [WIP]", true);
+	modifiers_sprite.Set_Row(0);
+	modifiers_sprite.Loop(0, 3, 1.f);
+	modifiers_sprite.Draw(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height);
 
-	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));			// Gate - player starts boss fight level here!
-	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));			// Gate 2 - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));		// Gate   - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));	// Gate 2 - player starts boss fight level here!
 	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE 1", true);
 	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, hubworld_font, hubworld_white, "GATE 2", true);
 
