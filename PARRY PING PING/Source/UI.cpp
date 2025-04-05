@@ -48,6 +48,9 @@ int currentCombo = 0;
 int highestCombo = 0;
 bool isPerfect = false;
 
+// Transitions
+bool Transition_L1End, Transition_L1Flag, Transition_L2End, Transition_L2Flag, Transition_HWFlag, Transition_HWEnd;
+
 // Font, colors, mouse coordinates
 s8 UI_font;
 s8 pixel_font;
@@ -171,6 +174,9 @@ void Init_UI()
 	highestCombo = 0;
 	score_color = UI_green;
 	isPerfect = false;
+
+	// Transitions
+	Transition_L1End = Transition_L2End = Transition_HWEnd = Transition_L1Flag = Transition_L2Flag = Transition_HWFlag = false;
 
 	// UI Menus
 	menubg_x = UI_IO[23];
@@ -769,7 +775,7 @@ void Draw_ClearMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			nextState = GS_RESTART;
+			Transition_L1Flag = true;
 			isInputEnabled = false;
 			player.canAttack = true;
 		}
@@ -797,7 +803,7 @@ void Draw_ClearMenu()
 			if (AEInputCheckTriggered(AEVK_LBUTTON))
 			{
 				AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-				nextState = GS_LEVEL2;
+				Transition_L2Flag = true;
 				player.canAttack = true;
 				isInputEnabled = false;
 			}
@@ -872,7 +878,7 @@ void Draw_ClearMenu()
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
-			nextState = GS_HUBWORLD;
+			Transition_HWFlag = true;
 			isInputEnabled = false;
 			currentScore = 0;
 		}
@@ -881,6 +887,37 @@ void Draw_ClearMenu()
 	{
 		uiscreen.isExitClicked = 0;
 		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+	}
+
+	if (Transition_L1Flag) 
+	{
+		TransitionEnter(Transition_L1End);
+		if (Transition_L1End) 
+		{
+			if (currentState == GS_LEVEL1) 
+			{
+				nextState = GS_RESTART;
+			}
+			else if (currentState == GS_LEVEL2) 
+			{
+				nextState = GS_RESTART;
+			}
+		}
+	}
+	else if (Transition_L2Flag) 
+	{
+		TransitionEnter(Transition_L2End);
+		if (Transition_L2End)
+		{
+			nextState = GS_LEVEL2;
+		}
+	}
+	else if (Transition_HWFlag) {
+		TransitionEnter(Transition_HWEnd);
+		if (Transition_HWEnd)
+		{
+			nextState = GS_HUBWORLD;
+		}
 	}
 }
 

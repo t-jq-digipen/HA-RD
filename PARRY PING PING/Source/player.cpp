@@ -852,21 +852,21 @@ void Blocked_Hit(f32 damage)
 		player.state = BLOCKED;
 		player.blocked.current = 0.f;
 
-		switch (player.Mod_DmgTakenIndex)
-		{
-		case 0:
-			// Player takes no damage
-			break;
-		case 1:
-			player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
-			break;
-		default:
-			player.hp -= damage * BLOCK_REDUCTION;
-			break;
-		case 2:
-			player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_INCREASED;
-			break;
-		}
+	switch (player.Mod_DmgTakenIndex)
+	{
+	case 0:
+		//Player takes no damage
+		break;
+	case 1:
+		player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_DECREASED;
+		break;
+	default:
+		player.hp -= damage * BLOCK_REDUCTION;
+		break;
+	case 3:
+		player.hp -= damage * BLOCK_REDUCTION * MODIFIER_DAMAGEMULTIPLIER_INCREASED;
+		break;
+	}
 
 		if (currentCombo > highestCombo)
 		{
