@@ -526,8 +526,8 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
-	WaitForLeaderboardFetch();
 	AEGfxTextureUnload(loadingImage1);
+	WaitForLeaderboardFetch();
 
 }
 
@@ -591,11 +591,17 @@ void fetchLeaderboard(int bossID) {
 			score = line.substr(firstDash + 3, secondDash - (firstDash + 3));
 			time = line.substr(secondDash + 3);
 
+			// Remove "Time: " prefix if it exists
+			if (time.rfind("Time: ", 0) == 0) {
+				time = time.substr(6);
+			}
+
 			names.push_back(name);
 			scores.push_back(score);
 			times.push_back(time);
 		}
 	}
+
 	file.close();
 
 	// Assuming you have global arrays to store leaderboard data
