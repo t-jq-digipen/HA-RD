@@ -19,8 +19,11 @@ typedef struct MainMenu
 	SpriteSheet_Old* spritesheet_button1;
 	SpriteSheet_Old* spritesheet_button2;
 	SpriteSheet_Old* spritesheet_button3;
+	SpriteSheet_Old* spritesheet_logo;
 
 	Timer animationtimer;		// Main menu button animation timer
+	Timer animationlogotimer;	// Main menu logo animation timer
+	Timer logoresettimer;		// Main menu logo reset timer
 	int isPlayClicked;			// Checks if play button is hovered
 	int isExitClicked;			// Checks if exit button is hovered
 	int isCreditsClicked;		// Checks if credits button is hovered
