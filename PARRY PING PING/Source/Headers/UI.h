@@ -198,3 +198,7 @@ void Update_LevelScore();
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
 void DrawLoadingImage();
+
+std::string sanitizeString(const std::string& input);
+
+void HandleTextInput();
