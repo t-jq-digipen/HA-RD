@@ -1106,14 +1106,19 @@ void Boss_Dash_Logic()
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
             // Calculate the remaining time for the charge attack
-            f32 remaining_time = boss_melee[boss_1.attack_type].timer.duration - boss_1.attack_timer.current;
+            //f32 remaining_time = boss_melee[boss_1.attack_type].timer.duration - boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration;
 
             // Calculate the required speed to reach the target in the remaining time
-            f32 required_speed = boss_1.target_dist * 5.f / remaining_time;
+            //f32 required_speed = boss_1.target_dist * 5.f / remaining_time;
+
+            AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
+            AEVec2Scale(&boss_1.target_dir, &boss_1.target_dir, 800.f * dt);
+
+            AEVec2Add(&boss_1.pos, &boss_1.pos, &boss_1.target_dir);
 
             // Move boss towards the target position using the required speed
-            boss_1.pos.x += boss_1.target_dir.x * required_speed * dt;
-            boss_1.pos.y += boss_1.target_dir.y * required_speed * dt;
+            //boss_1.pos.x += boss_1.target_dir.x * required_speed * dt;
+            //boss_1.pos.y += boss_1.target_dir.y * required_speed * dt;
 
             // Check for collision with the player
             if (AETestCircleToRect(&player.pos, player.radius, &boss_1.pos, BOSS_WIDTH, BOSS_HEIGHT))
@@ -1127,7 +1132,7 @@ void Boss_Dash_Logic()
 
             // Check if boss has reached the target position with a slight buffer
             f32 distance_to_target = AEVec2Distance(&boss_1.pos, &boss_1.target_pos);
-            if (distance_to_target <= 10.f)  // Adjust this threshold if needed
+            if (distance_to_target <= 50.f)  // Adjust this threshold if needed
             {
                 // Snap the boss to the target position to ensure it stops exactly
                 boss_1.pos = boss_1.target_pos;
@@ -1136,6 +1141,10 @@ void Boss_Dash_Logic()
                 boss_1.attack_timer.current = 0.f;
                 boss_1.attack_type = BOSS_SMASH;
                 boss_1.state = BOSS_SMASH_SWEEP;
+            }
+            else
+            {
+                boss_1.attack_timer.current = boss_melee[boss_1.attack_type].attack_windup / boss_melee[boss_1.attack_type].timer.duration;
             }
         }
         else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
