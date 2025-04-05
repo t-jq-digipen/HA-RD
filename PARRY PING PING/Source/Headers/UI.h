@@ -11,13 +11,19 @@
 #pragma once
 #include "utils.h"
 
+// First Time Init State Flag
 extern bool isFirstInit;
 
 // Extern font for other files
 extern s8 pixel_font;
 
+// Game Audio
 extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, dashAudio, ammoFullSFX, hubWorldMusic;
+
+// Game Audio Groups
 extern AEAudioGroup gameBGM, gameSFX;
+
+// Game BGM and SFX Volumes
 extern float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 extern float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
@@ -34,10 +40,19 @@ enum LEVEL_STATE
 	CLEARED
 };
 
+// Level Number
 extern int levelState;
+
+// Level Timers
 extern float levelTimer, levelTimer2;
+
+// Level Current Score
 extern int currentScore;
-extern bool displayPointsAccumulated, isInputDisabled;
+
+// Level Flags
+extern bool displayPointsAccumulated, isInputEnabled;
+
+// Level Score System
 extern int pointsAccumulated;
 extern Timer displayPointsTimer;
 extern int currentCombo, highestCombo;
@@ -191,14 +206,26 @@ void Collect_Points(int value, int score_index);
 void Draw_Points();
 
 // ----------------------------------------------------------------------------
-// Update the level score
+// Updates the current level score while level is playing
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
 
+// ----------------------------------------------------------------------------
+// Add new entry to leaderboard
+// ----------------------------------------------------------------------------
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
+// ----------------------------------------------------------------------------
+// Draw loading image
+// ----------------------------------------------------------------------------
 void DrawLoadingImage();
 
+// ----------------------------------------------------------------------------
+// Removes non-printable characters from input string
+// ----------------------------------------------------------------------------
 std::string sanitizeString(const std::string& input);
 
+// ----------------------------------------------------------------------------
+// Handle text input for player name
+// ----------------------------------------------------------------------------
 void HandleTextInput();
