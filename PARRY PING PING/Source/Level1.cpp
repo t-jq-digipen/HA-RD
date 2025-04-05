@@ -73,8 +73,6 @@ void Level1_Initialize()
 {
 	std::cout << "Level 1 Initialized\n";
 
-	// Music
-	AEAudioInit();
 
 	// Player
 	Init_Player();
@@ -157,8 +155,6 @@ void Level1_Update()
 	// Delta time
 	Get_DT();
 
-	// Music
-	AEAudioUpdate();
 
 	if (AEInputCheckTriggered(AEVK_B) && levelState != CLEARED && levelState != GAMEOVER)
 	{
@@ -275,7 +271,10 @@ void Level1_Draw()
 	{
 		//Draw_Boss_Hitboxes();
 		Draw_Boss();
-		Draw_Player();
+		if (player.hp > 0.f)
+		{
+			Draw_Player();
+		}
 	}
 
 	// UI

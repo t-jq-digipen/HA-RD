@@ -298,47 +298,39 @@ void Update_Boss2()
             case BOSS2_IDLE:
                 if (!Update_Timer(&boss_2.idle_timer))
                 {
-                    if (player.state != DEAD)
+                    // Set randomizer
+                    f32 randomizer = AERandFloat();
+
+                    if (randomizer <= .3f) // 40% probability for Missile Barrage
                     {
-                        // Set randomizer
-                        f32 randomizer = AERandFloat();
-
-                        if (randomizer <= .3f) // 40% probability for Missile Barrage
-                        {
-                            // Do Missile Barrage
-                            boss_2.attack_timer.current = 0.f;
-                            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
-                            boss_2.missile_prep.current = 0.f;
-                            boss_2.attack_type = MISSILE_BARRAGE;
-                            boss_2.state = BOSS2_MISSILE_BARRAGE;
-                            rocketset = false;
-                        }
-                        else if (randomizer <= .7f) // 40% probability for Dash & Slash
-                        {
-                            // Do Dash & Slash
-                            boss_2.attack_timer.current = 0.f;
-                            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
-                            boss_2.attack_type = DASH;
-                            boss_2.state = BOSS2_DASH_SLASH;
-                            dashed = false;
-                            prepdash = false;
-
-                        }
-                        else // 20% probability for Lightning Wave
-                        {
-                            // Do Lightning Wave
-                            boss_2.attack_timer.current = 0.f;
-                            boss_2.attackstate = BOSS2_ATTACK_WINDUP;
-                            boss_attack[LIGHTNING_STAB].timer.current = 0.f; // Reset stab timer
-                            boss_attack[LIGHTNING_WAVE].timer.current = 0.f;
-                            boss_2.attack_type = LIGHTNING_STAB;
-                            boss_2.state = BOSS2_LIGHTNING_WAVE;
-                        }
-
+                        // Do Missile Barrage
+                        boss_2.attack_timer.current = 0.f;
+                        boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+                        boss_2.missile_prep.current = 0.f;
+                        boss_2.attack_type = MISSILE_BARRAGE;
+                        boss_2.state = BOSS2_MISSILE_BARRAGE;
+                        rocketset = false;
                     }
-                    else // if player DEAD
+                    else if (randomizer <= .7f) // 40% probability for Dash & Slash
                     {
-                        boss_2.idle_timer.current = 0.f;
+                        // Do Dash & Slash
+                        boss_2.attack_timer.current = 0.f;
+                        boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+                        boss_2.attack_type = DASH;
+                        boss_2.state = BOSS2_DASH_SLASH;
+                        dashed = false;
+                        prepdash = false;
+                        
+                    }
+                    else // 20% probability for Lightning Wave
+                    {
+                        // Do Lightning Wave
+                        boss_2.attack_timer.current = 0.f;
+                        boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+                        boss_attack[LIGHTNING_STAB].timer.current = 0.f; // Reset stab timer
+                        boss_attack[LIGHTNING_WAVE].timer.current = 0.f;
+                        boss_2.attack_type = LIGHTNING_STAB;
+                        boss_2.state = BOSS2_LIGHTNING_WAVE;
                     }
                 }
                 break;

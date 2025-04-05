@@ -36,7 +36,7 @@ void Init_Camera()
 
 void Update_Camera() 
 {
-	if (isInputDisabled) return;  // If input is disabled, do nothing
+	if (isInputEnabled) return;  // If input is disabled, do nothing
 	if (LockCamera || CamPanning) return;
 
 	currVert = currHor = 0.f;
@@ -55,6 +55,7 @@ void Update_Camera()
 	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
 }
 
+// World space coordinates to screen space
 f32 World_To_Screen_x(f32 pos_x)
 {
 	return pos_x - cam_shift.x;
@@ -65,6 +66,8 @@ f32 World_To_Screen_y(f32 pos_y)
 	return pos_y - cam_shift.y;
 }
 
+
+// Screen space coordinates to world space
 f32 Screen_To_World_x(f32 pos_x)
 {
 	return pos_x + cam_shift.x;
@@ -75,33 +78,36 @@ f32 Screen_To_World_y(f32 pos_y)
 	return pos_y + cam_shift.y;
 }
 
+// Pans camera with specified distance and speed (accelerated because it looks cool)
 void Pan_Camera(f32 dir_hor, f32 dir_vert, f32 speed) {
-	LockCamera = true;
-	currVert += speed * deccel;
+	LockCamera = true;										// Locks camera, prevents it from being controlled with mouse/ movement
+	currVert += speed * deccel;								// Incr variables with acceleration values (goes from fast to slow)
 	currHor += speed * deccel;
 	deccel *= 0.9f;
 
-	cam_shift.x = cam_pos.x - cam_origin.x;
+	cam_shift.x = cam_pos.x - cam_origin.x;					// Set to starting position PRE-ADDING OFFSET			
 	cam_shift.y = cam_pos.y - cam_origin.y;
 	temp_campos = cam_pos;
-
-	// Update mouse shift
-	if (currVert >= dir_vert) {
+	
+	if (currVert >= dir_vert) {								// Clamp vals
 		currVert = dir_vert;
 	}
 	if (currHor >= dir_hor) {
 		currHor = dir_hor;
 	}
-	AEVec2Set(&temp_campos, currHor, currVert);
-	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);
-	AEVec2Add(&cam_shift, &cam_shift, &temp_campos);
+
+	AEVec2Set(&temp_campos, currHor, currVert);				// Set offsets to temp position
+	AEVec2Add(&cam_shift, &cam_shift, &mouse_shift);		// Add current camera positioning
+	AEVec2Add(&cam_shift, &cam_shift, &temp_campos);		// Add offsets
 }
 
 void ResetCamera() {
-	currVert = currHor = 0.f;					// Reset values and deccel
+	// Reset camera to player position
+	// Reset values and deccel
+	currVert = currHor = 0.f;
 	deccel = 4.f;
 
-	cam_pos.x = player.pos.x;
+	cam_pos.x = player.pos.x;								// Set position to lock in on player
 	cam_pos.y = player.pos.y;
 
 	// Update shift amount

@@ -3,6 +3,7 @@
 #include "UI.h"
 #include "HubWorld.h"
 
+// Tutorial Spritesheets
 SpriteSheet WASD_sprite;
 SpriteSheet space_sprite;
 SpriteSheet melee_sprite;
@@ -11,13 +12,22 @@ SpriteSheet reload_sprite;
 SpriteSheet range_sprite;
 SpriteSheet parry_sprite;
 
+// Tutorial Checkmark Image
 AEGfxTexture* checkmark;
 
+// Tutorial Active Flag
 bool tutorialActive;
+
+// Tutorial Transition Timer
 Timer transition_timer;
+
+// Tutorial Clear Delay Timer
 Timer clear_delay;
+
+// Tutorial Colors
 Color tutgreen, tutblack, tutgray, tutbg, tutwhite;
 
+// Tutorial Arrow Pointer Vector
 AEVec2 arrowdir;
 
 // File IO
@@ -43,7 +53,8 @@ bool	ranged_press[2];
 // 0 - block
 // 1 - parried successful
 bool	block_press[2];
-		
+
+// Tutorial States
 typedef enum Tutorial_State {
 	TUTORIAL_MOVEMENT,
 	TUTORIAL_MELEE,
@@ -55,7 +66,7 @@ typedef enum Tutorial_State {
 
 Tutorial_State tutstate, clearedstate, nextstate;
 
-
+// Reset tutorial
 void Reset_Tutorial()
 {
 	tutorialActive = true;						// Set tutorial to be active
@@ -81,6 +92,7 @@ void Reset_Tutorial()
 	}
 }
 
+// Create transition when player clears tutorial stage
 void Cleared_Tutstage()
 {
 	if (!Update_Timer(&clear_delay))
@@ -90,6 +102,7 @@ void Cleared_Tutstage()
 	}
 }
 
+// Set next tutorial stage when player clears a tutorial stage
 void Set_NextTutstage(Tutorial_State cleared, Tutorial_State next)
 {
 	clearedstate = cleared;			// Set cleared stage to current
@@ -195,9 +208,6 @@ void Update_Tutorial_Melee()
 // RANGE SEGMENT
 // ----------------------------------------------------------------------------
 #pragma region RANGE
-// ----------------------------------------------------------------------------
-// Updates ranged tutorial stage
-// ----------------------------------------------------------------------------
 bool Ranged_True()
 {
 	for (bool b : ranged_press)
@@ -210,6 +220,9 @@ bool Ranged_True()
 	return true;
 }
 
+// ----------------------------------------------------------------------------
+// Updates ranged tutorial stage
+// ----------------------------------------------------------------------------
 void Update_Tutorial_Range()
 {
 	if (clearedstate != TUTORIAL_RANGE)
@@ -243,6 +256,7 @@ void Update_Tutorial_Range()
 
 // PARRY SEGMENT
 // ----------------------------------------------------------------------------
+
 #pragma region PARRY
 bool Parry_True()
 {
@@ -256,6 +270,9 @@ bool Parry_True()
 	return true;
 }
 
+// ----------------------------------------------------------------------------
+// Updates parry tutorial stage
+// ----------------------------------------------------------------------------
 void Update_Tutorial_Parry()
 {
 	if (clearedstate != TUTORIAL_PARRY)
@@ -282,12 +299,14 @@ void Update_Tutorial_Parry()
 #pragma endregion PARRY
 // ----------------------------------------------------------------------------
 
-
+// Tutorial Too Far Flag
 bool toofar;
 
+// Tutorial Buttons
 AEVec2 button_size;
 f32 button_offset;
 
+// Tutorial Scaling
 f32 draw_y;
 f32 movedraw_x;
 f32 meleedraw_x;
@@ -295,7 +314,7 @@ f32 txtsize_h1, txtsize_h2, txtsize_h3, txtsize_content;
 f32 arrow_x, arrow_y, arrow_gate_x, arrow_gate_y;
 std::vector<f32> rangedraw_x;
 
-
+// Update arrow pointer
 void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 {
 	AEVec2 dummy{ target_pos_x, target_pos_y };
@@ -310,6 +329,7 @@ void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 	else toofar = false;
 }
 
+// Initialize the tutorial elements
 void Init_Tutorial()
 {
 	transition_timer = Create_Timer(Tutorial_IO[0]);		// TUTORIAL TRANSITION TIMER	2.0s
@@ -342,10 +362,9 @@ void Init_Tutorial()
 	arrow_y = Tutorial_IO[67];								// TUTORIAL ARROW Y				400.f
 	arrow_gate_x = Tutorial_IO[68];							// TUTORIAL ARROW TO GATE X		0.f
 	arrow_gate_y = Tutorial_IO[69];							// TUTORIAL ARROW TO GATE Y		750.f
-
-	Reset_Tutorial();
 }
 
+// Load the tutorial elements
 void Load_Tutorial()
 {
 	// Read File IO
@@ -362,6 +381,7 @@ void Load_Tutorial()
 	checkmark = AEGfxTextureLoad("Assets/UI/Tutorial/Checkmark.png");
 }
 
+// Unload the tutorial elements
 void Unload_Tutorial()
 {
 	WASD_sprite.Unload();
@@ -375,6 +395,7 @@ void Unload_Tutorial()
 	AEGfxTextureUnload(checkmark);
 }
 
+// Update the tutorial elements
 void Update_Tutorial()
 {
 	if (tutorialActive)
@@ -430,6 +451,7 @@ void Update_Tutorial()
 	}
 }
 
+// Draw the checkmark
 void DrawCheckmark(f32 pos_x, f32 pos_y)
 {
 	if (clear_delay.current < 1.f)	// Clear delay active
@@ -438,6 +460,7 @@ void DrawCheckmark(f32 pos_x, f32 pos_y)
 	}
 }
 
+// Draw the arrow pointer sprite
 void DrawArrow(f32 target_x, f32 target_y)
 {
 	arrow_sprite.Set_Row(0);
@@ -454,6 +477,7 @@ void DrawArrow(f32 target_x, f32 target_y)
 	}
 }
 
+// Draw the tutorial elements
 void Draw_Tutorial()
 {
 	if (tutorialActive)
@@ -601,7 +625,7 @@ void Draw_Tutorial()
 		}			// switch tutstate
 
 
-	}				// if active
+	}
 	else if (InTop20 == false && InModifiers == false)
 	{
 		DrawTextAdvanced(Tutorial_IO[18], Tutorial_IO[19], pixel_font, tutwhite, "PRESS T TO OPEN TUTORIAL", false, txtsize_h2);

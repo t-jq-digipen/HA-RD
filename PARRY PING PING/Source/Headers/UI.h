@@ -11,13 +11,19 @@
 #pragma once
 #include "utils.h"
 
+// First Time Init State Flag
 extern bool isFirstInit;
 
 // Extern font for other files
 extern s8 pixel_font;
 
+// Game Audio
 extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, dashAudio, ammoFullSFX, hubWorldMusic;
+
+// Game Audio Groups
 extern AEAudioGroup gameBGM, gameSFX;
+
+// Game BGM and SFX Volumes
 extern float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 extern float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
 
@@ -34,13 +40,24 @@ enum LEVEL_STATE
 	CLEARED
 };
 
-extern int levelState;
-extern float levelTimer, levelTimer2;
-extern int currentScore;
-extern bool displayPointsAccumulated, isInputDisabled;
-extern int pointsAccumulated;
-extern Timer displayPointsTimer;
-extern int currentCombo, highestCombo;
+// Level Number
+extern int levelState;						// level number
+
+// Level Timers
+extern float levelTimer, levelTimer2;		// level timers
+
+// Level Current Score
+extern int currentScore;					// current score in level
+
+// Level Flags
+extern bool displayPointsAccumulated;		// checks if points are being accumulated
+extern bool isInputEnabled;					// checks if player input is enabled
+
+// Level Score System
+extern int pointsAccumulated;				// points accumulated to be added to current score
+extern Timer displayPointsTimer;			// timer for displaying points accumlated
+extern int currentCombo;					// current combo
+extern int highestCombo;					// highest combo in one run
 
 // ----------------------------------------------------------------------------
 // Enumeration for score types
@@ -191,10 +208,26 @@ void Collect_Points(int value, int score_index);
 void Draw_Points();
 
 // ----------------------------------------------------------------------------
-// Update the level score
+// Updates the current level score while level is playing
 // ----------------------------------------------------------------------------
 void Update_LevelScore();
 
+// ----------------------------------------------------------------------------
+// Add new entry to leaderboard
+// ----------------------------------------------------------------------------
 void addLeaderboardEntry(const std::string& playerName, int score, const std::string& levelTimer);
 
+// ----------------------------------------------------------------------------
+// Draw loading image
+// ----------------------------------------------------------------------------
 void DrawLoadingImage();
+
+// ----------------------------------------------------------------------------
+// Removes non-printable characters from input string
+// ----------------------------------------------------------------------------
+std::string sanitizeString(const std::string& input);
+
+// ----------------------------------------------------------------------------
+// Handle text input for player name
+// ----------------------------------------------------------------------------
+void HandleTextInput();
