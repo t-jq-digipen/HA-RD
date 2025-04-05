@@ -706,7 +706,6 @@ void Movement() {
 		AEVec2Scale(&player.vel, &atk_dir, PLAYER_SPEED * hvy_vel_scale * dt);
 	}
 
-	//bool dodge_cd = Update_Timer(&player.dodgetimer);
 	bool dodge_cd = Update_Timer(&dodge_cooldown);
 	if (player.vel.x || player.vel.y)
 	{
@@ -757,7 +756,6 @@ void Movement() {
 	}
 
 
-	//if (player.dodgetimer.current * PLAYER_DASH_COOLDOWN <= PLAYER_DASH_DURATION)
 	if (Update_Timer(&dodge_time))
 	{
 		player.direction_h = (player.dodge_vel.x >= 0.f) ? RIGHT : LEFT;
@@ -1207,7 +1205,7 @@ void Update_Player()
 			std::cout << "bro is dead\n";
 		}
 	}
-	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current, player.ragemeter);
+	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current, player.ragemeter, dodge_cooldown.current);
 }
 
 

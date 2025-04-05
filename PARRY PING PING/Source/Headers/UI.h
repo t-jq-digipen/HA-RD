@@ -118,7 +118,7 @@ void Unload_Player_UI();
 // ----------------------------------------------------------------------------
 // Update the values for player UI
 // ----------------------------------------------------------------------------
-void Update_Player_UI(int ammo, float hp, float parry_timer, int rage);
+void Update_Player_UI(int ammo, float hp, float parry_cd, int rage, float dodge_cd);
 
 // ----------------------------------------------------------------------------
 // Initialize the boss UI elements

@@ -587,15 +587,11 @@ void Draw_Boss2_Hitboxes()
         case (LIGHTNING_STAB):
             if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
             {
-                // Draw windup animation for slam
-                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red2);
-                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y),
-                    (timer_progress / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, red3);
+                
             }
             else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
             {
-                // Draw active slam hitbox
-                DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red3);
+                
 
             }
             break;
@@ -812,6 +808,11 @@ void Draw_Boss2()
                 {
                 case BOSS2_ATTACK_WINDUP:
                 {
+                    // Draw windup animation for slam
+                    DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red2);
+                    DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y),
+                        (boss_2.attack_timer.current* boss_attack[boss_2.attack_type].timer.duration / boss_attack[boss_2.attack_type].attack_windup) * LIGHTNING_STAB_RADIUS, red3);
+
                     boss_2_sprite.Set_Row(12);
                     f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
                     boss_2_sprite.Set_Col(0, 9, anim_time);
@@ -819,6 +820,9 @@ void Draw_Boss2()
                 }   // WINDUP WAVE
                 case BOSS2_ATTACK_ACTIVE:
                 {
+                    // Draw active slam hitbox
+                    DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), LIGHTNING_STAB_RADIUS, red3);
+
                     boss_2_sprite.Set_Row(13);
                     f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
                     f32 anim_time = active_curr / active_time;

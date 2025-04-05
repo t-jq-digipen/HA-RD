@@ -44,9 +44,11 @@ s32 UI_mouseX, UI_mouseY;
 
 // Player UI
 float UI_playerhp, UI_playermaxhp;
-int UI_ammo, UI_maxammo;
-int UI_rage;
-float UI_parryCD;
+int 
+UI_ammo, UI_maxammo,
+UI_rage,
+UI_parryCD,
+UI_dodgeCD;
 Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
 // Boss UI
@@ -76,6 +78,9 @@ Color score_color;
 // Crosshair
 SpriteSheet crosshair;
 float crosshair_width, crosshair_height;
+
+// Dash and block cooldown
+SpriteSheet racecar;
 
 // HP and ammo HUD
 SpriteSheet playerHUD;
@@ -342,6 +347,9 @@ void Load_Player_UI()
 	crosshair = SpriteSheet("Assets/UI/Crosshair.png", 4, 1);
 	crosshair.Set_Row(0);
 
+	// Dash and block
+	racecar = SpriteSheet("Assets/UI/Racecar.png", 2, 2);
+
 	// HUD
 	playerHUD = SpriteSheet("Assets/UI/SwordHUD.png", 41, 7);
 	playerHUD.Set_Row(0);
@@ -352,24 +360,30 @@ void Unload_Player_UI()
 	// Crosshair
 	crosshair.Unload();
 
+	// Dash and block
+	racecar.Unload();
+
 	// Player HUD
 	playerHUD.Unload();
 }
 
 // Update the values for player UI
-void Update_Player_UI(int ammo, float hp, float parry_timer, int rage)
+void Update_Player_UI(int ammo, float hp, float parry_cd, int rage, float dodge_cd)
 {
 	// Update player hp/ammo
 	UI_playerhp = hp;
 	UI_ammo = ammo;
-	UI_parryCD = parry_timer;
+	UI_parryCD = (parry_cd != 1.f);
+	UI_dodgeCD = (dodge_cd != 1.f);
 	UI_rage = rage;
 }
 
 // Draws the player UI elements
 void Draw_Player_UI()
 {
-// HEALTH
+	if (!player.canAttack) return;
+
+	// HEALTH
     playerHUD.Set_Row(0);
     playerHUD.Set_Col(0, 40, (UI_playermaxhp - UI_playerhp)/UI_playermaxhp);
     playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
@@ -387,9 +401,19 @@ void Draw_Player_UI()
         playerHUD.Draw(0.f, 0.f, 1600.f, 900.f);
     }
 
-    if (!player.canAttack) return;
+	// BLOCK
+	racecar.Set_Row(0);
+	racecar.Set_Col(UI_parryCD);
+	racecar.Draw(Mouse.x - 50.f, Mouse.y - 50.f, 30.f, 30.f);
+
+	// DASH
+	racecar.Set_Row(1);
+	racecar.Set_Col(UI_dodgeCD);
+	racecar.Draw(Mouse.x + 50.f, Mouse.y - 50.f, 30.f, 30.f);
+
+	// COOLDOWN
     crosshair.Set_Col(UI_ammo);
-    crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f, false);
+    crosshair.Draw(Mouse.x, Mouse.y, 80.f, 80.f);
 }
 
 // Initialize the boss UI elements

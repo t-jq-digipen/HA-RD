@@ -501,7 +501,7 @@ void HubWorld_Draw()
 		FadeIn.A -= FadeInSpeed;
 	}
 	else FadeIn.A = 0.f;																				// Clamp to 0
-	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);										// Set render modes for drawing of colours
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);																// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 	DrawLoadingImage1();
 }
@@ -526,6 +526,8 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
+	modifiers_sprite.Unload();
+
 	WaitForLeaderboardFetch();
 	AEGfxTextureUnload(loadingImage1);
 
