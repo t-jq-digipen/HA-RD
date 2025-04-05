@@ -1,16 +1,20 @@
 //---------------------------------------------------------
-// file:	UI.h
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
-//			- 
-//			Muhammad Fauzan bin Mohamed Fauzy
+// File:	UI.h
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Manfred Sim ------------------------------- ??%
+//			- Score system
+//			- Button sprites
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
 //			- Leaderboard entry
 //			- Audio
-//			Tan Jun Quan
+// 
+//			Tan Jun Quan ------------------------------ ??%
 //			- Player UI
 //			
 //
-// brief:	UI elements
+// Brief:	UI elements
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

@@ -1,12 +1,14 @@
 //---------------------------------------------------------
-// file:	Boss2.h
-// project: Heavy Assault : Rust & Dust
-// author:  Muhammad Raziq bin Mohd Rafig (Primary)     70%
+// File:	Boss2.h
+// Project: Heavy Assault : Rust & Dust
+// Authors:  
+//          Muhammad Raziq bin Mohd Rafig ------------- ??%
 //          - 
-//          Tan Jun Quan                  (Secondary)   30%
+// 
+//          Tan Jun Quan ------------------------------ 10%
 //          - 
 //
-// brief:	Boss 2 header things (WIP)
+// Brief:	Boss 2 header things (WIP)
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

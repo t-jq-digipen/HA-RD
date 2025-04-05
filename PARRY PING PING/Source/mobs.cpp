@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// author:	AVID PARRY ENJOYERS
+// File:	SpriteSheet.h
+// Author:	AVID PARRY ENJOYERS
 // email:	-
 //
-// brief:	Spritesheet class declaration
+// Brief:	Spritesheet class declaration
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

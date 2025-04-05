@@ -1,12 +1,12 @@
 //---------------------------------------------------------
-// file:	Camera.h
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan                                
+// File:	Camera.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan                                
 //			- 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan
 //			- Camera panning
 //
-// brief:	Camera function declarations for rendering
+// Brief:	Camera function declarations for rendering
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

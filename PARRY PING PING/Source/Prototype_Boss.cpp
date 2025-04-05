@@ -1,7 +1,7 @@
 //---------------------------------------------------------
-// file:	Boss1.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Raziq bin Mohd Rafig
+// File:	Boss1.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Muhammad Raziq bin Mohd Rafig
 //          - The boss lol
 //          Tan Jun Quan
 //          - Sprites
@@ -10,7 +10,7 @@
 //          - Death Explosion
 //          - Score system
 //
-// brief:	Boss 1 implementation
+// Brief:	Boss 1 implementation
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -29,10 +29,9 @@
 Boss boss_1;
 
 // Boss state colors
-Color boss_idle, boss_windup, boss_swing, boss_stunned, boss_parried, boss_projectile_indicator, boss_projectile_color, boss_death_explosion_color;
+Color boss_idle, boss_windup, boss_swing, boss_death_explosion_color;
 
 // Sprite sheets
-SpriteSheet_Old boss_sprite_sheet;
 SpriteSheet boss_1_sprite;
 SpriteSheet fist_sprite;
 
@@ -93,28 +92,115 @@ f32 x_offset = 0.f;
 bool will_hit = true;
 
 // Level score update values
-int BOSS_SCORE_PLAYER_MELEE_HIT; // + 100 points (multiplied by damage value) per frame
-int BOSS_SCORE_BOSS_PROJECTILES_PARRIED; // + 5000 points if boss rocket successfully parried
-int BOSS_SCORE_BOSS_MELEE_PARRIED; // + 10000 points if boss successfully stunned via parry
-f32 BOSS_SCORE_TIME_BONUS_CAP; // + bonus points if player manages to beat boss within 1 minute or less
-int BOSS_SCORE_TIME_BONUS; // + 2000 points for every second of time left less than the 1 minute cap
-int BOSS_SCORE_DODGE; // + 2000 points if boss attack successfully dodged
-int BOSS_SCORE_PERFECT; // + 10000 points if player beats boss without taking damage
+int BOSS_SCORE_PLAYER_MELEE_HIT;            // + 100 points (multiplied by damage value) per frame
+int BOSS_SCORE_BOSS_PROJECTILES_PARRIED;    // + 5000 points if boss rocket successfully parried
+int BOSS_SCORE_BOSS_MELEE_PARRIED;          // + 10000 points if boss successfully stunned via parry
+f32 BOSS_SCORE_TIME_BONUS_CAP;              // + bonus points if player manages to beat boss within 1 minute or less
+int BOSS_SCORE_TIME_BONUS;                  // + 2000 points for every second of time left less than the 1 minute cap
+int BOSS_SCORE_DODGE;                       // + 2000 points if boss attack successfully dodged
+int BOSS_SCORE_PERFECT;                     // + 10000 points if player beats boss without taking damage
 
 // File IO
 std::vector<float> ProtoBoss_IO;
 std::vector<float> ProtoBossScore_IO;
 
+// Bool for file IO
+bool Boss1_FileRead = false;
+bool Boss1Score_FileRead = false;
+
 // Load boss assets
 void Load_Boss()
 {
-    // Read File IO
-    ReadFromFile("Assets/FileIO/ProtoBoss.txt", ProtoBoss_IO);
-    ReadFromFile("Assets/FileIO/PlayerScore.txt", ProtoBossScore_IO);
 
-    boss_sprite_sheet = Init_SpriteSheet("Assets/Proto_Monke/ProtoMonke.png", 5, 8, 1.f);
-    boss_1_sprite = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
-    fist_sprite = SpriteSheet("Assets/Bosses/fist.png", 2, 2);
+    if (!Boss1_FileRead)
+    {
+        // Read File IO
+        ReadFromFile("Assets/FileIO/ProtoBoss.txt", ProtoBoss_IO);
+        // Boss spawn position
+        BOSS_SPAWN_X = ProtoBoss_IO[0];             // BOSS SPAWN X = 0.f
+        BOSS_SPAWN_Y = ProtoBoss_IO[1];             // BOSS SPAWN Y = 200.f
+
+        // Boss size
+        BOSS_WIDTH = ProtoBoss_IO[2];               // BOSS WIDTH = 500.f
+        BOSS_HEIGHT = ProtoBoss_IO[3];              // BOSS HEIGHT = 500.f
+
+        // Boss draw size
+        BOSS_DRAW_WIDTH = ProtoBoss_IO[4];          // BOSS DRAW WIDTH = 650.f
+        BOSS_DRAW_HEIGHT = ProtoBoss_IO[5];         // BOSS DRAW HEIGHT = 650.f
+
+        // Boss hitbox size
+        BOSS_HITBOX_WIDTH = ProtoBoss_IO[6];        // BOSS HITBOX WIDTH = 400.f
+        BOSS_HITBOX_HEIGHT = ProtoBoss_IO[7];       // BOSS HITBOX HEIGHT = 300.f
+
+        // Boss attributes
+        BOSS_MAXHP = ProtoBoss_IO[8];               // BOSS MAX HP = 200.f
+        BOSS_DASH_DISTANCE = ProtoBoss_IO[9];       // BOSS MAX DASH DISTANCE = 250.f
+
+        // Attack timings
+
+        // BOSS_WINDUP = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
+        BOSS_WINDUP = { ProtoBoss_IO[10], ProtoBoss_IO[11], ProtoBoss_IO[12], ProtoBoss_IO[13], ProtoBoss_IO[14], ProtoBoss_IO[15], ProtoBoss_IO[16] };
+
+        // BOSS_ATTACK = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
+        BOSS_ATTACK = { ProtoBoss_IO[17], ProtoBoss_IO[18], ProtoBoss_IO[19], ProtoBoss_IO[20], ProtoBoss_IO[21], ProtoBoss_IO[22], ProtoBoss_IO[23] };
+
+        // BOSS_RECOVER = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
+        BOSS_RECOVER = { ProtoBoss_IO[24], ProtoBoss_IO[25], ProtoBoss_IO[26], ProtoBoss_IO[27], ProtoBoss_IO[28], ProtoBoss_IO[29], ProtoBoss_IO[30] };
+
+        // BOSS_STUN = { 0.f, 3.f, 0.f, 0.f, 3.f, 0.f, 0.f };
+        BOSS_STUN = { ProtoBoss_IO[31], ProtoBoss_IO[32], ProtoBoss_IO[33], ProtoBoss_IO[34], ProtoBoss_IO[35], ProtoBoss_IO[36], ProtoBoss_IO[37] };
+
+        // RocketFist attributes
+        BOSS_PROJECTILE_RADIUS = ProtoBoss_IO[38];                          // BOSS PROJECTILE RADIUS = 30.f
+        BOSS_PROJECTILE_DAMAGE = ProtoBoss_IO[39];                          // BOSS PROJECTILE DAMAGE = 20.f
+        BOSS_PROJECTILE_SPEED  = ProtoBoss_IO[40];                          // BOSS PROJECTILE SPEED = 1000.f
+
+        // Attack hitbox settings
+        SMASH_RADIUS     = ProtoBoss_IO[41];                                // BOSS SMASH RADIUS = 200.f
+        SMASH_DAMAGE     = ProtoBoss_IO[42];                                // BOSS SMASH DAMAGE = 30.f
+        BIG_SMASH_RADIUS = ProtoBoss_IO[43];                                // BOSS BIG SMASH RADIUS = 350.f
+        SWEEP_WIDTH      = ProtoBoss_IO[44];                                // BOSS SWEEP WIDTH = 600.f
+        SWEEP_HEIGHT     = ProtoBoss_IO[45];                                // BOSS SWEEP HEIGHT = 600.f
+
+        // Explosion effects
+        BOSS_DEATH_EXPLOSION_RADIUS = ProtoBoss_IO[46];                     // BOSS DEATH EXPLOSION RADIUS = 25.f
+
+        boss_1.idle_timer               = Create_Timer(ProtoBoss_IO[47]);   // BOSS IDLE TIMER = 1.f
+        boss_1.attack_timer             = Create_Timer(ProtoBoss_IO[48]);   // BOSS ATTACK TIMER = 1.f
+        boss_1.stun_timer               = Create_Timer(ProtoBoss_IO[49]);   // BOSS STUN TIMER = 3.f
+        boss_1.explosion_timer          = Create_Timer(ProtoBoss_IO[50]);   // BOSS EXPLOSION TIMER = 0.5f
+        boss_1.death_explosion_duration = Create_Timer(ProtoBoss_IO[51]);   // BOSS DEATH EXPLOSION DURATION = 4.f
+
+        // Boss shadow
+        BOSS_SHADOW_WIDTH  = ProtoBoss_IO[52];                              // BOSS SHADOW WIDTH = 120.f
+        BOSS_SHADOW_HEIGHT = ProtoBoss_IO[53];                              // BOSS SHADOW HEIGHT = 80.f
+
+        ProtoBoss_IO.clear();
+        Boss1_FileRead = true;
+    }
+
+    if (!Boss1Score_FileRead)
+    {
+        ReadFromFile("Assets/FileIO/PlayerScore.txt", ProtoBossScore_IO);
+
+        // Score system
+        BOSS_SCORE_PLAYER_MELEE_HIT = static_cast<int>(ProtoBossScore_IO[4]);             // + 100 points (multiplied by damage value) per frame
+        BOSS_SCORE_BOSS_PROJECTILES_PARRIED = static_cast<int>(ProtoBossScore_IO[5]);     // + 5000 points if boss rocket successfully parried
+        BOSS_SCORE_BOSS_MELEE_PARRIED = static_cast<int>(ProtoBossScore_IO[6]);           // + 10000 points if boss successfully stunned via parry
+        BOSS_SCORE_TIME_BONUS_CAP = static_cast<f32>(ProtoBossScore_IO[7]);               // + bonus points if player manages to beat boss within 1 minute or less
+        BOSS_SCORE_TIME_BONUS = static_cast<int>(ProtoBossScore_IO[8]);                   // + 2000 points for every second of time left less than the 1 minute cap
+        BOSS_SCORE_DODGE = static_cast<int>(ProtoBossScore_IO[9]);                        // + 2000 points if boss attack successfully dodged
+        BOSS_SCORE_PERFECT = static_cast<int>(ProtoBossScore_IO[10]);                     // + 10000 points if player beats boss without taking damage
+
+        ProtoBossScore_IO.clear();
+        Boss1Score_FileRead = true;
+    }
+    
+    
+
+    boss_1_sprite   = SpriteSheet("Assets/Bosses/Boss_1.png", 19, 25);
+    fist_sprite     = SpriteSheet("Assets/Bosses/fist.png", 2, 2);
+
     Load_Parry_Spark();
 }
 
@@ -124,10 +210,6 @@ void Init_Boss_Indicator()
     boss_idle       = SetColor(0xFFFF6961);
     boss_windup     = SetColor(0x508B0000);
     boss_swing      = SetColor(0x808B0000);
-    boss_stunned    = SetColor(0xFF000000);
-    boss_parried    = SetColor(0xFFFF00FF);
-    boss_projectile_indicator = SetColor(0xFFFF0000);
-    boss_projectile_color = SetColor(0xFFFF13F0);
     boss_death_explosion_color = SetColor(0xFFED6240);
 
     Init_Parry_Spark();
@@ -136,56 +218,8 @@ void Init_Boss_Indicator()
 // Initialize boss attributes
 void Init_Boss()
 {
-    boss_death_explosion.clear(); // Clear previous explosions
+    boss_death_explosion.clear();               // Clear previous explosions
 
-    // Boss spawn position
-    BOSS_SPAWN_X = ProtoBoss_IO[0];                                     // BOSS SPAWN X = 0.f
-    BOSS_SPAWN_Y = ProtoBoss_IO[1];                                     // BOSS SPAWN Y = 200.f
-
-    // Boss size
-    BOSS_WIDTH = ProtoBoss_IO[2];                                       // BOSS WIDTH = 500.f
-    BOSS_HEIGHT = ProtoBoss_IO[3];                                      // BOSS HEIGHT = 500.f
-
-    // Boss draw size
-    BOSS_DRAW_WIDTH = ProtoBoss_IO[4];                                  // BOSS DRAW WIDTH = 650.f
-    BOSS_DRAW_HEIGHT = ProtoBoss_IO[5];                                 // BOSS DRAW HEIGHT = 650.f
-
-    // Boss hitbox size
-    BOSS_HITBOX_WIDTH = ProtoBoss_IO[6];                                // BOSS HITBOX WIDTH = 400.f
-    BOSS_HITBOX_HEIGHT = ProtoBoss_IO[7];                               // BOSS HITBOX HEIGHT = 300.f
-
-    // Boss attributes
-    BOSS_MAXHP = ProtoBoss_IO[8];                                       // BOSS MAX HP = 200.f
-    BOSS_DASH_DISTANCE = ProtoBoss_IO[9];                               // BOSS MAX DASH DISTANCE = 250.f
-
-    // Attack timings
-
-    // BOSS_WINDUP = { 0.8f, 0.8f, 0.8f, 0.8f, 1.f, 2.f, 2.f };
-    BOSS_WINDUP = { ProtoBoss_IO[10], ProtoBoss_IO[11], ProtoBoss_IO[12], ProtoBoss_IO[13], ProtoBoss_IO[14], ProtoBoss_IO[15], ProtoBoss_IO[16] };
-
-    // BOSS_ATTACK = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f, 1.5f, 1.5f };
-    BOSS_ATTACK = { ProtoBoss_IO[17], ProtoBoss_IO[18], ProtoBoss_IO[19], ProtoBoss_IO[20], ProtoBoss_IO[21], ProtoBoss_IO[22], ProtoBoss_IO[23] };
-
-    // BOSS_RECOVER = { 0.4f, 1.f, 0.4f, 0.4f, 1.f, 1.f, 2.f };
-    BOSS_RECOVER = { ProtoBoss_IO[24], ProtoBoss_IO[25], ProtoBoss_IO[26], ProtoBoss_IO[27], ProtoBoss_IO[28], ProtoBoss_IO[29], ProtoBoss_IO[30] };
-
-    // BOSS_STUN = { 0.f, 3.f, 0.f, 0.f, 3.f, 0.f, 0.f };
-    BOSS_STUN = { ProtoBoss_IO[31], ProtoBoss_IO[32], ProtoBoss_IO[33], ProtoBoss_IO[34], ProtoBoss_IO[35], ProtoBoss_IO[36], ProtoBoss_IO[37] };
-
-    // RocketFist attributes
-    BOSS_PROJECTILE_RADIUS = ProtoBoss_IO[38];                          // BOSS PROJECTILE RADIUS = 30.f
-    BOSS_PROJECTILE_DAMAGE = ProtoBoss_IO[39];                          // BOSS PROJECTILE DAMAGE = 20.f
-    BOSS_PROJECTILE_SPEED = ProtoBoss_IO[40];                           // BOSS PROJECTILE SPEED = 1000.f
-
-    // Attack hitbox settings
-    SMASH_RADIUS = ProtoBoss_IO[41];                                    // BOSS SMASH RADIUS = 200.f
-    SMASH_DAMAGE = ProtoBoss_IO[42];                                    // BOSS SMASH DAMAGE = 30.f
-    BIG_SMASH_RADIUS = ProtoBoss_IO[43];                                // BOSS BIG SMASH RADIUS = 350.f
-    SWEEP_WIDTH = ProtoBoss_IO[44];                                     // BOSS SWEEP WIDTH = 600.f
-    SWEEP_HEIGHT = ProtoBoss_IO[45];                                    // BOSS SWEEP HEIGHT = 600.f
-
-    // Explosion effects
-    BOSS_DEATH_EXPLOSION_RADIUS = ProtoBoss_IO[46];                     // BOSS DEATH EXPLOSION RADIUS = 25.f
 
     // Boss starting point, hitbox and size
     boss_1.pos = { BOSS_SPAWN_X, BOSS_SPAWN_Y };
@@ -200,17 +234,12 @@ void Init_Boss()
     boss_1.attack_type = BOSS_SMASH;
     boss_1.attackstate = BOSS_ATTACK_WINDUP;
 
-    // Timers
-    boss_1.idle_timer = Create_Timer(ProtoBoss_IO[47]);                 // BOSS IDLE TIMER = 1.f
+    // Set Timers
     boss_1.idle_timer.current = 0.f;
-    boss_1.attack_timer = Create_Timer(ProtoBoss_IO[48]);               // BOSS ATTACK TIMER = 1.f
-    boss_1.stun_timer = Create_Timer(ProtoBoss_IO[49]);                 // BOSS STUN TIMER = 3.f
-    boss_1.explosion_timer = Create_Timer(ProtoBoss_IO[50]);            // BOSS EXPLOSION TIMER = 0.5f
-    boss_1.death_explosion_duration = Create_Timer(ProtoBoss_IO[51]);   // BOSS DEATH EXPLOSION DURATION = 4.f
-
-    // Boss shadow
-    BOSS_SHADOW_WIDTH = ProtoBoss_IO[52];                               // BOSS SHADOW WIDTH = 120.f
-    BOSS_SHADOW_HEIGHT = ProtoBoss_IO[53];                              // BOSS SHADOW HEIGHT = 80.f
+    boss_1.attack_timer.current = 1.f;
+    boss_1.stun_timer.current = 1.f;
+    boss_1.explosion_timer.current = 1.f;
+    boss_1.death_explosion_duration.current = 1.f;
 
     // Explosion effect check
     boss_1.explosion_triggered = 0;
@@ -228,14 +257,6 @@ void Init_Boss()
 
     Init_Boss_UI(boss_1.hp);
 
-    // Score system
-    BOSS_SCORE_PLAYER_MELEE_HIT = static_cast<int>(ProtoBossScore_IO[4]);             // + 100 points (multiplied by damage value) per frame
-    BOSS_SCORE_BOSS_PROJECTILES_PARRIED = static_cast<int>(ProtoBossScore_IO[5]);     // + 5000 points if boss rocket successfully parried
-    BOSS_SCORE_BOSS_MELEE_PARRIED = static_cast<int>(ProtoBossScore_IO[6]);           // + 10000 points if boss successfully stunned via parry
-    BOSS_SCORE_TIME_BONUS_CAP = static_cast<f32>(ProtoBossScore_IO[7]);               // + bonus points if player manages to beat boss within 1 minute or less
-    BOSS_SCORE_TIME_BONUS = static_cast<int>(ProtoBossScore_IO[8]);                   // + 2000 points for every second of time left less than the 1 minute cap
-    BOSS_SCORE_DODGE = static_cast<int>(ProtoBossScore_IO[9]);                        // + 2000 points if boss attack successfully dodged
-    BOSS_SCORE_PERFECT = static_cast<int>(ProtoBossScore_IO[10]);                     // + 10000 points if player beats boss without taking damage
 }
 
 // For damagecheck for player attacks to boss
@@ -617,34 +638,6 @@ void Draw_Boss_Hitboxes()
         break;
     }
 
-
-    // Existing animation and sprite sheet drawing logic (unchanged)
-    Color* color = {};
-    switch (boss_1.state)
-    {
-    case BOSS_SMASH_SWEEP:
-        color = &boss_swing;
-        break;
-    case BOSS_THREE_HIT:
-        // TBC
-        break;
-    case BOSS_PARRIED:
-        color = &boss_parried;
-        break;
-    case BOSS_RANGED_CHARGE:
-        // TBC
-        break;
-    case BOSS_RANGED_ROCKETFIST:
-        // TBC
-        break;
-    case BOSS_IDLE:
-    default:
-        color = &boss_idle;
-        break;
-    }
-
-
-
 }
 
 void Draw_Boss()
@@ -916,7 +909,6 @@ void Draw_Boss()
 
 void Unload_Boss()
 {
-    Unload_SpriteSheet(&boss_sprite_sheet);
     boss_1_sprite.Unload();
     fist_sprite.Unload();
     Unload_Parry_Spark();

@@ -1,10 +1,10 @@
 //---------------------------------------------------------
-// file:	MainMenu.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	MainMenu.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //          Muhammad Fauzan bin Mohamed Fauzy
 //
-// brief:	Implementation of main menu functions
+// Brief:	Implementation of main menu functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

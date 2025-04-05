@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	MainMenu.h
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	MainMenu.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //
-// brief:	Declaration of main menu functions
+// Brief:	Declaration of main menu functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

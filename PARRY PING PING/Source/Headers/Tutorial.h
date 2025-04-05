@@ -1,10 +1,14 @@
 //---------------------------------------------------------
-// file:	Tutorial.h
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			Manfred Sim
+// File:	Tutorial.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
 //
-// brief:	Tutorial overlay declaration
+// Brief:	Tutorial overlay declaration
+//			Manages and guides player through a series of
+//			gameplay mechanics, including movement, attacks,
+//			and parrying.
+//			The overlay shows the player what buttons to
+//			press or where to go.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

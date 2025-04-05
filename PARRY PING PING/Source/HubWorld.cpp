@@ -1,12 +1,18 @@
 //---------------------------------------------------------
-// file:	HubWorld.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
-//			Tan Jun Quan
-//			Manfred Sim
-//			Muhammad Fauzan bin Mohamed Fauzy
+// File:	HubWorld.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+// 
+//			Tan Jun Quan ------------------------------ 10%
+//			- Sprites
+// 
+//			Manfred Sim ------------------------------- 10%
+//			- File IO
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
 //
-// brief:	Definition of Hub World functions
+// Brief:	Definition of Hub World functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -257,7 +263,9 @@ void HubWorld_Initialize()
 	snprintf(bestTime2, sizeof(bestTime2), "Time: %02d:%02d:%02d", minutes2, seconds2, milliseconds2);
 	std::cout << "Player Level 2 Best Time: " << bestTime2 << '\n';
 }
+
 bool fuck;
+
 void HubWorld_Update()
 {
 	// Delta time

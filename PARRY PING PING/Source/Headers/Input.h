@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	Input.h
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
+// File:	Input.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
 //
-// brief:	Declaration of input handler
+// Brief:	Declaration of input handler for mouse
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

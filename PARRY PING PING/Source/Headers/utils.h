@@ -1,13 +1,26 @@
 //---------------------------------------------------------
-// file:	utils.h
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
-//			Muhammad Raziq bin Mohd Rafig
-//			Muhammad Fauzan bin Mohamed Fauzy
-//			Manfred Sim
+// File:	utils.h
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Tan Jun Quan ------------------------------ 50%
+//			- Dt manager
+//			- Timer system
+//			- Color struct
+//			- Basic spritesheet system
+//			- Base meshes
+//			- Basic shape drawing
+//			- Basic image drawing
 // 
-// brief:	Collection of utility functions
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+// 
+//			Muhammad Raziq bin Mohd Rafig ------------- ??%
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+// 
+//			Manfred Sim ------------------------------- ??%
+//			- File IO system
+// 
+// Brief:	Collection of utility functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

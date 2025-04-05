@@ -1,16 +1,17 @@
 //---------------------------------------------------------
-// file:	Level2.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Raziq bin Mohd Rafig
+// File:	Level2.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Muhammad Raziq bin Mohd Rafig ------------- ??%
 //			-
-//			Tan Jun Quan
-//			-
-//			Muhammad Fauzan bin Mohamed Fauzy
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
 //			- Map
-//			Manfred Sim
+// 
+//			Manfred Sim ------------------------------- ??%
 //			- File IO
 //
-// brief:	Implementation of Level 1 functions
+// Brief:	Implementation of Level 1 functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

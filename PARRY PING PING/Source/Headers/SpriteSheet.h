@@ -1,9 +1,14 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.h
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
+// File:	SpriteSheet.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
 //
-// brief:	Spritesheet class declaration
+// Brief:	Spritesheet class declaration
+//			Manages loading, unloading, and rendering of a
+//			spritesheet texture.
+//			Allows manipulating of current sprite index and
+//			supports animation looping.
+//			
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -26,9 +31,9 @@ public:
 	SpriteSheet(const char* texture_file, u32 cols, u32 rows);
 	// ----------------------------------------------------------------------------
 	// Destructor
-	// -	Does nothing...?
+	// -	If texture has not been unloaded, unloads the texture
 	// ----------------------------------------------------------------------------
-	~SpriteSheet() {}
+	~SpriteSheet();
 
 	// ----------------------------------------------------------------------------
 	// Unloader

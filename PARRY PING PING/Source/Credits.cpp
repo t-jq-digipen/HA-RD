@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	Credits.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	Credits.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //
-// brief:	Credits function implementation for rendering
+// Brief:	Credits function implementation for rendering
 //			text on screen
 //
 // Copyright © 2025 DigiPen, All rights reserved.

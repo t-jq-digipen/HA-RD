@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	GameStateManager.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	GameStateManager.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //
-// brief:	Implementation of game state manager functions and
+// Brief:	Implementation of game state manager functions and
 //			enum game states
 //
 // Copyright © 2025 DigiPen, All rights reserved.

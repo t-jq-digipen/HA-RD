@@ -1,13 +1,13 @@
 //---------------------------------------------------------
-// file:	Level1.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	Level1.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //			Muhammad Ashfer Danishkhan bin Afzalkhan
 //			Muhammad Raziq bin Mohd Rafig
 //			Muhammad Fauzan bin Mohamed Fauzy
 //			Tan Jun Quan
 //
-// brief:	Implementation of Level 1 functions
+// Brief:	Implementation of Level 1 functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

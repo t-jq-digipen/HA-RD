@@ -1,18 +1,23 @@
 //---------------------------------------------------------
-// file:	UI.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	UI.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Manfred Sim ------------------------------- ??%
 //			- 
-//			Muhammad Fauzan bin Mohamed Fauzy
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
 //			- Leaderboard entry
 //			- Audio
-//			Tan Jun Quan
-//			-
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+// 
+//			Tan Jun Quan ------------------------------ ??%
+//			- Player UI system
+//			- Player UI sprites
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
 //			- Modifiers
 //			
 //
-// brief:	UI elements
+// Brief:	Various UI elements
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -64,7 +69,6 @@ UI_ammo, UI_maxammo,
 UI_rage,
 UI_parryCD,
 UI_dodgeCD;
-Color empty_ammo, full_ammo, health, parry_charging, parry_ready;
 
 // Boss UI
 float UI_bosshp, UI_bossmaxhp;
@@ -356,11 +360,6 @@ void Init_Player_UI(int ammo, int maxammo, float hp, float maxhp)
 	UI_playermaxhp = maxhp;
 	UI_ammo = ammo;
 	UI_maxammo = maxammo;
-	empty_ammo = SetColor(0x70B0FFD5);
-	full_ammo = SetColor(0xFF24FF8B);
-	health = SetColor(0xFFFF6961);
-	parry_charging = SetColor(0xFF00255F);
-	parry_ready = SetColor(0xFF004EFF);
 
 }
 

@@ -1,12 +1,11 @@
 //---------------------------------------------------------
-// file:	HubWorld.h
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
-//			Tan Jun Quan
+// File:	HubWorld.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Muhammad Ashfer Danishkhan bin Afzalkhan
 //			Manfred Sim
 //			Muhammad Fauzan bin Mohamed Fauzy
 //
-// brief:	Declaration of Hub World functions
+// Brief:	Declaration of Hub World functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

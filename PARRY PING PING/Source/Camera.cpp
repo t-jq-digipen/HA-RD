@@ -1,12 +1,15 @@
 //---------------------------------------------------------
-// file:	Camera.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan                                
-//			- 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+// File:	Camera.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Tan Jun Quan ------------------------------ 60%
+//			- Base camera logic
+//			- World/Screen conversion functions
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 40%
 //			- Camera panning
 //
-// brief:	Camera function declarations for rendering
+// Brief:	Camera function declarations for rendering
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

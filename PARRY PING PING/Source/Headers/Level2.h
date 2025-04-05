@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	Level2.h
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Raziq bin Mohd Rafig
+// File:	Level2.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Muhammad Raziq bin Mohd Rafig
 //
-// brief:	Declaration of Level 2 functions
+// Brief:	Declaration of Level 2 functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

@@ -1,14 +1,20 @@
 //---------------------------------------------------------
-// file:	Boss2.cpp
-// project: Heavy Assault : Rust & Dust
-// author:  Muhammad Raziq bin Mohd Rafig               45%
-//          - 
-//          Tan Jun Quan                                45%
-//          - 
-//          Manfred Sim                                 10%
-//          - FILE IO
+// File:	Boss2.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:  
+//          Muhammad Raziq bin Mohd Rafig ------------- 45%
+//          - Boss system
+//          - Base attack logic
+// 
+//          Tan Jun Quan ------------------------------ 45%
+//          - Sprites
+//          - Polishing attack logic
+//          - Phase 2 logic
+// 
+//          Manfred Sim ------------------------------- 10%
+//          - File IO
 //
-// brief:	Boss 2 header things (WIP)
+// Brief:	Boss 2 header things (WIP)
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -419,11 +425,8 @@ void Update_Boss2()
 
         Update_Missiles();
 
-        // Remove inactive missiles
-        /*missiles.erase(std::remove_if(missiles.begin(), missiles.end(),
-            [](const Missile& m) { return !m.active; }), missiles.end());*/
 
-            // Reset last hit if no new melee hit detected
+        // Reset last hit if no new melee hit detected
         if (!new_hit2)
         {
             last_hit2 = 0;

@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	GameStateManager.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
+// File:	GameStateManager.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
 //
-// brief:	For mouse input
+// Brief:	Input handler for mouse position
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

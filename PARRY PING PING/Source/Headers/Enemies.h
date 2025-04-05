@@ -1,10 +1,13 @@
 //---------------------------------------------------------
-// file:	Enemies.h
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Ashfer Danishkhan bin Afzalkhan
+// File:	Enemies.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Muhammad Ashfer Danishkhan bin Afzalkhan
+//			-
+// 
 //			Tan Jun Quan
+//			- Parry spark
 //
-// brief:	Declaration of General Enemy related functions
+// Brief:	Declaration of General Enemy related functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

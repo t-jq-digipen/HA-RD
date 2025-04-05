@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	mobs.h
-// author:	AVID PARRY ENJOYERS
+// File:	mobs.h
+// Author:	AVID PARRY ENJOYERS
 // email:	-
 //
-// brief:	Mob class declaration
+// Brief:	Mob class declaration
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

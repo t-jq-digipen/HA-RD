@@ -1,12 +1,21 @@
 //---------------------------------------------------------
-// file:	player.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			-
+// File:	player.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
+//			- States
+//          - Movement
+//          - Melee
+//          - Dodging  
+//          - Parrying
+// 
 //			Muhammad Fauzan bin Mohamed Fauzy
-//			-
+//			- Ranged attacks
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Damage based on difficulty modifier
+//			- Rage buff
 //
-// brief:	Declaration of player functions
+// Brief:	Declaration of player functions
 // 
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

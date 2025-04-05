@@ -1,9 +1,9 @@
 //---------------------------------------------------------
-// file:	Level1.h
-// project: Heavy Assault : Rust & Dust
-// author:	Manfred Sim
+// File:	Level1.h
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //
-// brief:	Declaration of Level 1 functions
+// Brief:	Declaration of Level 1 functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

@@ -1,9 +1,13 @@
 //---------------------------------------------------------
-// file:	SpriteSheet.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
+// File:	SpriteSheet.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan
 //
-// brief:	Spritesheet class implementation
+// Brief:	Spritesheet class implementation
+//			Manages loading, unloading, and rendering of a
+//			spritesheet texture.
+//			Allows manipulating of current sprite index and
+//			supports animation looping.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -44,6 +48,11 @@ SpriteSheet::SpriteSheet(const char* texture_file, u32 cols, u32 rows) :
 
 	mesh = AEGfxMeshEnd();									// End mesh
 
+}
+
+SpriteSheet::~SpriteSheet()
+{
+	Unload();
 }
 
 void SpriteSheet::Set_Row(u32 row)

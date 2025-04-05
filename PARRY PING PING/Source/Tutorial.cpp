@@ -1,13 +1,21 @@
 //---------------------------------------------------------
-// file:	Tutorial.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			- 
-//			Manfred Sim
+// File:	Tutorial.cpp
+// Project: Heavy Assault : Rust & Dust
+// Authors:	
+//			Tan Jun Quan ------------------------------ 80%
+//			- Sprites
+//			- Tutorial logic
+// 
+//			Manfred Sim ------------------------------- 20%
 //			- File IO
 //			- Tutorial state
 //
-// brief:	Tutorial overlay implementation
+// Brief:	Tutorial overlay implementation
+//			Manages and guides player through a series of
+//			gameplay mechanics, including movement, attacks,
+//			and parrying.
+//			The overlay shows the player what buttons to
+//			press or where to go.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -80,7 +88,10 @@ typedef enum Tutorial_State {
 
 Tutorial_State tutstate, clearedstate, nextstate;
 
-// Reset tutorial
+
+// ----------------------------------------------------------------------------
+// Resets the tutorial
+// ----------------------------------------------------------------------------
 void Reset_Tutorial()
 {
 	tutorialActive = true;						// Set tutorial to be active
@@ -106,7 +117,9 @@ void Reset_Tutorial()
 	}
 }
 
+// ----------------------------------------------------------------------------
 // Create transition when player clears tutorial stage
+// ----------------------------------------------------------------------------
 void Cleared_Tutstage()
 {
 	if (!Update_Timer(&clear_delay))
@@ -116,7 +129,9 @@ void Cleared_Tutstage()
 	}
 }
 
+// ----------------------------------------------------------------------------
 // Set next tutorial stage when player clears a tutorial stage
+// ----------------------------------------------------------------------------
 void Set_NextTutstage(Tutorial_State cleared, Tutorial_State next)
 {
 	clearedstate = cleared;			// Set cleared stage to current
@@ -128,7 +143,9 @@ void Set_NextTutstage(Tutorial_State cleared, Tutorial_State next)
 // MOVEMENT SEGMENT
 // ----------------------------------------------------------------------------
 #pragma region MOVEMENT
+// ----------------------------------------------------------------------------
 // Helper function to check if all movement bools cleared
+// ----------------------------------------------------------------------------
 bool Movement_True()
 {
 	for (bool b : move_press)
@@ -222,6 +239,10 @@ void Update_Tutorial_Melee()
 // RANGE SEGMENT
 // ----------------------------------------------------------------------------
 #pragma region RANGE
+
+// ----------------------------------------------------------------------------
+// Checks if both ranged checks have passed
+// ----------------------------------------------------------------------------
 bool Ranged_True()
 {
 	for (bool b : ranged_press)
@@ -272,6 +293,10 @@ void Update_Tutorial_Range()
 // ----------------------------------------------------------------------------
 
 #pragma region PARRY
+
+// ----------------------------------------------------------------------------
+// Checks if both parry checks have passed
+// ----------------------------------------------------------------------------
 bool Parry_True()
 {
 	for (bool b : block_press)
@@ -328,7 +353,9 @@ f32 txtsize_h1, txtsize_h2, txtsize_h3, txtsize_content;
 f32 arrow_x, arrow_y, arrow_gate_x, arrow_gate_y;
 std::vector<f32> rangedraw_x;
 
+// ----------------------------------------------------------------------------
 // Update arrow pointer
+// ----------------------------------------------------------------------------
 void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 {
 	AEVec2 dummy{ target_pos_x, target_pos_y };
@@ -343,22 +370,40 @@ void Update_Arrow(f32 target_pos_x, f32 target_pos_y)
 	else toofar = false;
 }
 
+
+// ----------------------------------------------------------------------------
 // Initialize the tutorial elements
+// ----------------------------------------------------------------------------
 void Init_Tutorial()
 {
-	transition_timer = Create_Timer(Tutorial_IO[0]);		// TUTORIAL TRANSITION TIMER	2.0s
-	clear_delay = Create_Timer(Tutorial_IO[1]);				// TUTORIAL CLEAR DELAY			1.0s
 
 	toofar = false;
 	tutorialActive = false;
 
-	tutgreen	= SetColor(0xFF08A045);
-	tutblack	= SetColor(0xFF101010);
-	tutgray		= SetColor(0xFFD9D9D9);
-	tutbg		= SetColor(0x50000000);
-	tutwhite	= SetColor(0xFFFFFFFF);
+	tutgreen	= SetColor(0xFF08A045);						// Green text
+	tutblack	= SetColor(0xFF101010);						// Black text
+	tutgray		= SetColor(0xFFD9D9D9);						// Gray body text
+	tutbg		= SetColor(0x50000000);						// Faint dark overlay to place body text over
+	tutwhite	= SetColor(0xFFFFFFFF);						// White text
 	
-	button_size = { Tutorial_IO[6], Tutorial_IO[7] };		// TUTORIAL BUTTON SIZE			{ 50.f, 50.f }
+}
+
+// ----------------------------------------------------------------------------
+// Load the tutorial elements
+// ----------------------------------------------------------------------------
+void Load_Tutorial()
+{
+
+	if (Tutorial_IO.empty())
+	{
+		// Read File IO
+		ReadFromFile("Assets/FileIO/Tutorial.txt", Tutorial_IO);
+	}
+	
+	transition_timer = Create_Timer(Tutorial_IO[0]);		// TUTORIAL TRANSITION TIMER	2.0s
+	clear_delay = Create_Timer(Tutorial_IO[1]);				// TUTORIAL CLEAR DELAY			1.0s
+
+	button_size	  = { Tutorial_IO[6], Tutorial_IO[7] };		// TUTORIAL BUTTON SIZE			{ 50.f, 50.f }
 	button_offset = Tutorial_IO[8];							// TUTORIAL BUTTON OFFSET		100.f
 
 	draw_y = Tutorial_IO[9];								// TUTORIAL SPRITE DRAW Y		150.f					
@@ -376,13 +421,6 @@ void Init_Tutorial()
 	arrow_y = Tutorial_IO[67];								// TUTORIAL ARROW Y				400.f
 	arrow_gate_x = Tutorial_IO[68];							// TUTORIAL ARROW TO GATE X		0.f
 	arrow_gate_y = Tutorial_IO[69];							// TUTORIAL ARROW TO GATE Y		750.f
-}
-
-// Load the tutorial elements
-void Load_Tutorial()
-{
-	// Read File IO
-	ReadFromFile("Assets/FileIO/Tutorial.txt", Tutorial_IO);
 
 	WASD_sprite =	SpriteSheet::SpriteSheet("Assets/UI/Tutorial/WASD.png", 2, 4);
 	melee_sprite =	SpriteSheet::SpriteSheet("Assets/UI/Tutorial/Melee.png", 2, 1);
@@ -395,7 +433,9 @@ void Load_Tutorial()
 	checkmark = AEGfxTextureLoad("Assets/UI/Tutorial/Checkmark.png");
 }
 
+// ----------------------------------------------------------------------------
 // Unload the tutorial elements
+// ----------------------------------------------------------------------------
 void Unload_Tutorial()
 {
 	WASD_sprite.Unload();
@@ -406,10 +446,14 @@ void Unload_Tutorial()
 	range_sprite.Unload();
 	parry_sprite.Unload();
 
+	Tutorial_IO.clear();
+
 	AEGfxTextureUnload(checkmark);
 }
 
+// ----------------------------------------------------------------------------
 // Update the tutorial elements
+// ----------------------------------------------------------------------------
 void Update_Tutorial()
 {
 	if (tutorialActive)
@@ -465,7 +509,9 @@ void Update_Tutorial()
 	}
 }
 
+// ----------------------------------------------------------------------------
 // Draw the checkmark
+// ----------------------------------------------------------------------------
 void DrawCheckmark(f32 pos_x, f32 pos_y)
 {
 	if (clear_delay.current < 1.f)	// Clear delay active
@@ -474,7 +520,9 @@ void DrawCheckmark(f32 pos_x, f32 pos_y)
 	}
 }
 
+// ----------------------------------------------------------------------------
 // Draw the arrow pointer sprite
+// ----------------------------------------------------------------------------
 void DrawArrow(f32 target_x, f32 target_y)
 {
 	arrow_sprite.Set_Row(0);
@@ -491,7 +539,9 @@ void DrawArrow(f32 target_x, f32 target_y)
 	}
 }
 
+// ----------------------------------------------------------------------------
 // Draw the tutorial elements
+// ----------------------------------------------------------------------------
 void Draw_Tutorial()
 {
 	if (tutorialActive)
@@ -532,7 +582,7 @@ void Draw_Tutorial()
 			// Text
 			DrawRect(Tutorial_IO[28], Tutorial_IO[29], Tutorial_IO[30], Tutorial_IO[31], tutbg);
 
-			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[32], pixel_font, tutwhite,	"MELEE ATTACKS", false, txtsize_h2);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[32], pixel_font, tutwhite,"MELEE ATTACKS", false, txtsize_h2);
 
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[33], pixel_font, tutgray,	"Melee with LMB        ", false, txtsize_content);
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[34], pixel_font, tutgray,	"Hit up to three times!", false, txtsize_content);
@@ -541,6 +591,7 @@ void Draw_Tutorial()
 			// Images
 			DrawArrow(arrow_x, arrow_y);
 
+			// Draw one sword per combo :D
 			for (int i = 0; i < 3; i++)
 			{
 				melee_sprite.Set_Row(0);
@@ -562,8 +613,8 @@ void Draw_Tutorial()
 
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[41], pixel_font, tutgray,	"Shoot with RMB               ", false, txtsize_content);
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[42], pixel_font, tutgray,	"Tap to shoot light projectile", false, txtsize_content);
-			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[43], pixel_font, tutgray,		"Hold to unleash a powerful   ", false, txtsize_content);
-			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[44], pixel_font, tutgray,		"heavy laser that uses 3 ammo!", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[43], pixel_font, tutgray,	"Hold to unleash a powerful   ", false, txtsize_content);
+			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[44], pixel_font, tutgray,	"heavy laser that uses 3 ammo!", false, txtsize_content);
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[45], pixel_font, tutgray,	"Tip: Weave light projectiles ", false, txtsize_content);
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[46], pixel_font, tutgray,	"between melee hits to attack ", false, txtsize_content);
 			DrawTextAdvanced(Tutorial_IO[24], Tutorial_IO[47], pixel_font, tutgray,	"much faster!                 ", false, txtsize_content);
@@ -571,6 +622,7 @@ void Draw_Tutorial()
 			// Images
 			DrawArrow(arrow_x, arrow_y);
 
+			// Draw an icon for each ranged type
 			for (int i = 0; i < 2; i++)
 			{
 				range_sprite.Set_Row(i);
@@ -603,6 +655,7 @@ void Draw_Tutorial()
 			// Images
 			DrawArrow(arrow_x, arrow_y);
 
+			// Draw one block check and one successful parry check
 			for (int i = 0; i < 2; i++)
 			{
 				parry_sprite.Set_Row(i);
@@ -618,6 +671,7 @@ void Draw_Tutorial()
 
 		case TUTORIAL_TRANSITION:
 		{
+			// Congratulate the player for clearing the previous tutorial stage!
 			if (Update_Timer(&transition_timer))
 			{
 				DrawTextAdvanced(Tutorial_IO[62], Tutorial_IO[63], pixel_font, tutgreen, "Good job!", false);

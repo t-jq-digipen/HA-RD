@@ -1,10 +1,9 @@
 //---------------------------------------------------------
-// file:	Main.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			Manfred Sim
+// File:	Main.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Manfred Sim
 //
-// brief:	main!
+// Brief:	main!
 //
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------

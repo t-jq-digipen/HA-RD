@@ -1,16 +1,24 @@
 //---------------------------------------------------------
-// file:	player.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Tan Jun Quan
-//			-
-//			Muhammad Fauzan bin Mohamed Fauzy
-//			-
-//			Manfred Sim
+// File:	player.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Tan Jun Quan ------------------------------ 50%
+//			- Movement
+//			- Melee attacks
+//			- Dashing
+//			- Parrying
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//			- Ranged attacks (light and heavy)
+// 
+//			Manfred Sim ------------------------------- ??%
 //			- File IO
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			- Score system
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
 //			- Damage based on difficulty modifier
+//			- Rage buff
 //
-// brief:	Player functions  |	Line number
+// Brief:	Player functions  |	Line number
 // 
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

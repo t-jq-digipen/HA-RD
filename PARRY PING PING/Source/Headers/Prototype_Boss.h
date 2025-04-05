@@ -1,12 +1,12 @@
 //---------------------------------------------------------
-// file:	Boss1.cpp
-// project: Heavy Assault : Rust & Dust
-// author:	Muhammad Raziq bin Mohd Rafig
+// File:	Boss1.cpp
+// Project: Heavy Assault : Rust & Dust
+// Author:	Muhammad Raziq bin Mohd Rafig
 //          - The boss (lol ownself put ltr)
 //          Manfred Sim
 //          - Death Explosion
 //
-// brief:	Boss 1 declaration
+// Brief:	Boss 1 declaration
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
