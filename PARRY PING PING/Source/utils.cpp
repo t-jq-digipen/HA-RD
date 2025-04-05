@@ -716,36 +716,27 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 	// Clear any old data before reading
 	vector.clear();
 
-	// Open file with ifstream
-	std::ifstream ifs{ filename };
+	std::fstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cerr << "Cannot read " << filename << "!!!\n";
+		std::cout << "Cannot read " << filename << "!!!\n";
 		return;
 	}
-
-	std::cout << "Reading from " << filename << "...\n";
-
-	std::string line;
-	while (std::getline(ifs, line))
+	else
 	{
-		size_t pos = line.find(":");
-		if (pos != std::string::npos)
+		std::cout << "Can read " << filename << "!!!\n";
+		std::string label, value;
+		while (std::getline(ifs, label))
 		{
-			std::string value = line.substr(pos + 2);
-			try
+			size_t pos = label.find(":");
+			if (pos != std::string::npos)
 			{
-				float number = std::stof(value);
-				vector.push_back(number);
-			}
-			catch (const std::exception& e)
-			{
-				std::cerr << "Invalid float value in line: " << line << '\n';
+				value = label.substr(pos + 2);
+				vector.push_back(stof(value));
 			}
 		}
 	}
-
-	ifs.close();  // Ensure file is properly closed after reading
+	ifs.close();
 }
 
 // Reads all lines from text file
@@ -778,15 +769,13 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	std::ifstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cerr << "Cannot read " << filename << "!!!\n";
+		std::cout << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 
 	std::vector<std::string> lines;
 	std::string line;
-	bool found = false;
 
-	// Read and modify the line in memory
 	while (std::getline(ifs, line))
 	{
 		size_t pos = line.find(name);
@@ -796,22 +785,14 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 			if (value_pos != std::string::npos)
 			{
 				line = line.substr(0, value_pos + 2) + value;
-				std::cout << "Modified line: " << line << '\n';
-				found = true;
+				std::cout << "Modified line: " << line;
 			}
 		}
 		lines.push_back(line);
 	}
 	ifs.close();
 
-	if (!found)
-	{
-		std::cerr << "Variable name '" << name << "' not found in " << filename << '\n';
-		return;
-	}
-
-	// Open file for writing and write all modified lines immediately
-	std::ofstream ofs{ filename, std::ios::trunc };
+	std::ofstream ofs{ filename };
 	if (!ofs)
 	{
 		std::cerr << "Cannot open " << filename << " for writing!!!\n";
@@ -822,7 +803,6 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	{
 		ofs << modified_line << '\n';
 	}
-
-	ofs.flush();  // Ensure data is flushed to disk
-	ofs.close();  // Ensure file is properly closed
+	ofs.flush();
+	ofs.close();
 }
