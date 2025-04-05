@@ -90,7 +90,7 @@ float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 AEGfxTexture* loadingImage;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -263,7 +263,7 @@ void Load_UI()
 
 	// BGM and SFX
 	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
-	levelSFX = AEAudioLoadSound("Assets/ore.mp3");
+	levelSFX = AEAudioLoadSound("Assets/menuClick.mp3");
 	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
 	heavyProj = AEAudioLoadSound("Assets/heavyProj.mp3");
 	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
@@ -271,6 +271,7 @@ void Load_UI()
 	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
 	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
 	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
+	dashAudio = AEAudioLoadSound("Assets/dash.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }

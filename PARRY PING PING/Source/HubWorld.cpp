@@ -74,41 +74,59 @@ std::future<void> leaderboardFetchFuture;
 // File IO
 std::vector<float> HubWorld_IO_elements;
 
-//void FetchLeaderboardAsync() {
-//	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
-//	isFetchingLeaderboard = true;
-//
-//	// Launch async operation and store future
-//	leaderboardFetchFuture = std::async(std::launch::async, []() {
-//		fetchLeaderboard();
-//		isFetchingLeaderboard = false;
-//		});
-//}
-//
-//// Call this function when the game is closing
-//void WaitForLeaderboardFetch() {
-//	if (leaderboardFetchFuture.valid()) {
-//		leaderboardFetchFuture.get(); // Wait for completion
-//	}
-//}
+AEGfxTexture* loadingImage1;
+bool isLoading1;
+float rotationAngle1 = 0.f; // Angle for rotation of the loading image
+float rotationSpeed1 = 90.f; // Rotation speed (degrees per second)
+
+void DrawLoadingImage1() {
+	Color grey = { 0.5f, 0.5f, 0.5f, 1.f };
+	if (isFetchingLeaderboard.load()) {  // Only draw loading image while fetching
+		// Draw the image with a rotation angle
+		DrawRect(0.f, 0.f, 1600.f, 900.f, grey); // RGBA for grey color with transparency (0.5f opacity)
+		DrawImage(0.f, 0.f, 1280.f, 720.f, 0.f, loadingImage1);  // Full screen translucent background
+	}
+}
+
+
+
+void FetchLeaderboardAsync() {
+	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
+	isFetchingLeaderboard = true;
+
+	// Launch both fetch operations asynchronously
+	leaderboardFetchFuture = std::async(std::launch::async, []() {
+		fetchLeaderboard(0); // Fetch leaderboard for Boss1
+		isFetchingLeaderboard = false; // Set fetching to false after both are done
+		fetchLeaderboard(1); // Fetch leaderboard for Boss2
+		});
+}
+
+// Call this function when the game is closing
+void WaitForLeaderboardFetch() {
+	if (leaderboardFetchFuture.valid()) {
+		leaderboardFetchFuture.get(); // Wait for completion
+	}
+}
 
 void HubWorld_Load()
 {
+	loadingImage1 = AEGfxTextureLoad("Assets/loadingStatus.png");
+
 	// UI elements
 	Load_UI();
 	Load_Player_UI();
 
 	// Player
 	Load_Player();
-
+	
 	// Dummy Bots
 	Load_DummyBot();
 
 	// Tutorial
 	Load_Tutorial();
 
-	//// Leaderboard
-	//FetchLeaderboardAsync();
+	FetchLeaderboardAsync();
 
 	shrine_sprite	= SpriteSheet("Assets/HubWorld/Shrine.png", 13, 1);
 	campfire_sprite = SpriteSheet("Assets/HubWorld/Campfire.png", 12, 1);
@@ -443,6 +461,9 @@ void HubWorld_Draw()
 		FadeIn.A -= FadeInSpeed;
 	}
 	else FadeIn.A = 0.f;																				// Clamp to 0
+	AEGfxSetRenderMode(AE_GFX_RM_TEXTURE);										// Set render modes for drawing of colours
+	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+	DrawLoadingImage1();
 }
 
 void HubWorld_Free()
@@ -464,7 +485,7 @@ void HubWorld_Unload()
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
-	//WaitForLeaderboardFetch();
+	WaitForLeaderboardFetch();
 }
 
 void Draw_FadeIn(Color& Fade) {
@@ -497,30 +518,28 @@ void Draw_FadeOut(Color& Fade) {
 //FAUZAN UR STUFF IS HERE!!!!
 //I might implement a cool little swipe to left/right transition but ngl idk if we got time so can just implement the google doc names teehee tyvm
 
-void fetchLeaderboard() {
-	// Run Python script to generate leaderboard.txt
-	std::string command = "\"Assets\\dist\\leaderboard_helper.exe\"";
+
+void fetchLeaderboard(int bossID) {
+	std::string bossIDStr = (bossID == 0) ? "Boss1" : "Boss2";
+	std::string command = "\"Assets\\dist\\leaderboard_helper.exe\" " + bossIDStr;
 	int result = system(command.c_str());
 	if (result != 0) {
 		std::cerr << "Failed to run leaderboard_helper.exe" << std::endl;
 		return;
 	}
 
-	// Open leaderboard.txt
-	std::ifstream file("leaderboard.txt");
+	std::string filename = "leaderboard_" + bossIDStr + ".txt";
+	std::ifstream file(filename);
 	if (!file) {
-		std::cerr << "Failed to open leaderboard.txt" << std::endl;
+		std::cerr << "Failed to open " << filename << std::endl;
 		return;
 	}
 
 	std::vector<std::string> names, scores, times;
 	std::string line;
 
-	// Read leaderboard.txt line by line
 	while (std::getline(file, line)) {
 		std::string name, score, time;
-
-		// Split using " - " as the delimiter
 		size_t firstDash = line.find(" - ");
 		size_t secondDash = line.find(" - ", firstDash + 3);
 
@@ -534,32 +553,18 @@ void fetchLeaderboard() {
 			times.push_back(time);
 		}
 	}
-
 	file.close();
 
-	// Store in game leaderboard variables
+	// Assuming you have global arrays to store leaderboard data
 	for (size_t i = 0; i < names.size() && i < 20; i++) {
-		//@@@FAUZ@@@   can check here for assigning scores to vectors
-		for (int j = 0; j < 2; j++) {
-			HS_name[j][i] = names[i];
-			HS_score[j][i] = scores[i];
-			HS_time[j][i] = times[i];
-		}
+		HS_name[bossID][i] = names[i];
+		HS_score[bossID][i] = scores[i];
+		HS_time[bossID][i] = times[i];
 	}
 
-	std::cout << "Leaderboard fetched and stored successfully!" << std::endl;
-
+	std::cout << "Leaderboard fetched and stored for Boss " << bossID + 1 << "!" << std::endl;
 }
 
-//void FetchLeaderboardAsync() {
-//	if (isFetchingLeaderboard.load()) return; // Prevent multiple fetch calls
-//	isFetchingLeaderboard = true;
-//
-//	std::thread([]() {
-//		fetchLeaderboard(); // Fetch leaderboard data
-//		isFetchingLeaderboard = false;
-//		}).detach();
-//}
 
 
 std::string sanitizeString(const std::string& input) {

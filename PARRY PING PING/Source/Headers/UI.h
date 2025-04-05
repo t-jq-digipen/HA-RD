@@ -16,7 +16,7 @@ extern bool isFirstInit;
 // Extern font for other files
 extern s8 pixel_font;
 
-extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3;
+extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, dashAudio;
 extern AEAudioGroup gameBGM, gameSFX;
 extern float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 extern float current_sfx_vol, prev_sfx_vol, max_sfx_vol;

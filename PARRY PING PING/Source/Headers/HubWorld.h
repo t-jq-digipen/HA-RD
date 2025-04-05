@@ -33,7 +33,7 @@ void Draw_ShrineBoard();
 
 void Draw_ModifiersBoard();
 
-void fetchLeaderboard();
+void fetchLeaderboard(int bossID);
 
 void FetchLeaderboardAsync();
 		

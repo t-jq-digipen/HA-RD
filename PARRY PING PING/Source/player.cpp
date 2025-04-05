@@ -877,6 +877,7 @@ void Movement() {
 			}
 			if (AEInputCheckTriggered(AEVK_SPACE) && (input.x || input.y))
 			{
+				AEAudioPlay(dashAudio, gameSFX, 1.0f, 1.0f, 0); // First slash
 				AEVec2Set(&player.dodge_vel, input.x, input.y);
 				AEVec2Normalize(&player.dodge_vel, &player.dodge_vel);
 				player.state = DODGE;
