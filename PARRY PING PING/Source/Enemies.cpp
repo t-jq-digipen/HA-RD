@@ -20,16 +20,17 @@ DummyBotRange RParryBot;		//Ranged Attack
 
 SpriteSheet meleebot_sprite;
 
-
 typedef struct ParrySpark {
-	SpriteSheet sprite;
-	AEVec2 pos;
-	Timer timer;
-	bool active;
+	SpriteSheet sprite;				// Spritesheet
+	AEVec2 pos;						// Position to draw
+	Timer timer;					// Timer
+	bool active;					// Flag if can draw
 } ParrySpark;
 
 ParrySpark spark;
 
+#pragma region Parry Spark
+// Init parry spark position and timer
 void Init_Parry_Spark()
 {
 	spark.pos = { 0.f,0.f };
@@ -37,21 +38,25 @@ void Init_Parry_Spark()
 	spark.active = false;
 }
 
+// Load animation
 void Load_Parry_Spark()
 {
 	spark.sprite = SpriteSheet("Assets/UI/Spark.png", 9, 1);
 }
 
+// FREEEEE MEMORY
 void Unload_Parry_Spark()
 {
 	spark.sprite.Unload();
 }
 
-void Set_Spark_Loc(f32 pos_x, f32 pos_y) 
+// Set position of spark to specified location
+void Set_Spark_Loc(f32 pos_x, f32 pos_y)
 {
 	spark.pos = { pos_x, pos_y };
 }
 
+// Reset timer and prep for drawing effect
 void Start_Spark(f32 duration)
 {
 	if (!spark.active)
@@ -62,12 +67,11 @@ void Start_Spark(f32 duration)
 	}
 }
 
+// Draw spark effect WRT timer
 void Draw_Spark()
 {
-
 	if (Update_Timer(&spark.timer))
 	{
-		// std::cout << "SHOULDBEDRAWINGSPARKNOW\n";
 		spark.sprite.Set_Row(0);
 		spark.sprite.Set_Col(0, 8, spark.timer.current);
 		spark.sprite.Draw(World_To_Screen_x(spark.pos.x), World_To_Screen_y(spark.pos.y), 1500.f, 1000.f);
@@ -78,11 +82,14 @@ void Draw_Spark()
 	}
 }
 
+// reset flags and timer
 void End_Spark()
 {
 	spark.timer.current = 1.f;
 	spark.active = false;
 }
+#pragma endregion
+
 
 
 //MELEE PARRY BOT FUNCTIONS:
