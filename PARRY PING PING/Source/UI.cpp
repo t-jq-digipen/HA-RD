@@ -275,9 +275,9 @@ void Load_UI()
 	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
 	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
 	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
-	sword3 = AEAudioLoadSound("Assets/test2_third_slash.mp3");
+	sword3 = AEAudioLoadSound("Assets/third_slash.mp3");
 	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
-	dashAudio = AEAudioLoadSound("Assets/dash.mp3");
+	dashAudio = AEAudioLoadSound("Assets/dashSFX.mp3");
 	ammoFullSFX = AEAudioLoadSound("Assets/chargedCan.mp3");
 	hubWorldMusic = AEAudioLoadMusic("Assets/hubWorldSong.mp3");
 

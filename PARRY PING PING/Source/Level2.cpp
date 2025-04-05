@@ -57,8 +57,6 @@ void Level2_Initialize()
 {
 	std::cout << "Level 2 Initialized\n";
 
-	// Music
-	AEAudioInit();
 
 	// Player
 	Init_Player();
@@ -113,8 +111,6 @@ void Level2_Update()
 	// Delta time
 	Get_DT();
 
-	// Music
-	AEAudioUpdate();
 
 	if (AEInputCheckTriggered(AEVK_B))
 	{
