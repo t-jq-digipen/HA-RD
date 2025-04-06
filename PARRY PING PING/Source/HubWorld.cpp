@@ -66,6 +66,8 @@ f32 DummyMelee_rad{}, CurrHealth{}, MaxHealth{ 50.f };
 
 // Text vars
 Color hubworld_white;
+Color hubworld_black;
+Color hubworld_bronze;
 s8  hubworld_font;
 
 // Spritesheets
@@ -213,6 +215,8 @@ void HubWorld_Load()
 	// Font
 	hubworld_font   = AEGfxCreateFont("Assets/liberation-mono.ttf", 36);															// Font and text colour
 	hubworld_white  = SetColor(0xFFFFFFFF);
+	hubworld_black = SetColor(0xFF000000);
+	hubworld_bronze = SetColor(0xFF733B31);
 
 	// Fade transitions
 	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);
@@ -445,8 +449,8 @@ void HubWorld_Draw()
 	modifiers_sprite.Loop(0, 3, 1.f);
 	modifiers_sprite.Draw(World_To_Screen_x(Env_Modifiers.Pos.x), World_To_Screen_y(Env_Modifiers.Pos.y), Env_Modifiers.Width, Env_Modifiers.Height);
 
-	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, SetColor(0xFFFF6961));		// Gate   - player starts boss fight level here!
-	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, SetColor(0xFFFF6961));	// Gate 2 - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, hubworld_bronze);		// Gate   - player starts boss fight level here!
+	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, hubworld_bronze);	// Gate 2 - player starts boss fight level here!
 	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE 1", true);
 	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, hubworld_font, hubworld_white, "GATE 2", true);
 
@@ -753,20 +757,20 @@ void Draw_ShrineBoard() {
 			ShowBoss = 0;
 		}
 
-		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 3!", false);
+		DrawTextAdvanced(0.f, 700.f, pixel_font, hubworld_white, "TOP 3!", false);
 
 		// Show scores for respective bosses
 		switch (ShowBoss)
 		{
 		case 0:
-			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 1", false, 0.5f);
-			DrawRect(200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
-			DrawTextAdvanced(400.f, 550.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+			DrawTextAdvanced(0.f, 550.f, pixel_font, hubworld_white, "BOSS 1", false, 0.5f);
+			DrawRect(200.f, 275.f, 75.f, 75.f, hubworld_white);
+			DrawTextAdvanced(400.f, 550.f, pixel_font, hubworld_black, ">>", false, 0.3f);
 			break;
 		case 1:
-			DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "BOSS 2", false, 0.5f);
-			DrawRect(-200.f, 275.f, 75.f, 75.f, SetColor(0xFFFFFFFF));
-			DrawTextAdvanced(-400.f, 550.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
+			DrawTextAdvanced(0.f, 550.f, pixel_font, hubworld_white, "BOSS 2", false, 0.5f);
+			DrawRect(-200.f, 275.f, 75.f, 75.f, hubworld_white);
+			DrawTextAdvanced(-400.f, 550.f, pixel_font, hubworld_black, "<<", false, 0.3f);
 			break;
 		default:
 			ShowBoss = 0;
@@ -785,42 +789,42 @@ void Draw_ShrineBoard() {
 		// HS_name/score/time -> arr of 2 vectors, each vector holds 20 strings containing specified data: [BOSS_NUMBER][POSITION_IN_LEADERBOARD]
 		// To access eg name of 5th place name for boss 1: HS_name[0][4]
 		// Top 1
-		DrawTextAdvanced(0.f, 75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][0]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][0]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(0.f, 0.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][0]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 75.f, pixel_font, hubworld_white, sanitizeString(HS_name[ShowBoss][0]).c_str(), false, 0.3f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, 25.f, pixel_font, hubworld_white, sanitizeString(HS_score[ShowBoss][0]).c_str(), false, 0.2f);  // Convert std::string to const char*
+		DrawTextAdvanced(0.f, -15.f, pixel_font, hubworld_white, sanitizeString(HS_time[ShowBoss][0]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		// Top 2
-		DrawTextAdvanced(-400.f, 25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][1]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][1]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(-400.f, -50.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][1]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, 25.f, pixel_font, hubworld_white, sanitizeString(HS_name[ShowBoss][1]).c_str(), false, 0.3f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -25.f, pixel_font, hubworld_white, sanitizeString(HS_score[ShowBoss][1]).c_str(), false, 0.2f);  // Convert std::string to const char*
+		DrawTextAdvanced(-400.f, -65.f, pixel_font, hubworld_white, sanitizeString(HS_time[ShowBoss][1]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		// Top 3
-		DrawTextAdvanced(400.f, -25.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][2]).c_str(), false, 0.15f);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -75.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][2]).c_str(), false, 0.125f);  // Convert std::string to const char*
-		DrawTextAdvanced(400.f, -100.f, pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][2]).c_str(), false, 0.125f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -25.f, pixel_font, hubworld_white, sanitizeString(HS_name[ShowBoss][2]).c_str(), false, 0.3f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -75.f, pixel_font, hubworld_white, sanitizeString(HS_score[ShowBoss][2]).c_str(), false, 0.2f);  // Convert std::string to const char*
+		DrawTextAdvanced(400.f, -115.f, pixel_font, hubworld_white, sanitizeString(HS_time[ShowBoss][2]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		// Show More
-		DrawRect(600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
-		DrawTextAdvanced(1200.f, 0.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+		DrawRect(600.f, 0.f, 100.f, 100.f, hubworld_white);
+		DrawTextAdvanced(1200.f, 0.f, pixel_font, hubworld_black, ">>", false, 0.3f);
 	}
 	// Draw top 20
 	else {
-		DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "TOP 20!", false);
-		DrawTextAdvanced(-400.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-NAME-", false, 0.2f);
-		DrawTextAdvanced(-100.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-SCORE-", false, 0.2f);
-		DrawTextAdvanced(300.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "-TIME-", false, 0.2f);
+		DrawTextAdvanced(0.f, 700.f, pixel_font, hubworld_white, "TOP 20!", false);
+		DrawTextAdvanced(-400.f, 550.f, pixel_font, hubworld_white, "-NAME-", false, 0.2f);
+		DrawTextAdvanced(-100.f, 550.f, pixel_font, hubworld_white, "-SCORE-", false, 0.2f);
+		DrawTextAdvanced(300.f, 550.f, pixel_font, hubworld_white, "-TIME-", false, 0.2f);
 
 		// Draws out neat list of 20 names, score, timing for each specific boss!
 		for (int i = 0; i < 20; i++) 
 		{
-			DrawTextAdvanced(-400.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(-100.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
-			DrawTextAdvanced(300.f, 500.f - (i * 50.f), pixel_font, SetColor(0xFFFFFFFF), sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(-400.f, 500.f - (i * 50.f), pixel_font, hubworld_white, sanitizeString(HS_name[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(-100.f, 500.f - (i * 50.f), pixel_font, hubworld_white, sanitizeString(HS_score[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
+			DrawTextAdvanced(300.f, 500.f - (i * 50.f), pixel_font, hubworld_white, sanitizeString(HS_time[ShowBoss][i]).c_str(), false, 0.2f);  // Convert std::string to const char*
 
 		}
 
 		// Show Less
-		DrawRect(-600.f, 0.f, 100.f, 100.f, SetColor(0xFFFFFFFF));
+		DrawRect(-600.f, 0.f, 100.f, 100.f, hubworld_white);
 		DrawTextAdvanced(-1200.f, 0.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
 	}
 }
@@ -829,8 +833,8 @@ void Draw_ShrineBoard() {
 void Draw_ModifiersBoard() 
 {
 	// UI Screens for factors that adjust gameplay
-	DrawTextAdvanced(0.f, 700.f, pixel_font, SetColor(0xFFFFFFFF), "MODIFIERS", false);
-	DrawTextAdvanced(0.f, 550.f, pixel_font, SetColor(0xFFFFFFFF), "NOTE: This will affect your score", false, 0.3f);
+	DrawTextAdvanced(0.f, 700.f, pixel_font, hubworld_white, "MODIFIERS", false);
+	DrawTextAdvanced(0.f, 550.f, pixel_font, hubworld_white, "NOTE: This will affect your score", false, 0.3f);
 
 	// DAMAGE TAKEN MODIFIER
 	// Input for selecting 'difficulty'
@@ -861,11 +865,11 @@ void Draw_ModifiersBoard()
 		break;
 	}
 	// Draw!
-	DrawTextAdvanced(0.f, 400.f, pixel_font, SetColor(0xFFFFFFFF), "Damage Taken:", false, 0.3f);
-	DrawTextAdvanced(0.f, 300.f, pixel_font, SetColor(0xFFFFFFFF), Mod_DmgTaken[player.Mod_DmgTakenIndex], false, 0.3f);
-	DrawRect(175.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
-	DrawRect(-175.f, 150.f, 50.f, 50.f, SetColor(0xFFFFFFFF));
-	DrawTextAdvanced(-350.f, 300.f, pixel_font, SetColor(0xFF000000), "<<", false, 0.3f);
-	DrawTextAdvanced(350.f, 300.f, pixel_font, SetColor(0xFF000000), ">>", false, 0.3f);
+	DrawTextAdvanced(0.f, 400.f, pixel_font, hubworld_white, "Damage Taken:", false, 0.3f);
+	DrawTextAdvanced(0.f, 300.f, pixel_font, hubworld_white, Mod_DmgTaken[player.Mod_DmgTakenIndex], false, 0.3f);
+	DrawRect(175.f, 150.f, 50.f, 50.f, hubworld_white);
+	DrawRect(-175.f, 150.f, 50.f, 50.f, hubworld_white);
+	DrawTextAdvanced(-350.f, 300.f, pixel_font, hubworld_black, "<<", false, 0.3f);
+	DrawTextAdvanced(350.f, 300.f, pixel_font, hubworld_black, ">>", false, 0.3f);
 }
 #pragma endregion
