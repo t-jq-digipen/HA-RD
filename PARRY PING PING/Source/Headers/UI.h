@@ -35,7 +35,7 @@ extern bool isFirstInit;
 extern s8 pixel_font;
 
 // Game Audio
-extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, dashAudio, ammoFullSFX, hubWorldMusic;
+extern AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, dashAudio, ammoFullSFX, hubWorldMusic, boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket, gameClearSFX;
 
 // Game Audio Groups
 extern AEAudioGroup gameBGM, gameSFX;

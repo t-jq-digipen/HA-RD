@@ -374,6 +374,7 @@ void HubWorld_Draw()
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
+	AEGfxSetBackgroundColor(0.259f, 0.157f, 0.208f); // Beige color
 	// Define map size
 	Color borderColor = { 0.902f, 0.725f, 0.451f, 0.0f };
 

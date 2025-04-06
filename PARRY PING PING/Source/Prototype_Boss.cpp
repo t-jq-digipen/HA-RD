@@ -116,6 +116,8 @@ std::vector<float> ProtoBossScore_IO;
 bool Boss1_FileRead = false;
 bool Boss1Score_FileRead = false;
 
+bool hasPlayedAttackSFX = false;
+
 // Load boss assets
 void Load_Boss()
 {
@@ -936,13 +938,26 @@ void Smash_Sweep_Logic()
         else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
         {
             // Attack is active (check collision)
+            if (boss_1.attackstate != BOSS_ATTACK_ACTIVE) {
+                // Transitioning into ACTIVE state: play SFX once
+                switch (boss_1.attack_type) {
+                case BOSS_SMASH:
+                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    break;
+                case BOSS_SWEEP:
+                    AEAudioPlay(boss1Sweep1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    break;
+                }
+                hasPlayedAttackSFX = true;
+            }
+
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+
             switch (boss_1.attack_type)
             {
             case BOSS_SMASH:
                 if (AETestCircleToCircle(&boss_melee[BOSS_SMASH].pos, SMASH_RADIUS, &player.pos, player.radius))
                 {
-                    // Player damage calculation
                     if (will_hit)
                     {
                         Boss_Attack_Test(boss_melee[BOSS_SMASH].can_parry, 30.f);
@@ -953,7 +968,6 @@ void Smash_Sweep_Logic()
             case BOSS_SWEEP:
                 if (AETestCircleToRect(&player.pos, player.radius, &boss_melee[BOSS_SWEEP].pos, SWEEP_WIDTH, SWEEP_HEIGHT))
                 {
-                    // Parry checks
                     if (will_hit)
                     {
                         Boss_Attack_Test(boss_melee[BOSS_SWEEP].can_parry, 30.f);
@@ -993,77 +1007,85 @@ void Smash_Sweep_Logic()
 void Three_Hit_Logic()
 {
     // Update hitbox positions at the start of the logic
-    boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f };  // Left hit position
-    boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + 200.f, boss_1.pos.y - 150.f }; // Right hit position
-    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y };        // Circle hit position
+    boss_melee[BOSS_LEFT_HIT].pos = { boss_1.pos.x - 200.f, boss_1.pos.y - 150.f };  // Left hit
+    boss_melee[BOSS_RIGHT_HIT].pos = { boss_1.pos.x + 200.f, boss_1.pos.y - 150.f };  // Right hit
+    boss_melee[BOSS_CIRCLE_HIT].pos = { boss_1.pos.x, boss_1.pos.y };                 // Circle sweep
 
     if (Update_Timer(&boss_1.attack_timer))
     {
-        if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup)
+        float progress = boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration;
+
+        if (progress < boss_melee[boss_1.attack_type].attack_windup)
         {
             // Attack is winding up
             will_hit = true;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        else if (progress < boss_melee[boss_1.attack_type].attack_active)
         {
+            if (!hasPlayedAttackSFX)
+            {
+                // Play unique SFX for each hit type
+                switch (boss_1.attack_type)
+                {
+                case BOSS_LEFT_HIT:
+                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    break;
+                case BOSS_RIGHT_HIT:
+                    AEAudioPlay(boss1Smash2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    break;
+                case BOSS_CIRCLE_HIT:
+                    AEAudioPlay(boss1Sweep2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    break;
+                }
+                hasPlayedAttackSFX = true;
+            }
+
             // Attack is active (check collision)
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
+
             switch (boss_1.attack_type)
             {
             case BOSS_LEFT_HIT:
                 if (AETestCircleToCircle(&boss_melee[BOSS_LEFT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
                 {
-                    // Player damage calculation
                     if (will_hit)
-                    {
                         Boss_Attack_Test(boss_melee[BOSS_LEFT_HIT].can_parry, 30.f);
-                    }
                 }
                 break;
 
             case BOSS_RIGHT_HIT:
                 if (AETestCircleToCircle(&boss_melee[BOSS_RIGHT_HIT].pos, SMASH_RADIUS, &player.pos, player.radius))
                 {
-                    // Player damage calculation
                     if (will_hit)
-                    {
                         Boss_Attack_Test(boss_melee[BOSS_RIGHT_HIT].can_parry, 30.f);
-                    }
                 }
                 break;
 
             case BOSS_CIRCLE_HIT:
                 if (AETestCircleToCircle(&boss_melee[BOSS_CIRCLE_HIT].pos, BIG_SMASH_RADIUS, &player.pos, player.radius))
                 {
-                    // Player damage calculation
                     if (will_hit)
-                    {
                         Boss_Attack_Test(boss_melee[BOSS_CIRCLE_HIT].can_parry, 30.f);
-                    }
                 }
-                break;
-
-            default:
-                boss_1.attackstate = BOSS_ATTACK_RECOVER;
                 break;
             }
         }
-        else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover)
+        else if (progress < boss_melee[boss_1.attack_type].attack_recover)
         {
-            // Attack is recovering
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
         }
     }
     else
     {
+        hasPlayedAttackSFX = false; // Reset for the next hit
+
         if (boss_1.attack_type == BOSS_LEFT_HIT || boss_1.attack_type == BOSS_RIGHT_HIT)
         {
             boss_1.attack_type++;
             boss_melee[boss_1.attack_type].timer.current = 0.f;
             boss_1.attack_timer = boss_melee[boss_1.attack_type].timer;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
-
         }
         else
         {
@@ -1073,6 +1095,8 @@ void Three_Hit_Logic()
         }
     }
 }
+
+
 
 void Boss_Dash_Logic()
 {
@@ -1099,7 +1123,13 @@ void Boss_Dash_Logic()
         }
         else if (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
         {
-            // Attack is active (check collision)
+            // Play dash sound only on first ACTIVE frame
+            if (boss_1.attackstate != BOSS_ATTACK_ACTIVE)
+            {
+                AEAudioPlay(boss1Dash, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                hasPlayedAttackSFX = true;
+            }
+
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
             // Calculate the remaining time for the charge attack
@@ -1118,14 +1148,12 @@ void Boss_Dash_Logic()
                 }
             }
 
-            // Check if boss has reached the target position with a slight buffer
+            // Check if boss has reached the target position
             f32 distance_to_target = AEVec2Distance(&boss_1.pos, &boss_1.target_pos);
-            if (distance_to_target <= 50.f)  // Adjust this threshold if needed
+            if (distance_to_target <= 50.f)
             {
-                // Snap the boss to the target position to ensure it stops exactly
                 boss_1.pos = boss_1.target_pos;
 
-                // Transition to the next state 
                 boss_1.attack_timer.current = 0.f;
                 boss_1.attack_type = BOSS_SMASH;
                 boss_1.state = BOSS_SMASH_SWEEP;
@@ -1143,6 +1171,8 @@ void Boss_Dash_Logic()
     }
     else
     {
+        hasPlayedAttackSFX = false; // Reset for next attack
+
         if (boss_1.attack_type == BOSS_SMASH)
         {
             boss_1.attack_type++;
@@ -1180,8 +1210,14 @@ void Boss_Rocket_Logic() {
             // Calculate the distance
             boss_1.target_dist = AEVec2Distance(&player.pos, &boss_1.pos);
         }
-        else if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active) {
-            // Attack is active (spawn rocket fist)
+        else if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_active)
+        {
+            if (boss_1.attackstate != BOSS_ATTACK_ACTIVE)
+            {
+                AEAudioPlay(boss1Rocket, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f); // Rocket launch SFX
+                hasPlayedAttackSFX = true;
+            }
+
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
             // Spawn a rocket fist
@@ -1194,10 +1230,11 @@ void Boss_Rocket_Logic() {
             AEMtx33Identity(&fist.transform);
             rocket_fists.push_back(fist);
 
-            // Immediately transition to the recovery phase
+            // Immediately transition to recovery
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
-            boss_melee[boss_1.attack_type].timer.current = boss_melee[boss_1.attack_type].attack_active / boss_melee[boss_1.attack_type].timer.duration; // Skip to recovery phase
+            boss_melee[boss_1.attack_type].timer.current = boss_melee[boss_1.attack_type].attack_active / boss_melee[boss_1.attack_type].timer.duration;
         }
+
         else if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_recover) {
             // Attack is recovering
             boss_1.attackstate = BOSS_ATTACK_RECOVER;
@@ -1205,6 +1242,8 @@ void Boss_Rocket_Logic() {
         }
     }
     else {
+        hasPlayedAttackSFX = false; // Reset for next rocket
+
         // If the attack timer is done, transition back to idle
         boss_1.state = BOSS_IDLE;
         boss_1.attack_type = 0;
