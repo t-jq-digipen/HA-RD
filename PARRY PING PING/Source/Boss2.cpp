@@ -138,6 +138,13 @@ int BOSS2_SCORE_MULTIPLIER;                 // x2 points in Level 2
 std::vector<float> Boss2_IO;
 std::vector<float> Boss2Score_IO;
 
+bool played_slash1 = false;
+bool played_slash2 = false;
+
+bool played_stab = false;
+bool played_wave = false;
+
+
 // Load boss assets
 void Load_Boss2() 
 {
@@ -1050,11 +1057,24 @@ void Dash_Slash_Logic()
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
 
+                // Play slash audio once when the slash actually happens
+                if (boss_2.attack_type == DASH_SLASH1 && !played_slash1)
+                {
+                    AEAudioPlay(boss2Slash2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
+                    played_slash1 = true;
+                }
+                else if (boss_2.attack_type == DASH_SLASH2 && !played_slash2)
+                {
+                    AEAudioPlay(boss2Slash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
+                    played_slash2 = true;
+                }
+
                 // Check slash collision (using target_dir as slash position)
                 if (AETestCircleToRect(&player.pos, player.radius,
                     &boss_2.target_dir, SLASHWIDTH, SLASHHEIGHT))
                 {
-                    if (will_hit2) {
+                    if (will_hit2)
+                    {
                         Boss2_Attack_Test(boss_attack[boss_2.attack_type].can_parry, SLASH_DAMAGE);
                     }
                 }
@@ -1071,7 +1091,10 @@ void Dash_Slash_Logic()
         }
         else // Timer finished
         {
-                
+            
+            played_slash1 = false;
+            played_slash2 = false;
+
             // Transition to second slash or back to idle
             if (boss_2.attack_type == DASH_SLASH1) {
 
@@ -1150,10 +1173,12 @@ void Update_Missiles()
             // Check for player collision
             if (AETestCircleToCircle(&missile.targetpos, missile.targetradius, &player.pos, player.radius)) {
                 Boss_Attack_Test(boss_attack[MISSILE_BARRAGE].can_parry, 30.f);
+                AEAudioPlay(boss2Shock, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                 missile.active = false;
                 continue;
             }
             missile.active = false;
+            AEAudioPlay(boss2Shock, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
             continue; // Skip other checks since we deactivated it
         }
 
@@ -1169,7 +1194,6 @@ void Update_Missiles()
         missiles.end()
     );
 }
-
 
 void Missile_Barrage_Logic()
 {
@@ -1371,7 +1395,6 @@ void Missile_Barrage_Logic()
 
 void Lightning_Wave_Logic()
 {
-    // Set the attack timer duration to match current attack type
     boss_2.attack_timer.duration = boss_attack[boss_2.attack_type].timer.duration;
     lightningwave.pos = boss_2.pos;
     lightningwave.pos.y -= 150.f;
@@ -1390,13 +1413,20 @@ void Lightning_Wave_Logic()
                 boss_2.attackstate = BOSS2_ATTACK_WINDUP;
                 will_hit2 = true;
                 lightning_stab_damaged = false;
+                played_stab = false; // Reset the flag here
             }
             // Active Phase
             else if (timer_progress < boss_attack[LIGHTNING_STAB].attack_active)
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
-                
-                // Damage check
+
+                // Play audio once
+                if (!played_stab)
+                {
+                    AEAudioPlay(boss2Stab1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
+                    played_stab = true;
+                }
+
                 if (AETestCircleToCircle(&lightningwave.pos, LIGHTNING_STAB_RADIUS, &player.pos, player.radius))
                 {
                     if (will_hit2 && !lightning_stab_damaged)
@@ -1406,26 +1436,25 @@ void Lightning_Wave_Logic()
                     }
                 }
             }
-            // Recover Phase
+            // Recovery Phase
             else if (timer_progress < boss_attack[LIGHTNING_STAB].attack_recover)
             {
                 boss_2.attackstate = BOSS2_ATTACK_RECOVER;
             }
-
         }
         else
         {
-            // Transition to wave phase
             boss_2.attack_type = LIGHTNING_WAVE;
             boss_2.attackstate = BOSS2_ATTACK_WINDUP;
             boss_2.attack_timer.current = 0.f;
             boss_2.attack_timer.duration = boss_attack[LIGHTNING_WAVE].timer.duration;
             lightningwave.radius = 0.f;
             lightning_wave_damaged = false;
+            played_wave = false; // Reset wave flag
         }
         break;
-
     }
+
     case LIGHTNING_WAVE:
     {
         if (Update_Timer(&boss_2.attack_timer))
@@ -1436,19 +1465,23 @@ void Lightning_Wave_Logic()
             if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_windup)
             {
                 boss_2.attackstate = BOSS2_ATTACK_WINDUP;
+                played_wave = false; // Reset sound flag
             }
             // Active Phase
             else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_active)
             {
                 boss_2.attackstate = BOSS2_ATTACK_ACTIVE;
 
-                // Start the wave
+                if (!played_wave)
+                {
+                    AEAudioPlay(boss2Lightning, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
+                    played_wave = true;
+                }
+
                 lightningwave.timer.current = 0.f;
-
                 boss_2.attack_timer.current = boss_attack[LIGHTNING_WAVE].attack_active / boss_attack[LIGHTNING_WAVE].timer.duration;
-
             }
-            // Recover Phase
+            // Recovery Phase
             else if (timer_progress < boss_attack[LIGHTNING_WAVE].attack_recover)
             {
                 boss_2.attackstate = BOSS2_ATTACK_RECOVER;
@@ -1456,14 +1489,16 @@ void Lightning_Wave_Logic()
         }
         else
         {
-            // Attack complete
             boss_2.state = BOSS2_IDLE;
             boss_2.idle_timer.current = 0.f;
+            played_stab = false;
+            played_wave = false;
         }
         break;
     }
     }
 }
+
 
 void Update_Lightning_Wave()
 {
