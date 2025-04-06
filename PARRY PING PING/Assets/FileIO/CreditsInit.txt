@@ -1,6 +1,6 @@
 0) Credits Delay Timer: 2.f
 1) Credits Reset Delay Timer: 3.f
-2) Credits Max Offset: 5500.f
+2) Credits Max Offset: 7000.f
 3) Credits Normal Scroll Speed: 5.f
 4) Credits Fast Scroll Speed: 50.f
 5) Credits Button Animation Timer: 0.5f
@@ -30,26 +30,33 @@
 29) Credits Content 22 Pos Y: -3800.f
 30) Credits Content 23 Pos Y: -4000.f
 31) Credits Content 24 Pos Y: -4200.f
-32) Credits Content 25 Pos Y: -5800.f
-33) Credits Main Header Size: 0.75f
-34) Credits Header Size: 0.6f
-35) Credits Content Size: 0.4f
-36) Credits Footer Size: 0.3f
-37) Credits Logo Pos Y: -5400.f
-38) Credits Logo Width: 600.f
-39) Credits Logo Height: 200.f
-40) Credits Logo Rotation: 0.f
-41) Credits Background Box Pos Y: -400.f
-42) Credits Background Box Width: 1600.f
-43) Credits Background Box Height: 300.f
-44) Credits Scroll Bar Pos X: 700.f
-45) Credits Scroll Bar Pos Y: 25.f
-46) Credits Scroll Bar Width: 30.f
-47) Credits Scroll Bar Height: 650.f
-48) Credits Scroll Bar Indicator Pos Y: 300.f
-49) Credits Scroll Bar Indicator Height: 100.f
-50) Credits Back Button Pos X: 0.f
-51) Credits Back Button Pos Y: -350.f
-52) Credits Back Button Width: 200.f
-53) Credits Back Button Height: 100.f
-54) Credits Back Button Rotation: 0.f
+32) Credits Content 25 Pos Y: -4400.f
+33) Credits Content 26 Pos Y: -4600.f
+34) Credits Content 27 Pos Y: -4800.f
+35) Credits Content 28 Pos Y: -5000.f
+36) Credits Content 29 Pos Y: -5200.f
+37) Credits Content 30 Pos Y: -5400.f
+38) Credits Content 31 Pos Y: -5600.f
+39) Credits Content 32 Pos Y: -7400.f
+40) Credits Main Header Size: 0.75f
+41) Credits Header Size: 0.6f
+42) Credits Content Size: 0.4f
+43) Credits Footer Size: 0.3f
+44) Credits Logo Pos Y: -7000.f
+45) Credits Logo Width: 600.f
+46) Credits Logo Height: 200.f
+47) Credits Logo Rotation: 0.f
+48) Credits Background Box Pos Y: -400.f
+49) Credits Background Box Width: 1600.f
+50) Credits Background Box Height: 300.f
+51) Credits Scroll Bar Pos X: 700.f
+52) Credits Scroll Bar Pos Y: -10.f
+53) Credits Scroll Bar Width: 30.f
+54) Credits Scroll Bar Height: 750.f
+55) Credits Scroll Bar Indicator Pos Y: 340.f
+56) Credits Scroll Bar Indicator Height: 50.f
+57) Credits Back Button Pos X: 0.f
+58) Credits Back Button Pos Y: -350.f
+59) Credits Back Button Width: 200.f
+60) Credits Back Button Height: 100.f
+61) Credits Back Button Rotation: 0.f

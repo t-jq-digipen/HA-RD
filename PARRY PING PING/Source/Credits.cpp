@@ -124,42 +124,49 @@ void Credits_Update()
 	}
 
 	// ROLL CREDITS
-	DrawTextAdvanced(credits_IO[6], credits_IO[7] + credits_offset, credits_font, credits_gold, credits_content[0].c_str(), false, credits_IO[33]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[8] + credits_offset, credits_font, credits_red, credits_content[1].c_str(), false, credits_IO[34]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[9] + credits_offset, credits_font, credits_white, credits_content[2].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[10] + credits_offset, credits_font, credits_red, credits_content[3].c_str(), false, credits_IO[34]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[11] + credits_offset, credits_font, credits_white, credits_content[4].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[12] + credits_offset, credits_font, credits_white, credits_content[5].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[13] + credits_offset, credits_font, credits_white, credits_content[6].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[14] + credits_offset, credits_font, credits_white, credits_content[7].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[15] + credits_offset, credits_font, credits_white, credits_content[8].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[16] + credits_offset, credits_font, credits_red, credits_content[9].c_str(), false, credits_IO[34]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[17] + credits_offset, credits_font, credits_white, credits_content[10].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[18] + credits_offset, credits_font, credits_white, credits_content[11].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[19] + credits_offset, credits_font, credits_white, credits_content[12].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[20] + credits_offset, credits_font, credits_red, credits_content[13].c_str(), false, credits_IO[34]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[21] + credits_offset, credits_font, credits_white, credits_content[14].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[22] + credits_offset, credits_font, credits_red, credits_content[15].c_str(), false, credits_IO[34]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[23] + credits_offset, credits_font, credits_white, credits_content[16].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[24] + credits_offset, credits_font, credits_white, credits_content[17].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[25] + credits_offset, credits_font, credits_white, credits_content[18].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[26] + credits_offset, credits_font, credits_white, credits_content[19].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[27] + credits_offset, credits_font, credits_white, credits_content[20].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[28] + credits_offset, credits_font, credits_white, credits_content[21].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[29] + credits_offset, credits_font, credits_white, credits_content[22].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[30] + credits_offset, credits_font, credits_white, credits_content[23].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[31] + credits_offset, credits_font, credits_white, credits_content[24].c_str(), false, credits_IO[35]);
-	DrawTextAdvanced(credits_IO[6], credits_IO[32] + credits_offset, credits_font2, credits_white, credits_content[25].c_str(), false, credits_IO[36]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[7] + credits_offset, credits_font, credits_gold, credits_content[0].c_str(), false, credits_IO[40]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[8] + credits_offset, credits_font, credits_red, credits_content[1].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[9] + credits_offset, credits_font, credits_white, credits_content[2].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[10] + credits_offset, credits_font, credits_red, credits_content[3].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[11] + credits_offset, credits_font, credits_white, credits_content[4].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[12] + credits_offset, credits_font, credits_white, credits_content[5].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[13] + credits_offset, credits_font, credits_white, credits_content[6].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[14] + credits_offset, credits_font, credits_white, credits_content[7].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[15] + credits_offset, credits_font, credits_white, credits_content[8].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[16] + credits_offset, credits_font, credits_red, credits_content[9].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[17] + credits_offset, credits_font, credits_white, credits_content[10].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[18] + credits_offset, credits_font, credits_white, credits_content[11].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[19] + credits_offset, credits_font, credits_white, credits_content[12].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[20] + credits_offset, credits_font, credits_red, credits_content[13].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[21] + credits_offset, credits_font, credits_white, credits_content[14].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[22] + credits_offset, credits_font, credits_red, credits_content[15].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[23] + credits_offset, credits_font, credits_white, credits_content[16].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[24] + credits_offset, credits_font, credits_white, credits_content[17].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[25] + credits_offset, credits_font, credits_white, credits_content[18].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[26] + credits_offset, credits_font, credits_white, credits_content[19].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[27] + credits_offset, credits_font, credits_white, credits_content[20].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[28] + credits_offset, credits_font, credits_white, credits_content[21].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[29] + credits_offset, credits_font, credits_white, credits_content[22].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[30] + credits_offset, credits_font, credits_white, credits_content[23].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[31] + credits_offset, credits_font, credits_white, credits_content[24].c_str(), false, credits_IO[42]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[32] + credits_offset, credits_font, credits_red, credits_content[25].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[33] + credits_offset, credits_font, credits_white, credits_content[26].c_str(), false, credits_IO[43]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[34] + credits_offset, credits_font, credits_white, credits_content[27].c_str(), false, credits_IO[43]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[35] + credits_offset, credits_font, credits_red, credits_content[28].c_str(), false, credits_IO[41]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[36] + credits_offset, credits_font, credits_white, credits_content[29].c_str(), false, credits_IO[43]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[37] + credits_offset, credits_font, credits_white, credits_content[30].c_str(), false, credits_IO[43]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[38] + credits_offset, credits_font, credits_white, credits_content[31].c_str(), false, credits_IO[43]);
+	DrawTextAdvanced(credits_IO[6], credits_IO[39] + credits_offset, credits_font2, credits_white, credits_content[32].c_str(), false, credits_IO[43]);
 
 	// Logo
-	DrawImage(credits_IO[6], credits_IO[37]  + credits_offset, credits_IO[38], credits_IO[39], credits_IO[40], creditslogo);
+	DrawImage(credits_IO[6], credits_IO[44]  + credits_offset, credits_IO[45], credits_IO[46], credits_IO[47], creditslogo);
 
 	// Background Box
-	DrawRect(credits_IO[6], credits_IO[41], credits_IO[42], credits_IO[43], credits_bg);
+	DrawRect(credits_IO[6], credits_IO[48], credits_IO[49], credits_IO[50], credits_bg);
 
 	// Credits Bar
-	DrawRect(credits_IO[44], credits_IO[45], credits_IO[46], credits_IO[47], credits_red);
-	DrawRect(credits_IO[44], credits_IO[48] - (0.1f * credits_offset), credits_IO[46], credits_IO[49], credits_gold);
+	DrawRect(credits_IO[51], credits_IO[52], credits_IO[53], credits_IO[54], credits_red);
+	DrawRect(credits_IO[51], credits_IO[55] - (0.1f * credits_offset), credits_IO[53], credits_IO[56], credits_gold);
 
 	// back button (click to go back to main menu)
 
@@ -168,9 +175,9 @@ void Credits_Update()
 		credits_buttonanimationtimer.current = 0.f;
 	}
 
-	Draw_SpriteSheet_test(*spritesheet_backbutton, credits_IO[50], credits_IO[51], credits_IO[52], credits_IO[53], credits_IO[54]);
+	Draw_SpriteSheet_test(*spritesheet_backbutton, credits_IO[57], credits_IO[58], credits_IO[59], credits_IO[60], credits_IO[61]);
 
-	if (IsAreaClicked(800.f + credits_IO[50], 450.f - credits_IO[51], credits_IO[52], credits_IO[53], credits_mouseX, credits_mouseY))
+	if (IsAreaClicked(800.f + credits_IO[57], 450.f - credits_IO[58], credits_IO[59], credits_IO[60], credits_mouseX, credits_mouseY))
 	{
 
 		isBackClicked = 1;
