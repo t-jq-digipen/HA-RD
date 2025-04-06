@@ -119,8 +119,8 @@ void MainMenu_Update()
     f32 totalTime = fadeTimer.duration + 1.0f + fadeTimer.duration; // 2s fade-in + 1s hold + 2s fade-out
     fadeTimer.current += dt;
 
-    // Skips Logo when Right Shift is Pressed
-    if (AEInputCheckTriggered(AEVK_RSHIFT))
+    // Skips Logo when Escape is Pressed
+    if (AEInputCheckTriggered(AEVK_ESCAPE))
     {
         isFading = false;
     }
@@ -165,12 +165,6 @@ void MainMenu_Update()
     {
         // Get mouse position coordinates
         AEInputGetCursorPosition(&mouseX, &mouseY);
-
-        // Basic way to trigger exiting the application
-        if (AEInputCheckTriggered(AEVK_ESCAPE))
-        {
-            nextState = GS_QUIT;
-        }
 
         // Game Logo
         Draw_SpriteSheet_test(*mainmenu.spritesheet_logo, MainMenu_IO[1], MainMenu_IO[2], MainMenu_IO[3], MainMenu_IO[4], 0.f);
