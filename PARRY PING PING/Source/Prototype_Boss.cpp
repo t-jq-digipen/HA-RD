@@ -382,7 +382,6 @@ void Update_Boss()
         if (Attacking_Ranged_Impact(boss_1.pos, BOSS_HITBOX_WIDTH, BOSS_HITBOX_HEIGHT, &damage))
         {
             boss_1.hp -= damage;
-            std::cout << "Boss hit! HP: " << boss_1.hp << '\n';
         }
 
 
@@ -684,7 +683,6 @@ void Draw_Boss()
             else if (boss_1.attackstate == BOSS_ATTACK_RECOVER)
             {
                 // Set sprite info
-                std::cout << "RECOVERING";
                 boss_1_sprite.Set_Row(4);
                 f32 active_curr = (boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration) - boss_melee[boss_1.attack_type].attack_active;
                 f32 anim_time = active_curr / recover_time;
@@ -1192,7 +1190,6 @@ void Boss_Dash_Logic()
 void Boss_Rocket_Logic() {
     if (Update_Timer(&boss_melee[boss_1.attack_type].timer)) {
         if (boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration < boss_melee[boss_1.attack_type].attack_windup) {
-            std::cout << boss_melee[boss_1.attack_type].timer.current * boss_melee[boss_1.attack_type].timer.duration << " < " << boss_melee[boss_1.attack_type].attack_windup << '\n';
             // Attack is winding up
             will_hit = true;
             boss_1.attackstate = BOSS_ATTACK_WINDUP;
@@ -1268,7 +1265,6 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
             bullet_time.current = 0.f;
             Collect_Points(BOSS_SCORE_BOSS_MELEE_PARRIED, PARRY_SCORE);
             currentCombo += 1;
-            std::cout << "Boss parried\n";
         }
         Parried_Hit();
         break;

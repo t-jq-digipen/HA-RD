@@ -223,7 +223,6 @@ void HubWorld_Load()
 	// Clear transition timer
 	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
 
-
 }
 
 void HubWorld_Initialize()

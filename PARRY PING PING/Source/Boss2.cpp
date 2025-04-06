@@ -246,8 +246,6 @@ void Init_Boss2_Indicator()
 
 void Init_Boss2() 
 {
-    std::cout << "INIT BOSS2\n---------------\n";
-
     // Reset missiles
     missiles.clear();  // Clear any existing
     missiles.reserve(8); // Reserve space (but doesn't construct)
@@ -452,7 +450,6 @@ void Update_Boss2()
         if (Attacking_Ranged_Impact(boss_2.pos, BOSS2_HITBOX_WIDTH, BOSS2_HITBOX_HEIGHT, &damage2))
         {
             boss_2.hp -= damage2;
-            std::cout << "Boss hit! HP: " << boss_2.hp << '\n';
         }
 
 
@@ -518,7 +515,6 @@ void Update_Boss2()
     else    // boss_2.state == BOSS2_DEAD
     {
         levelState = CLEARED;
-        std::cout << "DEDTIME: " << boss_2.death_timer.current << " | DURATION: " << boss_2.death_timer.duration << '\n';
         Update_Timer(&boss_2.death_timer);
     }
 
@@ -660,7 +656,6 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(2);
                     f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / boss_attack[boss_2.attack_type].attack_windup;
 
-                    std::cout << "ANIMTIME " << anim_time << "\n";
                     boss_2_sprite.Set_Col(0, 2, anim_time);
                     break;
                 }   // WINDUP SLASH 1
@@ -675,7 +670,6 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(4);
                     f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
                     f32 anim_time = active_curr / recover_time;
-                    std::cout << "ANIMTIME " << anim_time << "\n";
                     boss_2_sprite.Set_Col(0, 7, anim_time);
                     break;
                 }   // RECOVER SLASH 1
@@ -718,7 +712,6 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(6);
                     f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / boss_attack[boss_2.attack_type].attack_windup;
 
-                    std::cout << "ANIMTIME " << anim_time << "\n";
                     boss_2_sprite.Set_Col(0, 5, anim_time);
                     break;
                 }   // WINDUP SLASH 1
@@ -733,7 +726,7 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(8);
                     f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
                     f32 anim_time = active_curr / recover_time;
-                    std::cout << "ANIMTIME " << anim_time << "\n";
+
                     boss_2_sprite.Set_Col(0, 2, anim_time);
                     break;
                 }   // RECOVER SLASH 1
@@ -751,7 +744,7 @@ void Draw_Boss2()
                 {
                     boss_2_sprite.Set_Row(9);
                     f32 anim_time = boss_2.attack_timer.current * boss_2.attack_timer.duration / windup_time;
-                    std::cout << "ANIMTIME " << anim_time << "\n";
+
                     boss_2_sprite.Set_Col(0, 6, anim_time);
                     break;
                 }   // WINDUP SLASH 1
@@ -760,7 +753,7 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(10);
                     f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - windup_time;
                     f32 anim_time = active_curr / active_time;
-                    std::cout << "ANIMTIME " << anim_time << "\n";
+
                     boss_2_sprite.Set_Col(0, 1, anim_time);
                     break;
                 }   // ACTIVE SLASH 1
@@ -769,7 +762,7 @@ void Draw_Boss2()
                     boss_2_sprite.Set_Row(11);
                     f32 active_curr = boss_2.attack_timer.current * boss_2.attack_timer.duration - boss_attack[boss_2.attack_type].attack_active;
                     f32 anim_time = active_curr / recover_time;
-                    std::cout << "ANIMTIME " << anim_time << "\n";
+
                     boss_2_sprite.Set_Col(0, 8, anim_time);
                     break;
                 }   // RECOVER SLASH 1
@@ -934,7 +927,6 @@ void Boss2_Attack_Test(bool canparry, f32 boss_damage)
             boss_2.attack_timer.current = 1.f;
 
             bullet_time.current = 0.f;
-            std::cout << "Boss parried. State: " << boss_2.state << '\n'; // Debug log
         }
         
         Parried_Hit();

@@ -1528,7 +1528,6 @@ void Collect_Points(int value, int score_index)
 // Draw accumulated points
 void Draw_Points()
 {
-	std::cout << pointsAccumulated << '\n';
 	if (levelState == PLAYING || levelState == CLEARED)
 	{
 		// While combo is active
@@ -1641,14 +1640,14 @@ void addLeaderboardEntry(const std::string& name, int score, const std::string& 
 		+ std::to_string(score) + "\" \""
 		+ timing + "\"\"";
 
-	std::cout << "Adding leaderboard entry for " << leaderboardCategory << "..." << std::endl;
+	// std::cout << "Adding leaderboard entry for " << leaderboardCategory << "..." << std::endl;
 	int result = system(command.c_str());
 
 	if (result != 0) {
-		std::cout << "Error adding leaderboard entry for " << leaderboardCategory << "!" << std::endl;
+		// std::cout << "Error adding leaderboard entry for " << leaderboardCategory << "!" << std::endl;
 	}
 	else {
-		std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
+		// std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
 		isInputSubmitted = UI_green;
 	}
 }

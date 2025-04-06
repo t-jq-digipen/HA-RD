@@ -696,12 +696,12 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 	std::fstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 	else
 	{
-		std::cout << "Can read " << filename << "!!!\n";
+		std::cerr << "Can read " << filename << "!!!\n";
 		std::string label, value;
 		while (std::getline(ifs, label))
 		{
@@ -725,7 +725,7 @@ void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
 	std::fstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 	else
@@ -734,7 +734,6 @@ void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
 		while (std::getline(ifs, line))
 		{
 			vector.push_back(line);
-			std::cout << line << '\n';
 		}
 	}
 	ifs.close();
@@ -746,7 +745,7 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	std::ifstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 
@@ -762,7 +761,6 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 			if (value_pos != std::string::npos)
 			{
 				line = line.substr(0, value_pos + 2) + value;
-				std::cout << "Modified line: " << line;
 			}
 		}
 		lines.push_back(line);
