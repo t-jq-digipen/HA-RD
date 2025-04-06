@@ -2,19 +2,25 @@
 // File:	UI.h
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Manfred Sim ------------------------------- ??%
+//			Manfred Sim ------------------------------- 70%
 //			- Score system
+//			- Game menus
 //			- Button sprites
+//			- State enumerations
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 20%
 //			- Leaderboard entry
 //			- Audio
 // 
-//			Tan Jun Quan ------------------------------ ??%
+//			Tan Jun Quan ------------------------------ 10%
 //			- Player UI
 //			
 //
-// Brief:	UI elements
+// Brief:	Declaration of various UI elements for player 
+//			interaction, and enumeration of level states
+//			to determine which UI elements should be active.
+//			Includes menu UI systems, leaderboard interface,
+//			player HUD, level transition animations.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

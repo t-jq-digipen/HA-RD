@@ -9,7 +9,8 @@
 //			Tan Jun Quan ------------------------------ 15%
 //			- Parry spark (Logic + Drawing)
 //
-// Brief:	Declaration of General Enemy related functions
+// Brief:	Enemy functions for training dummy bots found in
+//			hubworld, as well as parry spark warning system.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

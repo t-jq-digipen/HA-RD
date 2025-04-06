@@ -2,25 +2,38 @@
 // File:	HubWorld.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 60%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 55%
 //			- Interactable environments (Leaderboard, Modifiers, Ranged + Melee Parry Dummies)
 //			- Camera lock effect
 //			- Level selection + transition
 //			- Sprites
+//				- Modifiers
+//				- Shrine
 // 
 //			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
 //			- Leaderboard fetching
 //			- Audio
 //			- Map
 // 
-//			Tan Jun Quan ------------------------------ 5%
+//			Tan Jun Quan ------------------------------ 10%
 //			- Sprites
+//				- Campfire
+//				- Dummy bots
+//				- Spirits
+//			- Tutorial
 // 
 //			Manfred Sim ------------------------------- 5%
 //			- File IO
-// 
 //
-// Brief:	Definition of Hub World functions
+// Brief:	Definition of Hub World functions.
+//			Holds the logic for the hub world state, which
+//			allows the player to interact with various
+//			gameplay elements and teaches them with a
+//			tutorial overlay.
+//			The player can access an online leaderboard
+//			linked via Google API to a google sheet, practice
+//			against dummy enemies and adjust difficulty 
+//			modifiers here before entering the boss fights.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

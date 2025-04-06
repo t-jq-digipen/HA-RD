@@ -2,13 +2,17 @@
 // File:	MainMenu.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Manfred Sim ------------------------------- ??%
-//          -
+//			Manfred Sim ------------------------------- 90%
+//          - File IO
+//          - Game logo
+//          - Implementation of main menu
 // 
-//          Muhammad Fauzan bin Mohamed Fauzy --------- ??%
-//          -
+//          Muhammad Fauzan bin Mohamed Fauzy --------- 10%
+//          - Loading screen effect
 //
-// Brief:	Implementation of main menu functions
+// Brief:	Implementation of main menu state functions.
+//          Player may enter the game, credits page, or quit
+//          the application from this screen.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

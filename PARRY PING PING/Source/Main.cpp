@@ -3,7 +3,9 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Manfred Sim
 //
-// Brief:	main!
+// Brief:	Main entry point for HA:RD game, initializing
+//			system components, managing gamestates, and
+//			running the game loop.
 //
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------

@@ -19,7 +19,7 @@
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 10%
 //			- Level Transition 
 //
-// Brief:	Implementation of Level 1 functions
+// Brief:	Implementation of Level 1 state functions.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

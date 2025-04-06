@@ -15,7 +15,7 @@
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 15%
 //			- Level Transition 
 //
-// Brief:	Implementation of Level 1 functions
+// Brief:	Implementation of Level 2 state functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -210,16 +210,13 @@ void Level2_Draw()
 
 	if (player.pos.y - PLAYER_BASE_OFFSET2 > boss_2.pos.y - BOSS_BASE_OFFSET2)
 	{
-		//Draw_Boss_Hitboxes();
 		Draw_Player();
 		Draw_Boss2();
 	}
 	else
 	{
-		//Draw_Boss_Hitboxes();
 		Draw_Boss2();
 		Draw_Player();
-		
 	}
 
 	// UI

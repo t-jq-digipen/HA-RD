@@ -3,7 +3,11 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Manfred Sim
 //
-// Brief:	Declaration of main menu functions
+// Brief:	Declaration of main menu state functions.
+//          Player may enter the game, credits page, or quit
+//          the application from this screen.
+//			Holds a main menu struct which manages the
+//			various buttons in the main menu.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
