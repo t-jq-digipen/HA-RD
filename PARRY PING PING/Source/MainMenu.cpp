@@ -124,7 +124,7 @@ void MainMenu_Update()
     fadeTimer.current += dt;
 
     // Skips Logo when Escape is Pressed
-    if (AEInputCheckTriggered(AEVK_ESCAPE))
+    if (AEInputCheckTriggered(AEVK_ESCAPE) || AEInputCheckTriggered(AEVK_RBUTTON) || AEInputCheckTriggered(AEVK_LBUTTON) || AEInputCheckTriggered(AEVK_SPACE) || AEInputCheckTriggered(AEVK_RETURN))
     {
         isFading = false;
     }
