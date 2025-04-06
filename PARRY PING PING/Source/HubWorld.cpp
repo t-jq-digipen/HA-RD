@@ -121,6 +121,7 @@ f32 hubMap_height = 1536.f;
 f32 hubMap_width = 3272.f;
 
 AEGfxTexture* hubMapTexture;
+AEGfxTexture* dangerzone;
 
 #pragma region Leaderboard Loading
 void DrawLoadingImage1() 
@@ -183,6 +184,7 @@ void HubWorld_Load()
 	spirit_sprite		= SpriteSheet("Assets/HubWorld/Spirit.png", 12, 1);
 
 	hubMapTexture = AEGfxTextureLoad("Assets/hubWorldMap.png");
+	dangerzone = AEGfxTextureLoad("Assets/HubWorld/Danger.png");
 
 	// Meshes
 	Load_Mesh(20);
@@ -401,7 +403,7 @@ void HubWorld_Draw()
 	campfire_sprite.Loop(0, 11, 1.f);
 	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
 
-	DrawRect(World_To_Screen_x(700.f), World_To_Screen_y(100.f), 500.f, 500.f, SetColor(0xFFFFFFFF));
+	DrawImage(World_To_Screen_x(700.f), World_To_Screen_y(100.f), 500.f, 500.f, 0.f, dangerzone);
 
 	// Parry Bots/ Dummies	
 	Draw_DummyBotMelee();
@@ -607,6 +609,7 @@ void HubWorld_Unload()
 
 	AEGfxTextureUnload(loadingImage1);
 	AEGfxTextureUnload(hubMapTexture);
+	AEGfxTextureUnload(dangerzone);
 	WaitForLeaderboardFetch();
 
 
