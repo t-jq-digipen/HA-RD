@@ -116,7 +116,7 @@ AEGfxTexture* loadingImage;
 
 // BGM and SFX
 AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic,
-boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket;
+boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket, gameClearSFX;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -138,6 +138,9 @@ std::vector<float> UI_IO_score;
 
 // Font Size
 int font_size;
+
+static bool hasPlayedClearMenuAudio = false;
+
 
 // Initialize the various screen UI elements
 void Init_UI()
@@ -319,6 +322,7 @@ void Load_UI()
 	boss1Sweep2 = AEAudioLoadSound("Assets/boss1Sweep2.mp3");
 	boss1Dash = AEAudioLoadSound("Assets/boss1Dash.mp3");
 	boss1Rocket = AEAudioLoadSound("Assets/boss1Rocket.mp3");
+	gameClearSFX = AEAudioLoadSound("Assets/clearedMenu.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
@@ -360,6 +364,7 @@ void Unload_UI()
 	AEAudioUnloadAudio(boss1Sweep1);
 	AEAudioUnloadAudio(boss1Sweep2);
 	AEAudioUnloadAudio(boss1Dash);
+	AEAudioUnloadAudio(gameClearSFX);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
@@ -682,6 +687,14 @@ void Draw_ClearMenu()
 	// Flag to turn off player attacking
 	player.canAttack = false;
 
+	// Play clear menu audio once when the menu is first drawn
+	if (!hasPlayedClearMenuAudio)
+	{
+		AEAudioPlay(gameClearSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		hasPlayedClearMenuAudio = true;
+	}
+
+
 	// Update level highest score / best time
 	if (currentState == GS_LEVEL1)
 	{
@@ -816,10 +829,13 @@ void Draw_ClearMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			Transition_L1Flag = true;
 			isInputEnabled = false;
 			player.canAttack = true;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -848,6 +864,8 @@ void Draw_ClearMenu()
 				Transition_L2Flag = true;
 				player.canAttack = true;
 				isInputEnabled = false;
+				hasPlayedClearMenuAudio = false; // Reset for next time
+
 			}
 		}
 		else
@@ -923,6 +941,8 @@ void Draw_ClearMenu()
 			Transition_HWFlag = true;
 			isInputEnabled = false;
 			currentScore = 0;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -1270,6 +1290,13 @@ void Draw_GameOverMenu()
 	// Flag to enable user input
 	isInputEnabled = true;
 
+	// Play clear menu audio once when the menu is first drawn
+	if (!hasPlayedClearMenuAudio)
+	{
+		AEAudioPlay(gameClearSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		hasPlayedClearMenuAudio = true;
+	}
+
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -1368,6 +1395,8 @@ void Draw_GameOverMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
 			isInputEnabled = false;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -1411,6 +1440,8 @@ void Draw_GameOverMenu()
 			nextState = GS_HUBWORLD;
 			isInputEnabled = false;
 			currentScore = 0;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
