@@ -101,6 +101,7 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Source\Boss1.cpp" />
     <ClCompile Include="..\Source\Boss2.cpp" />
     <ClCompile Include="..\Source\Camera.cpp" />
     <ClCompile Include="..\Source\Credits.cpp" />
@@ -113,13 +114,13 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClCompile Include="..\Source\Main.cpp" />
     <ClCompile Include="..\Source\MainMenu.cpp" />
     <ClCompile Include="..\Source\player.cpp" />
-    <ClCompile Include="..\Source\Prototype_Boss.cpp" />
     <ClCompile Include="..\Source\SpriteSheet.cpp" />
     <ClCompile Include="..\Source\Tutorial.cpp" />
     <ClCompile Include="..\Source\UI.cpp" />
     <ClCompile Include="..\Source\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Source\Headers\Boss1.h" />
     <ClInclude Include="..\Source\Headers\Boss2.h" />
     <ClInclude Include="..\Source\Headers\Camera.h" />
     <ClInclude Include="..\Source\Headers\Credits.h" />
@@ -131,7 +132,6 @@ xcopy "$(SolutionDir)Extern\AlphaEngine\lib\fmod.dll" "$(OutDir)" /s /r /y /q</C
     <ClInclude Include="..\Source\Headers\Level2.h" />
     <ClInclude Include="..\Source\Headers\MainMenu.h" />
     <ClInclude Include="..\Source\Headers\player.h" />
-    <ClInclude Include="..\Source\Headers\Prototype_Boss.h" />
     <ClInclude Include="..\Source\Headers\SpriteSheet.h" />
     <ClInclude Include="..\Source\Headers\Tutorial.h" />
     <ClInclude Include="..\Source\Headers\UI.h" />

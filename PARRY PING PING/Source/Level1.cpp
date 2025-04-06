@@ -29,7 +29,7 @@
 #include "player.h"
 #include "Enemies.h"
 #include "Level1.h"
-#include "Prototype_Boss.h"
+#include "Boss1.h"
 #include "GameStateManager.h"
 
 

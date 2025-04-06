@@ -27,7 +27,7 @@
 #include "utils.h"
 #include "Camera.h"
 #include "UI.h"
-#include "Prototype_Boss.h"
+#include "Boss1.h"
 
  // ----------------------------------------------------------------------------
  // Enum for player states
