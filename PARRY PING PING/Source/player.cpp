@@ -14,9 +14,9 @@
 //			- File IO
 //			- Score system
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
 //			- Damage based on difficulty modifier
-//			- Rage buff
+//			- Rage meter buff
 //
 // Brief:	Player functions  |	Line number
 // 
@@ -1202,6 +1202,20 @@ void Update_Player()
 			f32 left_bound = -map_width / 2;
 			f32 right_bound = map_width / 2 - 80;
 			f32 top_bound = -map_height / 2;
+			f32 bottom_bound = 500.0f;
+
+			// Restrict movement within the map boundaries
+			if (player.pos.x < left_bound) player.pos.x = left_bound;
+			if (player.pos.x > right_bound) player.pos.x = right_bound;
+			if (player.pos.y < top_bound) player.pos.y = top_bound;
+			if (player.pos.y > bottom_bound) player.pos.y = bottom_bound;
+		}
+		else if (currentState == GS_HUBWORLD) // Apply for hubworld
+		{
+			f32 map_width = 2100.0f, map_height = 1136.0f;
+			f32 left_bound = -map_width / 2 + 80.f;
+			f32 right_bound = map_width / 2 - 80.f;
+			f32 top_bound = -map_height / 2.f;
 			f32 bottom_bound = 500.0f;
 
 			// Restrict movement within the map boundaries

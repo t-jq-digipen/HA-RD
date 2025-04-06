@@ -11,9 +11,9 @@
 //			Muhammad Fauzan bin Mohamed Fauzy
 //			- Ranged attacks
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
 //			- Damage based on difficulty modifier
-//			- Rage buff
+//			- Rage meter buff
 //
 // Brief:	Declaration of player functions
 // 

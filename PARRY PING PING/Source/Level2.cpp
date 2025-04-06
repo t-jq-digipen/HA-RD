@@ -10,6 +10,9 @@
 // 
 //			Manfred Sim ------------------------------- ??%
 //			- File IO
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
+//			- Level Transition 
 //
 // Brief:	Implementation of Level 1 functions
 //
@@ -83,7 +86,7 @@ void Level2_Initialize()
 	Init_Camera();
 
 	// Transition
-	transition_xpos = AEGfxGetWindowWidth();
+	transition_xpos = f32(AEGfxGetWindowWidth());
 	TransitionL2_Start = false;
 
 	// Mobs

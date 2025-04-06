@@ -2,12 +2,11 @@
 // File:	Enemies.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 90%
-//			-
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 85%
+//			- Dummy Attack patterns (Logic + Drawing)
 // 
-//			Tan Jun Quan ------------------------------ 10%
-//			- Parry spark
-//			- Sprites
+//			Tan Jun Quan ------------------------------ 15%
+//			- Parry spark(Logic + Drawing), sprites
 //
 // Brief:	Declaration of General Enemy related functions
 //
@@ -19,12 +18,13 @@
 #include "SpriteSheet.h"
 #include "utils.h"
 
-Color color_idle, color_windup, color_swing, color_stunned, color_parried;
+Color color_idle, color_windup, color_swing, color_projectile, color_parried;
 
 DummyBotMelee MParryBot;		//Melee Practice Range Parry Bot
 DummyBotRange RParryBot;		//Ranged Attack
 
 SpriteSheet meleebot_sprite;
+SpriteSheet rangebot_sprite;
 
 typedef struct ParrySpark {
 	SpriteSheet sprite;				// Spritesheet
@@ -152,12 +152,14 @@ void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp)
 void Load_DummyBot()
 {
 	meleebot_sprite = SpriteSheet("Assets/Enemies/Dummy1.png", 7, 5);
+	rangebot_sprite = SpriteSheet("Assets/Enemies/Dummy2.png", 5, 3);
 	Load_Parry_Spark();
 }
 
 void Unload_DummyBot()
 {
 	meleebot_sprite.Unload();
+	rangebot_sprite.Unload();
 	Unload_Parry_Spark();
 }
 
@@ -294,43 +296,39 @@ void Attack_DummyBotMelee()
 
 void Draw_DummyBotMelee() 
 {
-	DrawCircleAdvanced(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y - MParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
-	//jq the almighty animation lord please do ur magic these drawrects look UNPLEASANT
-	switch (MParryBot.state)										// Placeholder sprites - Draws circles of different colours depending on state its in
+	switch (MParryBot.state)
 	{
 	case Idle:
-		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_idle);
-		// JQWERTY - Draw Idle Anim
 		meleebot_sprite.Set_Row(0);
 		meleebot_sprite.Loop(0, 1, 1.f);
 		break;
 	case WindUp:
-		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_windup);
-		// JQWERTY - Draw raising up sword to swing Anim
+		// hitbox
+		DrawRect(World_To_Screen_x(MParryBot.attackpos.x + (MParryBot.windup_timer.current * MParryBot.AttackHitboxWidth / 2.f) - MParryBot.AttackHitboxWidth / 2.f), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.windup_timer.current * MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			// Draw 'hitbox'
+		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_swing);			// Draw 'hitbox'
+		
 		meleebot_sprite.Set_Row(1);
 		meleebot_sprite.Set_Col(0, 5, MParryBot.windup_timer.current);
 		break;
 	case Swinging:
-		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_windup);			// Draw 'hitbox'
-		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_swing);													// Draw attack range
-		// JQWERTY - Draw Swinging Anim (can just rip out of the player swing smear frames)
+		// hitbox
+		DrawRect(World_To_Screen_x(MParryBot.attackpos.x), World_To_Screen_y(MParryBot.attackpos.y), MParryBot.AttackHitboxWidth, MParryBot.AttackHitboxHeight, color_swing);			// Draw 'hitbox'
+		
+		// sprite
 		meleebot_sprite.Set_Row(2);
 		meleebot_sprite.Set_Col(0, 1, MParryBot.attack_timer.current);
 		break;
 	case Parried:
-		DrawRect(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y), MParryBot.rad, MParryBot.rad, color_parried);
 		// JQWERTY - Draw stunned SILLY Anim
 		meleebot_sprite.Set_Row(4);
 		meleebot_sprite.Loop(0, 2, 1.f);
 		break;
 	}
-	if (MParryBot.spark_draw) {
-		//std::cout << "draw cool spark like shiiiing sheeeeoonng not the supermarket but like the sound ykwim shiiiing and also play the sound like the one i just made shiiiing ok ty\n";
-		//add spark anim here :), its pos is alr synced with enem anim so just need to draw here :)
-		// JQWERTY - this is for the parry warning spark
-	}
 
-	meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y+50.f), 250.f, 250.f, false);
+	if (MParryBot.state != Destroyed)
+	{
+		meleebot_sprite.Draw(World_To_Screen_x(MParryBot.pos.x), World_To_Screen_y(MParryBot.pos.y + 50.f), 250.f, 250.f);
+	}
 	Draw_Spark();
 }
 
@@ -547,30 +545,39 @@ void Attack_DummyBotRange() {
 }
 
 void Draw_DummyBotRange() {
-	DrawCircleAdvanced(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y - RParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));			// Draw shadow under player
-	//jq the almighty animation lord please do ur magic these drawrects look ASS
+
+	//DrawCircleAdvanced(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y - RParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));
+	
 	switch (RParryBot.state)						// Placeholder sprites - Draws circles of different colours depending on state its in
 	{
 	case Idle:
-		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_idle);
-		// JQWERTY - Draw Idle Anim
+		// Idle
+		rangebot_sprite.Set_Row(0);
+		rangebot_sprite.Set_Col(0);
 		break;
 	case WindUp:
-		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_windup);
-		// JQWERTY - Draw Raising gun/ Hunkering down before shooting Anim
+		// Charging shot
+		rangebot_sprite.Set_Row(0);
+		rangebot_sprite.Set_Col(0,4,RParryBot.windup_timer.current);
 		break;
 	case Swinging:
-		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_swing);
-		// JQWERTY - Draw shooting Anim (projecile drawing below)
+		// Shot fired
+		rangebot_sprite.Set_Row(2);
+		rangebot_sprite.Set_Col(0, 2, RParryBot.attack_timer.current);
 		break;
-	case Parried:
-		DrawRect(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), RParryBot.rad, RParryBot.rad, color_parried);
-		// JQWERTY - This one tbh can just ignore for now, we'll discuss the deflecting projectiles another time then implement
 	}
+
+	if (RParryBot.state != Destroyed)
+	{
+		rangebot_sprite.Draw(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y + 50.f), 250.f, 250.f);
+	}
+
+
+
 	if (RParryBot.projectile_draw)		// If projectile needs to be drawn
 	{
 		//Temp Projectile Drawing
-		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_stunned);		// Draw circle at projectile's position
+		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_projectile);		// Draw circle at projectile's position
 		// JQWERTY - Draw steam/ laser bullet sprite here (currently rotation not yet implemented so itll look funky)
 	}
 }
@@ -578,8 +585,8 @@ void Draw_DummyBotRange() {
 void Init_Enemy_Indicator()								// For colours!!!!
 {
 	color_idle = SetColor(0xFFFF6961);
-	color_windup = SetColor(0xFFFFCF61);
-	color_swing = SetColor(0xFFAFFF61);
-	color_stunned = SetColor(0xFF000000);
+	color_windup = SetColor(0x508B0000);
+	color_swing = SetColor(0x808B0000);
+	color_projectile = SetColor(0xFF24FF8B);
 	color_parried = SetColor(0xFFFF00FF);
 }

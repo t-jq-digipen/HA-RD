@@ -51,8 +51,8 @@ SpriteSheet::SpriteSheet(const char* texture_file, u32 cols, u32 rows) :
 }
 
 SpriteSheet::~SpriteSheet()
-{
-	Unload();
+{ 
+	// do nothing 
 }
 
 void SpriteSheet::Set_Row(u32 row)

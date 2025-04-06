@@ -8,6 +8,7 @@
 // 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 40%
 //			- Camera panning
+//			- Cinematic camera lock
 //
 // Brief:	Camera function declarations for rendering
 //
