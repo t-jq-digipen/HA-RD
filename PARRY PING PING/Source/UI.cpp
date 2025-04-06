@@ -1608,48 +1608,96 @@ void Update_LevelScore()
 
 // Add new entry to leaderboard
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
+    if (name == "BACKSPACE to Type" || name.empty()) {
+        std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
+        return;  // Exit early if the name is invalid
+    }
 
-	if (name == "BACKSPACE to Type" || name.empty()) {
-		std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
-		return;  // Exit early if the name is invalid
-	}
+    char buffer[MAX_PATH];
+    if (_getcwd(buffer, MAX_PATH) == nullptr) {
+        std::cerr << "Error: Failed to get current directory!" << std::endl;
+        return;
+    }
 
-	char buffer[MAX_PATH];
-	if (_getcwd(buffer, MAX_PATH) == nullptr) {
-		std::cerr << "Error: Failed to get current directory!" << std::endl;
-		return;
-	}
+    // Determine leaderboard based on game state
+    std::string leaderboardCategory;
+    switch (currentState) {
+        case GS_LEVEL1:
+            leaderboardCategory = "Boss1";
+            break;
+        case GS_LEVEL2:
+            leaderboardCategory = "Boss2";
+            break;
+        default:
+            std::cerr << "Error: Leaderboard is only available for boss levels!" << std::endl;
+            return;
+    }
 
-	// Determine leaderboard based on game state
-	std::string leaderboardCategory;
-	switch (currentState) {
-	case GS_LEVEL1:
-		leaderboardCategory = "Boss1";
-		break;
-	case GS_LEVEL2:
-		leaderboardCategory = "Boss2";
-		break;
-	default:
-		std::cerr << "Error: Leaderboard is only available for boss levels!" << std::endl;
-		return;
-	}
+    // Construct command
+    std::string command = "\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \"" 
+                          + leaderboardCategory + "\" \""  // Use game state to determine leaderboard
+                          + name + "\" \"" 
+                          + std::to_string(score) + "\" \"" 
+                          + timing + "\"";
 
-	std::string command = "\"\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \""
-		+ leaderboardCategory + "\" \""  // Use game state to determine leaderboard
-		+ name + "\" \""
-		+ std::to_string(score) + "\" \""
-		+ timing + "\"\"";
+    // Convert command string to wide string
+    std::wstring commandW(command.begin(), command.end());
 
-	// std::cout << "Adding leaderboard entry for " << leaderboardCategory << "..." << std::endl;
-	int result = system(command.c_str());
+    // Convert wide string (wchar_t*) to multi-byte string (char*)
+    int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, commandW.c_str(), -1, NULL, 0, NULL, NULL);
+    if (sizeNeeded == 0) {
+        std::cerr << "Error: Failed to convert wide string to multi-byte string!" << std::endl;
+        return;
+    }
 
-	if (result != 0) {
-		// std::cout << "Error adding leaderboard entry for " << leaderboardCategory << "!" << std::endl;
-	}
-	else {
-		// std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
-		isInputSubmitted = UI_green;
-	}
+    // Allocate memory for the multi-byte string
+    char* commandMB = new char[sizeNeeded];
+
+    // Perform the conversion
+    WideCharToMultiByte(CP_UTF8, 0, commandW.c_str(), -1, commandMB, sizeNeeded, NULL, NULL);
+
+    // Setup STARTUPINFO and PROCESS_INFORMATION structs
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;  // Hide console window
+
+    // Create the process
+    BOOL processCreated = CreateProcess(
+        NULL,                    // Application name (NULL as we're passing the command line)
+        commandMB,               // Command line (now in multi-byte format)
+        NULL,                    // Process security attributes
+        NULL,                    // Thread security attributes
+        FALSE,                   // Do not inherit handles
+        CREATE_NO_WINDOW,        // Hide the window
+        NULL,                    // No environment block
+        NULL,                    // No current directory
+        &si,                     // Startup info
+        &pi                      // Process information
+    );
+
+    // Clean up the allocated memory for the multi-byte string
+    delete[] commandMB;
+
+    if (!processCreated) {
+        std::cerr << "Error: Failed to add leaderboard entry for " << leaderboardCategory << std::endl;
+        return;
+    }
+
+    // Wait for the process to finish
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Clean up by closing process and thread handles
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    // Update status after successfully submitting the leaderboard entry
+    isInputSubmitted = UI_green;
 }
 
 
