@@ -1,12 +1,17 @@
 //---------------------------------------------------------
 // File:	Boss1.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Muhammad Raziq bin Mohd Rafig
-//          - The boss (lol ownself put ltr)
-//          Manfred Sim
+// Authors:	
+//          Muhammad Raziq bin Mohd Rafig ------------- 85%
+//          - Boss logic
+//          - Boss attacks
+// 
+//          Manfred Sim ------------------------------- 15%
 //          - Death Explosion
 //
 // Brief:	Boss 1 declaration
+//          Declares the functions for boss 1, and various
+//          states and structs for the boss update logics.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

@@ -32,21 +32,6 @@ typedef enum EnemyAttackPatternState
 }EnemyAttackPatternState;
 
 // ----------------------------------------------------------------------------
-// Very early implementation of first boss attacks, will remove soon
-// ----------------------------------------------------------------------------
-typedef enum JQMonkeAttackPatternState
-{
-	JQIdle = 0,				//idle
-	JQSmashWindUp = 1,		//wind up for smash
-	JQSmash = 2,			//SMASH
-	JQSweepWindUp = 3,		//rocket propeler wind up
-	JQSweep = 4,			//SWEEP
-	JQRecovery = 5,			//recovery before going back to idle
-	JQParried = 6			//if parried during sweep
-}JQMonkeAttackPatternState;
-
-
-// ----------------------------------------------------------------------------
 // Struct for Melee Practice Range Dummy!
 // ----------------------------------------------------------------------------
 typedef struct DummyBotMelee
@@ -71,7 +56,7 @@ typedef struct DummyBotMelee
 
 
 // ----------------------------------------------------------------------------
-// Struct for Ramged Projectile Practice Range Dummy!
+// Struct for Ranged Projectile Practice Range Dummy!
 // ----------------------------------------------------------------------------
 typedef struct DummyBotRange
 {
@@ -100,7 +85,10 @@ typedef struct DummyBotRange
 // Active_DummyBotMelee/Range()		- Update each frame for dummy logic
 // Attack_DummyBotMelee/Range()		- Attack detection logic
 // Draw_DummyBotMelee/Range()		- Draw respective sprites
+// Load_DummyBot()					- Loads dummybot sprites
+// Unload_DummyBot()				- Unloads dummybot
 // ----------------------------------------------------------------------------
+
 // Melee Dummy!
 void Init_DummyBotMelee(AEVec2 pos, f32 rad, f32 max_hp);
 void Active_DummyBotMelee();

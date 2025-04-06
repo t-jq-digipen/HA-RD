@@ -2,16 +2,17 @@
 // File:	Level2.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Raziq bin Mohd Rafig ------------- ??%
-//			-
+//			Muhammad Raziq bin Mohd Rafig ------------- 35%
+//			- Boss 2
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 35%
 //			- Map
+//			- Audio
 // 
-//			Manfred Sim ------------------------------- ??%
+//			Manfred Sim ------------------------------- 15%
 //			- File IO
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 15%
 //			- Level Transition 
 //
 // Brief:	Implementation of Level 1 functions
@@ -66,9 +67,8 @@ void Level2_Load()
 	mapTexture2 = AEGfxTextureLoad("Assets/map2.png");
 	if (!mapTexture2)
 	{
-		printf("Failed to load map texture!\n");
+		std::cerr << "Failed to load map texture!\n";
 	}
-	std::cout << "Level 2 Loaded\n";
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/Level2.txt", L2_IO);
@@ -76,9 +76,6 @@ void Level2_Load()
 
 void Level2_Initialize()
 {
-	std::cout << "Level 2 Initialized\n";
-
-
 	// Player
 	Init_Player();
 
@@ -149,7 +146,6 @@ void Level2_Update()
 	{
 		LockCamera = false;
 		AEInputShowCursor(0);
-		//std::cout << "Playing\n";
 
 		// Boss behavior
 		Update_Boss2();
@@ -219,11 +215,6 @@ void Level2_Draw()
 	if (showBossHitboxes2)
 	{
 		Draw_Boss2_Hitboxes();
-		//std::cout << "Hitboxes drawn \n";
-	}
-	else
-	{
-		/*std::cout << "Hitboxes not drawn\n";*/
 	}
 
 	if (player.pos.y - PLAYER_BASE_OFFSET2 > boss_2.pos.y - BOSS_BASE_OFFSET2)
@@ -317,5 +308,5 @@ void Level2_Unload()
 		AEGfxTextureUnload(mapTexture2);
 		mapTexture2 = nullptr;
 	}
-	std::cout << "level2_unload";
+	L2_IO.clear();
 }

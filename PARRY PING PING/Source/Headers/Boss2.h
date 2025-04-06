@@ -2,11 +2,13 @@
 // File:	Boss2.h
 // Project: Heavy Assault : Rust & Dust
 // Authors:  
-//          Muhammad Raziq bin Mohd Rafig ------------- ??%
-//          - 
+//          Muhammad Raziq bin Mohd Rafig ------------- 95%
+//          - Boss logic
+//          - Boss structs
+//          - Missiles
 // 
-//          Tan Jun Quan ------------------------------ 10%
-//          - 
+//          Tan Jun Quan ------------------------------ 5%
+//          - Lightning wave
 //
 // Brief:	Boss 2 header things (WIP)
 //
@@ -89,7 +91,6 @@ typedef struct Boss2
     Timer idle_timer;           // Timer for idle state
     Timer attack_timer;         // Timer for attack states
     Timer stun_timer;           // Timer for stun states
-    Timer missile_prep;         // Timer to prep missiles
     Timer death_timer;          // Timer for death or phasebreak
 
     Boss2_AttackType attack_type;            // Current attack type

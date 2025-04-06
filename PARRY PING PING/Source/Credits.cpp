@@ -100,7 +100,6 @@ void Credits_Update()
 	}
 	if (!Update_Timer(&credits_delaytimer))
 	{
-		std::cout << credits_offset << '\n';
 		if (credits_offset < credits_max_offset)
 		{
 			// Speed up credits scrolling when holding right shift

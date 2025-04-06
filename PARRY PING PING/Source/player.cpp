@@ -7,10 +7,10 @@
 //			- Dashing
 //			- Parrying
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
 //			- Ranged attacks (light and heavy)
 // 
-//			Manfred Sim ------------------------------- ??%
+//			Manfred Sim ------------------------------- 15%
 //			- File IO
 //			- Score system
 // 
@@ -31,14 +31,7 @@
 #include <algorithm>
 #include <cmath>
 
-
-
-// Define map boundary limits
-// const float MAP_LEFT = -500.f;
-// const float MAP_RIGHT = 500.f;
-// const float MAP_TOP = 300.f;
-// const float MAP_BOTTOM = -300.f;
-
+// Rage and modifiers
 const float ATTACK_RAGEMULTIPLER = 0.75f;
 const float MODIFIER_DAMAGEMULTIPLIER_DECREASED = 0.5f;
 const float MODIFIER_DAMAGEMULTIPLIER_INCREASED = 2.f;
@@ -375,11 +368,6 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			// Apply the offset to the projectile's position (keep it in world space)
 			AEVec2 heavyAttackPos = { proj.pos.x + offsetX, proj.pos.y + offsetY };
 
-			// Debugging: Print projectile and target info
-			std::cout << "Projectile Position: (" << proj.pos.x << ", " << proj.pos.y << ")\n";
-			std::cout << "Heavy Attack Position: (" << heavyAttackPos.x << ", " << heavyAttackPos.y << ")\n";
-			std::cout << "Target Position (Boss): (" << target.x << ", " << target.y << ")\n";
-
 			// Direction of the heavy attack based on the angle (scaled by the attack's size)
 			float offsetX2 = cosf(proj.angle) * 1000.f;  // Use height to define the attack range (or use width)
 			float offsetY2 = sinf(proj.angle) * 1000.f;  // Same for Y
@@ -447,24 +435,13 @@ HEAVY_ATTACK_DELAY,
 HEAVY_ATTACK_LIFETIME,
 HEAVY_ATTACK_TICK;
 
-//const float RANGED_ATTACK_DURATION = .4f;
-//const float RANGED_ATTACK_DELAY = 0.1f;
-//
-//const float HEAVY_ATTACK_DURATION = 1.f;
-//const float HEAVY_ATTACK_DELAY = .5f;
 
 void Attacking_Ranged()
 {
-	// Only for debugging!
-	//if (AEInputCheckTriggered(AEVK_R) && player.ammo < 3)  //Reloading of Ammo and ensures does not exceed more than 3.
-	//{
-	//	player.ammo += 1;
-	//}
 
 	if (player.ammo == 3 && player.prevAmmo != 3)
 	{
 		// Play a sound effect when ammo reaches 3
-		std::cout << "Ammo reached 3 - audio cue!\n";
 		AEAudioPlay(ammoFullSFX, gameSFX, 1.0f, 1.0f, 0); // Replace 'ammoFullSFX' with your actual sound ID
 	}
 
@@ -618,7 +595,6 @@ void Attacking_Ranged()
 
 	if (!lifetimeExpiredHeavy) 
 	{
-		//std::cout << "Projectile lifetime expired, deactivating.\n";
 		heavy_atk.isActive = false;  // Mark the projectile as inactive
 	}
 
@@ -1437,7 +1413,6 @@ void Draw_Player()
 					float screenY = World_To_Screen_y(it->pos.y + offsetY);
 
 					// Draw the heavy projectile slightly in front of the player based on angle
-					//DrawImage(screenX, screenY, 1000.f, 1000.f, it->angle, heavy_texture);
 					laser_sprite.Set_Col(0, 32, heavy_atk.lifetimeTimer.current);
 					laser_sprite.Draw(screenX, screenY, 1000.f, 200.f, false, it->angle);
 				}

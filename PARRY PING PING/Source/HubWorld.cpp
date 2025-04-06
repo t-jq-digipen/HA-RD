@@ -8,13 +8,17 @@
 //			- Level selection + transition
 //			- Sprites
 // 
-//			Tan Jun Quan ------------------------------ 10%
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
+//			- Leaderboard fetching
+//			- Audio
+//			- Map
+// 
+//			Tan Jun Quan ------------------------------ 5%
 //			- Sprites
 // 
-//			Manfred Sim ------------------------------- 10%
+//			Manfred Sim ------------------------------- 5%
 //			- File IO
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
 //
 // Brief:	Definition of Hub World functions
 //
@@ -169,7 +173,6 @@ void HubWorld_Load()
 
 	// Meshes
 	Load_Mesh(20);
-	std::cout << "Hub World Loaded\n";
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/HubWorld.txt", HubWorld_IO_elements);
@@ -212,7 +215,6 @@ void HubWorld_Load()
 
 void HubWorld_Initialize()
 {
-	std::cout << "Hub World Initialized\n";
 
 	// UI Default flags/ settings
 	ShowBoss = 0;
@@ -255,26 +257,18 @@ void HubWorld_Initialize()
 
 	// Reset Level Clear Transition Timer
 	HubWorld_ClearTransitionTimer.current = 0.f;							// START CLEAR TRANSITION	0.f
-
-	// Level 1 Highest Score
-	std::cout << "Player Level 1 Highest Score: " << static_cast<int>(HubWorld_IO_scores[0]) << '\n';
 	
 	// Level 1 Best Time
 	minutes1 = static_cast<int>(HubWorld_IO_scores[1]) / 60;
 	seconds1 = static_cast<int>(HubWorld_IO_scores[1]) % 60;
 	milliseconds1 = static_cast<int>((HubWorld_IO_scores[1] - static_cast<int>(HubWorld_IO_scores[1])) * 100);
 	snprintf(bestTime1, sizeof(bestTime1), "Time: %02d:%02d:%02d", minutes1, seconds1, milliseconds1);
-	std::cout << "Player Level 1 Best Time: " << bestTime1 << '\n';
-
-	// Level 2 Highest Score
-	std::cout << "Player Level 2 Highest Score: " << static_cast<int>(HubWorld_IO_scores[2]) << '\n';
 
 	// Level 2 Best Time
 	minutes2 = static_cast<int>(HubWorld_IO_scores[3]) / 60;
 	seconds2 = static_cast<int>(HubWorld_IO_scores[3]) % 60;
 	milliseconds2 = static_cast<int>((HubWorld_IO_scores[3] - static_cast<int>(HubWorld_IO_scores[3])) * 100);
 	snprintf(bestTime2, sizeof(bestTime2), "Time: %02d:%02d:%02d", minutes2, seconds2, milliseconds2);
-	std::cout << "Player Level 2 Best Time: " << bestTime2 << '\n';
 }
 
 void HubWorld_Update()
@@ -390,9 +384,6 @@ void HubWorld_Draw()
 	DrawImageAttachedToRect(screen_x, screen_y, hubMap_width, hubMap_height, hubMapTexture);
 
 #pragma region Draw Environment
-	// DRAWING OF SPRITES IN HUB WORLD
-	// YES THERE IS COLLISION DETECTION HERE BUT IT DOES NOT REQUIRE FRAME PERFECT COL DETECTION
-	// ITS JUST FOR MORE DRAWING OF SPRITES
 	
 	// Campfire
 	campfire_sprite.Set_Row(0);
@@ -400,12 +391,10 @@ void HubWorld_Draw()
 	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
 
 	// Parry Bots/ Dummies	
-	Draw_DummyBotMelee();														// Draw (placeholder) sprites for dummies!
+	Draw_DummyBotMelee();
 	Draw_DummyBotRange();
-	//DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
-	//DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
-	// Gates + Modiers (merged)
+	// Gates + Modifiers (merged)
 	//Highlight effect when approaching gate
 	if (AETestPointToRect(&player.pos, &Env_Gate.Pos, Env_Gate.Width * 3.f, Env_Gate.Height * 2.f))
 	{
@@ -597,7 +586,6 @@ void HubWorld_Unload()
 	Unload_Mesh();
 	Unload_Player();
 	Unload_DummyBot();
-	std::cout << "HubWorld_unload";
 
 	campfire_sprite.Unload();
 	shrine_sprite.Unload();
@@ -694,7 +682,6 @@ void fetchLeaderboard(int bossID) {
 		HS_time[bossID][i] = times[i];
 	}
 
-	std::cout << "Leaderboard fetched and stored for Boss " << bossID + 1 << "!" << std::endl;
 }
 
 std::string sanitizeString(const std::string& input) {

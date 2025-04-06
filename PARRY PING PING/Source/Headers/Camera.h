@@ -1,8 +1,11 @@
 //---------------------------------------------------------
 // File:	Camera.h
 // Project: Heavy Assault : Rust & Dust
-// Author:	Tan Jun Quan------------------------------- 70%                  
-//			- 
+// Authors:	
+//			Tan Jun Quan------------------------------- 70%                  
+//			- Base camera logic based on player and mouse
+//			- World/Screen conversion functions
+// 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 30%
 //			- Camera panning
 //			- Cinematic camera lock

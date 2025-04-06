@@ -1,9 +1,19 @@
 //---------------------------------------------------------
 // File:	HubWorld.h
 // Project: Heavy Assault : Rust & Dust
-// Author:	Muhammad Ashfer Danishkhan bin Afzalkhan
-//			Manfred Sim
-//			Muhammad Fauzan bin Mohamed Fauzy
+// Author:	
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 70%
+//			- Dummies
+//			- Base level state
+//			- Interactable UI (Leaderboard shrine, Modifiers)
+//			- Level transitions
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 25%
+//			- Leaderboard fetching
+//			- Audio
+// 
+//			Manfred Sim ------------------------------- 5%
+//			- extern variables
 //
 // Brief:	Declaration of Hub World functions
 //
