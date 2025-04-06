@@ -310,32 +310,32 @@ void Load_UI()
 
 	// BGM and SFX
 
-	levelBGM = AEAudioLoadMusic("Assets/boss1Theme.mp3");
-	levelSFX = AEAudioLoadSound("Assets/menuClick.mp3");
-	lightProj = AEAudioLoadSound("Assets/lightProj.mp3");
-	heavyProj = AEAudioLoadSound("Assets/newCharged.mp3");
-	parryFX = AEAudioLoadSound("Assets/sword-parry.mp3");
-	sword1 = AEAudioLoadSound("Assets/first_slash.mp3");
-	sword2 = AEAudioLoadSound("Assets/second_slash.mp3");
-	sword3 = AEAudioLoadSound("Assets/third_slash.mp3");
-	bossLevel2 = AEAudioLoadMusic("Assets/boss2Music.mp3");
-	dashAudio = AEAudioLoadSound("Assets/dashSFX.mp3");
-	ammoFullSFX = AEAudioLoadSound("Assets/chargedCan.mp3");
-	hubWorldMusic = AEAudioLoadMusic("Assets/hubWorldSong.mp3");
-	boss1Smash1 = AEAudioLoadSound("Assets/boss1Smash1.mp3");
-	boss1Smash2 = AEAudioLoadSound("Assets/boss1Smash2.mp3");
-	boss1Sweep1 = AEAudioLoadSound("Assets/boss1Sweep1.mp3");
-	boss1Sweep2 = AEAudioLoadSound("Assets/boss1Sweep2.mp3");
-	boss1Dash = AEAudioLoadSound("Assets/boss1Dash.mp3");
-	boss1Rocket = AEAudioLoadSound("Assets/boss1Rocket.mp3");
-	gameClearSFX = AEAudioLoadSound("Assets/clearedMenu.mp3");
-	boss2Slash1 = AEAudioLoadSound("Assets/boss2Swing1.mp3");
-	boss2Slash2 = AEAudioLoadSound("Assets/boss2Swing2.mp3");
-	boss2Stab1 = AEAudioLoadSound("Assets/boss2SwordSlam1.mp3");
-	boss2Lightning = AEAudioLoadSound("Assets/boss2LightningWave.mp3");
-	boss2Shock = AEAudioLoadSound("Assets/boss2LightningBarrage.mp3");
+	levelBGM		= AEAudioLoadMusic("Assets/Audio/boss1Theme.mp3");
+	levelSFX		= AEAudioLoadSound("Assets/Audio/menuClick.mp3");
+	lightProj		= AEAudioLoadSound("Assets/Audio/lightProj.mp3");
+	heavyProj		= AEAudioLoadSound("Assets/Audio/newCharged.mp3");
+	parryFX			= AEAudioLoadSound("Assets/Audio/sword-parry.mp3");
+	sword1			= AEAudioLoadSound("Assets/Audio/first_slash.mp3");
+	sword2			= AEAudioLoadSound("Assets/Audio/second_slash.mp3");
+	sword3			= AEAudioLoadSound("Assets/Audio/third_slash.mp3");
+	bossLevel2		= AEAudioLoadMusic("Assets/Audio/boss2Music.mp3");
+	dashAudio		= AEAudioLoadSound("Assets/Audio/dashSFX.mp3");
+	ammoFullSFX		= AEAudioLoadSound("Assets/Audio/chargedCan.mp3");
+	hubWorldMusic	= AEAudioLoadMusic("Assets/Audio/hubWorldSong.mp3");
+	boss1Smash1		= AEAudioLoadSound("Assets/Audio/boss1Smash1.mp3");
+	boss1Smash2		= AEAudioLoadSound("Assets/Audio/boss1Smash2.mp3");
+	boss1Sweep1		= AEAudioLoadSound("Assets/Audio/boss1Sweep1.mp3");
+	boss1Sweep2		= AEAudioLoadSound("Assets/Audio/boss1Sweep2.mp3");
+	boss1Dash		= AEAudioLoadSound("Assets/Audio/boss1Dash.mp3");
+	boss1Rocket		= AEAudioLoadSound("Assets/Audio/boss1Rocket.mp3");
+	gameClearSFX	= AEAudioLoadSound("Assets/Audio/clearedMenu.mp3");
+	boss2Slash1		= AEAudioLoadSound("Assets/Audio/boss2Swing1.mp3");
+	boss2Slash2		= AEAudioLoadSound("Assets/Audio/boss2Swing2.mp3");
+	boss2Stab1		= AEAudioLoadSound("Assets/Audio/boss2SwordSlam1.mp3");
+	boss2Lightning	= AEAudioLoadSound("Assets/Audio/boss2LightningWave.mp3");
+	boss2Shock		= AEAudioLoadSound("Assets/Audio/boss2LightningBarrage.mp3");
 
-	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
+	loadingImage	= AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
 
 // Unload the UI elements

@@ -1014,7 +1014,7 @@ void Load_Player()
 	laser_sprite = SpriteSheet("Assets/Player/Laser.png", 33, 1);
 
 
-	projectile_texture = AEGfxTextureLoad("Assets/LightRangeAttack.png");
+	projectile_texture = AEGfxTextureLoad("Assets/Player/LightRangeAttack.png");
 	if (!projectile_texture) {
 		std::cerr << "Failed to load projectile texture!" << std::endl;
 	}
