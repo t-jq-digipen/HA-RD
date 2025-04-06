@@ -17,7 +17,6 @@
 #include "Input.h"
 #include "player.h"
 #include "GameStateManager.h"
-#include "mobs.h"
 
 
 // ---------------------------------------------------------------------------
