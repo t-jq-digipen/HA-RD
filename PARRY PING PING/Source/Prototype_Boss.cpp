@@ -942,10 +942,10 @@ void Smash_Sweep_Logic()
                 // Transitioning into ACTIVE state: play SFX once
                 switch (boss_1.attack_type) {
                 case BOSS_SMASH:
-                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                     break;
                 case BOSS_SWEEP:
-                    AEAudioPlay(boss1Sweep1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    AEAudioPlay(boss1Sweep1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                     break;
                 }
                 hasPlayedAttackSFX = true;
@@ -1029,13 +1029,13 @@ void Three_Hit_Logic()
                 switch (boss_1.attack_type)
                 {
                 case BOSS_LEFT_HIT:
-                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    AEAudioPlay(boss1Smash1, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                     break;
                 case BOSS_RIGHT_HIT:
-                    AEAudioPlay(boss1Smash2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    AEAudioPlay(boss1Smash2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                     break;
                 case BOSS_CIRCLE_HIT:
-                    AEAudioPlay(boss1Sweep2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                    AEAudioPlay(boss1Sweep2, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                     break;
                 }
                 hasPlayedAttackSFX = true;
@@ -1126,7 +1126,7 @@ void Boss_Dash_Logic()
             // Play dash sound only on first ACTIVE frame
             if (boss_1.attackstate != BOSS_ATTACK_ACTIVE)
             {
-                AEAudioPlay(boss1Dash, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f);
+                AEAudioPlay(boss1Dash, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0);
                 hasPlayedAttackSFX = true;
             }
 
@@ -1214,7 +1214,7 @@ void Boss_Rocket_Logic() {
         {
             if (boss_1.attackstate != BOSS_ATTACK_ACTIVE)
             {
-                AEAudioPlay(boss1Rocket, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0.0f); // Rocket launch SFX
+                AEAudioPlay(boss1Rocket, gameSFX, current_sfx_vol / max_sfx_vol, 1.0f, 0); // Rocket launch SFX
                 hasPlayedAttackSFX = true;
             }
 
