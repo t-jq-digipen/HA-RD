@@ -1,8 +1,12 @@
 //---------------------------------------------------------
 // File:	MainMenu.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Manfred Sim
-//          Muhammad Fauzan bin Mohamed Fauzy
+// Authors:	
+//			Manfred Sim ------------------------------- ??%
+//          -
+// 
+//          Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//          -
 //
 // Brief:	Implementation of main menu functions
 //
@@ -35,9 +39,10 @@ SpriteSheet_Old menulogo;
 MainMenu mainmenu;
 
 // Global variables
-Timer fadeTimer;   // Timer for fade-in effect
-bool isFading = true;  // Flag to track fade-in state
+Timer fadeTimer;            // Timer for fade-in effect
+bool isFading = true;       // Flag to track fade-in state
 AEGfxTexture* digipenLogo;  // Texture for the logo
+
 // File IO
 std::vector<float> MainMenu_IO;
 
@@ -46,8 +51,6 @@ std::vector<float> MainMenu_IO;
 // ----------------------------------------------------------------------------
 void MainMenu_Load()
 {
-    std::cout << "Main Menu Loaded\n";
-
 	// Meshes
 	Load_Mesh(20);
 
@@ -74,16 +77,6 @@ void MainMenu_Load()
 // ----------------------------------------------------------------------------
 void MainMenu_Initialize()
 {
-	std::cout << "Main Menu Initialized\n";
-
-	// Colors
-	// red = SetColor(0xFFFF6961);
-	// green = SetColor(0xFF88B984);  // If needed, uncomment this
-	// blue = SetColor(0xFF00008B);  // If needed, uncomment this
-	// black = SetColor(0xFF000000);  // If needed, uncomment this
-	// white = SetColor(0xFFFFFFFF);  // If needed, uncomment this
-	// hover_red = SetColor(0xFFFFA5A1);  // If needed, uncomment this
-
 	// Window width, height
 	width = (f32)AEGfxGetWindowWidth();
 	height = (f32)AEGfxGetWindowHeight();
@@ -182,7 +175,7 @@ void MainMenu_Update()
         // Game Logo
         Draw_SpriteSheet_test(*mainmenu.spritesheet_logo, MainMenu_IO[1], MainMenu_IO[2], MainMenu_IO[3], MainMenu_IO[4], 0.f);
         Loop_Timer(&mainmenu.logoresettimer);
-        std::cout << mainmenu.animationlogotimer.current << '\n';
+
         if (mainmenu.logoresettimer.current == 0.f)
         {       
             mainmenu.animationlogotimer.current = 0.f;

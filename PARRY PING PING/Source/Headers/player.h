@@ -1,14 +1,16 @@
 //---------------------------------------------------------
 // File:	player.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Tan Jun Quan
+// Authors:	
+//          Tan Jun Quan ------------------------------ 70%
+//          - Player struct
 //			- States
 //          - Movement
 //          - Melee
 //          - Dodging  
 //          - Parrying
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 25%
 //			- Ranged attacks
 // 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
@@ -29,9 +31,6 @@
  // ----------------------------------------------------------------------------
  // Enum for player states
  // ----------------------------------------------------------------------------
- /*!
-  * \brief Enumeration representing different player states.
-  */
 typedef enum PlayerState
 {
     IDLE,   ///< The player is idle and not moving or attacking
@@ -51,9 +50,6 @@ typedef enum PlayerState
 // ----------------------------------------------------------------------------
 // Enum for player states
 // ----------------------------------------------------------------------------
-/*!
- * \brief struct for player melee attack.
- */
 typedef struct Attack
 {
     Timer timer;
@@ -65,14 +61,8 @@ extern Attack melee_attack;
 
 // ----------------------------------------------------------------------------
 // Player struct
+// Holds data for player position, movement, health, state, and various timers
 // ----------------------------------------------------------------------------
-/*!
- * \brief Struct representing the player.
- *
- * This struct holds data related to the player's position, movement, health,
- * state, and various player timers. It also includes pointers to related
- * sprites and other game objects.
- */
 typedef struct Player
 {
     bool canAttack;        ///< Flag to disable attacks
@@ -98,22 +88,15 @@ typedef struct Player
 } Player;
 
 
-
 // ----------------------------------------------------------------------------
 // Direction enums
 // ----------------------------------------------------------------------------
-/*!
- * \brief Enumeration for vertical direction (up/down).
- */
 enum Direction_v
 {
     DOWN,  ///< Down direction
     UP     ///< Up direction
 };
 
-/*!
- * \brief Enumeration for horizontal direction (left/right).
- */
 enum Direction_h
 {
     RIGHT, ///< Right direction
@@ -128,94 +111,92 @@ extern Player player;
 // ----------------------------------------------------------------------------
 // Player movement and action functions
 // ----------------------------------------------------------------------------
-/*!
- * \brief Handles player movement input and updates position.
- */
 void Movement();
 
-/*!
- * \brief Loads player resources (textures, sprites).
- */
+// ----------------------------------------------------------------------------
+// Load player sprites and values
+// ----------------------------------------------------------------------------
 void Load_Player();
 
-/*!
- * \brief Initializes player properties and variables.
- */
+// ----------------------------------------------------------------------------
+// Initialize player values
+// ----------------------------------------------------------------------------
 void Init_Player();
 
-/*!
- * \brief Updates player states and actions.
- */
+// ----------------------------------------------------------------------------
+// Update player
+// ----------------------------------------------------------------------------
 void Update_Player();
 
-/*!
- * \brief Draws the player to the screen.
- */
+// ----------------------------------------------------------------------------
+// Draws the player
+// ----------------------------------------------------------------------------
 void Draw_Player();
 
-/*!
- * \brief Frees any dynamically allocated memory for the player.
- */
+// ----------------------------------------------------------------------------
+// Frees dynamic memory
+// ----------------------------------------------------------------------------
 void Free_Player();
 
-/*!
- * \brief Unloads player resources (textures, sprites).
- */
+// ----------------------------------------------------------------------------
+// Unloads player textures and sprites
+// ----------------------------------------------------------------------------
 void Unload_Player();
 
-/*!
- * \brief Handles attacking actions for the player.
- */
+// ----------------------------------------------------------------------------
+// Manages player melee attack input
+// ----------------------------------------------------------------------------
 void Attacking();
 
-/*!
- * \brief Checks if a melee attack hit a target.
- * \param target The position of the target to check for collision.
- * \return 1 if the attack hits, 0 otherwise.
- */
+// ----------------------------------------------------------------------------
+// Checks if melee attack hits the target, return 1 if attack hits
+// ----------------------------------------------------------------------------
 int Attacked_Melee(AEVec2 target);
 
-/*!
- * \brief Handles the behavior when the player is parried.
- */
+// ----------------------------------------------------------------------------
+// Manages player behaviour after successful parry
+// ----------------------------------------------------------------------------
 void Parried_Hit();
 
-/*!
- * \brief Handles the behavior when the player is blocked.
- * \param damage The amount of damage blocked.
- */
+// ----------------------------------------------------------------------------
+// Manages player behaviour after blocking a hit
+// Takes in parameter of how much damage
+// ----------------------------------------------------------------------------
 void Blocked_Hit(f32 damage);
 
-/*!
- * \brief Applies damage to the player when hit.
- * \param damage The amount of damage to apply.
- */
+// ----------------------------------------------------------------------------
+// Manages player behaviour after getting hit
+// Takes in parameter of how much damage
+// ----------------------------------------------------------------------------
 void Eat_Hit(f32 damage);
 
-/*!
- * \brief Handles ranged attacking actions for the player.
- */
+// ----------------------------------------------------------------------------
+// Manages player ranged attack behaviour, input, projectiles
+// ----------------------------------------------------------------------------
 void Attacking_Ranged();
 
-/*!
- * \brief Checks if a ranged attack hits a target.
- * \param target The position of the target.
- * \param width The width of the hitbox.
- * \param height The height of the hitbox.
- * \param damage Pointer to the damage value of the attack.
- * \return True if the attack hits the target, false otherwise.
- */
+// ----------------------------------------------------------------------------
+// Checks if ranged attacks hit the target, return true if attack hits
+// Takes the following parameters:
+// - Target position
+// - Target width
+// - Target height
+// - Pointer to damage value of attack
+// ----------------------------------------------------------------------------
 bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage);
 
-/*!
- * \brief Checks if a melee attack hits a target's hitbox.
- * \param target The position of the target.
- * \param width The width of the target's hitbox.
- * \param height The height of the target's hitbox.
- * \param check_hit Pointer to a flag to indicate if the hit is valid.
- * \param damage Pointer to the damage value of the attack.
- * \return True if the attack hits the target, false otherwise.
- */
+// ----------------------------------------------------------------------------
+// Checks if melee attacks hit a rectangular target, return true if attack hits
+// Takes the following parameters:
+// - Target position
+// - Target width
+// - Target height
+// - Pointer to flag to check if hit valid
+// - Pointer to damage value of attack
+// ----------------------------------------------------------------------------
 bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, float* damage);
 
+// ----------------------------------------------------------------------------
+// Helper function to play audio for melee attack
+// ----------------------------------------------------------------------------
 void PlayAttackSound(int combo);

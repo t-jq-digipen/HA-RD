@@ -1,16 +1,24 @@
 //---------------------------------------------------------
 // File:	Boss1.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Muhammad Raziq bin Mohd Rafig
-//          - The boss lol
-//          Tan Jun Quan
+// Authors:	
+//          Muhammad Raziq bin Mohd Rafig ------------- 60%
+//          - Boss logic
+//          - Boss attacks
+// 
+//          Tan Jun Quan ------------------------------ 20%
 //          - Sprites
-//          Manfred Sim
+//          - Parry spark
+//          - Polish boss logic
+// 
+//          Manfred Sim ------------------------------- 20%
 //          - File IO
 //          - Death Explosion
 //          - Score system
 //
-// Brief:	Boss 1 implementation
+// Brief:	Boss 1 implementation 
+//          Manages boss behaviour, attack patterns, 
+//          textures, etc.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -874,8 +882,6 @@ void Draw_Boss()
     {
         if (fist.active)
         {
-            //DrawCircle(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), fist.radius, boss_projectile_color);
-            //DrawRotatedRect(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), 180.f, 60.f, boss_projectile_color, boss_1.target_rot);
             if ((boss_1.target_rot > PI / 2.f && boss_1.target_rot < PI) || (boss_1.target_rot > -PI && boss_1.target_rot < -(PI / 2.f)))
             {
                 fist_sprite.Set_Row(1);
@@ -886,7 +892,6 @@ void Draw_Boss()
             }
             fist_sprite.Loop(0, 1, 0.2f);
             fist_sprite.Draw(World_To_Screen_x(fist.pos.x), World_To_Screen_y(fist.pos.y), 360.f, 120.f, false, boss_1.target_rot);
-            //DrawRotatedRect(World_To_Screen_x(boss_1.pos.x), World_To_Screen_y(boss_1.pos.y), BOSS_WIDTH, BOSS_HEIGHT, boss_idle, boss_1.target_rot);
         }
     }
 
@@ -1098,19 +1103,10 @@ void Boss_Dash_Logic()
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
             // Calculate the remaining time for the charge attack
-            //f32 remaining_time = boss_melee[boss_1.attack_type].timer.duration - boss_1.attack_timer.current * boss_melee[boss_1.attack_type].timer.duration;
-
-            // Calculate the required speed to reach the target in the remaining time
-            //f32 required_speed = boss_1.target_dist * 5.f / remaining_time;
-
             AEVec2Normalize(&boss_1.target_dir, &boss_1.target_dir);
             AEVec2Scale(&boss_1.target_dir, &boss_1.target_dir, 800.f * dt);
 
             AEVec2Add(&boss_1.pos, &boss_1.pos, &boss_1.target_dir);
-
-            // Move boss towards the target position using the required speed
-            //boss_1.pos.x += boss_1.target_dir.x * required_speed * dt;
-            //boss_1.pos.y += boss_1.target_dir.y * required_speed * dt;
 
             // Check for collision with the player
             if (AETestCircleToRect(&player.pos, player.radius, &boss_1.pos, BOSS_WIDTH, BOSS_HEIGHT))
@@ -1188,7 +1184,6 @@ void Boss_Rocket_Logic() {
             // Attack is active (spawn rocket fist)
             boss_1.attackstate = BOSS_ATTACK_ACTIVE;
 
-
             // Spawn a rocket fist
             RocketFist fist;
             fist.pos = boss_1.pos;
@@ -1236,9 +1231,6 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
             currentCombo += 1;
             std::cout << "Boss parried\n";
         }
-        else
-        {
-        }
         Parried_Hit();
         break;
     case BLOCK:
@@ -1257,9 +1249,14 @@ void Boss_Attack_Test(bool canparry, f32 boss_damage)
 
 void Draw_Boss_Death_Explosion(AEVec2& start)
 {
+    // start particle
     explosion_particle.pos = start;
+    // make particle active
     explosion_particle.active = true;
+    // make timer lifetime
     explosion_particle.timer = Create_Timer(0.5f);
+    // assign position transformation
     AEMtx33Identity(&explosion_particle.transform);
+    // push particle back
     boss_death_explosion.push_back(explosion_particle);
 }

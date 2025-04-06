@@ -3,10 +3,11 @@
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 85%
+//			- Dummies
 //			- Dummy Attack patterns (Logic + Drawing)
 // 
 //			Tan Jun Quan ------------------------------ 15%
-//			- Parry spark(Logic + Drawing), sprites
+//			- Parry spark (Logic + Drawing)
 //
 // Brief:	Declaration of General Enemy related functions
 //
@@ -20,8 +21,8 @@
 
 Color color_idle, color_windup, color_swing, color_projectile, color_parried;
 
-DummyBotMelee MParryBot;		//Melee Practice Range Parry Bot
-DummyBotRange RParryBot;		//Ranged Attack
+DummyBotMelee MParryBot;			//Melee Practice Range Parry Bot
+DummyBotRange RParryBot;			//Ranged Attack
 
 SpriteSheet meleebot_sprite;
 SpriteSheet rangebot_sprite;
@@ -319,7 +320,7 @@ void Draw_DummyBotMelee()
 		meleebot_sprite.Set_Col(0, 1, MParryBot.attack_timer.current);
 		break;
 	case Parried:
-		// JQWERTY - Draw stunned SILLY Anim
+		// Draw stunned SILLY Anim
 		meleebot_sprite.Set_Row(4);
 		meleebot_sprite.Loop(0, 2, 1.f);
 		break;
@@ -332,12 +333,11 @@ void Draw_DummyBotMelee()
 	Draw_Spark();
 }
 
-
-//RANGED PARRY BOT FUNCTIONS:
+// RANGED PARRY BOT FUNCTIONS:
 // Init            - Inits values such as timers etc
 // Active (Update) - Call in Update(), handles checking of states
 // Attack          - Call in Attacking state, handles logic for parrying, damage detection etc, i know the attack state is 'swinging' but yeah
-//Draw             - Render sprites
+// Draw            - Render sprites
 void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 	RParryBot.pos = pos;
 	RParryBot.FacingDir = RParryBot.FacingDown;								// Init here which dir bot should face!!!
@@ -447,7 +447,7 @@ void Active_DummyBotRange() {
 		case Swinging:
 			RParryBot.projectile_draw = true;
 			Attack_DummyBotRange();
-			if (Update_Timer(&RParryBot.attack_timer)) {			// idk why when i or this if statement it dont work so pls pardon this UNPLEASANT code
+			if (Update_Timer(&RParryBot.attack_timer)) {			
 				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range)		// If projectile travels too far, 
 				{
 					RParryBot.projectile_draw = false;
@@ -464,18 +464,6 @@ void Active_DummyBotRange() {
 				RParryBot.state = Idle;
 			}
 			break;
-		case Parried:
-			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
-			if (Update_Timer(&RParryBot.stun_timer)) {
-				//timer has not ended
-			}
-			else 
-			{
-				RParryBot.projectile_draw = false;
-				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
-				RParryBot.projectile_pos = RParryBot.attackpos;
-				RParryBot.state = Idle;
-			}
 		}
 
 	}
@@ -494,6 +482,7 @@ void Active_DummyBotRange() {
 	}
 }
 
+// CALL ASH!!!
 void Attack_DummyBotRange() {
 	//TO DO: ON PARRY - DEFLECT PROJECTILE BACK AT ENEMY
 	switch (RParryBot.FacingDir)									// Depending on direction dummy is facing, adjust projectile direction and speed
@@ -546,8 +535,6 @@ void Attack_DummyBotRange() {
 
 void Draw_DummyBotRange() {
 
-	//DrawCircleAdvanced(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y - RParryBot.rad * 0.5f), 35.f, 20.f, SetColor(0x92000000));
-	
 	switch (RParryBot.state)						// Placeholder sprites - Draws circles of different colours depending on state its in
 	{
 	case Idle:
@@ -574,15 +561,14 @@ void Draw_DummyBotRange() {
 
 
 
-	if (RParryBot.projectile_draw)		// If projectile needs to be drawn
+	if (RParryBot.projectile_draw)					// If projectile needs to be drawn
 	{
 		//Temp Projectile Drawing
-		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_projectile);		// Draw circle at projectile's position
-		// JQWERTY - Draw steam/ laser bullet sprite here (currently rotation not yet implemented so itll look funky)
+		DrawCircle(World_To_Screen_x(RParryBot.projectile_pos.x), World_To_Screen_y(RParryBot.projectile_pos.y), RParryBot.projectile_radius, color_projectile);
 	}
 }
 
-void Init_Enemy_Indicator()								// For colours!!!!
+void Init_Enemy_Indicator()							// For colours!!!!
 {
 	color_idle = SetColor(0xFFFF6961);
 	color_windup = SetColor(0x508B0000);

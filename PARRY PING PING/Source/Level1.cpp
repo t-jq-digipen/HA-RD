@@ -1,11 +1,22 @@
 //---------------------------------------------------------
 // File:	Level1.cpp
 // Project: Heavy Assault : Rust & Dust
-// Authors :	Manfred Sim
-//			Muhammad Raziq bin Mohd Rafig
-//			Muhammad Fauzan bin Mohamed Fauzy
-//			Tan Jun Quan
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
+// Authors :	
+//			Manfred Sim ------------------------------- 25%
+//			- Level states
+// 
+//			Muhammad Raziq bin Mohd Rafig ------------- 25%
+//			- Boss 1 implementation
+// 
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 20%
+//			- Level map
+//			- Audio
+// 
+//			Tan Jun Quan ------------------------------ 20%
+//			- Drawing state
+//			- Player
+// 
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 10%
 //			- Level Transition 
 //
 // Brief:	Implementation of Level 1 functions
@@ -69,9 +80,8 @@ void Level1_Load()
 	mapTexture = AEGfxTextureLoad("Assets/testMapBoundary5.png");
 	if (!mapTexture)
 	{
-		printf("Failed to load map texture!\n");
+		std::cerr << "Failed to load map texture!\n";
 	}
-	std::cout << "Level 1 Loaded\n";
 
 	// Read File IO
 	ReadFromFile("Assets/FileIO/Level1.txt", L1_IO);
@@ -79,9 +89,6 @@ void Level1_Load()
 
 void Level1_Initialize()
 {
-	std::cout << "Level 1 Initialized\n";
-
-
 	// Player
 	Init_Player();
 
@@ -179,7 +186,6 @@ void Level1_Update()
 	{
 		LockCamera = false;
 		AEInputShowCursor(0);
-		//std::cout << "Playing\n";
 
 		// Proto boss
 		Update_Boss();
@@ -197,9 +203,6 @@ void Level1_Update()
 		{
 			Update_LevelTimer(&levelTimer);
 		}
-
-		std::cout << "BGM Volume: " << current_bgm_vol << '\n';
-		std::cout << "SFX Volume: " << current_sfx_vol << '\n';
 	}
 	else
 	{
@@ -257,11 +260,6 @@ void Level1_Draw()
 	if (showBossHitboxes)
 	{
 		Draw_Boss_Hitboxes();
-		//std::cout << "Hitboxes drawn \n";
-	}
-	else
-	{
-		//std::cout << "Hitboxes not drawn\n";
 	}
 
 
@@ -356,5 +354,5 @@ void Level1_Unload()
 		AEGfxTextureUnload(mapTexture);
 		mapTexture = nullptr;
 	}
-	std::cout << "level1_unload";
+	L1_IO.clear();
 }

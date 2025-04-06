@@ -3,7 +3,7 @@
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
 //			Tan Jun Quan ------------------------------ 60%
-//			- Base camera logic
+//			- Base camera logic based on player and mouse
 //			- World/Screen conversion functions
 // 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 40%
@@ -106,6 +106,7 @@ void Pan_Camera(f32 dir_hor, f32 dir_vert, f32 speed) {
 	AEVec2Add(&cam_shift, &cam_shift, &temp_campos);		// Add offsets
 }
 
+// Resets the camera
 void ResetCamera() {
 	// Reset camera to player position
 	// Reset values and deccel

@@ -2,17 +2,18 @@
 // File:	Boss2.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:  
-//          Muhammad Raziq bin Mohd Rafig ------------- 45%
+//          Muhammad Raziq bin Mohd Rafig ------------- 50%
 //          - Boss system
 //          - Base attack logic
 // 
-//          Tan Jun Quan ------------------------------ 45%
+//          Tan Jun Quan ------------------------------ 35%
 //          - Sprites
 //          - Polishing attack logic
 //          - Phase 2 logic
 // 
-//          Manfred Sim ------------------------------- 10%
+//          Manfred Sim ------------------------------- 15%
 //          - File IO
+//          - Score system
 //
 // Brief:	Boss 2 header things (WIP)
 //
@@ -31,7 +32,6 @@
 Boss2 boss_2;
 
 // Boss state colors
-
 Color red2      = SetColor(0x508B0000);
 Color red3      = SetColor(0x808B0000);
 Color blue2     = SetColor(0xFF0000FF);
@@ -123,14 +123,14 @@ bool dashleft = false;
 int P2dash = 0;
 
 // Level score update values
-int BOSS2_SCORE_PLAYER_MELEE_HIT; // + 100 points (multiplied by damage value) per frame
-int BOSS2_SCORE_BOSS_PROJECTILES_PARRIED; // + 5000 points if boss rocket successfully parried
-int BOSS2_SCORE_BOSS_MELEE_PARRIED; // + 10000 points if boss successfully stunned via parry
-f32 BOSS2_SCORE_TIME_BONUS_CAP; // + bonus points if player manages to beat boss within 1 minute or less
-int BOSS2_SCORE_TIME_BONUS; // + 2000 points for every second of time left less than the 1 minute cap
-int BOSS2_SCORE_DODGE; // + 2000 points if boss attack successfully dodged
-int BOSS2_SCORE_PERFECT; // + 10000 points if player beats boss without taking damage
-int BOSS2_SCORE_MULTIPLIER; // x2 points in Level 2
+int BOSS2_SCORE_PLAYER_MELEE_HIT;           // + 100 points (multiplied by damage value) per frame
+int BOSS2_SCORE_BOSS_PROJECTILES_PARRIED;   // + 5000 points if boss rocket successfully parried
+int BOSS2_SCORE_BOSS_MELEE_PARRIED;         // + 10000 points if boss successfully stunned via parry
+f32 BOSS2_SCORE_TIME_BONUS_CAP;             // + bonus points if player manages to beat boss within 1 minute or less
+int BOSS2_SCORE_TIME_BONUS;                 // + 2000 points for every second of time left less than the 1 minute cap
+int BOSS2_SCORE_DODGE;                      // + 2000 points if boss attack successfully dodged
+int BOSS2_SCORE_PERFECT;                    // + 10000 points if player beats boss without taking damage
+int BOSS2_SCORE_MULTIPLIER;                 // x2 points in Level 2
 
 // File IO
 std::vector<float> Boss2_IO;
@@ -312,12 +312,11 @@ void Update_Boss2()
                     // Set randomizer
                     f32 randomizer = AERandFloat();
 
-                    if (randomizer <= .3f) // 40% probability for Missile Barrage
+                    if (randomizer <= .3f) // 30% probability for Missile Barrage
                     {
                         // Do Missile Barrage
                         boss_2.attack_timer.current = 0.f;
                         boss_2.attackstate = BOSS2_ATTACK_WINDUP;
-                        boss_2.missile_prep.current = 0.f;
                         boss_2.attack_type = MISSILE_BARRAGE;
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                         rocketset = false;
@@ -333,7 +332,7 @@ void Update_Boss2()
                         prepdash = false;
                         
                     }
-                    else // 20% probability for Lightning Wave
+                    else // 30% probability for Lightning Wave
                     {
                         // Do Lightning Wave
                         boss_2.attack_timer.current = 0.f;
@@ -386,13 +385,12 @@ void Update_Boss2()
                         boss_2.attack_timer.current = 0.f;
                         boss_2.attackstate = BOSS2_ATTACK_WINDUP;
                         boss_attack[MISSILE_BARRAGE].timer.current = 0.f;
-                        boss_2.missile_prep.current = 0.f;
                         boss_2.attack_type = MISSILE_BARRAGE;
                         boss_2.state = BOSS2_MISSILE_BARRAGE;
                         rocketset = false;
                         P2dash = 0;
                     }
-                    else
+                    else                    // 60% to Dash Slash Dash Slash Dash Slash Slash (say it 3x fast)
                     {
                         // Do Dash & Slash
                         boss_2.attack_timer.current = 0.f;
@@ -582,20 +580,7 @@ void Draw_Boss2_Hitboxes()
     }
     case (BOSS2_LIGHTNING_WAVE):
     {
-        switch (boss_2.attack_type)
-        {
-        case (LIGHTNING_STAB):
-            if (boss_2.attackstate == BOSS2_ATTACK_WINDUP)
-            {
-                
-            }
-            else if (boss_2.attackstate == BOSS2_ATTACK_ACTIVE)
-            {
-                
-
-            }
-            break;
-        }
+        // Shifted to draw_boss2 to draw over the shadow!
         break;
     }
     default:
@@ -604,8 +589,6 @@ void Draw_Boss2_Hitboxes()
 
     if (lightningwave.radius)
     {
-        //DrawCircle(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), lightningwave.radius, blue2);
-
         lightningwave_sprite.Set_Row(0);
         lightningwave_sprite.Loop(0, 3, .5f);
         lightningwave_sprite.Draw(World_To_Screen_x(lightningwave.pos.x), World_To_Screen_y(lightningwave.pos.y), lightningwave.radius * 2.f, lightningwave.radius * 2.f);
@@ -1005,6 +988,11 @@ void Dash_Slash_Logic()
                         boss_2.target_pos = { player.pos.x - DASH_OFFSET, player.pos.y };
                         dashleft = true;
                     }
+
+                    // Clamp the boss so he dont fly off the map!!!
+                    boss_2.target_pos.x = AEClamp(boss_2.target_pos.x, -1486.f, 1406.f);
+                    boss_2.target_pos.y = AEClamp(boss_2.target_pos.y, -568.f, 500.f);
+
                     prepdash = true;
                 }
             }
@@ -1023,6 +1011,7 @@ void Dash_Slash_Logic()
                     (boss_2.target_pos.x - boss_2.target_dir.x) * dash_active_progress;
                 boss_2.pos.y = boss_2.target_dir.y +
                     (boss_2.target_pos.y - boss_2.target_dir.y) * dash_active_progress;
+
             }
             // Dash Recovery
             else if (timer_progress < boss_attack[DASH].attack_recover)
@@ -1289,9 +1278,10 @@ void Missile_Barrage_Logic()
                         dashleft = true;
                     }
 
-                    //boss_2.target_pos.x = AEClamp(boss_2.target_pos.x,0,1);
-                    //boss_2.target_pos.y = AEClamp(boss_2.target_pos.y,0,1);
-                    // I NEED HELP FOR MAP CLAMPS
+                    // Clamp the boss so he dont fly off the map!!!
+                    boss_2.target_pos.x = AEClamp(boss_2.target_pos.x, -1486.f, 1406.f);
+                    boss_2.target_pos.y = AEClamp(boss_2.target_pos.y, -568.f, 500.f);
+
                     prepdash = true;
                 }
             }
@@ -1444,7 +1434,6 @@ void Lightning_Wave_Logic()
     }
     case LIGHTNING_WAVE:
     {
-        std::cout << "Timer Progress: " << boss_2.attack_timer.current << " / " << boss_2.attack_timer.duration << "\n";
         if (Update_Timer(&boss_2.attack_timer))
         {
             f32 timer_progress = boss_2.attack_timer.current * boss_2.attack_timer.duration;
@@ -1484,10 +1473,13 @@ void Lightning_Wave_Logic()
 
 void Update_Lightning_Wave()
 {
+    // If the lightning wave is updating
     if (Update_Timer(&lightningwave.timer))
     {
+        // EXPANSION
         lightningwave.radius += LIGHTNING_WAVE_SPEED;
 
+        // Check if hits player
         if (AETestCircleToCircle(&lightningwave.pos, lightningwave.radius, &player.pos, player.radius) &&
             !lightning_wave_damaged)
         {
@@ -1495,7 +1487,7 @@ void Update_Lightning_Wave()
             lightning_wave_damaged = true;
         }
     }
-    else
+    else    // Lightning wave timed out, reset it
     {
         lightningwave.radius = 0.f;
         lightning_stab_damaged = false;
