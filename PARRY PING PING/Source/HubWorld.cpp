@@ -222,8 +222,6 @@ void HubWorld_Load()
 	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
 
 
-
-	HubWorld_IO_elements.clear();
 }
 
 void HubWorld_Initialize()
@@ -382,7 +380,6 @@ void HubWorld_Draw()
 	f32 map_x = -hubMap_width / 2;
 	f32 map_y = -hubMap_height / 2;
 
-
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
@@ -403,6 +400,8 @@ void HubWorld_Draw()
 	campfire_sprite.Set_Row(0);
 	campfire_sprite.Loop(0, 11, 1.f);
 	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
+
+	DrawRect(World_To_Screen_x(700.f), World_To_Screen_y(100.f), 500.f, 500.f, SetColor(0xFFFFFFFF));
 
 	// Parry Bots/ Dummies	
 	Draw_DummyBotMelee();
@@ -610,6 +609,8 @@ void HubWorld_Unload()
 	AEGfxTextureUnload(hubMapTexture);
 	WaitForLeaderboardFetch();
 
+
+	HubWorld_IO_elements.clear();
 }
 
 #pragma region Fade Effects
