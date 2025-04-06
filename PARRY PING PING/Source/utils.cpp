@@ -9,18 +9,24 @@
 //			- Basic spritesheet system					
 //			- Base meshes								
 //			- Basic shape drawing						
-//			- Basic image drawing						
+//			- Basic image drawing
+// 														
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 15%
+//			- Image in rect
+//			- Image with fading effects
+//			- Lerp function
+//			- Boundary functions
+// 
+//			Manfred Sim ------------------------------- 15%
+//			- File IO system
 // 														
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 10%
 //			- Advanced text drawing
 //			- Level-to-level transitions
 // 														
-//			Muhammad Raziq bin Mohd Rafig ------------- ??%
-// 														
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
-// 
-//			Manfred Sim ------------------------------- ??%
-//			- File IO system
+//			Muhammad Raziq bin Mohd Rafig ------------- 10%
+//			- Rotated rectangle drawing
+//			- Boss player direction
 // 
 // Brief:	Collection of utility functions
 //
@@ -553,7 +559,6 @@ f32 Lerp(f32 start, f32 end, f32 t)
 	return start + t * (end - start);
 }
 
-
 // Draw Image with fading effect
 void DrawImageFading(f32 pos_x, f32 pos_y, f32 width, f32 height, f32 rot, AEGfxTexture* image, f32 alpha)
 {
@@ -670,53 +675,6 @@ void DrawObjectWithBoundaryCentered(f32 pos_x, f32 pos_y, f32 width, f32 height,
 	DrawBoundary(boundary_x, boundary_y, width, height);
 }
 
-
-// Check if two circles are intersecting
-bool AreCirclesIntersecting(f32 pos_x1, f32 pos_y1, f32 radius1, f32 pos_x2, f32 pos_y2, f32 radius2) 
-{
-	AEVec2 crc1 = { pos_x1, pos_y1 };
-
-	AEVec2 crc2 = { pos_x2, pos_y2 };
-
-	return AETestCircleToCircle(&crc1, radius1, &crc2, radius2);
-}
-
-// Check if two rectangles are intersecting
-bool AreRectanglesIntersecting(f32 rect1_x, f32 rect1_y, f32 rect1_width, f32 rect1_height,
-	f32 rect2_x, f32 rect2_y, f32 rect2_width, f32 rect2_height)
-{
-	// Get the edges of the first rectangle
-	f32 rect1_left = rect1_x;
-	f32 rect1_right = rect1_x + rect1_width;
-	f32 rect1_top = rect1_y;
-	f32 rect1_bottom = rect1_y + rect1_height;
-
-	// Get the edges of the second rectangle
-	f32 rect2_left = rect2_x;
-	f32 rect2_right = rect2_x + rect2_width;
-	f32 rect2_top = rect2_y;
-	f32 rect2_bottom = rect2_y + rect2_height;
-
-	// Check if the rectangles overlap
-	bool isIntersecting = !(rect1_right < rect2_left ||    // rect1 is to the left of rect2
-		rect1_left > rect2_right ||    // rect1 is to the right of rect2
-		rect1_bottom < rect2_top ||    // rect1 is above rect2
-		rect1_top > rect2_bottom);     // rect1 is below rect2
-
-	return isIntersecting;
-}
-
-
-float CalculateDistance(float x1, float y1, float x2, float y2)
-{
-	return sqrtf((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-}
-
-
-
-
-
-
 // Checks if an area is clicked
 int IsAreaClicked(f32 pos_x, f32 pos_y, f32 width, f32 height, s32 click_x, s32 click_y)
 {
@@ -738,12 +696,11 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 	std::fstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 	else
 	{
-		std::cout << "Can read " << filename << "!!!\n";
 		std::string label, value;
 		while (std::getline(ifs, label))
 		{
@@ -767,7 +724,7 @@ void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
 	std::fstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 	else
@@ -776,7 +733,6 @@ void ReadWholeFile(const char* filename, std::vector<std::string>& vector)
 		while (std::getline(ifs, line))
 		{
 			vector.push_back(line);
-			std::cout << line << '\n';
 		}
 	}
 	ifs.close();
@@ -788,7 +744,7 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 	std::ifstream ifs{ filename };
 	if (!ifs)
 	{
-		std::cout << "Cannot read " << filename << "!!!\n";
+		std::cerr << "Cannot read " << filename << "!!!\n";
 		return;
 	}
 
@@ -804,7 +760,6 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 			if (value_pos != std::string::npos)
 			{
 				line = line.substr(0, value_pos + 2) + value;
-				std::cout << "Modified line: " << line;
 			}
 		}
 		lines.push_back(line);
@@ -829,34 +784,33 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 
 f32 transition_xpos{ 0.f }, transition_speed{ 70.f };		// Specifies length of bars + speed of increase/ decrease
 int bars{ 5 };												// Specify how many bars to draw across the screen
-f32 windowW{ f32(AEGfxGetWindowWidth()) }, windowH{ f32(AEGfxGetWindowHeight()) };
-void TransitionEnter(bool &flag) 
+void TransitionEnter(bool& flag)
 {
 	// Loop for each bar, draw at spaced out increments
-	for (int i = 0; i < bars; i++) 
+	for (int i = 0; i < bars; i++)
 	{
-		DrawRect(-windowW / 2.f + transition_xpos / 2.f - (i * 200.f), (windowH / bars) / 2.f - windowH / 2.f + (windowH / bars) * i, transition_xpos + (i * 200.f), windowH / bars, SetColor(0xFF000000));
+		DrawRect(-AEGfxGetWindowWidth() / 2.f + transition_xpos / 2.f - (i * 200.f), (AEGfxGetWindowHeight() / bars) / 2.f - AEGfxGetWindowHeight() / 2.f + (AEGfxGetWindowHeight() / bars) * i, transition_xpos + (i * 200.f), AEGfxGetWindowHeight() / bars, SetColor(0xFF000000));
 	}
 	transition_xpos += transition_speed;					// Increment size of bar (hides screen)
 	// Clamp and alter flag
-	if (transition_xpos > windowW + bars * 200.f)
-	{ 
-		transition_xpos = windowW + bars * 200.f;
-		flag = true; 
+	if (transition_xpos > AEGfxGetWindowWidth() + bars * 200.f)
+	{
+		transition_xpos = AEGfxGetWindowWidth() + bars * 200.f;
+		flag = true;
 	}
 }
 
-void TransitionExit(bool& flag) 
+void TransitionExit(bool& flag)
 {
 	// Loop for each bar, draw at spaced out increments
-	for (int i = 0; i < bars; i++) 
+	for (int i = 0; i < bars; i++)
 	{
-		DrawRect(-windowW / 2.f + transition_xpos / 2.f - (i * 200.f), (windowH / bars) / 2.f - windowH / 2.f + (windowH / bars) * i, transition_xpos + (i * 200.f), windowH / bars, SetColor(0xFF000000));
+		DrawRect(-AEGfxGetWindowWidth() / 2.f + transition_xpos / 2.f - (i * 200.f), (AEGfxGetWindowHeight() / bars) / 2.f - AEGfxGetWindowHeight() / 2.f + (AEGfxGetWindowHeight() / bars) * i, transition_xpos + (i * 200.f), AEGfxGetWindowHeight() / bars, SetColor(0xFF000000));
 	}
 	transition_xpos -= transition_speed;					// Decrement size of bar (reveals screen)
 	// Clamp and alter flag
-	if (transition_xpos < 0.f) 
-	{ 
-		transition_xpos = 0.f; flag = true; 
+	if (transition_xpos < 0.f)
+	{
+		transition_xpos = 0.f; flag = true;
 	}
 }

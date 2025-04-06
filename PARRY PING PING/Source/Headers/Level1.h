@@ -3,7 +3,7 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Manfred Sim
 //
-// Brief:	Declaration of Level 1 functions
+// Brief:	Declaration of Level 1 state functions.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

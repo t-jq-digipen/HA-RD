@@ -3,7 +3,9 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Manfred Sim
 //
-// Brief:	main!
+// Brief:	Main entry point for HA:RD game, initializing
+//			system components, managing gamestates, and
+//			running the game loop.
 //
 // Copyright © 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -38,7 +40,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// Initialization of your own variables go here
 
 		// Using custom window procedure
-		AESysInit(hInstance, nCmdShow, 1600, 900, 1, 60, false, NULL);
+		AESysInit(hInstance, nCmdShow, 1600, 900, 0, 60, false, NULL);
 
 		// Changing the window title
 		AESysSetWindowTitle("HA:RD");

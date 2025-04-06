@@ -19,7 +19,7 @@
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 10%
 //			- Level Transition 
 //
-// Brief:	Implementation of Level 1 functions
+// Brief:	Implementation of Level 1 state functions.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -232,12 +232,6 @@ void Level1_Draw()
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
-
-	// Draw map borders
-	DrawRect(screen_x + map_width / 2, screen_y, map_width, 10, borderColor); // Bottom
-	DrawRect(screen_x + map_width / 2, screen_y + map_height, map_width, 10, borderColor); // Top
-	DrawRect(screen_x, screen_y + map_height / 2, 10, map_height, borderColor); // Left
-	DrawRect(screen_x + map_width, screen_y + map_height / 2, 10, map_height, borderColor); // Right
 
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle

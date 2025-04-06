@@ -4,7 +4,7 @@
 // Author:	Manfred Sim
 //
 // Brief:	Declaration of game state manager functions and
-//			enum game states
+//			game state enumerations.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

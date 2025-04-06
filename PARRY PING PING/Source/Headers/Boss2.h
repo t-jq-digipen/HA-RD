@@ -10,7 +10,9 @@
 //          Tan Jun Quan ------------------------------ 5%
 //          - Lightning wave
 //
-// Brief:	Boss 2 header things (WIP)
+// Brief:	Boss 2 declaration
+//          Declares the functions for boss 2, and various
+//          states and structs for the boss update logics.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

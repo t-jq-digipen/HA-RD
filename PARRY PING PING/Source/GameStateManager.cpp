@@ -3,8 +3,7 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Manfred Sim
 //
-// Brief:	Implementation of game state manager functions and
-//			enum game states
+// Brief:	Implementation of game state manager functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

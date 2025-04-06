@@ -2,25 +2,38 @@
 // File:	HubWorld.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 60%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 55%
 //			- Interactable environments (Leaderboard, Modifiers, Ranged + Melee Parry Dummies)
 //			- Camera lock effect
 //			- Level selection + transition
 //			- Sprites
+//				- Modifiers
+//				- Shrine
 // 
 //			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
 //			- Leaderboard fetching
 //			- Audio
 //			- Map
 // 
-//			Tan Jun Quan ------------------------------ 5%
+//			Tan Jun Quan ------------------------------ 10%
 //			- Sprites
+//				- Campfire
+//				- Dummy bots
+//				- Spirits
+//			- Tutorial
 // 
 //			Manfred Sim ------------------------------- 5%
 //			- File IO
-// 
 //
-// Brief:	Definition of Hub World functions
+// Brief:	Definition of Hub World functions.
+//			Holds the logic for the hub world state, which
+//			allows the player to interact with various
+//			gameplay elements and teaches them with a
+//			tutorial overlay.
+//			The player can access an online leaderboard
+//			linked via Google API to a google sheet, practice
+//			against dummy enemies and adjust difficulty 
+//			modifiers here before entering the boss fights.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -108,6 +121,7 @@ f32 hubMap_height = 1536.f;
 f32 hubMap_width = 3272.f;
 
 AEGfxTexture* hubMapTexture;
+AEGfxTexture* dangerzone;
 
 #pragma region Leaderboard Loading
 void DrawLoadingImage1() 
@@ -170,6 +184,7 @@ void HubWorld_Load()
 	spirit_sprite		= SpriteSheet("Assets/HubWorld/Spirit.png", 12, 1);
 
 	hubMapTexture = AEGfxTextureLoad("Assets/hubWorldMap.png");
+	dangerzone = AEGfxTextureLoad("Assets/HubWorld/Danger.png");
 
 	// Meshes
 	Load_Mesh(20);
@@ -208,9 +223,6 @@ void HubWorld_Load()
 	// Clear transition timer
 	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
 
-
-
-	HubWorld_IO_elements.clear();
 }
 
 void HubWorld_Initialize()
@@ -361,6 +373,7 @@ void HubWorld_Draw()
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
 
+	AEGfxSetBackgroundColor(0.259f, 0.157f, 0.208f); // Beige color
 	// Define map size
 	Color borderColor = { 0.902f, 0.725f, 0.451f, 0.0f };
 
@@ -368,16 +381,9 @@ void HubWorld_Draw()
 	f32 map_x = -hubMap_width / 2;
 	f32 map_y = -hubMap_height / 2;
 
-
 	// Convert world positions to screen positions
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
-
-	// Draw map borders
-	DrawRect(screen_x + hubMap_width / 2, screen_y, hubMap_width, 10, borderColor); // Bottom
-	DrawRect(screen_x + hubMap_width / 2, screen_y + hubMap_height, hubMap_width, 10, borderColor); // Top
-	DrawRect(screen_x, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Left
-	DrawRect(screen_x + hubMap_width, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Right
 
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
@@ -389,6 +395,8 @@ void HubWorld_Draw()
 	campfire_sprite.Set_Row(0);
 	campfire_sprite.Loop(0, 11, 1.f);
 	campfire_sprite.Draw(World_To_Screen_x(Env_Campfire.Pos.x), World_To_Screen_y(Env_Campfire.Pos.y), Env_Campfire.Width, Env_Campfire.Height);
+
+	DrawImage(World_To_Screen_x(700.f), World_To_Screen_y(100.f), 500.f, 500.f, 0.f, dangerzone);
 
 	// Parry Bots/ Dummies	
 	Draw_DummyBotMelee();
@@ -594,8 +602,11 @@ void HubWorld_Unload()
 
 	AEGfxTextureUnload(loadingImage1);
 	AEGfxTextureUnload(hubMapTexture);
+	AEGfxTextureUnload(dangerzone);
 	WaitForLeaderboardFetch();
 
+
+	HubWorld_IO_elements.clear();
 }
 
 #pragma region Fade Effects
@@ -635,12 +646,34 @@ void Draw_FadeOut(Color& Fade)
 #pragma region Leaderboard logic
 void fetchLeaderboard(int bossID) {
 	std::string bossIDStr = (bossID == 0) ? "Boss1" : "Boss2";
-	std::string command = "\"Assets\\dist\\leaderboard_helper.exe\" " + bossIDStr;
-	int result = system(command.c_str());
-	if (result != 0) {
+	std::string command = "Assets\\dist\\leaderboard_helper.exe " + bossIDStr;
+
+	// Set up the STARTUPINFO structure
+	STARTUPINFO si = { sizeof(STARTUPINFO) };
+	PROCESS_INFORMATION pi;
+
+	// Create the process without showing the console window
+	if (!CreateProcess(NULL,   // Application name (NULL to pass the command line directly)
+		&command[0],           // Command line
+		NULL,                  // Process handle not inheritable
+		NULL,                  // Thread handle not inheritable
+		FALSE,                 // Set handle inheritance to FALSE
+		CREATE_NO_WINDOW,      // Flag to hide the console window
+		NULL,                  // Use parent's environment block
+		NULL,                  // Use parent's starting directory
+		&si,                   // Pointer to STARTUPINFO structure
+		&pi))                  // Pointer to PROCESS_INFORMATION structure
+	{
 		std::cerr << "Failed to run leaderboard_helper.exe" << std::endl;
 		return;
 	}
+
+	// Wait until the process terminates
+	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Close process and thread handles
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 
 	std::string filename = "leaderboard_" + bossIDStr + ".txt";
 	std::ifstream file(filename);
@@ -681,7 +714,6 @@ void fetchLeaderboard(int bossID) {
 		HS_score[bossID][i] = scores[i];
 		HS_time[bossID][i] = times[i];
 	}
-
 }
 
 std::string sanitizeString(const std::string& input) {

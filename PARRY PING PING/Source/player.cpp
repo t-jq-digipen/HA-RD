@@ -1,16 +1,19 @@
 //---------------------------------------------------------
 // File:	player.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Tan Jun Quan ------------------------------ 50%
+// Author:	Tan Jun Quan ------------------------------ 55%
 //			- Movement
 //			- Melee attacks
 //			- Dashing
 //			- Parrying
+//			- Sprites
+//			- File IO polish
 // 
 //			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
 //			- Ranged attacks (light and heavy)
+//			- Audio
 // 
-//			Manfred Sim ------------------------------- 15%
+//			Manfred Sim ------------------------------- 10%
 //			- File IO
 //			- Score system
 // 
@@ -18,7 +21,14 @@
 //			- Damage based on difficulty modifier
 //			- Rage meter buff
 //
-// Brief:	Player functions  |	Line number
+// Brief:	Implementation of the player.
+//			Contains the logic for behaviour and systems
+//			involving the player, including:
+//			- Movement + Dodging
+//			- Attacks
+//			- Blocking + Parrying
+//			- Rage buff from successful parries
+//			- Score system
 // 
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -145,7 +155,6 @@ void ResetSound()
 	{
 		sound_played[i] = false; // Reset all phases to not played
 	}
-	// std::cout << "Sound reset" << std::endl; // Debug print to check if it's resetting
 }
 
 bool Attacking_Melee()
@@ -263,8 +272,6 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 				*damage = ATTACK_DAMAGE[melee_attack.combo] + (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER);
 			}
 
-			std::cout << "MULTIPLIER: " << (ATTACK_DAMAGE[melee_attack.combo] * (float(player.ragemeter) / 5.f) * ATTACK_RAGEMULTIPLER) << '\n';
-			std::cout << "TOTAL DMG: " << *damage << '\n';
 			return true;
 		}
 		else if (!melee_attack.combo)
@@ -287,8 +294,6 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 #pragma region RANGED
 
 AEGfxTexture* projectile_texture;
-
-AEGfxTexture* heavy_texture;
 
 Projectile heavy_atk;
 Projectile new_proj;
@@ -391,10 +396,6 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 					Collect_Points(SCORE_HEAVY_LASER_HIT, BIG_HIT_SCORE);
 					laserTickTimer.current = 0.f;
 				}
-				std::cout << "Heavy Attack Hit!\n";
-			}
-			else {
-				std::cout << "NO HIT\n";
 			}
 		}
 		// **Light projectile collision check** (No change here, you can keep this as is)
@@ -404,7 +405,6 @@ bool Attacking_Ranged_Impact(AEVec2 target, f32 width, f32 height, float* damage
 			proj.isActive = false; // Deactivate light projectile after hit
 			currentCombo += 1;
 			Collect_Points(SCORE_LIGHT_PROJECTILE_HIT, HIT_SCORE); // Update score when light projectile hits
-			std::cout << "Light Attack Hit!\n";
 		}
 	}
 
@@ -470,7 +470,6 @@ void Attacking_Ranged()
 			laserTickTimer.current = 0.f;
 
 			// **Play the light projectile sound effect**
-			std::cout << "Laser sound triggered!\n";  // Debugging
 			AEAudioPlay(heavyProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
@@ -488,7 +487,6 @@ void Attacking_Ranged()
 			melee_attack.timer.current = 1.f;
 
 			// **Play the light projectile sound effect**
-			std::cout << "Light projectile sound triggered!\n";  // Debugging
 			AEAudioPlay(lightProj, gameSFX, 1.0f, 1.0f, 0);
 		}
 
@@ -689,7 +687,6 @@ void Movement() {
 	{
 
 		float hvy_vel_scale = -1.f * (1.f - heavy_attack.current);
-		std::cout << hvy_vel_scale;
 
 		AEVec2Scale(&player.vel, &atk_dir, PLAYER_SPEED * hvy_vel_scale * dt);
 	}
@@ -779,7 +776,6 @@ void Parrying()
 		if (player.blocktimer.current < PARRY_DURATION / BLOCK_COOLDOWN)
 		{
 			player.state = PARRY;
-			std::cout << "parrying";
 
 		}
 		else if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
@@ -796,7 +792,6 @@ void Parrying()
 		if (player.blocktimer.current < BLOCK_DURATION / BLOCK_COOLDOWN)
 		{
 			player.blocktimer.current = BLOCK_DURATION / BLOCK_COOLDOWN;
-			//std::cout << "block cd starts\n";
 		}
 		if (player.state == BLOCK || player.state == BLOCKED || player.state == PARRY || player.state == PARRIED)
 		{
@@ -824,7 +819,6 @@ void Parried_Hit()
 	// reset block cooldown
 	player.blocktimer.current = 1.f;
 
-	std::cout << "Parry sound triggered!\n";
 	AEAudioPlay(parryFX, gameSFX, 1.0f, 1.0f, 0);
 }
 
@@ -1025,10 +1019,6 @@ void Load_Player()
 		std::cerr << "Failed to load projectile texture!" << std::endl;
 	}
 
-	heavy_texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
-	if (!heavy_texture) {
-		std::cerr << "Failed to load projectile texture!" << std::endl;
-	}
 }
 
 
@@ -1188,11 +1178,11 @@ void Update_Player()
 		}
 		else if (currentState == GS_HUBWORLD) // Apply for hubworld
 		{
-			f32 map_width = 2100.0f, map_height = 1136.0f;
-			f32 left_bound = -map_width / 2 + 80.f;
-			f32 right_bound = map_width / 2 - 80.f;
-			f32 top_bound = -map_height / 2.f;
-			f32 bottom_bound = 500.0f;
+			f32 map_width = 2972.0f, map_height = 1136.0f;
+			f32 left_bound = -map_width / 2;
+			f32 right_bound = map_width / 2;
+			f32 top_bound = -map_height / 2;
+			f32 bottom_bound = 600.0f;
 
 			// Restrict movement within the map boundaries
 			if (player.pos.x < left_bound) player.pos.x = left_bound;
@@ -1207,7 +1197,6 @@ void Update_Player()
 		{
 			levelState = GAMEOVER;
 
-			std::cout << "bro is dead\n";
 		}
 	}
 	Update_Player_UI(player.ammo, player.hp, player.blocktimer.current, player.ragemeter, dodge_cooldown.current);
@@ -1444,6 +1433,5 @@ void Unload_Player()
 	laser_sprite.Unload();
 
 	AEGfxTextureUnload(projectile_texture);
-	AEGfxTextureUnload(heavy_texture);
 
 }

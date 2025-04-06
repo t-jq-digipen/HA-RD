@@ -9,7 +9,8 @@
 //			Tan Jun Quan ------------------------------ 15%
 //			- Parry spark (Logic + Drawing)
 //
-// Brief:	Declaration of General Enemy related functions
+// Brief:	Enemy functions for training dummy bots found in
+//			hubworld, as well as parry spark warning system.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -388,6 +389,11 @@ void Init_DummyBotRange(AEVec2 pos, f32 rad, f32 max_hp) {
 int RParryBot_last_hit = 0;
 int RParryBot_new_hit = 0;
 
+void Update_Projectile()
+{
+
+}
+
 void Active_DummyBotRange() {
 	if (RParryBot.state != Destroyed) {			// If dummy is still alive
 
@@ -428,7 +434,7 @@ void Active_DummyBotRange() {
 			if (Update_Timer(&RParryBot.idle_timer)) {
 				//timer has not ended
 			}
-			else 
+			else
 			{
 				RParryBot.windup_timer.current = 0.f;				// Idle timer has ended, change states and start timer for next state
 				RParryBot.state = WindUp;
@@ -438,7 +444,7 @@ void Active_DummyBotRange() {
 			if (Update_Timer(&RParryBot.windup_timer)) {
 				//timer has not ended
 			}
-			else 
+			else
 			{
 				RParryBot.attack_timer.current = 0.f;				// Windup timer has ended, change states and start timer for next state
 				RParryBot.state = Swinging;
@@ -447,7 +453,7 @@ void Active_DummyBotRange() {
 		case Swinging:
 			RParryBot.projectile_draw = true;
 			Attack_DummyBotRange();
-			if (Update_Timer(&RParryBot.attack_timer)) {			
+			if (Update_Timer(&RParryBot.attack_timer)) {			// idk why when i or this if statement it dont work so pls pardon this UNPLEASANT code
 				if (AEVec2Distance(&RParryBot.pos, &RParryBot.projectile_pos) > RParryBot.projectile_range)		// If projectile travels too far, 
 				{
 					RParryBot.projectile_draw = false;
@@ -456,7 +462,7 @@ void Active_DummyBotRange() {
 					RParryBot.state = Idle;
 				}
 			}
-			else 
+			else
 			{
 				RParryBot.projectile_draw = false;
 				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
@@ -464,6 +470,18 @@ void Active_DummyBotRange() {
 				RParryBot.state = Idle;
 			}
 			break;
+		case Parried:
+			//REPLACE THIS BECAUSE DONT MAKE SENSE FOR PARRIED PROJECTILE TO STUN ENEMY
+			if (Update_Timer(&RParryBot.stun_timer)) {
+				//timer has not ended
+			}
+			else
+			{
+				RParryBot.projectile_draw = false;
+				RParryBot.idle_timer.current = 0.f;					// Attacking timer has ended, change states and start timer for next state
+				RParryBot.projectile_pos = RParryBot.attackpos;
+				RParryBot.state = Idle;
+			}
 		}
 
 	}
@@ -473,7 +491,7 @@ void Active_DummyBotRange() {
 			//timer has not ended
 			RParryBot.projectile_draw = false;
 		}
-		else 
+		else
 		{
 			RParryBot.idle_timer.current = 0.f;						// Respawn timer has ended, change states and start timer for next state
 			RParryBot.hp = RParryBot.max_hp;
@@ -482,7 +500,6 @@ void Active_DummyBotRange() {
 	}
 }
 
-// CALL ASH!!!
 void Attack_DummyBotRange() {
 	//TO DO: ON PARRY - DEFLECT PROJECTILE BACK AT ENEMY
 	switch (RParryBot.FacingDir)									// Depending on direction dummy is facing, adjust projectile direction and speed
@@ -556,7 +573,7 @@ void Draw_DummyBotRange() {
 
 	if (RParryBot.state != Destroyed)
 	{
-		rangebot_sprite.Draw(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y + 50.f), 250.f, 250.f);
+		rangebot_sprite.Draw(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), 250.f, 250.f);
 	}
 
 

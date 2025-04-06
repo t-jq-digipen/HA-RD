@@ -3,7 +3,7 @@
 // Project: Heavy Assault : Rust & Dust
 // Author:	Muhammad Raziq bin Mohd Rafig
 //
-// Brief:	Declaration of Level 2 functions
+// Brief:	Declaration of Level 2 state functions
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

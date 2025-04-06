@@ -2,23 +2,27 @@
 // File:	UI.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Manfred Sim ------------------------------- ??%
-//			- 
+//			Manfred Sim ------------------------------- 60%
+//			- File IO
+//			- Score system
+//			- Game menus
+//			- Button sprites
 // 
-//			Muhammad Fauzan bin Mohamed Fauzy --------- ??%
+//			Muhammad Fauzan bin Mohamed Fauzy --------- 25%
 //			- Leaderboard entry
 //			- Audio
 // 
-//			Tan Jun Quan ------------------------------ ??%
+//			Tan Jun Quan ------------------------------ 15%
 //			- Player UI system
 //			- Player UI sprites
 // 
 //			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
 //			- Modifiers (Affecting score)
 //			- Level Transitions
-//			
 //
-// Brief:	Various UI elements
+// Brief:	Various UI elements for player interaction
+//			Includes menu UI systems, leaderboard interface,
+//			player HUD, level transition animations.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
@@ -115,7 +119,8 @@ float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 AEGfxTexture* loadingImage;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic,
+boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket, gameClearSFX;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -137,6 +142,9 @@ std::vector<float> UI_IO_score;
 
 // Font Size
 int font_size;
+
+bool hasPlayedClearMenuAudio;
+
 
 // Initialize the various screen UI elements
 void Init_UI()
@@ -257,6 +265,8 @@ void Init_UI()
 
 	// First Time Init State Flag
 	isFirstInit = true;
+
+	hasPlayedClearMenuAudio = false;
 }
 
 void Load_UI()
@@ -312,6 +322,13 @@ void Load_UI()
 	dashAudio = AEAudioLoadSound("Assets/dashSFX.mp3");
 	ammoFullSFX = AEAudioLoadSound("Assets/chargedCan.mp3");
 	hubWorldMusic = AEAudioLoadMusic("Assets/hubWorldSong.mp3");
+	boss1Smash1 = AEAudioLoadSound("Assets/boss1Smash1.mp3");
+	boss1Smash2 = AEAudioLoadSound("Assets/boss1Smash2.mp3");
+	boss1Sweep1 = AEAudioLoadSound("Assets/boss1Sweep1.mp3");
+	boss1Sweep2 = AEAudioLoadSound("Assets/boss1Sweep2.mp3");
+	boss1Dash = AEAudioLoadSound("Assets/boss1Dash.mp3");
+	boss1Rocket = AEAudioLoadSound("Assets/boss1Rocket.mp3");
+	gameClearSFX = AEAudioLoadSound("Assets/clearedMenu.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
@@ -349,6 +366,11 @@ void Unload_UI()
 	AEAudioUnloadAudio(dashAudio);
 	AEAudioUnloadAudio(ammoFullSFX);
 	AEAudioUnloadAudio(hubWorldMusic);
+	AEAudioUnloadAudio(boss1Smash1);
+	AEAudioUnloadAudio(boss1Sweep1);
+	AEAudioUnloadAudio(boss1Sweep2);
+	AEAudioUnloadAudio(boss1Dash);
+	AEAudioUnloadAudio(gameClearSFX);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
@@ -671,6 +693,14 @@ void Draw_ClearMenu()
 	// Flag to turn off player attacking
 	player.canAttack = false;
 
+	// Play clear menu audio once when the menu is first drawn
+	if (!hasPlayedClearMenuAudio)
+	{
+		AEAudioPlay(gameClearSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		hasPlayedClearMenuAudio = true;
+	}
+
+
 	// Update level highest score / best time
 	if (currentState == GS_LEVEL1)
 	{
@@ -805,10 +835,13 @@ void Draw_ClearMenu()
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
+
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			Transition_L1Flag = true;
 			isInputEnabled = false;
 			player.canAttack = true;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -837,6 +870,8 @@ void Draw_ClearMenu()
 				Transition_L2Flag = true;
 				player.canAttack = true;
 				isInputEnabled = false;
+				hasPlayedClearMenuAudio = false; // Reset for next time
+
 			}
 		}
 		else
@@ -912,6 +947,8 @@ void Draw_ClearMenu()
 			Transition_HWFlag = true;
 			isInputEnabled = false;
 			currentScore = 0;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -1259,6 +1296,13 @@ void Draw_GameOverMenu()
 	// Flag to enable user input
 	isInputEnabled = true;
 
+	// Play clear menu audio once when the menu is first drawn
+	if (!hasPlayedClearMenuAudio)
+	{
+		AEAudioPlay(gameClearSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
+		hasPlayedClearMenuAudio = true;
+	}
+
 	// Get mouse position coordinates
 	AEInputGetCursorPosition(&UI_mouseX, &UI_mouseY);
 
@@ -1357,6 +1401,8 @@ void Draw_GameOverMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			nextState = GS_RESTART;
 			isInputEnabled = false;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -1400,6 +1446,8 @@ void Draw_GameOverMenu()
 			nextState = GS_HUBWORLD;
 			isInputEnabled = false;
 			currentScore = 0;
+			hasPlayedClearMenuAudio = false; // Reset for next time
+
 		}
 	}
 	else
@@ -1480,7 +1528,6 @@ void Collect_Points(int value, int score_index)
 // Draw accumulated points
 void Draw_Points()
 {
-	std::cout << pointsAccumulated << '\n';
 	if (levelState == PLAYING || levelState == CLEARED)
 	{
 		// While combo is active
@@ -1561,48 +1608,96 @@ void Update_LevelScore()
 
 // Add new entry to leaderboard
 void addLeaderboardEntry(const std::string& name, int score, const std::string& timing) {
+    if (name == "BACKSPACE to Type" || name.empty()) {
+        std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
+        return;  // Exit early if the name is invalid
+    }
 
-	if (name == "BACKSPACE to Type" || name.empty()) {
-		std::cerr << "Error: Please enter a valid name before submitting!" << std::endl;
-		return;  // Exit early if the name is invalid
-	}
+    char buffer[MAX_PATH];
+    if (_getcwd(buffer, MAX_PATH) == nullptr) {
+        std::cerr << "Error: Failed to get current directory!" << std::endl;
+        return;
+    }
 
-	char buffer[MAX_PATH];
-	if (_getcwd(buffer, MAX_PATH) == nullptr) {
-		std::cerr << "Error: Failed to get current directory!" << std::endl;
-		return;
-	}
+    // Determine leaderboard based on game state
+    std::string leaderboardCategory;
+    switch (currentState) {
+        case GS_LEVEL1:
+            leaderboardCategory = "Boss1";
+            break;
+        case GS_LEVEL2:
+            leaderboardCategory = "Boss2";
+            break;
+        default:
+            std::cerr << "Error: Leaderboard is only available for boss levels!" << std::endl;
+            return;
+    }
 
-	// Determine leaderboard based on game state
-	std::string leaderboardCategory;
-	switch (currentState) {
-	case GS_LEVEL1:
-		leaderboardCategory = "Boss1";
-		break;
-	case GS_LEVEL2:
-		leaderboardCategory = "Boss2";
-		break;
-	default:
-		std::cerr << "Error: Leaderboard is only available for boss levels!" << std::endl;
-		return;
-	}
+    // Construct command
+    std::string command = "\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \"" 
+                          + leaderboardCategory + "\" \""  // Use game state to determine leaderboard
+                          + name + "\" \"" 
+                          + std::to_string(score) + "\" \"" 
+                          + timing + "\"";
 
-	std::string command = "\"\"" + std::string(buffer) + "\\Assets\\dist\\leaderboard_helper.exe\" \""
-		+ leaderboardCategory + "\" \""  // Use game state to determine leaderboard
-		+ name + "\" \""
-		+ std::to_string(score) + "\" \""
-		+ timing + "\"\"";
+    // Convert command string to wide string
+    std::wstring commandW(command.begin(), command.end());
 
-	std::cout << "Adding leaderboard entry for " << leaderboardCategory << "..." << std::endl;
-	int result = system(command.c_str());
+    // Convert wide string (wchar_t*) to multi-byte string (char*)
+    int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, commandW.c_str(), -1, NULL, 0, NULL, NULL);
+    if (sizeNeeded == 0) {
+        std::cerr << "Error: Failed to convert wide string to multi-byte string!" << std::endl;
+        return;
+    }
 
-	if (result != 0) {
-		std::cout << "Error adding leaderboard entry for " << leaderboardCategory << "!" << std::endl;
-	}
-	else {
-		std::cout << "Leaderboard entry added successfully for " << leaderboardCategory << "!" << std::endl;
-		isInputSubmitted = UI_green;
-	}
+    // Allocate memory for the multi-byte string
+    char* commandMB = new char[sizeNeeded];
+
+    // Perform the conversion
+    WideCharToMultiByte(CP_UTF8, 0, commandW.c_str(), -1, commandMB, sizeNeeded, NULL, NULL);
+
+    // Setup STARTUPINFO and PROCESS_INFORMATION structs
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    ZeroMemory(&pi, sizeof(pi));
+
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW;
+    si.wShowWindow = SW_HIDE;  // Hide console window
+
+    // Create the process
+    BOOL processCreated = CreateProcess(
+        NULL,                    // Application name (NULL as we're passing the command line)
+        commandMB,               // Command line (now in multi-byte format)
+        NULL,                    // Process security attributes
+        NULL,                    // Thread security attributes
+        FALSE,                   // Do not inherit handles
+        CREATE_NO_WINDOW,        // Hide the window
+        NULL,                    // No environment block
+        NULL,                    // No current directory
+        &si,                     // Startup info
+        &pi                      // Process information
+    );
+
+    // Clean up the allocated memory for the multi-byte string
+    delete[] commandMB;
+
+    if (!processCreated) {
+        std::cerr << "Error: Failed to add leaderboard entry for " << leaderboardCategory << std::endl;
+        return;
+    }
+
+    // Wait for the process to finish
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    // Clean up by closing process and thread handles
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
+    // Update status after successfully submitting the leaderboard entry
+    isInputSubmitted = UI_green;
 }
 
 
