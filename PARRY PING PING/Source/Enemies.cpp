@@ -2,12 +2,11 @@
 // File:	Enemies.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 90%
-//			-
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 85%
+//			- Dummy Attack patterns (Logic + Drawing)
 // 
-//			Tan Jun Quan ------------------------------ 10%
-//			- Parry spark
-//			- Sprites
+//			Tan Jun Quan ------------------------------ 15%
+//			- Parry spark(Logic + Drawing), sprites
 //
 // Brief:	Declaration of General Enemy related functions
 //

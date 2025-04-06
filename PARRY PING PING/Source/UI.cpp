@@ -13,8 +13,9 @@
 //			- Player UI system
 //			- Player UI sprites
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
-//			- Modifiers
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
+//			- Modifiers (Affecting score)
+//			- Level Transitions
 //			
 //
 // Brief:	Various UI elements

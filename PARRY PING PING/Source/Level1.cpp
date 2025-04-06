@@ -1,11 +1,12 @@
 //---------------------------------------------------------
 // File:	Level1.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Manfred Sim
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+// Authors :	Manfred Sim
 //			Muhammad Raziq bin Mohd Rafig
 //			Muhammad Fauzan bin Mohamed Fauzy
 //			Tan Jun Quan
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
+//			- Level Transition 
 //
 // Brief:	Implementation of Level 1 functions
 //
@@ -90,7 +91,7 @@ void Level1_Initialize()
 	Init_Enemy_Indicator();
 
 	// Level Transition
-	transition_xpos = AEGfxGetWindowWidth();
+	transition_xpos = f32(AEGfxGetWindowWidth());
 	TransitionL1_Start = false;
 
 	// Incrementing Level Timer

@@ -2,7 +2,11 @@
 // File:	HubWorld.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 60%
+//			- Interactable environments (Leaderboard, Modifiers, Ranged + Melee Parry Dummies)
+//			- Camera lock effect
+//			- Level selection + transition
+//			- Sprites
 // 
 //			Tan Jun Quan ------------------------------ 10%
 //			- Sprites
@@ -264,8 +268,6 @@ void HubWorld_Initialize()
 	std::cout << "Player Level 2 Best Time: " << bestTime2 << '\n';
 }
 
-bool fuck;
-
 void HubWorld_Update()
 {
 	// Delta time
@@ -275,15 +277,6 @@ void HubWorld_Update()
 	if (AEInputCheckTriggered(AEVK_B))
 	{
 		nextState = GS_RESTART;												// Press B to restart level
-	}
-
-	if (AEInputCheckCurr(AEVK_9))
-	{
-		TransitionEnter(fuck);
-	}
-	if (AEInputCheckCurr(AEVK_0))
-	{
-		TransitionExit(fuck);
 	}
 
 	if (levelState == PLAYING)

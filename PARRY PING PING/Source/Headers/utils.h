@@ -11,7 +11,9 @@
 //			- Basic shape drawing
 //			- Basic image drawing
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 10%
+//			- Advanced text drawing
+//			- Level-to-level transitions
 // 
 //			Muhammad Raziq bin Mohd Rafig ------------- ??%
 // 

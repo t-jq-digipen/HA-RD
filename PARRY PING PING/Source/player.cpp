@@ -14,9 +14,9 @@
 //			- File IO
 //			- Score system
 // 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan -- ??%
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 5%
 //			- Damage based on difficulty modifier
-//			- Rage buff
+//			- Rage meter buff
 //
 // Brief:	Player functions  |	Line number
 // 

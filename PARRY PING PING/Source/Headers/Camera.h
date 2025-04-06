@@ -1,10 +1,11 @@
 //---------------------------------------------------------
 // File:	Camera.h
 // Project: Heavy Assault : Rust & Dust
-// Author:	Tan Jun Quan                                
+// Author:	Tan Jun Quan------------------------------- 70%                  
 //			- 
-//			Muhammad Ashfer Danishkhan bin Afzalkhan
+//			Muhammad Ashfer Danishkhan bin Afzalkhan -- 30%
 //			- Camera panning
+//			- Cinematic camera lock
 //
 // Brief:	Camera function declarations for rendering
 //
