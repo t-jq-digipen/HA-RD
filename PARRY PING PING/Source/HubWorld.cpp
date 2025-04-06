@@ -100,10 +100,15 @@ AEGfxTexture* loadingImage1;
 float rotationAngle1 = 0.f; // Angle for rotation of the loading image
 float rotationSpeed1 = 90.f; // Rotation speed (degrees per second)
 
+f32 hubMap_height = 1536.f;
+f32 hubMap_width = 3272.f;
+
+AEGfxTexture* hubMapTexture;
+
 #pragma region Leaderboard Loading
 void DrawLoadingImage1() 
 {
-	Color grey = { 0.5f, 0.5f, 0.5f, 1.f };
+	Color grey = { 0.251f, 0.251f, 0.251f, 1.f };
 	if (isFetchingLeaderboard.load()) 
 	{   // Only draw loading image while fetching
 		// Draw the image with a rotation angle
@@ -160,6 +165,8 @@ void HubWorld_Load()
 	modifiers_sprite	= SpriteSheet("Assets/HubWorld/Compuser.png", 4, 1);
 	spirit_sprite		= SpriteSheet("Assets/HubWorld/Spirit.png", 12, 1);
 
+	hubMapTexture = AEGfxTextureLoad("Assets/hubWorldMap.png");
+
 	// Meshes
 	Load_Mesh(20);
 	std::cout << "Hub World Loaded\n";
@@ -197,6 +204,8 @@ void HubWorld_Load()
 
 	// Clear transition timer
 	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
+
+
 
 	HubWorld_IO_elements.clear();
 }
@@ -357,6 +366,28 @@ void HubWorld_Draw()
 
 	AEGfxSetRenderMode(AE_GFX_RM_COLOR);										// Set render modes for drawing of colours
 	AEGfxSetBlendMode(AE_GFX_BM_BLEND);
+
+	// Define map size
+	Color borderColor = { 0.902f, 0.725f, 0.451f, 0.0f };
+
+	// Offset map drawing so (0,0) is centered in the camera view
+	f32 map_x = -hubMap_width / 2;
+	f32 map_y = -hubMap_height / 2;
+
+
+	// Convert world positions to screen positions
+	f32 screen_x = World_To_Screen_x(map_x);
+	f32 screen_y = World_To_Screen_y(map_y);
+
+	// Draw map borders
+	DrawRect(screen_x + hubMap_width / 2, screen_y, hubMap_width, 10, borderColor); // Bottom
+	DrawRect(screen_x + hubMap_width / 2, screen_y + hubMap_height, hubMap_width, 10, borderColor); // Top
+	DrawRect(screen_x, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Left
+	DrawRect(screen_x + hubMap_width, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Right
+
+
+	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
+	DrawImageAttachedToRect(screen_x, screen_y, hubMap_width, hubMap_height, hubMapTexture);
 
 #pragma region Draw Environment
 	// DRAWING OF SPRITES IN HUB WORLD
@@ -574,6 +605,7 @@ void HubWorld_Unload()
 	spirit_sprite.Unload();
 
 	AEGfxTextureUnload(loadingImage1);
+	AEGfxTextureUnload(hubMapTexture);
 	WaitForLeaderboardFetch();
 
 }
