@@ -295,8 +295,6 @@ bool Attacked_Melee_rect(AEVec2 target, f32 width, f32 height, int* check_hit, f
 
 AEGfxTexture* projectile_texture;
 
-AEGfxTexture* heavy_texture;
-
 Projectile heavy_atk;
 Projectile new_proj;
 
@@ -1021,10 +1019,6 @@ void Load_Player()
 		std::cerr << "Failed to load projectile texture!" << std::endl;
 	}
 
-	heavy_texture = AEGfxTextureLoad("Assets/HeavyRangeAttack.png");
-	if (!heavy_texture) {
-		std::cerr << "Failed to load projectile texture!" << std::endl;
-	}
 }
 
 
@@ -1439,6 +1433,5 @@ void Unload_Player()
 	laser_sprite.Unload();
 
 	AEGfxTextureUnload(projectile_texture);
-	AEGfxTextureUnload(heavy_texture);
 
 }

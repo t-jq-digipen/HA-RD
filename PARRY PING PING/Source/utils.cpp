@@ -701,7 +701,6 @@ void ReadFromFile(const char* filename, std::vector<float>& vector)
 	}
 	else
 	{
-		std::cerr << "Can read " << filename << "!!!\n";
 		std::string label, value;
 		while (std::getline(ifs, label))
 		{

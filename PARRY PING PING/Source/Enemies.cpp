@@ -573,7 +573,7 @@ void Draw_DummyBotRange() {
 
 	if (RParryBot.state != Destroyed)
 	{
-		rangebot_sprite.Draw(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y + 50.f), 250.f, 250.f);
+		rangebot_sprite.Draw(World_To_Screen_x(RParryBot.pos.x), World_To_Screen_y(RParryBot.pos.y), 250.f, 250.f);
 	}
 
 
