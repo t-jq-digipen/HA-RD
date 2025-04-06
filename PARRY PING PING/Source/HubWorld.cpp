@@ -646,12 +646,34 @@ void Draw_FadeOut(Color& Fade)
 #pragma region Leaderboard logic
 void fetchLeaderboard(int bossID) {
 	std::string bossIDStr = (bossID == 0) ? "Boss1" : "Boss2";
-	std::string command = "\"Assets\\dist\\leaderboard_helper.exe\" " + bossIDStr;
-	int result = system(command.c_str());
-	if (result != 0) {
+	std::string command = "Assets\\dist\\leaderboard_helper.exe " + bossIDStr;
+
+	// Set up the STARTUPINFO structure
+	STARTUPINFO si = { sizeof(STARTUPINFO) };
+	PROCESS_INFORMATION pi;
+
+	// Create the process without showing the console window
+	if (!CreateProcess(NULL,   // Application name (NULL to pass the command line directly)
+		&command[0],           // Command line
+		NULL,                  // Process handle not inheritable
+		NULL,                  // Thread handle not inheritable
+		FALSE,                 // Set handle inheritance to FALSE
+		CREATE_NO_WINDOW,      // Flag to hide the console window
+		NULL,                  // Use parent's environment block
+		NULL,                  // Use parent's starting directory
+		&si,                   // Pointer to STARTUPINFO structure
+		&pi))                  // Pointer to PROCESS_INFORMATION structure
+	{
 		std::cerr << "Failed to run leaderboard_helper.exe" << std::endl;
 		return;
 	}
+
+	// Wait until the process terminates
+	WaitForSingleObject(pi.hProcess, INFINITE);
+
+	// Close process and thread handles
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 
 	std::string filename = "leaderboard_" + bossIDStr + ".txt";
 	std::ifstream file(filename);
@@ -692,7 +714,6 @@ void fetchLeaderboard(int bossID) {
 		HS_score[bossID][i] = scores[i];
 		HS_time[bossID][i] = times[i];
 	}
-
 }
 
 std::string sanitizeString(const std::string& input) {

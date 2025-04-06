@@ -3,9 +3,9 @@
 # project: Heavy Assault : Rust & Dust
 # author:	Muhammad Fauzan bin Mohamed Fauzy
 #
-# brief:	Leaderboard (fauz add more ltr)
+# brief:	Leaderboard Function to help store the score and timing into a Google SHeets which is then called to retrieve values for the leaderboard
 #
-# Copyright © 2025 DigiPen, All rights reserved.
+# Copyright 2025 DigiPen, All rights reserved.
 #---------------------------------------------------------
 
 import sys
@@ -27,12 +27,12 @@ def fetch_leaderboard(boss_id):
             with open(filename, "w", encoding="utf-8") as file:
                 for entry in leaderboard:
                     file.write(f"{entry['name']} - {entry['score']} - {entry['level_time']}\n")
-            
-            print(f"Leaderboard fetched and saved to {filename}")
         else:
-            print(f"Error fetching leaderboard: {response.status_code}")
+            # Handling the error silently
+            pass
     except requests.exceptions.RequestException as e:
-        print(f"Request error: {e}")
+        # Handling the request error silently
+        pass
 
 
 def add_leaderboard_entry(boss_id, player_name, score, level_time):
@@ -48,12 +48,12 @@ def add_leaderboard_entry(boss_id, player_name, score, level_time):
     try:
         response = requests.post(BASE_URL, data=params)
         
-        if response.status_code == 200:
-            print(f"Leaderboard for {boss_id} updated successfully.")
-        else:
-            print(f"Error updating leaderboard: {response.status_code}")
+        if response.status_code != 200:
+            # Handling the error silently
+            pass
     except requests.exceptions.RequestException as e:
-        print(f"Request error: {e}")
+        # Handling the request error silently
+        pass
 
 
 if __name__ == "__main__":
@@ -71,6 +71,5 @@ if __name__ == "__main__":
         add_leaderboard_entry(boss_id, player_name, score, level_time)
     
     else:
-        print("Invalid arguments.\n")
-        print("To fetch leaderboard: python leaderboard_helper.py [boss_id]")
-        print("To add entry: python leaderboard_helper.py [boss_id] [name] [score] [level_time]")
+        # Handling invalid arguments silently
+        pass
