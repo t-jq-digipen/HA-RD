@@ -784,34 +784,33 @@ void WriteToFile(const char* filename, const std::string& name, const std::strin
 
 f32 transition_xpos{ 0.f }, transition_speed{ 70.f };		// Specifies length of bars + speed of increase/ decrease
 int bars{ 5 };												// Specify how many bars to draw across the screen
-f32 windowW{ f32(AEGfxGetWindowWidth()) }, windowH{ f32(AEGfxGetWindowHeight()) };
-void TransitionEnter(bool &flag) 
+void TransitionEnter(bool& flag)
 {
 	// Loop for each bar, draw at spaced out increments
-	for (int i = 0; i < bars; i++) 
+	for (int i = 0; i < bars; i++)
 	{
-		DrawRect(-windowW / 2.f + transition_xpos / 2.f - (i * 200.f), (windowH / bars) / 2.f - windowH / 2.f + (windowH / bars) * i, transition_xpos + (i * 200.f), windowH / bars, SetColor(0xFF000000));
+		DrawRect(-AEGfxGetWindowWidth() / 2.f + transition_xpos / 2.f - (i * 200.f), (AEGfxGetWindowHeight() / bars) / 2.f - AEGfxGetWindowHeight() / 2.f + (AEGfxGetWindowHeight() / bars) * i, transition_xpos + (i * 200.f), AEGfxGetWindowHeight() / bars, SetColor(0xFF000000));
 	}
 	transition_xpos += transition_speed;					// Increment size of bar (hides screen)
 	// Clamp and alter flag
-	if (transition_xpos > windowW + bars * 200.f)
-	{ 
-		transition_xpos = windowW + bars * 200.f;
-		flag = true; 
+	if (transition_xpos > AEGfxGetWindowWidth() + bars * 200.f)
+	{
+		transition_xpos = AEGfxGetWindowWidth() + bars * 200.f;
+		flag = true;
 	}
 }
 
-void TransitionExit(bool& flag) 
+void TransitionExit(bool& flag)
 {
 	// Loop for each bar, draw at spaced out increments
-	for (int i = 0; i < bars; i++) 
+	for (int i = 0; i < bars; i++)
 	{
-		DrawRect(-windowW / 2.f + transition_xpos / 2.f - (i * 200.f), (windowH / bars) / 2.f - windowH / 2.f + (windowH / bars) * i, transition_xpos + (i * 200.f), windowH / bars, SetColor(0xFF000000));
+		DrawRect(-AEGfxGetWindowWidth() / 2.f + transition_xpos / 2.f - (i * 200.f), (AEGfxGetWindowHeight() / bars) / 2.f - AEGfxGetWindowHeight() / 2.f + (AEGfxGetWindowHeight() / bars) * i, transition_xpos + (i * 200.f), AEGfxGetWindowHeight() / bars, SetColor(0xFF000000));
 	}
 	transition_xpos -= transition_speed;					// Decrement size of bar (reveals screen)
 	// Clamp and alter flag
-	if (transition_xpos < 0.f) 
-	{ 
-		transition_xpos = 0.f; flag = true; 
+	if (transition_xpos < 0.f)
+	{
+		transition_xpos = 0.f; flag = true;
 	}
 }
