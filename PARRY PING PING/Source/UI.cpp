@@ -120,7 +120,7 @@ AEGfxTexture* loadingImage;
 
 // BGM and SFX
 AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic,
-boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket, gameClearSFX;
+boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket, gameClearSFX, boss2Slash1, boss2Slash2, boss2Stab1, boss2Lightning, boss2Shock;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -329,6 +329,11 @@ void Load_UI()
 	boss1Dash = AEAudioLoadSound("Assets/boss1Dash.mp3");
 	boss1Rocket = AEAudioLoadSound("Assets/boss1Rocket.mp3");
 	gameClearSFX = AEAudioLoadSound("Assets/clearedMenu.mp3");
+	boss2Slash1 = AEAudioLoadSound("Assets/boss2Swing1.mp3");
+	boss2Slash2 = AEAudioLoadSound("Assets/boss2Swing2.mp3");
+	boss2Stab1 = AEAudioLoadSound("Assets/boss2SwordSlam1.mp3");
+	boss2Lightning = AEAudioLoadSound("Assets/boss2LightningWave.mp3");
+	boss2Shock = AEAudioLoadSound("Assets/boss2LightningBarrage.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
@@ -371,6 +376,11 @@ void Unload_UI()
 	AEAudioUnloadAudio(boss1Sweep2);
 	AEAudioUnloadAudio(boss1Dash);
 	AEAudioUnloadAudio(gameClearSFX);
+	AEAudioUnloadAudio(boss2Slash1);
+	AEAudioUnloadAudio(boss2Slash2);
+	AEAudioUnloadAudio(boss2Stab1);
+	AEAudioUnloadAudio(boss2Lightning);
+	AEAudioUnloadAudio(boss2Shock);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
