@@ -938,7 +938,7 @@ void Draw_ClearMenu()
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
@@ -954,7 +954,7 @@ void Draw_ClearMenu()
 	else
 	{
 		uiscreen.isExitClicked = 0;
-		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 	if (Transition_L1Flag) 
@@ -1438,7 +1438,7 @@ void Draw_GameOverMenu()
 		uiscreen.isExitClicked = 1;
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
 		{
@@ -1453,7 +1453,7 @@ void Draw_GameOverMenu()
 	else
 	{
 		uiscreen.isExitClicked = 0;
-		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 }
 
