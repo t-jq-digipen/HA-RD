@@ -2,7 +2,7 @@
 // File:	Boss1.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:	
-//          Muhammad Raziq bin Mohd Rafig ------------- 60%
+//          Muhammad Raziq bin Mohd Rafig ------------- 50%
 //          - Boss logic
 //          - Boss attacks
 // 
@@ -15,6 +15,9 @@
 //          - File IO
 //          - Death Explosion
 //          - Score system
+// 
+//          Muhammad Fauzan bin Mohamed Fauzy --------- 10%
+//          - Audio for Each Boss Attack
 //
 // Brief:	Boss 1 implementation 
 //          Manages boss behaviour, attack patterns, 
