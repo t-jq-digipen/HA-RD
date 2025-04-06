@@ -115,7 +115,8 @@ float menu_x, menu_y, menu_width, menu_height, endmenu_height, menu_rot;
 AEGfxTexture* loadingImage;
 
 // BGM and SFX
-AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic;
+AEAudio levelBGM, levelSFX, lightProj, parryFX, heavyProj, sword1, sword2, sword3, bossLevel2, dashAudio, ammoFullSFX, hubWorldMusic,
+boss1Smash1, boss1Smash2, boss1Sweep1, boss1Sweep2, boss1Dash, boss1Rocket;
 AEAudioGroup gameBGM, gameSFX;
 float current_bgm_vol, prev_bgm_vol, max_bgm_vol;
 float current_sfx_vol, prev_sfx_vol, max_sfx_vol;
@@ -312,6 +313,12 @@ void Load_UI()
 	dashAudio = AEAudioLoadSound("Assets/dashSFX.mp3");
 	ammoFullSFX = AEAudioLoadSound("Assets/chargedCan.mp3");
 	hubWorldMusic = AEAudioLoadMusic("Assets/hubWorldSong.mp3");
+	boss1Smash1 = AEAudioLoadSound("Assets/boss1Smash1.mp3");
+	boss1Smash2 = AEAudioLoadSound("Assets/boss1Smash2.mp3");
+	boss1Sweep1 = AEAudioLoadSound("Assets/boss1Sweep1.mp3");
+	boss1Sweep2 = AEAudioLoadSound("Assets/boss1Sweep2.mp3");
+	boss1Dash = AEAudioLoadSound("Assets/boss1Dash.mp3");
+	boss1Rocket = AEAudioLoadSound("Assets/boss1Rocket.mp3");
 
 	loadingImage = AEGfxTextureLoad("Assets/PlanetTexture.png");
 }
@@ -349,6 +356,10 @@ void Unload_UI()
 	AEAudioUnloadAudio(dashAudio);
 	AEAudioUnloadAudio(ammoFullSFX);
 	AEAudioUnloadAudio(hubWorldMusic);
+	AEAudioUnloadAudio(boss1Smash1);
+	AEAudioUnloadAudio(boss1Sweep1);
+	AEAudioUnloadAudio(boss1Sweep2);
+	AEAudioUnloadAudio(boss1Dash);
 	AEAudioUnloadAudioGroup(gameBGM);
 	AEAudioUnloadAudioGroup(gameSFX);
 }
