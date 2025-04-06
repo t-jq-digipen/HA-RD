@@ -190,12 +190,6 @@ void Level2_Draw()
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
 
-	// Draw map borders
-	DrawRect(screen_x + map_width2 / 2, screen_y, map_width2, 10, borderColor); // Bottom
-	DrawRect(screen_x + map_width2 / 2, screen_y + map_height2, map_width2, 10, borderColor); // Top
-	DrawRect(screen_x, screen_y + map_height2 / 2, 10, map_height2, borderColor); // Left
-	DrawRect(screen_x + map_width2, screen_y + map_height2 / 2, 10, map_height2, borderColor); // Right
-
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
 	DrawImageAttachedToRect(screen_x, screen_y, map_width2, map_height2, mapTexture2);

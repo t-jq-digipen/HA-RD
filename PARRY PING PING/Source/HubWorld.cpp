@@ -386,12 +386,6 @@ void HubWorld_Draw()
 	f32 screen_x = World_To_Screen_x(map_x);
 	f32 screen_y = World_To_Screen_y(map_y);
 
-	// Draw map borders
-	DrawRect(screen_x + hubMap_width / 2, screen_y, hubMap_width, 10, borderColor); // Bottom
-	DrawRect(screen_x + hubMap_width / 2, screen_y + hubMap_height, hubMap_width, 10, borderColor); // Top
-	DrawRect(screen_x, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Left
-	DrawRect(screen_x + hubMap_width, screen_y + hubMap_height / 2, 10, hubMap_height, borderColor); // Right
-
 
 	// Call the DrawImageAttachedToRect to attach the image to the center of the map rectangle
 	DrawImageAttachedToRect(screen_x, screen_y, hubMap_width, hubMap_height, hubMapTexture);
