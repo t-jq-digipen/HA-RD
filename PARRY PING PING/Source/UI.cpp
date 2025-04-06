@@ -267,14 +267,14 @@ void Load_UI()
 	ReadFromFile("Assets/FileIO/PlayerBestScores.txt", UI_IO_score);
 
 	// Menu Buttons
-	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_options	= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_exit		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_restart	= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_1		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_2		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_3		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
-	ssmenu_4		= Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_options	= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_exit		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_restart	= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_1		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_2		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_3		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
+	ssmenu_4		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
 	ssmenu_screen	= Init_SpriteSheet("Assets/UI/MenuScreen.png", 5, 1, 1.f);
 	ssmenu_bar1		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
 	ssmenu_bar2		= Init_SpriteSheet("Assets/UI/MenuBar.png", 1, 1, 1.f);
@@ -559,7 +559,7 @@ void Draw_PauseMenu()
 
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
@@ -571,7 +571,7 @@ void Draw_PauseMenu()
 	else
 	{
 		uiscreen.isExitClicked = 0;
-		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 	// Restart Button (click to restart level)
@@ -1228,7 +1228,7 @@ void Draw_QuitMenu()
 
 		if (Update_Timer(&uiscreen.animationtimer))
 		{
-			Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+			Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 8, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 		}
 
 		if (AEInputCheckTriggered(AEVK_LBUTTON))
@@ -1248,7 +1248,7 @@ void Draw_QuitMenu()
 	else
 	{
 		uiscreen.isExitClicked = 0;
-		Set_SpriteSheet_current(&ssmenu_exit, 2, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
+		Set_SpriteSheet_current(&ssmenu_exit, 11, 1, 1, uiscreen.animationtimer, uiscreen.animationtimer.duration);
 	}
 
 }

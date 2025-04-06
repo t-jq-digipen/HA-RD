@@ -51,7 +51,7 @@ void Credits_Load()
 	credits_font2 = AEGfxCreateFont("Assets/liberation-mono.ttf", 72);
 
 	// Back To Main Menu Button
-	backbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 11, 8, 1.f);
+	backbutton = Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);
 
 	// Logo
 	creditslogo = AEGfxTextureLoad("Assets/Digipen_Logo.png");
