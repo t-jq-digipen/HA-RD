@@ -27,7 +27,6 @@
 #include "Level2.h"
 #include "Boss2.h"
 #include "GameStateManager.h"
-#include "mobs.h"
 
 
 AEGfxTexture* mapTexture2 = nullptr;
@@ -85,9 +84,6 @@ void Level2_Initialize()
 	// Transition
 	transition_xpos = f32(AEGfxGetWindowWidth());
 	TransitionL2_Start = false;
-
-	// Mobs
-	Init_Mobs();
 
 	// Boss
 	Init_Boss2();
@@ -150,9 +146,6 @@ void Level2_Update()
 		// Boss behavior
 		Update_Boss2();
 
-		// Mobs
-		Update_Mobs();
-
 		// Player WASD Movement
 		Update_Player();
 
@@ -209,8 +202,6 @@ void Level2_Draw()
 
 	Update_Camera();
 
-	// Mobs
-	Draw_Mobs();
 
 	if (showBossHitboxes2)
 	{
