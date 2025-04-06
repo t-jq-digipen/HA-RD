@@ -139,7 +139,7 @@ std::vector<float> UI_IO_score;
 // Font Size
 int font_size;
 
-static bool hasPlayedClearMenuAudio = false;
+bool hasPlayedClearMenuAudio;
 
 
 // Initialize the various screen UI elements
@@ -261,6 +261,8 @@ void Init_UI()
 
 	// First Time Init State Flag
 	isFirstInit = true;
+
+	hasPlayedClearMenuAudio = false;
 }
 
 void Load_UI()
