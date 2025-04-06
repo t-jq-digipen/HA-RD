@@ -10,7 +10,7 @@
 //			- Camera panning
 //			- Cinematic camera lock
 //
-// Brief:	Camera function declarations for rendering
+// Brief:	Declaration of the functions in Camera.cpp
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

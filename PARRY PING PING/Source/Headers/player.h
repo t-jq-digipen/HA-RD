@@ -17,7 +17,8 @@
 //			- Damage based on difficulty modifier
 //			- Rage meter buff
 //
-// Brief:	Declaration of player functions
+// Brief:	Declaration of player functions and state enums
+//          governing the player behaviour and systems.
 // 
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

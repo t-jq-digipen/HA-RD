@@ -15,7 +15,9 @@
 //          - File IO
 //          - Score system
 //
-// Brief:	Boss 2 header things (WIP)
+// Brief:	Boss 2 implementation 
+//          Manages boss behaviour, attack patterns, phases
+//          textures, etc.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

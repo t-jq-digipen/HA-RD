@@ -15,7 +15,8 @@
 //			Manfred Sim ------------------------------- 5%
 //			- extern variables
 //
-// Brief:	Declaration of Hub World functions
+// Brief:	Declaration of functions for Hub World state
+//			and leaderboard updating.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

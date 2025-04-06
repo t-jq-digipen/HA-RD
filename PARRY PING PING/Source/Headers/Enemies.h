@@ -9,6 +9,7 @@
 //			- Parry spark
 // 
 // Brief:	Declaration of General Enemy related functions
+//			and parry spark system.
 //
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------

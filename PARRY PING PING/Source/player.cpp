@@ -1,16 +1,19 @@
 //---------------------------------------------------------
 // File:	player.cpp
 // Project: Heavy Assault : Rust & Dust
-// Author:	Tan Jun Quan ------------------------------ 50%
+// Author:	Tan Jun Quan ------------------------------ 55%
 //			- Movement
 //			- Melee attacks
 //			- Dashing
 //			- Parrying
+//			- Sprites
+//			- File IO polish
 // 
 //			Muhammad Fauzan bin Mohamed Fauzy --------- 30%
 //			- Ranged attacks (light and heavy)
+//			- Audio
 // 
-//			Manfred Sim ------------------------------- 15%
+//			Manfred Sim ------------------------------- 10%
 //			- File IO
 //			- Score system
 // 
@@ -18,7 +21,14 @@
 //			- Damage based on difficulty modifier
 //			- Rage meter buff
 //
-// Brief:	Player functions  |	Line number
+// Brief:	Implementation of the player.
+//			Contains the logic for behaviour and systems
+//			involving the player, including:
+//			- Movement + Dodging
+//			- Attacks
+//			- Blocking + Parrying
+//			- Rage buff from successful parries
+//			- Score system
 // 
 // Copyright © 2025 DigiPen, All rights reserved.
 //---------------------------------------------------------
