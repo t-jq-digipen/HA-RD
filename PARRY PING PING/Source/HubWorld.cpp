@@ -451,8 +451,8 @@ void HubWorld_Draw()
 
 	DrawRect(World_To_Screen_x(Env_Gate.Pos.x), World_To_Screen_y(Env_Gate.Pos.y), Env_Gate.Width, Env_Gate.Height, hubworld_bronze);		// Gate   - player starts boss fight level here!
 	DrawRect(World_To_Screen_x(Env_Gate2.Pos.x), World_To_Screen_y(Env_Gate2.Pos.y), Env_Gate2.Width, Env_Gate2.Height, hubworld_bronze);	// Gate 2 - player starts boss fight level here!
-	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, hubworld_font, hubworld_white, "GATE 1", true);
-	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, hubworld_font, hubworld_white, "GATE 2", true);
+	DrawTextAdvanced(Env_Gate.Pos.x, Env_Gate.Pos.y, pixel_font, hubworld_white, "GATE 1", true, 0.3f);
+	DrawTextAdvanced(Env_Gate2.Pos.x, Env_Gate2.Pos.y, pixel_font, hubworld_white, "GATE 2", true, 0.3f);
 
 	// Shrine 
 	//Highlight effect when approaching leaderboard shrine

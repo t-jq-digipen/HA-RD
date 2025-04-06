@@ -2,7 +2,7 @@
 // File:	Boss2.cpp
 // Project: Heavy Assault : Rust & Dust
 // Authors:  
-//          Muhammad Raziq bin Mohd Rafig ------------- 50%
+//          Muhammad Raziq bin Mohd Rafig ------------- 45%
 //          - Boss system
 //          - Base attack logic
 // 
@@ -11,9 +11,12 @@
 //          - Polishing attack logic
 //          - Phase 2 logic
 // 
-//          Manfred Sim ------------------------------- 15%
+//          Manfred Sim ------------------------------- 10%
 //          - File IO
 //          - Score system
+// 
+//          Muhammad Fauzan bin Mohamed Fauzy --------- 10%
+//          - Audio for Each Boss Attack
 //
 // Brief:	Boss 2 implementation 
 //          Manages boss behaviour, attack patterns, phases
