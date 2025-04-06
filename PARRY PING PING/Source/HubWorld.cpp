@@ -371,8 +371,8 @@ void HubWorld_Draw()
 	// Parry Bots/ Dummies	
 	Draw_DummyBotMelee();														// Draw (placeholder) sprites for dummies!
 	Draw_DummyBotRange();
-	DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
-	DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
+	//DrawTextAdvanced(DummyMelee_pos.x - 30.f, DummyMelee_pos.y + 50.f, hubworld_font, hubworld_white, "Melee Dummy", true);
+	//DrawTextAdvanced(DummyRange_pos.x + 30.f, DummyRange_pos.y + 50.f, hubworld_font, hubworld_white, "Ranged Dummy", true);
 
 	// Gates + Modiers (merged)
 	//Highlight effect when approaching gate
