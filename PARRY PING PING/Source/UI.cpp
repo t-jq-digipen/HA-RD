@@ -956,7 +956,6 @@ void Draw_ClearMenu()
 			AEAudioPlay(levelSFX, gameSFX, current_sfx_vol / max_sfx_vol, 1.f, 0);
 			Transition_HWFlag = true;
 			isInputEnabled = false;
-			currentScore = 0;
 			hasPlayedClearMenuAudio = false; // Reset for next time
 
 		}
