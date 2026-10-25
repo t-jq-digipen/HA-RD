@@ -271,6 +271,9 @@ void Init_Boss2()
 
     // Starting state & phase
     boss_2.idle_timer.current = 0.f;
+    boss_2.attack_timer.current = 1.f;
+    boss_2.stun_timer.current = 1.f;
+    boss_2.death_timer.current = 1.f;
     boss_2.phase        = PHASE1;
     boss_2.state        = BOSS2_IDLE;
     boss_2.attackstate  = BOSS2_ATTACK_WINDUP;

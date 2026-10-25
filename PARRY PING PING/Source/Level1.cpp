@@ -100,13 +100,6 @@ void Level1_Initialize()
 	transition_xpos = f32(AEGfxGetWindowWidth());
 	TransitionL1_Start = false;
 
-	// Incrementing Level Timer
-	levelTimer = L1_IO[0];
-
-	// Level Score
-	currentScore = 0;
-	displayPointsAccumulated = false;
-
 	// Level Clear Transition Timer
 	cleartransitiontimer = Create_Timer(L1_IO[1]);
 	cleartransitiontimer.current = 0.f;
@@ -140,24 +133,12 @@ void Level1_Initialize()
 	map_width = L1_IO[10];
 	map_height = L1_IO[11];
 
-	// Incrementing Level Timer
-	levelTimer = 0.f;
-
-	// Level Score
-	currentScore = 0;
-	displayPointsAccumulated = false;
+	// Incrementing Level Timer (after Init_UI, which resets it)
+	levelTimer = L1_IO[0];
 
 	// Set Camera to Player
 	LockCamera = false;
 	player.canAttack = true;
-
-	// Level Clear Transition Timer
-	cleartransitiontimer = Create_Timer(5.f);
-	cleartransitiontimer.current = 0.f;
-
-	// Game Over Transition Timer
-	gameovertransitiontimer = Create_Timer(2.f);
-	gameovertransitiontimer.current = 0.f;
 }
 
 void ToggleBossHitboxes()

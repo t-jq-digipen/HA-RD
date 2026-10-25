@@ -209,10 +209,6 @@ void Init_UI()
 	uiscreen.isPlayClicked = uiscreen.isOptionsClicked = uiscreen.isExitClicked = uiscreen.isRestartClicked = 0;
 	uiscreen.isButton1Clicked = uiscreen.isButton2Clicked = uiscreen.isButton3Clicked = uiscreen.isButton4Clicked = 0;
 
-	// BGM and SFX (Audio Groups)
-	gameBGM = AEAudioCreateGroup();
-	gameSFX = AEAudioCreateGroup();
-
 	// Initialize volume settings when entering level
 	if (!isFirstInit)
 	{
@@ -275,6 +271,10 @@ void Load_UI()
 	ReadFromFile("Assets/FileIO/UI.txt", UI_IO);
 	ReadFromFile("Assets/FileIO/Settings.txt", UI_IO_settings);
 	ReadFromFile("Assets/FileIO/PlayerBestScores.txt", UI_IO_score);
+
+	// BGM and SFX (Audio Groups) - created once here, freed in Unload_UI
+	gameBGM = AEAudioCreateGroup();
+	gameSFX = AEAudioCreateGroup();
 
 	// Menu Buttons
 	ssmenu_play		= Init_SpriteSheet("Assets/UI/MenuButton.png", 12, 8, 1.f);

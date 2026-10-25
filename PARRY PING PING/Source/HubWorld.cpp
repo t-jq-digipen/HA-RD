@@ -218,12 +218,6 @@ void HubWorld_Load()
 	hubworld_black = SetColor(0xFF000000);
 	hubworld_bronze = SetColor(0xFF733B31);
 
-	// Fade transitions
-	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);
-	FadeInSpeed = HubWorld_IO_elements[37];																							// FADE IN SPEED	0.03f
-	FadeShrine.A = HubWorld_IO_elements[38];																						// FADE ALPHA		0.f
-	FadeGate.A = HubWorld_IO_elements[38]; 																							// FADE ALPHA		0.f
-
 	// Clear transition timer
 	HubWorld_ClearTransitionTimer = Create_Timer(HubWorld_IO_elements[39]);															// CLEAR TRANSITION TIMER	5.f
 
@@ -241,6 +235,12 @@ void HubWorld_Initialize()
 	Transition_Flag_Gate1 = Transition_Flag_Gate2 = false;
 	Transition_Start = false;
 	transition_xpos = 0.f;
+
+	// Fade transitions (reset here so restarting replays the fade-in)
+	FadeIn = FadeGate = FadeShrine = SetColor(0xFF000000);
+	FadeInSpeed = HubWorld_IO_elements[37];																							// FADE IN SPEED	0.03f
+	FadeShrine.A = HubWorld_IO_elements[38];																						// FADE ALPHA		0.f
+	FadeGate.A = HubWorld_IO_elements[38]; 																							// FADE ALPHA		0.f
 
 	// Resize Vectors for highscores to hold 20 values
 	for (int i = 0; i < 2; i++) {
@@ -585,6 +585,7 @@ void HubWorld_Draw()
 void HubWorld_Free()
 {
 	Free_Player();																						// Free memory!
+	Free_UI();																							// Stop BGM/SFX so restart doesn't layer music
 	AEInputShowCursor(1);																				// Restore cursor!
 }
 
@@ -607,6 +608,7 @@ void HubWorld_Unload()
 	AEGfxTextureUnload(loadingImage1);
 	AEGfxTextureUnload(hubMapTexture);
 	AEGfxTextureUnload(dangerzone);
+	AEGfxDestroyFont(hubworld_font);
 	WaitForLeaderboardFetch();
 
 
