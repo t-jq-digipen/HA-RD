@@ -1006,6 +1006,15 @@ void Load_Player()
 	SCORE_PLAYER_LOSE			= static_cast<int>(PlayerScore_IO[3]);				// - 10000 points for game over
 	SCORE_LEVEL2_MULTIPLIER		= static_cast<int>(PlayerScore_IO[11]);				// x2 points in Level 2
 
+	// Apply multiplier here (not in Init) so restarting, which skips Load, doesn't stack it
+	if (currentState == GS_LEVEL2)
+	{
+		SCORE_LIGHT_PROJECTILE_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_HEAVY_LASER_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_PLAYER_EAT_HIT *= SCORE_LEVEL2_MULTIPLIER;
+		SCORE_PLAYER_LOSE *= SCORE_LEVEL2_MULTIPLIER;
+	}
+
 	PlayerScore_IO.clear();
 
 	// SPRITES
@@ -1091,14 +1100,6 @@ void Init_Player()
 	Init_Player_UI(player.ammo, PLAYER_MAX_AMMO, player.hp, PLAYER_MAXHP);
 
 	laserTickTimer = Create_Timer(HEAVY_ATTACK_TICK);
-
-	if (currentState == GS_LEVEL2)
-	{
-		SCORE_LIGHT_PROJECTILE_HIT *= SCORE_LEVEL2_MULTIPLIER;
-		SCORE_HEAVY_LASER_HIT *= SCORE_LEVEL2_MULTIPLIER;
-		SCORE_PLAYER_EAT_HIT *= SCORE_LEVEL2_MULTIPLIER;
-		SCORE_PLAYER_LOSE *= SCORE_LEVEL2_MULTIPLIER;
-	}
 }
 
 void Update_Player()
