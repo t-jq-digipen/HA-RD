@@ -7,7 +7,7 @@
 //			system components, managing gamestates, and
 //			running the game loop.
 //
-// Copyright © 2020 DigiPen, All rights reserved.
+// Copyright Â© 2020 DigiPen, All rights reserved.
 //---------------------------------------------------------
 
 // ---------------------------------------------------------------------------
@@ -88,6 +88,10 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 				// Informing the system about the loop's end
 				AESysFrameEnd();
+				
+				// window closed (X button / Alt+F4): leave through the normal quit path
+				if (!AESysDoesWindowExist())
+					nextState = GS_QUIT;
 			}
 			fpFree();
 			if (nextState != GS_RESTART)
